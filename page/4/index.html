@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/nimbuskblog/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/nimbuskblog/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/nimbuskblog/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/nimbuskblog/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/nimbuskblog/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css">
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nimbusk.cc","root":"/nimbuskblog/","images":"/nimbuskblog/images","scheme":"Pisces","version":"8.2.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"algolia_applicationID","apiKey":"algolia_apiKey","indexName":"algolia_indexName","hits":{"per_page":10}}};
+  </script>
+<meta name="description" content="严而求之，谨而写之，写好一个有态度的博客">
+<meta property="og:type" content="website">
+<meta property="og:title" content="NimbusK&#39;s Blog">
+<meta property="og:url" content="https://nimbusk.cc/page/4/index.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="严而求之，谨而写之，写好一个有态度的博客">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="Hexo, NexT, NimbusK">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://nimbusk.cc/page/4/">
+
+
+<script class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>NimbusK's Blog</title>
+  
+
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/nimbuskblog/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">NimbusK's Blog</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/nimbuskblog/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li>
+        <li class="menu-item menu-item-about"><a href="/nimbuskblog/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li>
+        <li class="menu-item menu-item-tags"><a href="/nimbuskblog/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li>
+        <li class="menu-item menu-item-categories"><a href="/nimbuskblog/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li>
+        <li class="menu-item menu-item-archives"><a href="/nimbuskblog/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+        <li class="menu-item menu-item-commonweal"><a href="/nimbuskblog/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/nimbuskblog/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">严而求之，谨而写之，写好一个有态度的博客</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/nimbuskblog/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/nimbuskblog/categories/">
+          
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/nimbuskblog/tags/">
+          
+        <span class="site-state-item-count">86</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/nimbuskblog/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/a0df4ec2.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/a0df4ec2.html" class="post-title-link" itemprop="url">设计模式</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-08-25 12:07:10" itemprop="dateCreated datePublished" datetime="2019-08-25T12:07:10+08:00">2019-08-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:28" itemprop="dateModified" datetime="2021-02-20T10:40:28+08:00">2021-02-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/nimbuskblog/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/" itemprop="url" rel="index"><span itemprop="name">设计模式</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="软件设计"><a href="#软件设计" class="headerlink" title="软件设计"></a>软件设计</h3><h3 id="UML建模"><a href="#UML建模" class="headerlink" title="UML建模"></a>UML建模</h3><h2 id="设计模式概论"><a href="#设计模式概论" class="headerlink" title="设计模式概论"></a>设计模式概论</h2><h2 id="设计模式目的"><a href="#设计模式目的" class="headerlink" title="设计模式目的"></a>设计模式目的</h2><h2 id="设计模式原则"><a href="#设计模式原则" class="headerlink" title="设计模式原则"></a>设计模式原则</h2><h2 id="设计模式"><a href="#设计模式" class="headerlink" title="设计模式"></a>设计模式</h2><h2 id=""><a href="#" class="headerlink" title=""></a></h2>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/35e48191.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/35e48191.html" class="post-title-link" itemprop="url">MySQL相关读书笔记</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-08-21 21:45:20" itemprop="dateCreated datePublished" datetime="2019-08-21T21:45:20+08:00">2019-08-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:28" itemprop="dateModified" datetime="2021-02-20T10:40:28+08:00">2021-02-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/nimbuskblog/categories/%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3/" itemprop="url" rel="index"><span itemprop="name">数据相关</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote class="blockquote-center">
+<p>Good code is its own best documentation. As you’re about to add a comment, ask yourself, “How can I improve the code so that this comment isn’t needed?”<br>Steve McConnell</p>
+
+</blockquote>
+
+<h1 id="Effective-MySQL之SQL语句最优化"><a href="#Effective-MySQL之SQL语句最优化" class="headerlink" title="Effective MySQL之SQL语句最优化"></a>Effective MySQL之SQL语句最优化</h1><h2 id="MySQL索引"><a href="#MySQL索引" class="headerlink" title="MySQL索引"></a>MySQL索引</h2><p>MySQL主要用到的索引数据结构有：</p>
+<ul>
+<li>B-树：<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Btree">B-树</a></li>
+<li>B+树:<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/B%2B_tree">B+树</a></li>
+<li>散列：<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Hash_table">散列</a></li>
+<li>通信R-树：<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/R-tree">R-树</a></li>
+<li>全文本:<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Full_text_search">全文本</a><h3 id="MySQL不同存储引擎数据结构"><a href="#MySQL不同存储引擎数据结构" class="headerlink" title="MySQL不同存储引擎数据结构"></a>MySQL不同存储引擎数据结构</h3><h4 id="MyISAM"><a href="#MyISAM" class="headerlink" title="MyISAM"></a>MyISAM</h4>MyISAM存储引擎使用B-树数据结构来实现<strong>主码索引</strong>、<strong>唯一索引</strong>以及<strong>非主码索引</strong>。<br>MyISAM索引是在内存的一个公共键缓存中管理的，这个缓存大小可以通过<code>key_buffer_size</code>或者其他命名键缓存来定义。<h4 id="InnoDB"><a href="#InnoDB" class="headerlink" title="InnoDB"></a>InnoDB</h4><h5 id="B-树聚簇主码"><a href="#B-树聚簇主码" class="headerlink" title="B+树聚簇主码"></a>B+树聚簇主码</h5>InnoDB用聚簇主码存储数据，底层信息占用的磁盘空间的大小很大程度上取决于页面的填充因子；所有InnoDB数据和索引都是在内存中通过<code>innodb_buffer_pool_size</code>设置选项定义InnoDB缓冲池进行管理。<h5 id="B-树非主码"><a href="#B-树非主码" class="headerlink" title="B-树非主码"></a>B-树非主码</h5>非主码索引使用B-树数据结构，与MyISAM区别在于，InnoDB中，非主码索引存储的是主码实际值，而在MyISAM中，非主码索引存储的是包含主码值的数据的指针。<h4 id="内存散列索引"><a href="#内存散列索引" class="headerlink" title="内存散列索引"></a>内存散列索引</h4>只有MEMORY引擎支持散列的数据结构。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/nimbuskblog/post/35e48191.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/93780ad2.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/93780ad2.html" class="post-title-link" itemprop="url">CAT监控学习与使用</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-05-18 09:58:39" itemprop="dateCreated datePublished" datetime="2019-05-18T09:58:39+08:00">2019-05-18</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:28" itemprop="dateModified" datetime="2021-02-20T10:40:28+08:00">2021-02-20</time>
+      </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/145818e1.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/145818e1.html" class="post-title-link" itemprop="url">Ubuntu相关系列</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-05-16 02:20:17" itemprop="dateCreated datePublished" datetime="2019-05-16T02:20:17+08:00">2019-05-16</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:28" itemprop="dateModified" datetime="2021-02-20T10:40:28+08:00">2021-02-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/nimbuskblog/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>又是一个熬夜的夜晚，凌晨2点半，新晋小备机工作站基本搞定了。 Yeah!</p>
+<h2 id="Ubuntu安装与初始化配置"><a href="#Ubuntu安装与初始化配置" class="headerlink" title="Ubuntu安装与初始化配置"></a>Ubuntu安装与初始化配置</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><h3 id="机械硬盘挂载"><a href="#机械硬盘挂载" class="headerlink" title="机械硬盘挂载"></a>机械硬盘挂载</h3><h3 id="切换数据源为阿里云"><a href="#切换数据源为阿里云" class="headerlink" title="切换数据源为阿里云"></a>切换数据源为阿里云</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">备份source.list</span></span><br><span class="line">cp -f /etc/apt/sources.list /etc/apt/sources.list.bak</span><br></pre></td></tr></table></figure>
+<p>通过vi/vim修改sources.list<br>将原有的都注释了，把下面的数据源新增在文件末尾即可：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse</span><br><span class="line"></span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse</span><br><span class="line"></span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse</span><br><span class="line"></span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse</span><br><span class="line"></span><br><span class="line">deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse</span><br><span class="line">deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse</span><br></pre></td></tr></table></figure>
+<p>保存之后，记得：sudo apt-get install update<br>更新数据源即可</p>
+<h2 id="系列话题"><a href="#系列话题" class="headerlink" title="系列话题"></a>系列话题</h2><h2 id="相关命令"><a href="#相关命令" class="headerlink" title="相关命令"></a>相关命令</h2><h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/322bf04b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/322bf04b.html" class="post-title-link" itemprop="url">SpringBoot实战读书笔记</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-03-20 23:40:53" itemprop="dateCreated datePublished" datetime="2019-03-20T23:40:53+08:00">2019-03-20</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:29" itemprop="dateModified" datetime="2021-02-20T10:40:29+08:00">2021-02-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/nimbuskblog/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">读书笔记</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>以历代Spring Framework的进步为基础，Spring Boot实现了自动配置，这让Spring能够智能探<br>测正在构建何种应用程序，自动配置必要的组件以满足应用程序的需要。对于那些常见的配置场<br>景，不再需要显式地编写配置了，Spring会替你料理好一切。</p>
+<h3 id="第一章-入门"><a href="#第一章-入门" class="headerlink" title="第一章 入门"></a>第一章 入门</h3><h4 id="Spring-Boot-精要"><a href="#Spring-Boot-精要" class="headerlink" title="Spring Boot 精要"></a>Spring Boot 精要</h4><ul>
+<li>自动配置：针对很多Spring应用程序常见的应用功能，Spring Boot能自动提供相关配置。</li>
+<li>起步依赖：告诉Spring Boot需要什么功能，它就能引入需要的库。</li>
+<li>命令行界面：这是Spring Boot的可选特性，借此你只需写代码就能完成完整的应用程序，<br>无需传统项目构建。</li>
+<li>Actuator：让你能够深入运行中的Spring Boot应用程序，一探究竟。</li>
+</ul>
+<h5 id="自动配置"><a href="#自动配置" class="headerlink" title="自动配置"></a>自动配置</h5><p>Spring Boot的自动配置远不止嵌入式数据库和JdbcTemplate，它有大把的办法帮你减轻配置负担，这些自动配置涉及Java持久化API（Java Persistence API，JPA）、Thymeleaf模板、安全和Spring MVC。</p>
+<h5 id="起步依赖"><a href="#起步依赖" class="headerlink" title="起步依赖"></a>起步依赖</h5><p>起步依赖其实就是特殊的<code>Maven</code>依赖和```Gradle``依赖，利用了传递依赖解析，把常用库聚合在一起，组成了几个为特定功能而定制的依赖。</p>
+<h5 id="命令行界面"><a href="#命令行界面" class="headerlink" title="命令行界面"></a>命令行界面</h5><p>Spring Boot CLI利用了起步依赖和自动配置，让你专注于代码本身。</p>
+<h5 id="Actuator"><a href="#Actuator" class="headerlink" title="Actuator"></a>Actuator</h5><p>Spring Boot的最后一块“拼图”是Actuator，其他几个部分旨在简化Spring开发，而Actuator则要提供在运行时检视应用程序内部情况的能力。提供如下细节：</p>
+<ul>
+<li>Spring应用程序上下文里配置的Bean</li>
+<li>Spring Boot的自动配置做的决策</li>
+<li>应用程序取到的环境变量、系统属性、配置属性和命令行参数</li>
+<li>应用程序里线程的当前状态</li>
+<li>应用程序最近处理过的HTTP请求的追踪情况</li>
+<li>各种和内存用量、垃圾回收、Web请求以及数据源用量相关的指标</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/483443e6.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/483443e6.html" class="post-title-link" itemprop="url">响应式架构（消息模式Actor实现与Scala、Akka应用集成）</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-19 21:12:55" itemprop="dateCreated datePublished" datetime="2018-11-19T21:12:55+08:00">2018-11-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:29" itemprop="dateModified" datetime="2021-02-20T10:40:29+08:00">2021-02-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/nimbuskblog/categories/Akka%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Akka系列</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>原书《Reactive Messaging Patterns with the Actor Model Applications and Integration in Scala and Akka》，作者：Vaughn Vernon，是《实现领域驱动设计》（Implementing Domain Driven Design）一书的作者。因而，本书值得一看。本文随笔笔记，记录本书中的主要点，以便后续查看翻阅。</p>
+<h3 id="书章节小记"><a href="#书章节小记" class="headerlink" title="书章节小记"></a>书章节小记</h3><h4 id="推荐序"><a href="#推荐序" class="headerlink" title="推荐序"></a>推荐序</h4><p><em>注：</em>本书推荐序是由Akka项目创始人所作。</p>
+<ul>
+<li>Actor是异步驱动、可以并行和分布式部署及运行的最小颗粒。</li>
+<li>Akka的Acotr模式本身可以保证单个Actor实例中每个行为的原子性，并行的粒度可以细化到单个Actor实例。</li>
+<li>从架构层面看，Actor能同时担当实体Beans和中间缓存的角色，并且是异步驱动的，且具备分片集群下的水平扩展能力。</li>
+<li>从业务领域来看，Actor可以非常自然地直接对应到业务实体。</li>
+</ul>
+<h4 id="译者序"><a href="#译者序" class="headerlink" title="译者序"></a>译者序</h4><p>Actor模型拥有以下优点：</p>
+<ul>
+<li>大幅度降低应用程序内部的耦合性</li>
+<li>Actor模型的消息传递形式简化了并行程序的开发工作，使开发人员无须与并发编程基础元素打交道</li>
+<li>在高动态环境中，Actor模型既可以利用顺序编程技巧，也可以利用函数编程技巧</li>
+<li>Actor模型可以解决许多并发编程难题，如死锁、活锁、互斥体等等</li>
+<li>Actor模型能够大幅度提高调用方法的安全性和速度</li>
+</ul>
+<h4 id="第一章-Actor模型和企业级软件概述"><a href="#第一章-Actor模型和企业级软件概述" class="headerlink" title="第一章 Actor模型和企业级软件概述"></a>第一章 Actor模型和企业级软件概述</h4>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/ad5d9134.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/ad5d9134.html" class="post-title-link" itemprop="url">effective-javascript</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-11 17:11:52" itemprop="dateCreated datePublished" datetime="2018-11-11T17:11:52+08:00">2018-11-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:28" itemprop="dateModified" datetime="2021-02-20T10:40:28+08:00">2021-02-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/nimbuskblog/categories/JavaScript%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">JavaScript系列</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ul>
+<li>本文默认JS即为JavaScript语言</li>
+<li>“注：”为本人理解内容</li>
+</ul>
+<h4 id="第2条：理解JavaScript的浮点数"><a href="#第2条：理解JavaScript的浮点数" class="headerlink" title="第2条：理解JavaScript的浮点数"></a>第2条：理解JavaScript的浮点数</h4><ul>
+<li>不管是整数还是浮点数，JavaScript都将它们简单归类为数字。事实上，所有的数字都是<strong>双精度浮点数</strong></li>
+<li>位运算符将数字视为32位的有符号整数</li>
+<li>当心浮点运算中的精度陷阱</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0.1</span> + <span class="number">0.2</span>) + <span class="number">0.3</span>; <span class="comment">// 0.6000000000000001</span></span><br><span class="line"><span class="number">0.1</span> + (<span class="number">0.2</span> + <span class="number">0.3</span>); <span class="comment">// 0.6</span></span><br><span class="line"><span class="comment">// 一个有效的解决方式是将浮点数转化为整数运算，例如上例中可以转换为</span></span><br><span class="line">(<span class="number">10</span> + <span class="number">20</span>) + <span class="number">30</span>; <span class="comment">// 60</span></span><br><span class="line"><span class="number">10</span> + (<span class="number">20</span> + <span class="number">30</span>); <span class="comment">// 60</span></span><br></pre></td></tr></table></figure>
+<h4 id="第3条-当心隐式强制转换"><a href="#第3条-当心隐式强制转换" class="headerlink" title="第3条 当心隐式强制转换"></a>第3条 当心隐式强制转换</h4><ul>
+<li>特别注意字符强制转换的问题：结果为null的变量在算术运算中不会导致失败，而是被隐式转换为0</li>
+<li>测试某个值是否是NaN，在JS中唯一一个不等于其自身的值，因此，可以随时通过检查一个值是否等于其自身的方式来测试该值是否是NaN</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="literal">NaN</span>;</span><br><span class="line">a !== a; <span class="comment">// true</span></span><br><span class="line"><span class="keyword">var</span> b = <span class="string">&quot;foo&quot;</span>;</span><br><span class="line">b != b; <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<h4 id="第5条：避免对混合类型使用-运算符"><a href="#第5条：避免对混合类型使用-运算符" class="headerlink" title="第5条：避免对混合类型使用==运算符"></a>第5条：避免对混合类型使用==运算符</h4><p>一个好的替代方法是使用严格相等运算符<br><img data-src="ad5d9134/table1.1.jpg" alt="==运算符的强制转换规则"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/nimbuskblog/post/ad5d9134.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/f73b2f1e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/f73b2f1e.html" class="post-title-link" itemprop="url">Scala编程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-08-19 18:10:05" itemprop="dateCreated datePublished" datetime="2018-08-19T18:10:05+08:00">2018-08-19</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:29" itemprop="dateModified" datetime="2021-02-20T10:40:29+08:00">2021-02-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/nimbuskblog/categories/Scala%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Scala系列</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="第一章-可伸展的语言"><a href="#第一章-可伸展的语言" class="headerlink" title="第一章 可伸展的语言"></a>第一章 可伸展的语言</h3><p>Scala提供了一个实质上实现了Erlang的actor模型的附加库，用于实现线程模型之上的并发抽象。可以通过彼此间传递消息来实现通信。<br>actor可以执行两种基本操作：消息的发送和接受。发送操作，用惊叹号表示，如：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">recipient ! msg</span><br></pre></td></tr></table></figure>
+<p>发送是异步的。<br>每个actor都有信箱（mailbox）把进入的消息排成队列。actor通过receive代码块处理信箱中收到的消息：</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">receive &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="type">Msg1</span> =&gt; ... <span class="comment">// 处理Msg1</span></span><br><span class="line">    <span class="keyword">case</span> <span class="type">Msg2</span> =&gt; ... <span class="comment">// 处理Msg2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>在Scala里，函数就是对象。</strong></p>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/b709cacd.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/b709cacd.html" class="post-title-link" itemprop="url">Scala&Akka学习纪要</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-08-17 00:06:18" itemprop="dateCreated datePublished" datetime="2018-08-17T00:06:18+08:00">2018-08-17</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:29" itemprop="dateModified" datetime="2021-02-20T10:40:29+08:00">2021-02-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/nimbuskblog/categories/Scala%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Scala系列</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>前一段时间，公司小组内调整，我被安插到一个在线客服的项目下。人不多，就我一个人作为主开发。其主要原因是，项目整体大的需求少数，总体趋于稳定，故而开发很少。<br>但是，从我接手到目前（2018-8-16），总共也就不到1个半月，前前后后遇到产线事件不下数10起，其中2~3起事件，定位不到问题。<br>本片发稿日（2018-8-16），白日再次被公司上集领导层点名批评，说这个系统不好用，怎么怎么样。<br>确实，从我接手看，这个系统很成问题，为什么说很？经常性出问题！<br>反观自己，确实，对于这套东西本省就很不熟，当初答应接下来，就是因为想挑战挑战。但是从目前看，效果并不明显。<br>总结开来：<strong>遇到这些所谓奇怪的问题，总结开来就是：无从下手排查。导致平凡出现问题后，解决问题的失效，本质性有没有解决问题等等。客户并不满意！</strong></p>
+<p>这套在线客服系统，大体用到的技术包含，如下：</p>
+<ul>
+<li>Java</li>
+<li>Scala</li>
+<li>Akka</li>
+<li>SocketIO</li>
+<li>Redis</li>
+<li>Java Web一套</li>
+</ul>
+<p>其中，Scala、Akka、Redis在此之前的工作中并没有很好的接触。特别是Scala、Akka根本碰都没碰过，然而在这套系统里面，这俩又是核心骨架。</p>
+<p>先从Scala、Akka这两个陌生的东西开始看起！</p>
+<h3 id="笔记规范"><a href="#笔记规范" class="headerlink" title="笔记规范"></a>笔记规范</h3><ul>
+<li>各资料章节为基础小结记录</li>
+</ul>
+<h3 id="主要内容"><a href="#主要内容" class="headerlink" title="主要内容"></a>主要内容</h3><ul>
+<li>《Scala编程》</li>
+<li>《响应式架构 消息模式Actor实现与ScalaAkka应用集成》</li>
+</ul>
+
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/178a5861.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/nimbuskblog/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/nimbuskblog/post/178a5861.html" class="post-title-link" itemprop="url">Hexo建站</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-08-12 02:40:53" itemprop="dateCreated datePublished" datetime="2018-08-12T02:40:53+08:00">2018-08-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-02-20 10:40:29" itemprop="dateModified" datetime="2021-02-20T10:40:29+08:00">2021-02-20</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/nimbuskblog/categories/%E7%AB%99%E7%82%B9/" itemprop="url" rel="index"><span itemprop="name">站点</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>至于为什么要自建博客，想必你能找到这篇hexo教程，之前肯定检索过不少信息了 :) 就不过多赘述了。</p>
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>如果你没有从事过开发相关工作/没有学习过计算机编程、网络相关知识，下面提到的，建议还是花点时间了解一下，不必了解那么深。</p>
+<ul>
+<li>nodejs/npm相关语法</li>
+<li>hexo及hexo相关语法</li>
+<li>git仓库/github</li>
+<li>域名/域名CDN记录</li>
+<li>CDN加速</li>
+<li>HTTPS</li>
+</ul>
+<p>npm install hexo-cli -g –save<br>npm install hexo-deployer-git –save</p>
+<h3 id="开始建站"><a href="#开始建站" class="headerlink" title="开始建站"></a>开始建站</h3><h3 id="站点启用HTTPS"><a href="#站点启用HTTPS" class="headerlink" title="站点启用HTTPS"></a>站点启用HTTPS</h3><h4 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h4><p>原理基本上基于放弃使用github.io托管博客静态页面，寻找第三方支持全站启用https的站点。<br>参考<a target="_blank" rel="noopener" href="https://juejin.im/entry/5a8bd9f25188257a5911cfc6">掘金网</a>对比比较内容</p>
+<h4 id="Netlify"><a href="#Netlify" class="headerlink" title="Netlify"></a>Netlify</h4><p>官网：<a target="_blank" rel="noopener" href="http://www.netflix.com/">http://www.netflix.com</a><br>最大的特点：支持同步Github仓库数据、免费启用Let’s Encrypt SSL证书</p>
+<h5 id="绑定流程"><a href="#绑定流程" class="headerlink" title="绑定流程"></a>绑定流程</h5><h5 id="添加自定义域名"><a href="#添加自定义域名" class="headerlink" title="添加自定义域名"></a>添加自定义域名</h5><h5 id="启用全站HTTPS"><a href="#启用全站HTTPS" class="headerlink" title="启用全站HTTPS"></a>启用全站HTTPS</h5><h5 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h5>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/nimbuskblog/page/3/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/nimbuskblog/">1</a><span class="space">&hellip;</span><a class="page-number" href="/nimbuskblog/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/nimbuskblog/page/5/">5</a><a class="page-number" href="/nimbuskblog/page/6/">6</a><a class="extend next" rel="next" href="/nimbuskblog/page/5/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nimbusk</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/nimbuskblog/js/utils.js"></script><script src="/nimbuskblog/js/motion.js"></script><script src="/nimbuskblog/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.4/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.13.1/dist/instantsearch.production.min.js"></script><script src="/nimbuskblog/js/algolia-search.js"></script>
+
+
+
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  <script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+        tags: 'none'
+      },
+      options: {
+        renderActions: {
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              const target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3.1.2/es5/tex-mml-chtml.js';
+    script.defer = true;
+    document.head.appendChild(script);
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.typesetClear();
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+
+
+
+</body>
+</html>
