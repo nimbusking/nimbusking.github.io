@@ -13,7 +13,7 @@ timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: https://nimbusk.cc/nimbuskblog
+url: https://nimbusk.cc/
 root: /nimbuskblog/
 permalink: post/:abbrlink.html
 abbrlink:
@@ -109,7 +109,7 @@ plugins:
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  repo: git@github.com:nimbusking/nimbuskblog.git
+  # repo: git@github.com:nimbusking/nimbuskblog.git
   branch: gh-pages
 
 filter_optimize:
