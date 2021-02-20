@@ -1,0 +1,72 @@
+# 指定构建环境是Node.js，当前版本是稳定版
+language: node_js
+node_js: stable
+
+# 设置钩子只检测sources分支的push变动(如果单独设置仓库，这个可以不用设置)
+branches:
+  only:
+    - sources
+
+# 设置缓存文件
+cache:
+  directories:
+    - node_modules
+
+# 设置安装插件前的前置工作，主题我自己延续最新版NexT主体且通过npm方式安装
+# 我将NexT_config分支clone到当前根目录下，配置通常不会变更
+before_install:
+  - npm install -g hexo-cli
+  - mkdir temp
+  - cd ./temp
+  - hexo init
+
+#安装hexo next主题及相关插件
+install:
+  - npm install
+  - npm install hexo-theme-next --save
+  - npm install hexo-deployer-git --save
+  - npm install hexo-generator-searchdb --save
+  - npm install hexo-wordcount --save
+  - npm install hexo-abbrlink --save
+  - npm install lozad --save
+  - npm uninstall hexo-generator-index --save
+  - npm install hexo-generator-index-pin-top --save
+  - npm install hexo-algolia --save
+
+
+before_script:
+  - git config user.name "nimbusking"
+  - git config user.email "nimbusking@hotmail.com"
+  # 替换同目录下的_config.yml文件中github_token字符串为travis后台刚才配置的变量，注>意此处sed命令用了双引号。单引号无效！
+  - pwd
+  - cp -f ../_config.yml ./
+  - cp -f ../_config.next.yml ./
+  - sed -i "s/git_token/${GIT_TOKEN}/g" ./_config.yml
+  - sed -i "s/algolia_applicationID/${ALGOLIA_APPLICATIONID}/g" ./_config.yml
+  - sed -i "s/algolia_apiKey/${ALGOLIA_APIKEY}/g" ./_config.yml
+  - sed -i "s/algolia_indexName/${ALGOLIA_INDEXNAME}/g" ./_config.yml
+  - sed -i "s/gitalk_client_id/${GITALK_CLIENT_ID}/g" ./_config.next.yml
+  - sed -i "s/gitalk_client_secret/${GITALK_CLIENT_SECRET}/g" ./_config.next.yml
+    # 设置Algolia Search API key环境变量
+  - export HEXO_ALGOLIA_INDEXING_KEY=${ALGOLIA_APIKEY}
+  - rm -rf source
+  - cp -rf ../source ./
+
+# 执行清缓存，生成网页操作
+script:
+  - hexo clean
+  - hexo generate
+  - ls -ltr
+  - hexo algolia
+  # deploy
+  - hexo deploy
+
+# deploy:
+#   on:
+#     branch: sources                # 工作分支
+#   strategy: git
+#   provider: pages
+#   token: $GIT_TOKEN              # GitHub Token 变量
+#   keep_history: true            # 保持推送记录，以增量提交的方式
+#   local_dir: ./public             # 需要推送到 master 分支的静态文件目录
+#   target_branch: master       # 推送的目标文件夹 local_dir(public) -> master 分支
