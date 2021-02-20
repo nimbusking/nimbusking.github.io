@@ -24,6 +24,7 @@ before_script:
   - export HEXO_ALGOLIA_INDEXING_KEY=${ALGOLIA_APIKEY}
 
 script:
+  - hexo clean
   - hexo generate
   - hexo algolia
 deploy:
