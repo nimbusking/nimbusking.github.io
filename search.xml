@@ -264,6 +264,35 @@
       </tags>
   </entry>
   <entry>
+    <title>Hexo与TravisCI持续集成</title>
+    <url>/post/e62993b1.html</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>Hexo个人博客满打满算也算是建站有2~3年了，原先自己的写作的方式是：</p>
+<ul>
+<li>有多平台协作的软件：例如为知笔记、iOS自带的备忘录、OneNote等等，这些多平台协作的软件，供自己日常写稿子所需。</li>
+<li>一个平台编译发布：家中的Windows台式机</li>
+<li>整个Hexo工程目录丢在OneDrive中同步</li>
+</ul>
+<p>这样的模式，存在几个问题：</p>
+<a id="more"></a>
+<ul>
+<li>协作协作并不方便，其实根本没有做到随时随地编写发布到博客网站的可能</li>
+<li>一个平台编译：多平台编译其实可以，但是存在问题的是，也是之前碰到过的一种情况。<br>我在自己办公windows的备机上也搭建了Hexo环境，也能编译。也登录了同步OneDrive账号，同步了Hexo工程目录。也能编译，也能发布。但是由于某天，不知道什么鬼原因，两台电脑同步出了问题，导致OneDrive自己给所有文件通通重命名了，所有文件名称中加入了计算机名称，这个让我抓狂的。<br>后来就是全部删了，重新hexo init，重新搞了一遍。</li>
+<li>跨平台可能未必行：在windows编译的，跑到Mac或者Linux环境下编译，能不能搞定，这个还没试过。不过也能可想而知，会出奇怪的问题。</li>
+</ul>
+<p>也正是因为上述主要的三个问题，导致了，必须得更新同步方式。原先想，自己在家中的服务器上，搭建编译环境，也不是不可以，说白了也就是写一个Shell脚本嘛。不过后来放弃了，<strong>最主要的一个问题是：文章怎么同步？</strong> 我换电脑，写的东西怎么同步到环境里？更别说，如果要用手机呢？<br>后来，在百度和Google找来找去，发现很多提到的一个持续集成的工具TravisCI。<br>研究了一下，完全可以满足自己的需求。<br>不过。。。。<br>整个过程还是蛮曲折的。。</p>
+<h2 id="前置须知"><a href="#前置须知" class="headerlink" title="前置须知"></a>前置须知</h2><h3 id="涉及到的相关组件版本"><a href="#涉及到的相关组件版本" class="headerlink" title="涉及到的相关组件版本"></a>涉及到的相关组件版本</h3><p>我的Hexo用的最新的。<br>我的Hexo主题也是用的最新的，当前版本是：8.2.1<br>Node JS版本是：v12.20.2</p>
+<h3 id="关于TravisCI"><a href="#关于TravisCI" class="headerlink" title="关于TravisCI"></a>关于TravisCI</h3><p>一句话解释Travis CI干嘛的，说白了就是一个在线编译环境，如果你玩过Jekins，这玩意儿就很好懂了。具体细节，真的建议，看官方文档就好。<br><a href="https://docs.travis-ci.com/">https://docs.travis-ci.com/</a><br>挑一个你了解的开发语言，如Java、Python什么的，去看看示例就好了。</p>
+<h3 id="关于我的站点结构"><a href="#关于我的站点结构" class="headerlink" title="关于我的站点结构"></a>关于我的站点结构</h3><h3 id="关于Hexo与TravisCI集成"><a href="#关于Hexo与TravisCI集成" class="headerlink" title="关于Hexo与TravisCI集成"></a>关于Hexo与TravisCI集成</h3><h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><h2 id="集成步骤"><a href="#集成步骤" class="headerlink" title="集成步骤"></a>集成步骤</h2><h2 id="一点不一样的修改"><a href="#一点不一样的修改" class="headerlink" title="一点不一样的修改"></a>一点不一样的修改</h2>]]></content>
+      <categories>
+        <category>站点</category>
+      </categories>
+      <tags>
+        <tag>站点</tag>
+        <tag>Hexo</tag>
+        <tag>TravisCI</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>电影小评</title>
     <url>/post/7a56ef2a.html</url>
     <content><![CDATA[<h2 id="前篇"><a href="#前篇" class="headerlink" title="前篇"></a>前篇</h2><p>记录日常生活中，观看过的电影，做一些影评或简或杂，留存一点记忆。观看列表，多半都可以在豆瓣中搜到，其中多数不低于7分。</p>
