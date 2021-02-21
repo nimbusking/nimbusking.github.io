@@ -13,7 +13,7 @@ cache:
 install:
   - npm install hexo-theme-next --save
   - npm install hexo-deployer-git --save
-  - npm install hexo-generator-searchdb --save
+  # - npm install hexo-generator-searchdb --save
   - npm install hexo-wordcount --save
   - npm install hexo-abbrlink --save
   - npm install lozad --save
