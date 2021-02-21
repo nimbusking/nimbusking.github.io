@@ -41,12 +41,22 @@ https://docs.travis-ci.com/
 ### 关于我的站点结构
 - 文章托管自然是GitHub，仓库的名字就是：nimbusking.github.io。PS：别折腾自定义的仓库名字了，你要是改了，后面又要折腾不少配置，尤其是绑定了自定义域名的。
 - 绑定了一个自己的主站域名，就是你所见到的。
-- 开启了HTTPS，我交给了[Netlify](https://www.netlify.com/)托管，Netlify证书是通过Let’s Encrypt自签的。
+- 开启了HTTPS，我交给了[Netlify](https://www.netlify.com/)托管，Netlify证书是通过Let’s Encrypt自签的。严格意义上说，现在我的文章都是部署在Netlify的.
 - 域名DNS绑到了DNSPOD
 - 无CDN（未来也不会加）
 - Hexo主题用的是[NexT](https://github.com/next-theme/hexo-theme-next)，版本8.2.1，新版本仓库已经迁移了，集成到npm了，而且主要使用了Numjucks
 以上就是主要的一些情况的补充说明
+
 ### 关于Hexo与TravisCI集成
+折腾了，差不多1天吧，才搞通了。中间在一个问题上纠结了很久，把遇到的主要情况，先行说明一下。
+网上百度和Google中搜了很多，很多都试了，都是不行，无法编译通过。后来不经意在，Hexo韩文官网下藏了一篇关于TravisCI集成的文章（很奇怪，为毛英文主站没有，还好Google收录了，让我搜到了）。
+文章地址：https://hexo.io/ko/docs/github-pages.html
+怕日后没了，我离线了，在附件中可以查看。
+其实最主要的问题就一个：**让TravisCI拉取的仓库中放哪些文件？**这点很多别人的文章中，并没有明确说明，导致我自己也是绕了好大一个弯。
+这点在官网的文章里，其实有详细说明的：
+{% note primary%}
+Push the files of your Hexo folder to the repository. The public/ folder is not (and should not be) uploaded by default, make sure the .gitignore file contains public/ line. The folder structure should be roughly similar to this repo, without the .gitmodules file
+{% endnote %}
 
 
 
@@ -55,3 +65,6 @@ https://docs.travis-ci.com/
 ## 集成步骤
 
 ## 一点不一样的修改
+
+## 附件
+- ![Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo github pages.7z)
