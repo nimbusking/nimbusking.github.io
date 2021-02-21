@@ -6,7 +6,8 @@ comments: false
 ---
 ### 前言
 ~~*博客全站Disqus评论已开启，非正常访问地区，采用访客模式留言，留言之后不会立马显示，需要Disqus后台审批；正常登录模式留言，需要FQ*~~
-评论区插件切换至：Valine [Valine插件主页](https://valine.js.org/hexo.html)，相关统计使用：leancould国际版
+~~评论区插件切换至：Valine [Valine插件主页](https://valine.js.org/hexo.html)，相关统计使用：leancould国际版~~
+Valine似乎已亡，评论区插件切换至GTalk，不折腾了。。。
 
 ### 开博背景
 在这个博客里，寄希望于记录下工作、生活中的点点滴滴，技术的也好，非技术的也罢。写下来，供自己日后查阅的同时，也希望有机会在本博客里和同行们交流。最重要的是，**时刻提醒自己，要更新博客**
