@@ -20,7 +20,6 @@ install:
   - npm uninstall hexo-generator-index --save
   - npm install hexo-generator-index-pin-top --save
   - npm install hexo-algolia --save
-  - npm install
 
 before_script:
   - git config user.name "nimbusking"
@@ -31,9 +30,11 @@ before_script:
   - sed -i "s/algolia_indexName/${ALGOLIA_INDEXNAME}/g" ./_config.yml
   - sed -i "s/gitalk_client_id/${GITALK_CLIENT_ID}/g" ./_config.next.yml
   - sed -i "s/gitalk_client_secret/${GITALK_CLIENT_SECRET}/g" ./_config.next.yml
-    # 设置Algolia Search API key环境变量
-  - export HEXO_ALGOLIA_INDEXING_KEY=${ALGOLIA_APIKEY}
   - pwd
+  # clone自定义配置
+  - git clone -b customer_config https://github.com/nimbusking/nimbusking.github.io.git temp
+  - cp -f ./temp/post-meta.njk ./node_modules/hexo-theme-next/layout/_partials/post
+  - rm -rf ./temp
 
 script:
   - hexo clean
