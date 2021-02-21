@@ -4,8 +4,12 @@
 
   {# PinTop #}
   {%- if post.top %}
-    <i class="fa fa-thumb-tack" style="color: #EB6D39"></i>
-    <font color="EB6D39">置顶</font>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-map-pin" style="color: #EB6D39"></i>
+      </span>
+      <span class="post-meta-item-text">置顶</span>
+    </span>
   {%- endif %}
   
   {%- if theme.post_meta.created_at %}
