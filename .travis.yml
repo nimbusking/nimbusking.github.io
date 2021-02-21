@@ -33,6 +33,7 @@ before_script:
   - sed -i "s/gitalk_client_secret/${GITALK_CLIENT_SECRET}/g" ./_config.next.yml
     # 设置Algolia Search API key环境变量
   - export HEXO_ALGOLIA_INDEXING_KEY=${ALGOLIA_APIKEY}
+  - pwd
 
 script:
   - hexo clean
