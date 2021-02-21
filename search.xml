@@ -280,6 +280,10 @@
 <li>跨平台可能未必行：在windows编译的，跑到Mac或者Linux环境下编译，能不能搞定，这个还没试过。不过也能可想而知，会出奇怪的问题。</li>
 </ul>
 <h3 id="为啥我选择了TravisCI"><a href="#为啥我选择了TravisCI" class="headerlink" title="为啥我选择了TravisCI"></a>为啥我选择了TravisCI</h3><p>也正是因为上述主要的三个问题，导致了，必须得更新同步方式。原先想，自己在家中的服务器上，搭建编译环境，也不是不可以，说白了也就是写一个Shell脚本嘛。不过后来放弃了，<strong>最主要的一个问题是：文章怎么同步？</strong> 我换电脑，写的东西怎么同步到环境里？更别说，如果要用手机呢？<br>后来，在百度和Google找来找去，发现很多提到的一个持续集成的工具TravisCI。<br>在英文版的Hexo官网中，提到了很多现在一键部署的方式，有兴趣可以点击下方传送门：<br><a href="https://hexo.io/docs/one-command-deployment">https://hexo.io/docs/one-command-deployment</a></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>文中并没有提及相关git操作的命令，如果你还不是很熟悉，请请自行查找相关知识</li>
+<li>本文是针对已经对hexo使用相对熟悉的哈，如果你还未从未接触过hexo，请先了解一下hexo。</li>
+</ul>
 <h2 id="前置须知"><a href="#前置须知" class="headerlink" title="前置须知"></a>前置须知</h2><h3 id="涉及到的相关组件版本"><a href="#涉及到的相关组件版本" class="headerlink" title="涉及到的相关组件版本"></a>涉及到的相关组件版本</h3><p>我的Hexo用的最新的。<br>我的Hexo主题也是用的最新的，当前版本是：8.2.1<br>Node JS版本是：v12.20.2</p>
 <h3 id="关于TravisCI"><a href="#关于TravisCI" class="headerlink" title="关于TravisCI"></a>关于TravisCI</h3><p>一句话解释Travis CI干嘛的，说白了就是一个在线编译环境，如果你玩过Jekins，这玩意儿就很好懂了。具体细节，真的建议，看官方文档就好。<br><a href="https://docs.travis-ci.com/">https://docs.travis-ci.com/</a><br>挑一个你了解的开发语言，如Java、Python什么的，去看看示例就好了。</p>
 <h3 id="关于我的站点结构"><a href="#关于我的站点结构" class="headerlink" title="关于我的站点结构"></a>关于我的站点结构</h3><ul>
@@ -293,10 +297,31 @@
 <h3 id="关于Hexo与TravisCI集成"><a href="#关于Hexo与TravisCI集成" class="headerlink" title="关于Hexo与TravisCI集成"></a>关于Hexo与TravisCI集成</h3><p>折腾了，差不多1天吧，才搞通了。中间在一个问题上纠结了很久，把遇到的主要情况，先行说明一下。<br>网上百度和Google中搜了很多，很多都试了，都是不行，无法编译通过。后来不经意在，Hexo韩文官网下藏了一篇关于TravisCI集成的文章（很奇怪，为毛英文主站没有，还好Google收录了，让我搜到了）。<br>文章地址：<a href="https://hexo.io/ko/docs/github-pages.html">https://hexo.io/ko/docs/github-pages.html</a><br>怕日后没了，我离线了，在附件中可以查看。<br>其实最主要的问题就一个：<strong>让TravisCI拉取的仓库中放哪些文件？</strong>这点很多别人的文章中，并没有明确说明，导致我自己也是绕了好大一个弯。<br>这点在官网的文章里，其实有详细说明的：</p>
 <div class="note primary"><p>Push the files of your Hexo folder to the repository. The public/ folder is not (and should not be) uploaded by default, make sure the .gitignore file contains public/ line. The folder structure should be roughly similar to this repo, without the .gitmodules file</p>
 </div>
-
-
-
-<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><h2 id="集成步骤"><a href="#集成步骤" class="headerlink" title="集成步骤"></a>集成步骤</h2><h2 id="一点不一样的修改"><a href="#一点不一样的修改" class="headerlink" title="一点不一样的修改"></a>一点不一样的修改</h2><h2 id="附件"><a href="#附件" class="headerlink" title="附件"></a>附件</h2><ul>
+<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p><strong>就是</strong>：除了public以及git相关的文件之外，全部push到仓库里。<br>你可以参考我的站点的master文章源文件目录结构：<a href="https://github.com/nimbusking/nimbusking.github.io/tree/master">https://github.com/nimbusking/nimbusking.github.io/tree/master</a></p>
+<h4 id="插曲"><a href="#插曲" class="headerlink" title="插曲"></a>插曲</h4><p><em>有的文章中提到，只需要传_travis.yml,_config.yml,source，这三个就行了，我真心不知道那些文章中的作者提到的，是怎么hexo generate过的</em><br>我也是在这上面绕了很久，也真的这么做了，结果发现，插件什么都装了，结果到执行hexo generate的时候，死活就会报下面类似的问题：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line">Commands:</span><br><span class="line">help Get help on a command.</span><br><span class="line">init Create a new Hexo folder.</span><br><span class="line">version Display version information.</span><br><span class="line"></span><br><span class="line">Global Options:</span><br><span class="line">--config Specify config file instead of using _config.yml</span><br><span class="line">--cwd Specify the CWD</span><br><span class="line">--debug Display all verbose messages in the terminal</span><br><span class="line">--draft Display draft posts</span><br><span class="line">--safe Disable all plugins and scripts</span><br><span class="line">--silent Hide output on console</span><br></pre></td></tr></table></figure>
+<p>这个类似的提示，hexo没有给出具体的错误，但是结果就是呢，根本就不会生成编译后的public文件夹。后来，我自己在我本地windows上，就copy上面提到的仨文件，一模一样的遇到的提示。至此，说明这个是错误的。</p>
+<p>PS：后来，我在_travis.yml，中自己建了一个临时文件夹，完了写shell命令，先hexo init一个临时目录，完了手工copy source目录以及与hexo相关的配置文件。最后，我确实搞定了，可以自动编译通过，但是问题就是，每次都是全新生成的。</p>
+<p>插曲就先说到这里，具体正确的步骤，我会在下面那个集成步骤中详细说明。</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><ul>
+<li>一个空的名为[username].github.io的仓库，其中username是你自己定义的名字<ul>
+<li>上面这个仓库中，有俩分支：一个默认的master分支，一个gh-pages(你可以起别的名字，但是建议就用这个好了，官网也是这个)。</li>
+<li>自定义名称可以，但是一定要记住：<strong>master分支存放博客源文件，gh-pages存放最终hexo generate生成的public文件夹下的内容</strong></li>
+</ul>
+</li>
+<li>绑定TravisCI在线账号</li>
+</ul>
+<h2 id="集成步骤"><a href="#集成步骤" class="headerlink" title="集成步骤"></a>集成步骤</h2><p>git clone你的那个空[username].github.io项目到本地的某个目录下</p>
+<h3 id="初始化一个空项目"><a href="#初始化一个空项目" class="headerlink" title="初始化一个空项目"></a>初始化一个空项目</h3><p>没啥说的，cd到目录下，hexo init</p>
+<h3 id="拷贝源文件"><a href="#拷贝源文件" class="headerlink" title="拷贝源文件"></a>拷贝源文件</h3><p>主要涉及到你之前的hexo工程中的配置文件，像我主要有两个：</p>
+<ul>
+<li>_config.yml</li>
+<li>_config.next.yml (next主题的配置文件)<br>剩下就是你的source目录下所有东西</li>
+</ul>
+<h3 id="修改配置文件中的敏感信息"><a href="#修改配置文件中的敏感信息" class="headerlink" title="修改配置文件中的敏感信息"></a>修改配置文件中的敏感信息</h3><p>主要是如果你使用了一些第三方插件，可能会有一些访问的API Token之类的东西，这部分可不能直接上传到github上，否则不久你懂的。<br>将这些敏感信息用一个变量名称代替，这些变量怎么用，后面会提到。</p>
+<h3 id="上传源文件到master分支"><a href="#上传源文件到master分支" class="headerlink" title="上传源文件到master分支"></a>上传源文件到master分支</h3><p>git push就是了，没什么好说的。</p>
+<h3 id="配置TravisCI账号"><a href="#配置TravisCI账号" class="headerlink" title="配置TravisCI账号"></a>配置TravisCI账号</h3><p>用github授权登录之后，第一次登录travisci官网后，会让你同步仓库。你可能跟我这个不一样，第一次登录会让你去你的github中配置相关的授权信息，照着步骤操作即可。<br><img data-src="e62993b1/AutoCapture_2021-02-22_002857.jpg" alt="同步仓库信息"></p>
+<h3 id="配置-travis-yml文件"><a href="#配置-travis-yml文件" class="headerlink" title="配置_travis.yml文件"></a>配置_travis.yml文件</h3><h2 id="一点不一样的修改"><a href="#一点不一样的修改" class="headerlink" title="一点不一样的修改"></a>一点不一样的修改</h2><h2 id="附件"><a href="#附件" class="headerlink" title="附件"></a>附件</h2><ul>
 <li>![Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo github pages.7z)</li>
 </ul>
 ]]></content>
