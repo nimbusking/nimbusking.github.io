@@ -122,4 +122,4 @@ git push就是了，没什么好说的。
 ## 一点不一样的修改
 
 ## 附件
-- ![Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo github pages.7z)
+- [Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo github pages.7z)
