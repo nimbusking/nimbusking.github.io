@@ -138,14 +138,6 @@ filter_optimize:
   # lower means it will be executed first, default of Hexo is 10
   priority: 12
 
-# JavaScript library for reading EXIF image metadata.
-# For more information: https://github.com/exif-js/exif-js
-exif:
-  enable: false
-  tags:
-    FocalLength: "{value}mm"
-    FNumber: "f/{value}"
-    ExposureTime: "{value}s"
 
 algolia:
   applicationID: algolia_applicationID
