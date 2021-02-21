@@ -29,6 +29,10 @@ Hexo个人博客满打满算也算是建站有2~3年了，原先自己的写作�
 在英文版的Hexo官网中，提到了很多现在一键部署的方式，有兴趣可以点击下方传送门：
 https://hexo.io/docs/one-command-deployment
 
+## 前言
+- 文中并没有提及相关git操作的命令，如果你还不是很熟悉，请请自行查找相关知识
+- 本文是针对已经对hexo使用相对熟悉的哈，如果你还未从未接触过hexo，请先了解一下hexo。
+
 ## 前置须知
 ### 涉及到的相关组件版本
 我的Hexo用的最新的。
@@ -57,12 +61,63 @@ https://docs.travis-ci.com/
 {% note primary%}
 Push the files of your Hexo folder to the repository. The public/ folder is not (and should not be) uploaded by default, make sure the .gitignore file contains public/ line. The folder structure should be roughly similar to this repo, without the .gitmodules file
 {% endnote %}
+#### 注意
+**就是**：除了public以及git相关的文件之外，全部push到仓库里。
+你可以参考我的站点的master文章源文件目录结构：https://github.com/nimbusking/nimbusking.github.io/tree/master
+#### 插曲
+*有的文章中提到，只需要传_travis.yml,_config.yml,source，这三个就行了，我真心不知道那些文章中的作者提到的，是怎么hexo generate过的*
+我也是在这上面绕了很久，也真的这么做了，结果发现，插件什么都装了，结果到执行hexo generate的时候，死活就会报下面类似的问题：
 
+```shell
+Commands:
+help Get help on a command.
+init Create a new Hexo folder.
+version Display version information.
 
+Global Options:
+--config Specify config file instead of using _config.yml
+--cwd Specify the CWD
+--debug Display all verbose messages in the terminal
+--draft Display draft posts
+--safe Disable all plugins and scripts
+--silent Hide output on console
+```
+
+这个类似的提示，hexo没有给出具体的错误，但是结果就是呢，根本就不会生成编译后的public文件夹。后来，我自己在我本地windows上，就copy上面提到的仨文件，一模一样的遇到的提示。至此，说明这个是错误的。
+
+PS：后来，我在_travis.yml，中自己建了一个临时文件夹，完了写shell命令，先hexo init一个临时目录，完了手工copy source目录以及与hexo相关的配置文件。最后，我确实搞定了，可以自动编译通过，但是问题就是，每次都是全新生成的。
+
+插曲就先说到这里，具体正确的步骤，我会在下面那个集成步骤中详细说明。
 
 ## 准备工作
+- 一个空的名为[username].github.io的仓库，其中username是你自己定义的名字
+    + 上面这个仓库中，有俩分支：一个默认的master分支，一个gh-pages(你可以起别的名字，但是建议就用这个好了，官网也是这个)。
+    + 自定义名称可以，但是一定要记住：**master分支存放博客源文件，gh-pages存放最终hexo generate生成的public文件夹下的内容**
+- 绑定TravisCI在线账号
 
 ## 集成步骤
+git clone你的那个空[username].github.io项目到本地的某个目录下
+### 初始化一个空项目
+没啥说的，cd到目录下，hexo init
+### 拷贝源文件
+主要涉及到你之前的hexo工程中的配置文件，像我主要有两个：
+- _config.yml
+- _config.next.yml (next主题的配置文件)
+剩下就是你的source目录下所有东西
+
+### 修改配置文件中的敏感信息
+主要是如果你使用了一些第三方插件，可能会有一些访问的API Token之类的东西，这部分可不能直接上传到github上，否则不久你懂的。
+将这些敏感信息用一个变量名称代替，这些变量怎么用，后面会提到。
+### 上传源文件到master分支
+git push就是了，没什么好说的。
+### 配置TravisCI账号
+用github授权登录之后，第一次登录travisci官网后，会让你同步仓库。你可能跟我这个不一样，第一次登录会让你去你的github中配置相关的授权信息，照着步骤操作即可。
+![同步仓库信息](e62993b1/AutoCapture_2021-02-22_002857.jpg)
+
+
+
+### 配置_travis.yml文件
+
 
 ## 一点不一样的修改
 
