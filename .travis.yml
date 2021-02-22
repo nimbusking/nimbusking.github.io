@@ -1,12 +1,12 @@
 language: node_js
 node_js:
   - 12
-cache: npm
 branches:
   only:
     - master # build master branch only
 # 设置缓存文件
 cache:
+  npm
   directories:
     - node_modules
 

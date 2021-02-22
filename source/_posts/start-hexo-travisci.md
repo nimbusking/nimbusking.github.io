@@ -93,6 +93,9 @@ PS：后来，我在_travis.yml，中自己建了一个临时文件夹，完了�
 - 一个空的名为[username].github.io的仓库，其中username是你自己定义的名字
     + 上面这个仓库中，有俩分支：一个默认的master分支，一个gh-pages(你可以起别的名字，但是建议就用这个好了，官网也是这个)。
     + 自定义名称可以，但是一定要记住：**master分支存放博客源文件，gh-pages存放最终hexo generate生成的public文件夹下的内容**
+    + 你的这个仓库的GitHub Pages指定的分支要选择为：gh-pages，如下图所示：
+    ![gh-pages](e62993b1/AutoCapture_2021-02-22_170448.png)
+
 - 绑定TravisCI在线账号
 
 ## 集成步骤
@@ -101,8 +104,8 @@ git clone你的那个空[username].github.io项目到本地的某个目录下
 没啥说的，cd到目录下，hexo init
 ### 拷贝源文件
 主要涉及到你之前的hexo工程中的配置文件，像我主要有两个：
-- _config.yml
-- _config.next.yml (next主题的配置文件)
+- ```.config.yml```
+- ```.config.next.yml``` (next主题的配置文件)
 
 剩下就是你的source目录下所有东西
 
@@ -137,13 +140,110 @@ git push就是了，没什么好说的。
 ![同步仓库信息](e62993b1/AutoCapture_2021-02-22_002857.jpg)
 在搜索框中键入你的仓库名称，随后点击Settings
 ![Settings页面](e62993b1/AutoCapture_2021-02-22_154127.png)
-在Settings页面中，只需要注意添加
-
-
+在Settings页面中，只需要注意添加相应的变量即可。如下图所示：
+![Settings页面](e62993b1/AutoCapture_2021-02-22_154416.png)
+我自己在这里添加了7个，其中一个GH_TOKEN就是上面在GitHub通过Generate New Token操作生成的。其余的，一个是GiTalk相关的，一个是algolia相关的。通常，其余配置保证默认即可，如果有特殊配置需求，可以阅读Travis相关的配置说明，如Cron Jobs等。
+至此，关联上你的GitHub仓库之后，就等于加了一个钩子程序，但是在正式启用前，还缺一个重要的配置文件：```.travis.yml``` ，只有配置了这个文件，才能会被Travis CI识别。
 ### 配置_travis.yml文件
+这个步骤是集成TravisCI的核心，注意修改。
+按照Hexo官网的说明，官网的配置如下：
+PS：官网默认没有给每项配置作说明，我这里直接在下面配置文件中加上注释了
+```yaml
+sudo: false
+# 脚本运行语言
+language: node_js
+# NodeJS版本
+node_js:
+  - 10 # use nodejs v10 LTS
+# 开启npm缓存
+cache: npm
+# TravisCI监听的分支为master分支
+branches:
+  only:
+    - master # build master branch only
+script:
+  - hexo generate # generate static files
+deploy:
+  provider: pages
+  skip-cleanup: true
+  # 这个GH_TOKEN就是在TravisCI后台设置那里添加的变量
+  github-token: $GH_TOKEN
+  keep-history: true
+  # 远程分支
+  on:
+    branch: master
+  # 本地目录
+  local-dir: public
+```
+自己在配置的时候，发现，就这个完全已经可以成功部署了。
+**注意** 如果你使用的是TraivsCI自身自带的deploy命令，而且你的项目工程中，原先通过“hexo-deployer-git”插件来deploy的，那么你的hexo工程的配置文件：.config.yml中还需修改：
+```yaml
+deploy:
+  type: git
+  # 需要将repo给注释了
+  # repo: git@github.com:nimbusking/nimbuskblog.git
+  # 同时，这里的分支不要选错，hexo generate生成的最终页面，需要deploy到这个分支中
+  branch: gh-pages
+```
+
+### 一点不一样的修改
+先贴上我的.travis.yml配置：
+```yaml
+language: node_js
+node_js:
+  - 12
+cache: npm
+branches:
+  only:
+    - master # build master branch only
+# 设置缓存文件
+cache:
+  directories:
+    - node_modules
+
+install:
+  - npm install
+  - npm install hexo-theme-next --save
+  - npm install hexo-deployer-git --save
+  # - npm install hexo-generator-searchdb --save
+  - npm install hexo-generator-feed
+  - npm install hexo-wordcount --save
+  - npm install hexo-abbrlink --save
+  - npm install lozad --save
+  - npm uninstall hexo-generator-index --save
+  - npm install hexo-generator-index-pin-top --save
+  - npm install hexo-algolia --save
+
+before_script:
+  - git config user.name "nimbusking"
+  - git config user.email "kemivong@hotmail.com"
+  # 替换同目录下的_config.yml文件中github_token字符串为travis后台刚才配置的变量，注>意此处sed命令用了双引号。单引号无效！
+  - sed -i "s/algolia_applicationID/${ALGOLIA_APPLICATIONID}/g" ./_config.yml
+  - sed -i "s/algolia_apiKey/${ALGOLIA_APIKEY}/g" ./_config.yml
+  - sed -i "s/algolia_indexName/${ALGOLIA_INDEXNAME}/g" ./_config.yml
+  - sed -i "s/gitalk_client_id/${GITALK_CLIENT_ID}/g" ./_config.next.yml
+  - sed -i "s/gitalk_client_secret/${GITALK_CLIENT_SECRET}/g" ./_config.next.yml
+  # - pwd
+  # clone自定义配置
+  - git clone -b customer_config https://github.com/nimbusking/nimbusking.github.io.git temp
+  - cp -f ./temp/post-meta.njk ./node_modules/hexo-theme-next/layout/_partials/post
+  - rm -rf ./temp
+
+script:
+  - hexo clean
+  - hexo generate
+  - hexo algolia
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GH_TOKEN
+  keep-history: true
+  on:
+    branch: master
+  local-dir: public
+```
 
 
-## 一点不一样的修改
 
 ## 附件
 - [Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo_github_pages.7z)
