@@ -243,7 +243,7 @@ deploy:
   local-dir: public
 ```
 
-
+我这里比官网默认配置多了几个东西，
 
 ## 附件
 - [Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo_github_pages.7z)
