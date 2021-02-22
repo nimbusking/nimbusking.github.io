@@ -103,17 +103,41 @@ git clone你的那个空[username].github.io项目到本地的某个目录下
 主要涉及到你之前的hexo工程中的配置文件，像我主要有两个：
 - _config.yml
 - _config.next.yml (next主题的配置文件)
+
 剩下就是你的source目录下所有东西
 
 ### 修改配置文件中的敏感信息
 主要是如果你使用了一些第三方插件，可能会有一些访问的API Token之类的东西，这部分可不能直接上传到github上，否则不久你懂的。
-将这些敏感信息用一个变量名称代替，这些变量怎么用，后面会提到。
+将这些敏感信息用一个变量名称代替，这些变量怎么用，后面会提到。比如，我在我的hexo里面使用了algolia搜索，那么在我的_config.yml配置文件中，则改为如下样子：
+```yaml
+# algolia_applicationID就是一个占位符，其它类似
+algolia:
+  applicationID: algolia_applicationID
+  apiKey: algolia_apiKey
+  indexName: algolia_indexName
+  chunkSize: 5000
+  fields:
+    - title
+    - slug
+    - path
+    - content:strip
+```
+
 ### 上传源文件到master分支
 git push就是了，没什么好说的。
+
+### 生成GitHub Token
+这个token是为了在外部授权可以提交代码所用。
+设置路径，访问你的GitHub主页，路径：Settings(点击你的头像右边的下拉箭头) -> Developer Settings -> Personal access tokens -> Generate New Token，如下图所示：
+![Generate New Token](e62993b1/AutoCapture_2021-02-22_154729.png)
+**注意**这个token要及时复制到文本编辑器里面，下次再进来之后，就看不到了。
+
 ### 配置TravisCI账号
 用github授权登录之后，第一次登录travisci官网后，会让你同步仓库。你可能跟我这个不一样，第一次登录会让你去你的github中配置相关的授权信息，照着步骤操作即可。
 ![同步仓库信息](e62993b1/AutoCapture_2021-02-22_002857.jpg)
-
+在搜索框中键入你的仓库名称，随后点击Settings
+![Settings页面](e62993b1/AutoCapture_2021-02-22_154127.png)
+在Settings页面中，只需要注意添加
 
 
 ### 配置_travis.yml文件
