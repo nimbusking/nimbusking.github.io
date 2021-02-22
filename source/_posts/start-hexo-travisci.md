@@ -143,7 +143,7 @@ git push就是了，没什么好说的。
 ![Settings页面](e62993b1/AutoCapture_2021-02-22_154416.png)
 我自己在这里添加了7个，其中一个GH_TOKEN就是上面在GitHub通过Generate New Token操作生成的。其余的，一个是GiTalk相关的，一个是algolia相关的。通常，其余配置保证默认即可，如果有特殊配置需求，可以阅读Travis相关的配置说明，如Cron Jobs等。
 至此，关联上你的GitHub仓库之后，就等于加了一个钩子程序，但是在正式启用前，还缺一个重要的配置文件：```.travis.yml``` ，只有配置了这个文件，才能会被Travis CI识别。
-### 配置_travis.yml文件
+### 配置.travis.yml文件
 这个步骤是集成TravisCI的核心，注意修改。
 按照Hexo官网的说明，官网的配置如下：
 PS：官网默认没有给每项配置作说明，我这里直接在下面配置文件中加上注释了
@@ -255,6 +255,7 @@ deploy:
 - 最后一段git clone，是我自己在配置置顶插件之后，自己有修改相关置顶的样式。为了生效，我需要将next主题中的相关配置给替换成我自己的配置。
 - 在执行了hexo generate之后，我又执行了一下hexo algolia，更新algolia索引
 - 最后就是deploy，$GH_TOKEN就是从TravisCI后台获取的配置的Token值
+- 如果你同样使用了 **netlify托管，别忘了修改其部署的分支（如果通过现在的仓库部署方式的话）为gh-pages**
 
 ## 结语
 至此，Hexo与TravisCI集成的步骤基本介绍完毕。
