@@ -203,20 +203,26 @@ cache:
 
 install:
   - npm install
+  # hexo主题
   - npm install hexo-theme-next --save
+  # deployer git 插件
   - npm install hexo-deployer-git --save
   # - npm install hexo-generator-searchdb --save
+  # rss订阅插件
   - npm install hexo-generator-feed
+  # 卜算子词数统计
   - npm install hexo-wordcount --save
+  # 短链
   - npm install hexo-abbrlink --save
+  # 懒加载
   - npm install lozad --save
   - npm uninstall hexo-generator-index --save
+  # 置顶插件
   - npm install hexo-generator-index-pin-top --save
+  # algolia搜索
   - npm install hexo-algolia --save
 
 before_script:
-  - git config user.name "nimbusking"
-  - git config user.email "kemivong@hotmail.com"
   # 替换同目录下的_config.yml文件中github_token字符串为travis后台刚才配置的变量，注>意此处sed命令用了双引号。单引号无效！
   - sed -i "s/algolia_applicationID/${ALGOLIA_APPLICATIONID}/g" ./_config.yml
   - sed -i "s/algolia_apiKey/${ALGOLIA_APIKEY}/g" ./_config.yml
@@ -243,7 +249,13 @@ deploy:
   local-dir: public
 ```
 
-我这里比官网默认配置多了几个东西，
+我这里比官网默认配置多了几个东西：
+- 设置了nodejs下的node_modules缓存目录，提高编译速度
+- 通过install前置步骤安装了一些必要的hexo插件
+- 在执行hexo generate命令之前，通过before_script进行了相关必要替换：在这个里面就通过linux sed命令通过取到在travisci后台配置的变量替换到配置文件中。
+- 最后一段git clone，是我自己在配置置顶插件之后，自己有修改相关置顶的样式。为了生效，我需要将next主题中的相关配置给替换成我自己的配置。
+- 在执行了hexo generate之后，我又执行了一下hexo algolia，更新algolia索引
+- 最后就是deploy
 
 ## 附件
 - [Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo_github_pages.7z)
