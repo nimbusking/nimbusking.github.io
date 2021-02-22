@@ -34,10 +34,6 @@ https://hexo.io/docs/one-command-deployment
 - 本文是针对已经对hexo使用相对熟悉的哈，如果你还未从未接触过hexo，请先了解一下hexo。
 
 ## 前置须知
-### 涉及到的相关组件版本
-我的Hexo用的最新的。
-我的Hexo主题也是用的最新的，当前版本是：8.2.1
-Node JS版本是：v12.20.2
 ### 关于TravisCI
 一句话解释Travis CI干嘛的，说白了就是一个在线编译环境，如果你玩过Jekins，这玩意儿就很好懂了。具体细节，真的建议，看官方文档就好。
 https://docs.travis-ci.com/
@@ -45,11 +41,13 @@ https://docs.travis-ci.com/
 ### 关于我的站点结构
 - 文章托管自然是GitHub，仓库的名字就是：nimbusking.github.io。PS：别折腾自定义的仓库名字了，你要是改了，后面又要折腾不少配置，尤其是绑定了自定义域名的。
 - 绑定了一个自己的主站域名，就是你所见到的。
-- 开启了HTTPS，我交给了[Netlify](https://www.netlify.com/)托管，Netlify证书是通过Let’s Encrypt自签的。严格意义上说，现在我的文章都是部署在Netlify的.
-- 域名DNS绑到了DNSPOD
-- 无CDN（未来也不会加）
+- 主站开启了HTTPS，没自己折腾Nginx，于是我交给了[Netlify](https://www.netlify.com/)托管，Netlify证书是通过Let’s Encrypt自签的。严格意义上说，现在我的文章都是部署在Netlify的.
+- 域名DNS解析绑到了DNSPOD
+- 无CDN（未来也不会加，理由不解释）
 - Hexo主题用的是[NexT](https://github.com/next-theme/hexo-theme-next)，版本8.2.1，新版本仓库已经迁移了，集成到npm了，而且主要使用了Numjucks
 以上就是主要的一些情况的补充说明
+- Hexo版本默认用的是最新的版本（直接由npm安装了）
+- NodeJS由于沿用自己最初在Windows平台编译的版本，使用的12。
 
 ### 关于Hexo与TravisCI集成
 折腾了，差不多1天吧，才搞通了。中间在一个问题上纠结了很久，把遇到的主要情况，先行说明一下。
@@ -96,7 +94,7 @@ PS：后来，我在_travis.yml，中自己建了一个临时文件夹，完了�
     + 你的这个仓库的GitHub Pages指定的分支要选择为：gh-pages，如下图所示：
     ![gh-pages](e62993b1/AutoCapture_2021-02-22_170448.png)
 
-- 绑定TravisCI在线账号：现在的官网是：
+- 绑定TravisCI在线账号：现在的官网是：https://travis-ci.com/
 
 ## 集成步骤
 git clone你的那个空[username].github.io项目到本地的某个目录下
