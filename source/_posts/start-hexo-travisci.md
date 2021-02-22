@@ -96,7 +96,7 @@ PS：后来，我在_travis.yml，中自己建了一个临时文件夹，完了�
     + 你的这个仓库的GitHub Pages指定的分支要选择为：gh-pages，如下图所示：
     ![gh-pages](e62993b1/AutoCapture_2021-02-22_170448.png)
 
-- 绑定TravisCI在线账号
+- 绑定TravisCI在线账号：现在的官网是：
 
 ## 集成步骤
 git clone你的那个空[username].github.io项目到本地的某个目录下
@@ -255,7 +255,7 @@ deploy:
 - 在执行hexo generate命令之前，通过before_script进行了相关必要替换：在这个里面就通过linux sed命令通过取到在travisci后台配置的变量替换到配置文件中。
 - 最后一段git clone，是我自己在配置置顶插件之后，自己有修改相关置顶的样式。为了生效，我需要将next主题中的相关配置给替换成我自己的配置。
 - 在执行了hexo generate之后，我又执行了一下hexo algolia，更新algolia索引
-- 最后就是deploy
+- 最后就是deploy，$GH_TOKEN就是从TravisCI后台获取的配置的Token值
 
 ## 附件
 - [Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo_github_pages.7z)
