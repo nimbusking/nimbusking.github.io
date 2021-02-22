@@ -37,7 +37,7 @@
 <meta property="og:image" content="https://nimbusk.cc/post/e62993b1/AutoCapture_2021-02-22_154127.png">
 <meta property="og:image" content="https://nimbusk.cc/post/e62993b1/AutoCapture_2021-02-22_154416.png">
 <meta property="article:published_time" content="2021-02-21T22:18:07.000Z">
-<meta property="article:modified_time" content="2021-02-22T12:46:37.521Z">
+<meta property="article:modified_time" content="2021-02-22T12:53:11.953Z">
 <meta property="article:author" content="nimbusk">
 <meta property="article:tag" content="站点">
 <meta property="article:tag" content="Hexo">
@@ -306,7 +306,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-22 12:46:37" itemprop="dateModified" datetime="2021-02-22T12:46:37+00:00">2021-02-22</time>
+        <time title="修改时间：2021-02-22 12:53:11" itemprop="dateModified" datetime="2021-02-22T12:53:11+00:00">2021-02-22</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -414,7 +414,8 @@
 <li>最后就是deploy，$GH_TOKEN就是从TravisCI后台获取的配置的Token值</li>
 <li>如果你同样使用了 <strong>netlify托管，别忘了修改其部署的分支（如果通过现在的仓库部署方式的话）为gh-pages</strong></li>
 </ul>
-<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>至此，Hexo与TravisCI集成的步骤基本介绍完毕。<br>但是还有个疑问，还没搞定。为什么原来只放那三文件，hexo编译不通过呢？相比现在，上传的源文件中多了如下几个：</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>至此，Hexo与TravisCI集成的步骤基本介绍完毕。目前基本完美的解决了编译平台的事情。之后就是，换了一个环境，只需要git clone分支就好了。不过有一个小小的遗憾，因为我用了短链，所以，如果我新建了一个主题文章，那么默认是不会生成短链的，只有在hexo g之后才会生成。所以。。。</p>
+<p>至此不过还有个疑问，还没搞定。为什么原来只放那三文件，hexo编译不通过呢？相比现在，上传的源文件中多了如下几个：</p>
 <ul>
 <li>_config.landscape.yml</li>
 <li>package-lock.json</li>
