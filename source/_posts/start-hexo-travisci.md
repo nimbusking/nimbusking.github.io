@@ -32,6 +32,7 @@ https://hexo.io/docs/one-command-deployment
 ## 前言
 - 文中并没有提及相关git操作的命令，如果你还不是很熟悉，请请自行查找相关知识
 - 本文是针对已经对hexo使用相对熟悉的哈，如果你还未从未接触过hexo，请先了解一下hexo。
+- **如果未来**你发现按照我的方法集成有问题，不排除可能有语法更新了，组件更新了。如果你有疑问，可以在评论区留言，或者通过Email联系我，我第一时间有空的话，会帮你解答疑问。
 
 ## 前置须知
 ### 关于TravisCI
@@ -51,10 +52,10 @@ https://docs.travis-ci.com/
 
 ### 关于Hexo与TravisCI集成
 折腾了，差不多1天吧，才搞通了。中间在一个问题上纠结了很久，把遇到的主要情况，先行说明一下。
-网上百度和Google中搜了很多，很多都试了，都是不行，无法编译通过。后来不经意在，Hexo韩文官网下藏了一篇关于TravisCI集成的文章（很奇怪，为毛英文主站没有，还好Google收录了，让我搜到了）。
+网上百度和Google中搜了很多，很多都试了，都是不行，无法编译通过。主要编译不通过的，放在下文的插曲中有相关说明。后来不经意在，Hexo韩文官网下藏了一篇关于TravisCI集成的文章（很奇怪，为毛英文主站没有？还好Google收录了，让我搜到了）。
 文章地址：https://hexo.io/ko/docs/github-pages.html
-怕日后没了，我离线了，在附件中可以查看。
-其实最主要的问题就一个：**让TravisCI拉取的仓库中放哪些文件？**这点很多别人的文章中，并没有明确说明，导致我自己也是绕了好大一个弯。
+怕日后没了，我离线了，在附件小结中可以查看。
+其实最主要的问题就一个：**让TravisCI拉取的仓库中放哪些文件？**这点很多别人的文章中，并没有明确说明，其中也不乏有误导性的文章，导致我自己也是绕了好大一个弯。
 这点在官网的文章里，其实有详细说明的：
 {% note primary%}
 Push the files of your Hexo folder to the repository. The public/ folder is not (and should not be) uploaded by default, make sure the .gitignore file contains public/ line. The folder structure should be roughly similar to this repo, without the .gitmodules file
@@ -63,7 +64,7 @@ Push the files of your Hexo folder to the repository. The public/ folder is not 
 **就是**：除了public以及git相关的文件之外，全部push到仓库里。
 你可以参考我的站点的master文章源文件目录结构：https://github.com/nimbusking/nimbusking.github.io/tree/master
 #### 插曲
-*有的文章中提到，只需要传_travis.yml,_config.yml,source，这三个就行了，我真心不知道那些文章中的作者提到的，是怎么hexo generate过的*
+*有的文章中提到，只需要传.travis.yml,.config.yml,source，这三个就行了，我真心不知道那些文章中的作者提到的，是怎么hexo generate过的*
 我也是在这上面绕了很久，也真的这么做了，结果发现，插件什么都装了，结果到执行hexo generate的时候，死活就会报下面类似的问题：
 
 ```shell
@@ -254,6 +255,16 @@ deploy:
 - 最后一段git clone，是我自己在配置置顶插件之后，自己有修改相关置顶的样式。为了生效，我需要将next主题中的相关配置给替换成我自己的配置。
 - 在执行了hexo generate之后，我又执行了一下hexo algolia，更新algolia索引
 - 最后就是deploy，$GH_TOKEN就是从TravisCI后台获取的配置的Token值
+
+## 结语
+至此，Hexo与TravisCI集成的步骤基本介绍完毕。
+但是还有个疑问，还没搞定。为什么原来只放那三文件，hexo编译不通过呢？相比现在，上传的源文件中多了如下几个：
+- _config.landscape.yml
+- package-lock.json
+- package.json
+
+就可以了？我在我的travis.yml脚本中，并没有安装通过npm安装hexo啊，但是照样执行成功了，这是怎么做到的呢？回头可能还得去了解了解NodeJS下底层工作机制了。
+未完待续。。。
 
 ## 附件
 - [Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo_github_pages.7z)
