@@ -32,12 +32,9 @@ https://hexo.io/docs/one-command-deployment
 ## 前言
 - 文中并没有提及相关git操作的命令，如果你还不是很熟悉，请请自行查找相关知识
 - 本文是针对已经对hexo使用相对熟悉的哈，如果你还未从未接触过hexo，请先了解一下hexo。
+- **如果未来**你发现按照我的方法集成有问题，不排除可能有语法更新了，组件更新了。如果你有疑问，可以在评论区留言，或者通过Email联系我，我第一时间有空的话，会帮你解答疑问。
 
 ## 前置须知
-### 涉及到的相关组件版本
-我的Hexo用的最新的。
-我的Hexo主题也是用的最新的，当前版本是：8.2.1
-Node JS版本是：v12.20.2
 ### 关于TravisCI
 一句话解释Travis CI干嘛的，说白了就是一个在线编译环境，如果你玩过Jekins，这玩意儿就很好懂了。具体细节，真的建议，看官方文档就好。
 https://docs.travis-ci.com/
@@ -47,18 +44,20 @@ https://docs.travis-ci.com/
 ### 关于我的站点结构
 - 文章托管自然是GitHub，仓库的名字就是：nimbusking.github.io。PS：别折腾自定义的仓库名字了，你要是改了，后面又要折腾不少配置，尤其是绑定了自定义域名的。
 - 绑定了一个自己的主站域名，就是你所见到的。
-- 开启了HTTPS，我交给了[Netlify](https://www.netlify.com/)托管，Netlify证书是通过Let’s Encrypt自签的。严格意义上说，现在我的文章都是部署在Netlify的.
-- 域名DNS绑到了DNSPOD
-- 无CDN（未来也不会加）
+- 主站开启了HTTPS，没自己折腾Nginx，于是我交给了[Netlify](https://www.netlify.com/)托管，Netlify证书是通过Let’s Encrypt自签的。严格意义上说，现在我的文章都是部署在Netlify的.
+- 域名DNS解析绑到了DNSPOD
+- 无CDN（未来也不会加，理由不解释）
 - Hexo主题用的是[NexT](https://github.com/next-theme/hexo-theme-next)，版本8.2.1，新版本仓库已经迁移了，集成到npm了，而且主要使用了Numjucks
 以上就是主要的一些情况的补充说明
+- Hexo版本默认用的是最新的版本（直接由npm安装了）
+- NodeJS由于沿用自己最初在Windows平台编译的版本，使用的12。
 
 ### 关于Hexo与TravisCI集成
 折腾了，差不多1天吧，才搞通了。中间在一个问题上纠结了很久，把遇到的主要情况，先行说明一下。
-网上百度和Google中搜了很多，很多都试了，都是不行，无法编译通过。后来不经意在，Hexo韩文官网下藏了一篇关于TravisCI集成的文章（很奇怪，为毛英文主站没有，还好Google收录了，让我搜到了）。
+网上百度和Google中搜了很多，很多都试了，都是不行，无法编译通过。主要编译不通过的，放在下文的插曲中有相关说明。后来不经意在，Hexo韩文官网下藏了一篇关于TravisCI集成的文章（很奇怪，为毛英文主站没有？还好Google收录了，让我搜到了）。
 文章地址：https://hexo.io/ko/docs/github-pages.html
-怕日后没了，我离线了，在附件中可以查看。
-其实最主要的问题就一个：**让TravisCI拉取的仓库中放哪些文件？**这点很多别人的文章中，并没有明确说明，导致我自己也是绕了好大一个弯。
+怕日后没了，我离线了，在附件小结中可以查看。
+其实最主要的问题就一个：**让TravisCI拉取的仓库中放哪些文件？**这点很多别人的文章中，并没有明确说明，其中也不乏有误导性的文章，导致我自己也是绕了好大一个弯。
 这点在官网的文章里，其实有详细说明的：
 {% note primary%}
 Push the files of your Hexo folder to the repository. The public/ folder is not (and should not be) uploaded by default, make sure the .gitignore file contains public/ line. The folder structure should be roughly similar to this repo, without the .gitmodules file
@@ -67,7 +66,7 @@ Push the files of your Hexo folder to the repository. The public/ folder is not 
 **就是**：除了public以及git相关的文件之外，全部push到仓库里。
 你可以参考我的站点的master文章源文件目录结构：https://github.com/nimbusking/nimbusking.github.io/tree/master
 #### 插曲
-*有的文章中提到，只需要传_travis.yml,_config.yml,source，这三个就行了，我真心不知道那些文章中的作者提到的，是怎么hexo generate过的*
+*有的文章中提到，只需要传.travis.yml,.config.yml,source，这三个就行了，我真心不知道那些文章中的作者提到的，是怎么hexo generate过的*
 我也是在这上面绕了很久，也真的这么做了，结果发现，插件什么都装了，结果到执行hexo generate的时候，死活就会报下面类似的问题：
 
 ```shell
@@ -98,7 +97,7 @@ PS：后来，我在_travis.yml，中自己建了一个临时文件夹，完了�
     + 你的这个仓库的GitHub Pages指定的分支要选择为：gh-pages，如下图所示：
     ![gh-pages](e62993b1/AutoCapture_2021-02-22_170448.png)
 
-- 绑定TravisCI在线账号
+- 绑定TravisCI在线账号：现在的官网是：https://travis-ci.com/
 
 ## 集成步骤
 git clone你的那个空[username].github.io项目到本地的某个目录下
@@ -146,7 +145,7 @@ git push就是了，没什么好说的。
 ![Settings页面](e62993b1/AutoCapture_2021-02-22_154416.png)
 我自己在这里添加了7个，其中一个GH_TOKEN就是上面在GitHub通过Generate New Token操作生成的。其余的，一个是GiTalk相关的，一个是algolia相关的。通常，其余配置保证默认即可，如果有特殊配置需求，可以阅读Travis相关的配置说明，如Cron Jobs等。
 至此，关联上你的GitHub仓库之后，就等于加了一个钩子程序，但是在正式启用前，还缺一个重要的配置文件：```.travis.yml``` ，只有配置了这个文件，才能会被Travis CI识别。
-### 配置_travis.yml文件
+### 配置.travis.yml文件
 这个步骤是集成TravisCI的核心，注意修改。
 按照Hexo官网的说明，官网的配置如下：
 PS：官网默认没有给每项配置作说明，我这里直接在下面配置文件中加上注释了
@@ -257,7 +256,19 @@ deploy:
 - 在执行hexo generate命令之前，通过before_script进行了相关必要替换：在这个里面就通过linux sed命令通过取到在travisci后台配置的变量替换到配置文件中。
 - 最后一段git clone，是我自己在配置置顶插件之后，自己有修改相关置顶的样式。为了生效，我需要将next主题中的相关配置给替换成我自己的配置。
 - 在执行了hexo generate之后，我又执行了一下hexo algolia，更新algolia索引
-- 最后就是deploy
+- 最后就是deploy，$GH_TOKEN就是从TravisCI后台获取的配置的Token值
+- 如果你同样使用了 **netlify托管，别忘了修改其部署的分支（如果通过现在的仓库部署方式的话）为gh-pages**
+
+## 结语
+至此，Hexo与TravisCI集成的步骤基本介绍完毕。目前基本完美的解决了编译平台的事情。之后就是，换了一个环境，只需要git clone分支就好了。不过有一个小小的遗憾，因为我用了短链，所以，如果我新建了一个主题文章，那么默认是不会生成短链的，只有在hexo g之后才会生成。所以。。。
+
+至此不过还有个疑问，还没搞定。为什么原来只放那三文件，hexo编译不通过呢？相比现在，上传的源文件中多了如下几个：
+- _config.landscape.yml
+- package-lock.json
+- package.json
+
+就可以了？我在我的travis.yml脚本中，并没有安装通过npm安装hexo啊，但是照样执行成功了，这是怎么做到的呢？回头可能还得去了解了解NodeJS下底层工作机制了。
+未完待续。。。
 
 ## 附件
 - [Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo_github_pages.7z)
