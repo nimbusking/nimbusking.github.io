@@ -38,7 +38,7 @@ before_script:
   - rm -rf ./temp
 
 script:
-  - hexo clean
+  # - hexo clean
   - hexo generate
   - hexo algolia
 deploy:
