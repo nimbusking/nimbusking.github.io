@@ -342,7 +342,7 @@
 <li>本文是针对已经对hexo使用相对熟悉的哈，如果你还未从未接触过hexo，请先了解一下hexo。</li>
 <li><strong>如果未来</strong>你发现按照我的方法集成有问题，不排除可能有语法更新了，组件更新了。如果你有疑问，可以在评论区留言，或者通过Email联系我，我第一时间有空的话，会帮你解答疑问。</li>
 </ul>
-<h2 id="前置须知"><a href="#前置须知" class="headerlink" title="前置须知"></a>前置须知</h2><h3 id="关于TravisCI"><a href="#关于TravisCI" class="headerlink" title="关于TravisCI"></a>关于TravisCI</h3><p>一句话解释Travis CI干嘛的，说白了就是一个在线编译环境，如果你玩过Jekins，这玩意儿就很好懂了。具体细节，真的建议，看官方文档就好。<br><a href="https://docs.travis-ci.com/">https://docs.travis-ci.com/</a><br>挑一个你了解的开发语言，如Java、Python什么的，去看看示例就好了。</p>
+<h2 id="前置须知"><a href="#前置须知" class="headerlink" title="前置须知"></a>前置须知</h2><h3 id="关于TravisCI"><a href="#关于TravisCI" class="headerlink" title="关于TravisCI"></a>关于TravisCI</h3><p>一句话解释Travis CI干嘛的，说白了就是一个在线编译环境，如果你玩过Jekins，这玩意儿就很好懂了。具体细节，真的建议，看官方文档就好。<br><a href="https://docs.travis-ci.com/">https://docs.travis-ci.com/</a><br>挑一个你了解的开发语言，如Java、Python什么的，去看看示例就好了。<br><img data-src="e62993b1/bg2017121901.png" alt="官网logo"><br>灵性的大胡子，哈哈哈哈</p>
 <h3 id="关于我的站点结构"><a href="#关于我的站点结构" class="headerlink" title="关于我的站点结构"></a>关于我的站点结构</h3><ul>
 <li>文章托管自然是GitHub，仓库的名字就是：nimbusking.github.io。PS：别折腾自定义的仓库名字了，你要是改了，后面又要折腾不少配置，尤其是绑定了自定义域名的。</li>
 <li>绑定了一个自己的主站域名，就是你所见到的。</li>
