@@ -22,7 +22,7 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","version":"8.2.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"JKC51AYK2C","apiKey":"4f0be6dde67b9323867fdfa3b214b0a4","indexName":"nimbuskblog","hits":{"per_page":10}}};
+    var CONFIG = {"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"JKC51AYK2C","apiKey":"4f0be6dde67b9323867fdfa3b214b0a4","indexName":"nimbuskblog","hits":{"per_page":10}}};
   </script>
 <meta name="description" content="背景原书《Reactive Messaging Patterns with the Actor Model Applications and Integration in Scala and Akka》，作者：Vaughn Vernon，是《实现领域驱动设计》（Implementing Domain Driven Design）一书的作者。因而，本书值得一看。本文随笔笔记，记录本书中的主要点，以便">
 <meta property="og:type" content="article">
@@ -32,7 +32,7 @@
 <meta property="og:description" content="背景原书《Reactive Messaging Patterns with the Actor Model Applications and Integration in Scala and Akka》，作者：Vaughn Vernon，是《实现领域驱动设计》（Implementing Domain Driven Design）一书的作者。因而，本书值得一看。本文随笔笔记，记录本书中的主要点，以便">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2018-11-19T21:12:55.000Z">
-<meta property="article:modified_time" content="2021-02-23T08:33:34.527Z">
+<meta property="article:modified_time" content="2021-03-05T10:05:49.933Z">
 <meta property="article:author" content="nimbusk">
 <meta property="article:tag" content="Akka">
 <meta name="twitter:card" content="summary">
@@ -202,7 +202,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">53</span>
+          <span class="site-state-item-count">54</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -215,7 +215,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">87</span>
+        <span class="site-state-item-count">88</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -298,7 +298,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -482,8 +482,8 @@
 <script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
 
   
-<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.4/dist/algoliasearch-lite.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.13.1/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.5/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.15.0/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
 
 
 
@@ -542,6 +542,7 @@ NexT.utils.loadComments('.gitalk-container', () => {
       owner       : 'nimbusking',
       admin       : ['nimbusking'],
       id          : '86f7c5703c38c0643ec22f8bfccb2752',
+      proxy       : 'https://cors-anywhere.herokuapp.com/https://github.com/login/oauth/access_token',
         language: 'en|zh-CN|zh-TW',
       distractionFreeMode: true
     });

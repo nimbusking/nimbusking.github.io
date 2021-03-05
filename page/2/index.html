@@ -22,7 +22,7 @@
 
 <script class="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","version":"8.2.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"JKC51AYK2C","apiKey":"4f0be6dde67b9323867fdfa3b214b0a4","indexName":"nimbuskblog","hits":{"per_page":10}}};
+    var CONFIG = {"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","version":"8.2.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"JKC51AYK2C","apiKey":"4f0be6dde67b9323867fdfa3b214b0a4","indexName":"nimbuskblog","hits":{"per_page":10}}};
   </script>
 <meta name="description" content="严而求之，谨而写之，写好一个有态度的博客">
 <meta property="og:type" content="website">
@@ -199,7 +199,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">53</span>
+          <span class="site-state-item-count">54</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -212,7 +212,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">87</span>
+        <span class="site-state-item-count">88</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -261,6 +261,100 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/52d27346.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/post/52d27346.html" class="post-title-link" itemprop="url">极客时间-深入拆解Java虚拟机</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-07-12 19:20:37" itemprop="dateCreated datePublished" datetime="2020-07-12T19:20:37+00:00">2020-07-12</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/" itemprop="url" rel="index"><span itemprop="name">极客时间</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h1 id="课程实录"><a href="#课程实录" class="headerlink" title="课程实录"></a>课程实录</h1><h2 id="01-Java代码是怎么运行的？"><a href="#01-Java代码是怎么运行的？" class="headerlink" title="(01)Java代码是怎么运行的？"></a>(01)Java代码是怎么运行的？</h2><ul>
+<li>从虚拟机视角来看，执行 Java 代码首先需要将它编译而成的 class 文件加载到 Java 虚拟机中。加载后的 Java 类会被存放于方法区（Method Area）中。实际运行时，虚拟机会执行方法区内的代码。<br>Java 虚拟机会将栈细分为面向 Java 方法的 Java 方法栈，面向本地方法（用 C++ 写的 native 方法）的本地方法栈，以及存放各个线程执行位置的 PC 寄存器。</li>
+<li>在运行过程中，每当调用进入一个 Java 方法，Java 虚拟机会在当前线程的 Java 方法栈中生成一个栈帧，用以存放局部变量以及字节码的操作数。这个栈帧的大小是提前计算好的，而且 Java 虚拟机不要求栈帧在内存空间里连续分布。</li>
+<li>当退出当前执行的方法时，不管是正常返回还是异常返回，Java 虚拟机均会弹出当前线程的当前栈帧，并将之舍弃。<br>在 HotSpot 里面，上述翻译过程有两种形式：</li>
+<li>第一种是解释执行，即逐条将字节码翻译成机器码并执行；</li>
+<li>第二种是即时编译（Just-In-Time compilation，JIT），即将一个方法中包含的所有字节码编译成机器码后再执行。<br>!(HotSpot字节码解释执行与即时编译)[52d27346/AutoCapture_2020-07-12_195739.jpg]<br>两者之间，<em>前者的优势在于无需等待编译</em>，而<em>后者的优势在于实际运行速度更快</em>。HotSpot默认采用混合模式，综合了解释执行和即时编译两者的优点。它会先解释执行字节码，而后将其中反复执行的热点代码，以方法为单位进行即时编译。</li>
+</ul>
+<h3 id="Java虚拟机的运行效率"><a href="#Java虚拟机的运行效率" class="headerlink" title="Java虚拟机的运行效率"></a>Java虚拟机的运行效率</h3><p>HotSpot 采用了多种技术来提升启动性能以及峰值性能，刚刚提到的即时编译便是其中最重要的技术之一。即时编译建立在程序符合二八定律的假设上，也就是百分之二十的代码占据了百分之八十的计算资源。<br>对于占据大部分的 <strong>不常用的代码</strong>，我们无需耗费时间将其编译成机器码，而是采取解释执行的方式运行；另一方面，对于仅占据小部分的热点代码，我们则可以将其编译成机器码，以达到理想的运行速度。<br><strong>注：</strong>综合编译，以优化达到理想的运行性能</p>
+<p>为了满足不同用户场景的需要，HotSpot 内置了多个即时编译器：C1、C2 和 Graal。Graal 是 Java 10 正式引入的实验性即时编译器。</p>
+<ul>
+<li>C1 又叫做 Client 编译器，面向的是对启动性能有要求的客户端 GUI 程序，采用的优化手段相对简单，因此编译时间较短。</li>
+<li>C2 又叫做 Server 编译器，面向的是对峰值性能有要求的服务器端程序，采用的优化手段相对复杂，因此编译时间较长，但同时生成代码的执行效率较高。<br>从 Java 7 开始，HotSpot 默认采用分层编译的方式：<em>热点方法首先会被 C1 编译，而后热点方法中的热点会进一步被 C2 编译。</em></li>
+</ul>
+<h2 id="03-Java虚拟机是如何加载Java类"><a href="#03-Java虚拟机是如何加载Java类" class="headerlink" title="(03)Java虚拟机是如何加载Java类"></a>(03)Java虚拟机是如何加载Java类</h2><h2 id="10-Java对象的内存布局"><a href="#10-Java对象的内存布局" class="headerlink" title="(10)Java对象的内存布局"></a>(10)Java对象的内存布局</h2><h2 id="11-amp-12-垃圾回收"><a href="#11-amp-12-垃圾回收" class="headerlink" title="(11&amp;12)垃圾回收"></a>(11&amp;12)垃圾回收</h2><h1 id="延伸阅读"><a href="#延伸阅读" class="headerlink" title="延伸阅读"></a>延伸阅读</h1><h1 id="额外实践"><a href="#额外实践" class="headerlink" title="额外实践"></a>额外实践</h1>
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/70b658a.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -294,7 +388,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -404,7 +498,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -493,7 +587,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -580,7 +674,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -662,7 +756,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -744,7 +838,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -838,7 +932,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
       </span>
 
   
@@ -910,7 +1004,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:49" itemprop="dateModified" datetime="2021-03-05T10:05:49+00:00">2021-03-05</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1001,7 +1095,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
+        <time title="修改时间：2021-03-05 10:05:50" itemprop="dateModified" datetime="2021-03-05T10:05:50+00:00">2021-03-05</time>
       </span>
 
   
@@ -1025,86 +1119,6 @@
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/post/f890a94d.html#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/7a4fe646.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="nimbusk">
-      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="NimbusK's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/post/7a4fe646.html" class="post-title-link" itemprop="url">Adobe Audition不完整教程</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-
-  
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-05-01 22:55:11" itemprop="dateCreated datePublished" datetime="2020-05-01T22:55:11+00:00">2020-05-01</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-02-23 08:33:34" itemprop="dateModified" datetime="2021-02-23T08:33:34+00:00">2021-02-23</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><h4 id="认识AU的历史"><a href="#认识AU的历史" class="headerlink" title="认识AU的历史"></a>认识AU的历史</h4><p>今年早些时候，入手了《Adobe Audition CC经典教程》这本书，打算系统的补充一下AU相关的知识。<br>认识AU不短，早在自己高二时代（距今11年了），就认识了，那时候还是3.0时代。那时候记得托付兄长在亚马逊（当时还是卓越）上买过教程书籍。<br>但是，由于那时候环境条件有限，没有办法延展开来学习。<br>直到上大学，有了自己个人的笔记本，那时候才算是弄了起来。<br>早在大一的时候，那时候还加入了学生会，哈哈哈。记得非常清楚，大一的迎新晚会，我是作为后台的音效师角色，负责整场晚会的前期音频、音效素材的收集，晚会现场后台音频的播放控制相关。也算是得益于早年很早接触AU相关后的一次实战吧。</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/post/7a4fe646.html#more" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1200,8 +1214,8 @@
 <script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
 
   
-<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.4/dist/algoliasearch-lite.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.13.1/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.8.5/dist/algoliasearch-lite.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.15.0/dist/instantsearch.production.min.js"></script><script src="/js/algolia-search.js"></script>
 
 
 
