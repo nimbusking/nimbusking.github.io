@@ -321,6 +321,19 @@
       </tags>
   </entry>
   <entry>
+    <title>Dubbo学习</title>
+    <url>/post/9cb1e15.html</url>
+    <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h2 id="学习"><a href="#学习" class="headerlink" title="学习"></a>学习</h2><h3 id="Dubbo核心架构"><a href="#Dubbo核心架构" class="headerlink" title="Dubbo核心架构"></a>Dubbo核心架构</h3><h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2>]]></content>
+      <categories>
+        <category>Java系列</category>
+      </categories>
+      <tags>
+        <tag>中间件</tag>
+        <tag>RPC</tag>
+        <tag>Dubbo</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>一则关于MySQL分区表索引的探索</title>
     <url>/post/c58ba19c.html</url>
     <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>最近在工作工程中遇到一个关于MySQL分区表索引的问题</p>
