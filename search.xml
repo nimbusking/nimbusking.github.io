@@ -1614,7 +1614,8 @@
   <entry>
     <title>JVM知识相关</title>
     <url>/post/2d9f6eea.html</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><a id="more"></a>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>记录日常学习JVM的杂项知识点相关</p>
+<a id="more"></a>
 <h2 id="JVM运行时区域"><a href="#JVM运行时区域" class="headerlink" title="JVM运行时区域"></a>JVM运行时区域</h2><h2 id="类加载子系统"><a href="#类加载子系统" class="headerlink" title="类加载子系统"></a>类加载子系统</h2><h2 id="垃圾收集算法和垃圾收集器"><a href="#垃圾收集算法和垃圾收集器" class="headerlink" title="垃圾收集算法和垃圾收集器"></a>垃圾收集算法和垃圾收集器</h2><h2 id="Java虚拟机问题排查与性能调优相关"><a href="#Java虚拟机问题排查与性能调优相关" class="headerlink" title="Java虚拟机问题排查与性能调优相关"></a>Java虚拟机问题排查与性能调优相关</h2>]]></content>
       <categories>
         <category>Java系列</category>
