@@ -9,6 +9,7 @@ categories: Java系列
 ---
 
 ## 前言
+记录日常学习JVM的杂项知识点相关
 
 <!-- more -->
 ## JVM运行时区域
