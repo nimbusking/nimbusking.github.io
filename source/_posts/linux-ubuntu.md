@@ -44,6 +44,17 @@ deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted unive
 保存之后，记得：sudo apt-get install update
 更新数据源即可
 
+### 首次登录设置root密码
+- 打开终端，输入**sudo passwd root**，
+在[sudo] password for wheat:后输入当前用户的密码
+
+- 当前用户密码验证通过后
+输入需要设置的root超级管理员账户密码Enter new UNIX password:
+验证输入的密码Retype new UNIX password:
+
+- 出现passwd: password updated successfully字样，表示超级管理员root账户密码设置成功
+- 验证：输入su，后输入超级管理员账户的密码，验证通过则成功切换到root账户root
+
 ## 系列话题
 ## 相关命令
 ## 参考
