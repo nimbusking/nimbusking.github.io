@@ -41,7 +41,7 @@ deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe 
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
 ```
 
-保存之后，记得：sudo apt-get install update
+保存之后，记得：**sudo apt-get update**
 更新数据源即可
 
 ### 首次登录设置root密码
