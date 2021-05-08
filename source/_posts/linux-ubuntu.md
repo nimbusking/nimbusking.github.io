@@ -56,5 +56,7 @@ deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted unive
 - 验证：输入su，后输入超级管理员账户的密码，验证通过则成功切换到root账户root
 
 ## 系列话题
+### 在ubuntu下编译openjdk
+编译方法来自于《深入理解JAVA虚拟机 第三版》，详细请参考该书中第一章，1.6小节的相关说明
 ## 相关命令
 ## 参考
