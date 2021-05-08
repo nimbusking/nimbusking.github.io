@@ -58,5 +58,11 @@ deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted unive
 ## 系列话题
 ### 在ubuntu下编译openjdk
 编译方法来自于《深入理解JAVA虚拟机 第三版》，详细请参考该书中第一章，1.6小节的相关说明
+#### 准备源码包
+根据书中的说明，推荐直接通过网页下载，具体方法如下：
+去链接**https://hg.openjdk.java.net/jdk/jdk12/** 访问，点击左侧的**Browse**后，在下方有个zip压缩包，直接点击下载即可。如下图所示：
+![下载openjdk12源码压缩包](145818e1/2021-05-08_165324.png)
+#### 系统需求
+
 ## 相关命令
 ## 参考
