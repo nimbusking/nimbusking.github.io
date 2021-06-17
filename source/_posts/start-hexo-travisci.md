@@ -259,6 +259,16 @@ deploy:
 - 最后就是deploy，$GH_TOKEN就是从TravisCI后台获取的配置的Token值
 - 如果你同样使用了 **netlify托管，别忘了修改其部署的分支（如果通过现在的仓库部署方式的话）为gh-pages**
 
+### 异常情况
+#### 遇到Could not authorize build request错误
+今天（2021-06-18）发现死活构建不了，在自己mac上push到github上，死活就没看到travis出现自动构建。又尝试手工构建了一下，结果发现怎么都失败了。提示了一个标题中遇到的错误。
+起初还以为自己配置哪里有问题，到github的授权页面，发现token规则好像更新了，可以更新一下。于是乎又更新了一把，结果发现还是没用。
+后来百度一下，在官网中找到了：
+“Could not authorize build request”, usually means that the account’s subscription expired or that it ran out of trial builds.
+
+到你的账户设置下，plan一栏下，看看订阅。
+如果没有显示，需要你选择的话，那就选择免费的，免费计划，有10000点，个人用户，能构建很久了。
+
 ## 结语
 至此，Hexo与TravisCI集成的步骤基本介绍完毕。目前基本完美的解决了编译平台的事情。之后就是，换了一个环境，只需要git clone分支就好了。不过有一个小小的遗憾，因为我用了短链，所以，如果我新建了一个主题文章，那么默认是不会生成短链的，只有在hexo g之后才会生成。所以。。。
 
