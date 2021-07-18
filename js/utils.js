@@ -22,7 +22,7 @@ if (typeof DOMTokenList.prototype.replace !== 'function') {
   );
 
   if (document.readyState === 'loading') {
-    document.addEventListener('readystatechange', onPageLoaded, {once: true});
+    document.addEventListener('readystatechange', onPageLoaded, { once: true });
   } else {
     onPageLoaded();
   }
@@ -282,6 +282,14 @@ NexT.utils = {
     });
   },
 
+  registerPostReward: function() {
+    const button = document.querySelector('.reward-container button');
+    if (!button) return;
+    button.addEventListener('click', () => {
+      document.querySelector('.post-reward').classList.toggle('active');
+    });
+  },
+
   activateNavByIndex: function(index) {
     const target = document.querySelectorAll('.post-toc li a.nav-link')[index];
     if (!target || target.classList.contains('active-current')) return;
@@ -392,7 +400,7 @@ NexT.utils = {
     if (legacyCallback) {
       return this.loadComments(selector).then(legacyCallback);
     }
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const element = document.querySelector(selector);
       if (!CONFIG.comments.lazyload || !element) {
         resolve();
