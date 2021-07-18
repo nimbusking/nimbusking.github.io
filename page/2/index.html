@@ -160,7 +160,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-count">57</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -223,6 +223,109 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/f3b827b0.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/post/f3b827b0.html" class="post-title-link" itemprop="url">Linux下Nexus私服搭建</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-01-13 23:02:30" itemprop="dateCreated datePublished" datetime="2021-01-13T23:02:30+00:00">2021-01-13</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>本篇搭建设计到的相关资源如下：</p>
+<ul>
+<li>操作系统：CentOS 7.9</li>
+<li>JDK: 1.8.0_211</li>
+<li>Nexus私服版本：nexus-3.29.2-02</li>
+</ul>
+<h3 id="Nexus介绍"><a href="#Nexus介绍" class="headerlink" title="Nexus介绍"></a>Nexus介绍</h3><p>Nexus 是Maven仓库管理器，如果我们使用Maven，我们可以从Maven中央仓库下载所需要的构件（artifact），但这通常没有公司这么干，一般都是在本地架设一个Maven仓库服务器，在代理远程仓库的同时维护本地仓库，以节省带宽和时间，Nexus就可以满足这样的需要。此外，它还提供了强大的仓库管理功能，构件搜索功能，它基于REST，友好的UI是一个extjs的REST客户端，它占用较少的内存，基于简单文件系统而非数据库。这些优点使其日趋成为最流行的Maven仓库管理器。<br>Nexus不是Maven的核心概念，它仅仅是一种衍生出来的特殊的Maven仓库。对于Maven来说，仓库只有两种：本地仓库和远程仓库。</p>
+<h3 id="Nexus私服特点"><a href="#Nexus私服特点" class="headerlink" title="Nexus私服特点"></a>Nexus私服特点</h3><p>搭建私服后：本地仓库没有，再去私服下载，私服没有，再去中央仓库下载</p>
+<ul>
+<li>减少网络带宽流量</li>
+<li>加速Maven构建</li>
+<li>部署第三方构件</li>
+<li>提高稳定性、增强控制</li>
+<li>降低中央仓库的负载</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/post/f3b827b0.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/bbf06dfa.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -256,7 +359,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
       </span>
 
   
@@ -359,7 +462,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -451,7 +554,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -545,7 +648,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -655,7 +758,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -744,7 +847,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -831,7 +934,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -913,7 +1016,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -995,7 +1098,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
+        <time title="修改时间：2021-07-18 10:13:23" itemprop="dateModified" datetime="2021-07-18T10:13:23+00:00">2021-07-18</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1032,78 +1135,6 @@
             </div>
           <!--/noindex-->
         
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/34b1852f.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="nimbusk">
-      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="NimbusK's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/post/34b1852f.html" class="post-title-link" itemprop="url">rss订阅测试</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-
-  
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2020-05-06 00:59:53" itemprop="dateCreated datePublished" datetime="2020-05-06T00:59:53+00:00">2020-05-06</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-07-18 09:05:09" itemprop="dateModified" datetime="2021-07-18T09:05:09+00:00">2021-07-18</time>
-      </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <h3 id="订阅测试"><a href="#订阅测试" class="headerlink" title="订阅测试"></a>订阅测试</h3>
       
     </div>
 
