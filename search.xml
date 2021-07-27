@@ -741,7 +741,7 @@
 <li>句柄访问：Java堆中可能会划分出一块内存来作为 <em>句柄池</em>，reference中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自具体的地址信息</li>
 <li>直接指针访问：reference中存储的直接就是对象的地址</li>
 </ul>
-<p><img data-src="d7ba81a7/memory_hander_detect.png" alt="通过直接指针访问内存"><br><img data-src="d7ba81a7/direct_memory_detect.png" alt="通过直接指针访问内存"></p>
+<p><img data-src="d7ba81a7/memory_hander_detect.png" alt="通过句柄访问内存"><br><img data-src="d7ba81a7/direct_memory_detect.png" alt="通过直接指针访问内存"></p>
 <h2 id="实战相关"><a href="#实战相关" class="headerlink" title="实战相关"></a>实战相关</h2>]]></content>
       <categories>
         <category>Java系列</category>
