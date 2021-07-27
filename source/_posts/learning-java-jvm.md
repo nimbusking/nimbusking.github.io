@@ -141,7 +141,7 @@ Java程序会通过栈上的reference数据来操作对上的具体对象，但�
 - 句柄访问：Java堆中可能会划分出一块内存来作为 *句柄池*，reference中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自具体的地址信息
 - 直接指针访问：reference中存储的直接就是对象的地址
 
-![通过直接指针访问内存](d7ba81a7/memory_hander_detect.png)
+![通过句柄访问内存](d7ba81a7/memory_hander_detect.png)
 ![通过直接指针访问内存](d7ba81a7/direct_memory_detect.png)
 
 
