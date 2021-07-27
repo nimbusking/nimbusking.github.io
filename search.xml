@@ -736,6 +736,12 @@
 </ul>
 <h6 id="实例数据信息"><a href="#实例数据信息" class="headerlink" title="实例数据信息"></a>实例数据信息</h6><p>程序代码中定义的各种类型字段内容，无论是从父类继承下来的，还是在子类中定义的字段都必须记录起来。<em>这部分的存储顺序会收到虚拟机分配策略参数（-XX:FieldsAllocationStyle参数）和字段在Java源码中的定义顺序的影响</em></p>
 <h6 id="对齐填充"><a href="#对齐填充" class="headerlink" title="对齐填充"></a>对齐填充</h6><p>不是必然存在，也没有特别的含义，仅仅起着占位符的作用。任何对象大小都必须是8字节的整数倍。如果对象实例数据部分没有对齐的话，就需要通过对齐填充来补全。</p>
+<h5 id="对象的访问定位"><a href="#对象的访问定位" class="headerlink" title="对象的访问定位"></a>对象的访问定位</h5><p>Java程序会通过栈上的reference数据来操作对上的具体对象，但由于reference类型在《Java虚拟机规范》里面只规定了 <strong>它是一个指向对象的引用</strong>，并没有定义这个引用应该通过什么方式去定位、访问到堆中对象的具体位置。主流的访问方式有：<strong>句柄</strong> 和 <strong>直接指针</strong>。</p>
+<ul>
+<li>句柄访问：Java堆中可能会划分出一块内存来作为 <em>句柄池</em>，reference中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自具体的地址信息</li>
+<li>直接指针访问：reference中存储的直接就是对象的地址</li>
+</ul>
+<p><img data-src="d7ba81a7/memory_hander_detect.png" alt="通过直接指针访问内存"><br><img data-src="d7ba81a7/direct_memory_detect.png" alt="通过直接指针访问内存"></p>
 <h2 id="实战相关"><a href="#实战相关" class="headerlink" title="实战相关"></a>实战相关</h2>]]></content>
       <categories>
         <category>Java系列</category>
