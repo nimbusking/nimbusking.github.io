@@ -449,4 +449,73 @@ public static void testTenuringThreshold() {
 ```
 
 
+#### 动态对象年龄判定
+为了能更好地适应不同程序的内存状况，HotSpot虚拟机**并不是永远**要求对象的年龄必须达到-XX：MaxTenuringThreshold才能晋升老年代，如果在Survivor空间中相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代，无须等到-XX：MaxTenuringThreshold中要求的年龄。
+
+```java
+private static final int _1MB = 1024 * 1024;
+/**
+* VM参数：-verbose:gc -Xms20M -Xmx20M -Xmn10M -XX:+PrintGCDetails -XX:SurvivorRatio=8
+-XX:MaxTenuringThreshold=15
+* -XX:+PrintTenuringDistribution
+*/
+@SuppressWarnings("unused")
+public static void testTenuringThreshold2() {
+    byte[] allocation1, allocation2, allocation3, allocation4;
+    allocation1 = new byte[_1MB / 4]; // allocation1+allocation2大于survivo空间一半
+    allocation2 = new byte[_1MB / 4];
+    allocation3 = new byte[4 * _1MB];
+    allocation4 = new byte[4 * _1MB];
+    allocation4 = null;
+    allocation4 = new byte[4 * _1MB];
+}
+```
+
+#### 空间分配担保
+在发生Minor GC之前，虚拟机必须先检查老年代最大可用的连续空间**是否大于**新生代所有对象总空间，
+- 如果这个条件成立，那这一次Minor GC可以确保是安全的。
+- 如果不成立，则虚拟机会先查看-XX：HandlePromotionFailure参数的设置值是否允许担保失败（Handle Promotion Failure）；
+    + 如果允许，那会继续检查老年代最大可用的连续空间是否大于历次晋升到老年代对象的平均大小，
+    + 如果大于，将尝试进行一次Minor GC，尽管这次Minor GC是有风险的；
+    + 如果小于，或者-XX：HandlePromotionFailure设置不允许冒险，那这时就要改为进行一次Full GC。
+
+**注：** 说白了，就是在MinorGC前，需要判定老年代要不要腾出空间来存储Survivor中的内存对象，如果老年代自己都不够，那就来一次Full GC腾出空间来与Survivor空间置换之后，再进行MinorGC。
+
+## 第四章 虚拟机性能监控、故障处理工具
+**给一个系统定位问题的时候，知识、经验是关键基础，数据是依据，工具是运用知识处理数据的手段。**
+这里说的数据包括但不限于异常堆栈、虚拟机运行日志、垃圾收集器日志、线程快照（threaddump/javacore文件）、堆转储快照（heapdump/hprof文件）等。
+
+### 基础故障处理工具
+- 商业授权工具：主要是JMC（Java M ission Control）及它要使用到的JFR（Java Flight Recorder），JMC这个原本来自于JRockit的运维监控套件从JDK 7 Update 40开始就被集成到OracleJDK中，JDK 11之前都无须独立下载，但是在商业环境中使用它则是要付费的。
+- 正式支持工具：这一类工具属于被长期支持的工具，不同平台、不同版本的JDK之间，这类工具可能会略有差异，但是不会出现某一个工具突然消失的情况。
+- 实验性工具：这一类工具在它们的使用说明中被声明为“没有技术支持，并且是实验性质的”（Unsupported and Experimental）产品，日后可能会转正，也可能会在某个JDK版本中无声无息地消失。但事实上它们通常都非常稳定而且功能强大，也能在处理应用程序性能问题、定位故障时发挥很大的作用。
+
+#### jps: 虚拟机进程状况工具
+除了名字像UNIX的ps命令之外，它的功能也和ps命令类似：可以列出正在运行的虚拟机进程，并显示虚拟机执行主类（Main Class，main()函数所在的类）名称以及这些进程的本地虚拟机唯一ID（LVMID，Local Virtual M achine Identifier）。
+
+**作用：** 如果同时启动了多个虚拟机进程，无法根据进程名称定位时，那就必须依赖jps命令显示主类的功能才能区分了。
+![jps工具主要选项](d7ba81a7/jps_params.png)
+
+#### jstat：虚拟机统计信息监视工具
+jstat（JVM Statistics M onitoring Tool）是用于监视虚拟机各种运行状态信息的命令行工具。它可以显示本地或者远程虚拟机进程中的**类加载、内存、垃圾收集、即时编译等运行时数据**，在没有GUI图形界面、只提供了纯文本控制台环境的服务器上，它将是运行期定位虚拟机性能问题的常用工具。
+
+![jstat工具主要选项](d7ba81a7/jstat_params.png)
+
+#### jinfo：Java配置信息工具
+jinfo（Configuration Info for Java）的作用是实时查看和调整虚拟机各项参数。使用jps命令的-v参数可以查看虚拟机启动时显式指定的参数列表，但如果想知道未被显式指定的参数的系统默认值，除了去找资料外，就只能使用jinfo的-flag选项进行查询了。
+
+#### jmap：Java内存映像工具
+jmap（Memory Map for Java）命令用于生成堆转储快照（一般称为heapdump或dump文件）。如果不使用jmap命令，要想获取Java堆转储快照也还有一些比较“暴力”的手段：譬如在第2章中用过的-XX：+HeapDumpOnOutOfMemoryError参数，可以让虚拟机在内存溢出异常出现之后自动生成堆转储快照文件，通过-XX：+HeapDumpOnCtrlBreak参数则可以使用[Ctrl]+[Break]键让虚拟机生成堆转储快照文件，又或者在Linux系统下通过**Kill -3**命令发送进程退出信号“恐吓”一下虚拟机，也能顺利拿到堆转储快照。
+
+![jmap工具主要选项](d7ba81a7/jmap_params.png)
+
+#### jhat：虚拟机堆转储快照分析工具
+JDK提供jhat（JVM Heap Analysis Tool）命令与jmap搭配使用，来分析jmap生成的堆转储快照。jhat内置了一个微型的HTTP/Web服务器，生成堆转储快照的分析结果后，可以在浏览器中查看。*不过实事求是地说，在实际工作中，除非手上真的没有别的工具可用，否则多数人是不会直接使用jhat命令来分析堆转储快照文件的。*
+
+#### jstack：Java堆栈跟踪工具
+jstack（Stack Trace for Java）命令用于生成虚拟机当前时刻的线程快照（一般称为threaddump或者javacore文件）。线程快照就是当前虚拟机内每一条线程正在执行的方法堆栈的集合，生成线程快照的目的通常是定位线程出现长时间停顿的原因，如线程间死锁、死循环、请求外部资源导致的长时间挂起等，都是导致线程长时间停顿的常见原因。
+
+![jstack工具主要选项](d7ba81a7/jstack_params.png)
+
+
 # 实战相关
