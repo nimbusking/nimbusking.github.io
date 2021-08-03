@@ -687,5 +687,9 @@ hsdb>
 JHSDB提供了非常强大且灵活的命令和功能，本节的例子只是其中一个很小的应用，读者在实际开发、学习时，可以用它来调试虚拟机进程或者dump出来的内存转储快照，以积累更多的实际经验。
 关于其它的相关描述，查看fx大神的描述[rednaxelafx](https://www.iteye.com/blog/rednaxelafx-1847971)
 
+#### JConsole:Java监视与管理控制台
+
+
+
 
 # 实战相关
