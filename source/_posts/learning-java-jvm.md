@@ -688,8 +688,229 @@ JHSDB提供了非常强大且灵活的命令和功能，本节的例子只是其
 关于其它的相关描述，查看fx大神的描述[rednaxelafx](https://www.iteye.com/blog/rednaxelafx-1847971)
 
 #### JConsole:Java监视与管理控制台
+JConsole（Java Monitoring and Management Console）是一款基于JMX（Java Manage-mentExtensions）的可视化监视、管理工具。它的主要功能是通过JMX的MBean（Managed Bean）对系统进行信息收集和参数动态调整。
+JMX是一种开放性的技术，不仅可以用在虚拟机本身的管理上，还可以运行于虚拟机之上的软件中，典型的如中间件大多也基于JMX来实现管理与监控。虚拟机对JMX MBean的访问也是完全开放的，可以使用代码调用API、支持JMX协议的管理控制台，或者其他符合JMX规范的软件进行访问。
+
+##### 启动JConsole
+![JConsole连接页面](d7ba81a7/jconsole_login.jpg)
+通过JDK/bin目录下的jconsole.exe启动JConsole后，会自动搜索出本机运行的所有虚拟机进程，而不需要用户自己使用jps来查询，如图4-10所示。双击选择其中一个进程便可进入主界面开始监控。JMX支持跨服务器的管理，也可以使用下面的“远程进程”功能来连接远程服务器，对远程虚拟机进行监控。如下图所示：
+![JConsole主界面](d7ba81a7/jconsole_main_page.jpg)
+
+##### 内存监控
+“内存”页签的作用相当于可视化的jstat命令，用于监视被收集器管理的虚拟机内存（被收集器直接管理的Java堆和被间接管理的方法区）的变化趋势。
+
+测试代码：
+```java
+/**
+ * 内存占位符对象，一个OOMObject大约占64KB<br>
+ * 这段代码的作用是以64KB/50ms的速度向Java堆中填充数据，一共填充1000次，使用JConsole的“内存”页签进行监视，观察曲线和柱状指示图的变化。
+ *
+ * -Xms100m -Xmx100m -XX:+UseSerialGC
+ *
+ * @author nimbus.k 2021-08-03 22:22
+ * @version 1.0
+ */
+public class OOMObjectTest {
+
+    static class OOMObject {
+        public byte[] placeholder = new byte[64 * 1024];
+    }
+
+    public static void fillHeap(int num) throws InterruptedException {
+        List<OOMObject> list = new ArrayList<OOMObject>();
+        for (int i = 0; i < num; i++) {
+            // 稍作延时，令监视曲线的变化更加明显
+            Thread.sleep(50);
+            list.add(new OOMObject());
+        }
+        System.gc();
+    }
+
+    public static void main(String[] args) throws Exception {
+        fillHeap(1000);
+    }
+
+}
+
+```
+
+**解读：**
+程序运行后，在“内存”页签中可以看到内存池Eden区的运行趋势呈现折线状，如图4-12所示。监视范围扩大至整个堆后，会发现曲线是一直平滑向上增长的。从柱状图可以看到，在1000次循环执行结束，运行了System.gc()后，虽然整个新生代Eden和Survivor区都基本被清空了，但是代表老年代的柱状图仍然保持峰值状态，说明被填充进堆中的数据在System.gc()方法执行之后仍然存活。
+
+这里作者给我们提出了两个问题：
+- 虚拟机启动参数只限制了Java堆为100M B，但没有明确使用-Xmn参数指定新生代大小，读者能否从监控图中估算出新生代的容量？
+- 为何执行了System.gc()之后，图4-12中代表老年代的柱状图仍然显示峰值状态，代码需要如何调整才能让System.gc()回收掉填充到堆中的对象？
+
+![Eden区内存变化状况](d7ba81a7/jconsole_memory_monitoring.jpg)
+
+问题1答案：图4-12显示Eden空间为27328KB，因为没有设置-XX：SurvivorRadio参数，所以Eden与Survivor空间比例的默认值为8∶1，因此整个新生代空间大约为27328KB×125%=34160KB。
+问题2答案：执行System.gc()之后，空间未能回收是因为List<OOMObject>list对象仍然存活，fillHeap()方法仍然没有退出，因此list对象在System.gc()执行时仍然处于作用域之内 **(准确地说，只有虚拟机使用解释器执行的时候，“在作用域之内”才能保证它不会被回收，因为这里的回收还涉及局部变量表变量槽的复用、即时编译器介入时机等问题，具体读者可参考第8章)** 。如果把System.gc()移动到fillHeap()方法外调用就可以回收掉全部内存。
+
+**注：** 问题一答案容易理解，实际就是这么分配的，如果想要验证可以通过调整SurvivorRadio参数来调整；问题2，我们来通过稍微修改一下上述OOMObjectTest代码片段，来看看是不是如作者所说：
+代码片段如下，只将main方法中相关代码做了调整，其余不变
+```java
+public static void main(String[] args) throws Exception {
+        for (int i = 10; i < 200;) {
+            fillHeap(1000);
+            if (i % 50 == 0) {
+                // 每被50整除时，再手工触发一次GC
+                System.gc();
+            }
+            i = i + 10;
+        }
+
+    }
+```
+
+此时运行监控结过，如下图所示：
+![Eden区内存完全回收场景](d7ba81a7/jconsole_memory_monitoring2.jpg)
+从图中可以看出，确实完全回收了（留有少部分，毕竟还有其它区域代码的实例需要占用空间）
+
+##### 线程监控
+如果说JConsole的“内存”页签相当于可视化的jstat命令的话，那“线程”页签的功能就相当于可视化的jstack命令了，遇到线程停顿的时候可以使用这个页签的功能进行分析。前面讲解jstack命令时提到 **线程长时间停顿的主要原因有等待外部资源（数据库连接、网络资源、设备资源等）、死循环、锁等待等。**
+
+示例代码：
+```java
+/**
+ * 线程死循环演示
+ *
+ * @author nimbus.k 2021-08-03 22:52
+ * @version 1.0
+ */
+public class ThreadMonitor {
+
+    /**
+     * 线程死循环演示
+     */
+    public static void createBusyThread() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) // 第41行
+                    ;
+            }
+        }, "testBusyThread");
+        thread.start();
+    }
+
+    /**
+     * 线程锁等待演示
+     */
+    public static void createLockThread(final Object lock) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (lock) {
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, "testLockThread");
+        thread.start();
+    }
+    public static void main(String[] args) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        br.readLine();
+        createBusyThread();
+        br.readLine();
+        Object obj = new Object();
+        createLockThread(obj);
+    }
+
+}
+```
+
+程序运行后，首先在“线程”页签中选择main线程，如图4-13所示。堆栈追踪显示BufferedReader的readBytes()方法正在等待System.in的键盘输入，这时候线程为Runnable状态，Runnable状态的线程仍会被分配运行时间，但readBytes()方法检查到流没有更新就会立刻归还执行令牌给操作系统，这种等待只消耗很小的处理器资源。
+![main线程](d7ba81a7/jconsole_thread_main.jpg)
+接着监控testBusyThread线程，又如下图所示。testBusyThread线程一直在执行空循环，从堆栈追踪中看到一直在MonitoringTest.java代码的41行停留，41行的代码为while(true)。这时候线程为Runnable状态，而且没有归还线程执行令牌的动作，所以会在空循环耗尽操作系统分配给它的执行时间，直到线程切换为止，这种等待会消耗大量的处理器资源。
+![testBusyThread线程](d7ba81a7/jconsole_thread_testBusyThread.jpg)
+testLockThread线程在等待lock对象的notify()或notifyAll()方法的出现，**线程这时候处于WAITING状态，在重新唤醒前不会被分配执行时间。** 如下图所示：
+![testLockThread线程](d7ba81a7/jconsole_memory_testLockThread.jpg)
+testLockThread线程正处于正常的活锁等待中，只要lock对象的notify()或notifyAll()方法被调用，这个线程便能激活继续执行
+
+###### 死锁代码样例
+代码示例：
+```java
+/**
+ * 一则死锁代码样例
+ *
+ * @author nimbus.k 2021-08-03 23:09
+ * @version 1.0
+ */
+public class DeadLockTest {
+
+    /**
+     * 线程死锁等待演示
+     */
+    static class SynAddRunalbe implements Runnable {
+        int a, b;
+        public SynAddRunalbe(int a, int b) {
+            this.a = a;
+            this.b = b;
+        }
+        @Override
+        public void run() {
+            synchronized (Integer.valueOf(a)) {
+                synchronized (Integer.valueOf(b)) {
+                    System.out.println(a + b);
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 100; i++) {
+            new Thread(new SynAddRunalbe(1, 2)).start();
+            new Thread(new SynAddRunalbe(2, 1)).start();
+        }
+    }
+
+}
+```
+
+**代码释意**
+这段代码开了200个线程去分别计算1+2以及2+1的值，理论上for循环都是可省略的，两个线程也可能会导致死锁，不过那样概率太小，需要尝试运行很多次才能看到死锁的效果。如果运气不是特别差的话，上面带for循环的版本最多运行两三次就会遇到线程死锁，程序无法结束。
+**根本原因**
+造成死锁的根本原
+因是Integer.valueOf()方法出于减少对象创建次数和节省内存的考虑，会对数值为-128～127之间的Integer对象进行缓存（这是《Java虚拟机规范》中明确要求缓存的默认值，实际值可以调整，具体取决于java.lang.Integer.Integer-Cache.high参数的设置。），如果valueOf()方法传入的参数在这个范围之内，就直接返回缓存中的对象。也就是说代码中尽管调用了200次Integer.valueOf()方法，但一共只返回了两个不同的Integer对象。*假如某个线程的两个synchronized块之间发生了一次线程切换，那就会出现线程A在等待被线程B持有的Integer.valueOf(1)，线程B又在等待被线程A持有的Integer.valueOf(2)，结果大家都跑不下去的情况。*
+
+![testLockThread线程](d7ba81a7/jconsole_deadlock.jpg)
+**很清晰地显示，线程Thread-3在等待一个被线程Thread-4持有的Integer对象，而点击线程Thread-4则显示它也在等待一个被线程Thread-3持有的Integer对象，这样两个线程就互相卡住，除非牺牲其中一个，否则死锁无法释放。**
 
 
+#### VisualVM：多合-故障处理工具
+VisualVM（All-in-One Java Troubleshooting Tool）是功能最强大的运行监视和故障处理程序之一，曾经在很长一段时间内是Oracle官方主力发展的虚拟机故障处理工具。Oracle曾在VisualVM的软件说明中写上了“All-in-One”的字样，预示着它除了 **常规的运行监视、故障处理外，还将提供其他方面的能力，譬如性能分析（Profiling）。**
+相比其它收费第三方工具，VisualVM还有一个很大的优点：**不需要被监视的程序基于特殊Agent去运行，因此它的通用性很强，对应用程序实际性能的影响也较小，使得它可以直接应用在生产环境中。**
 
+##### VisualVM兼容范围与插件安装
+VisualVM基于NetBeans平台开发工具，所以一开始它就具备了通过插件扩展功能的能力，有了插件扩展支持，VisualVM可以做到：
+- 显示虚拟机进程以及进程的配置、环境信息（jps、jinfo）。
+- 监视应用程序的处理器、垃圾收集、堆、方法区以及线程的信息（jstat、jstack）。
+- dump以及分析堆转储快照（jmap、jhat）。
+- 方法级的程序运行性能分析，找出被调用最多、运行时间最长的方法。
+- 离线程序快照：收集程序的运行时配置、线程dump、内存dump等信息建立一个快照，可以将快照发送开发者处进行Bug反馈。
+- 其他插件带来的无限可能性。
+
+**用笔者的话来说**
+首次启动VisualVM后，读者先不必着急找应用程序进行监测，初始状态下的VisualVM并没有加载任何插件，虽然基本的监视、线程面板的功能主程序都以默认插件的形式提供，但是如果不在VisualVM上装任何扩展插件，就相当于放弃它最精华的功能，和没有安装任何应用软件的操作系统差不多。
+
+独立安装的插件存储在VisualVM的根目录，譬如JDK 9之前自带的VisulalVM，插件安装后是放在JDK_HOME/lib/visualvm中的。
+JDK 9之后VisulalVM形成了一个独立项目：[VisualVM主页](https://visualvm.github.io/?Java_VisualVM)
+
+插件安装非特殊场景，无需手动安装，在有网络连接的环境下，点击“工具->插件菜单”，在页签的“可用插件”及“已安装”中列举了当前版本VisualVM可以使用的全部插件，选中插件后在右边窗口会显示这个插件的基本信息，如开发者、版本、功能描述等。
+![testLockThread线程](d7ba81a7/visualvm_plugins_main_page.jpg)
+
+##### 生成、浏览堆转储快照
+在VisualVM中生成堆转储快照文件有两种方式，可以执行下列任一操作：
+- 在“应用程序”窗口中右键单击应用程序节点，然后选择“堆Dump”。
+- 在“应用程序”窗口中双击应用程序节点以打开应用程序标签，然后在“监视”标签中单击“堆Dump”。
+
+生成堆转储快照文件之后，应用程序页签会在该堆的应用程序下增加一个以[heap-dump]开头的子节点，并且在主页签中打开该转储快照，如图4-20所示。如果需要把堆转储快照保存或发送出去，就应在heapdump节点上右键选择“另存为”菜单，否则当VisualVM关闭时，生成的堆转储快照文件会被当作临时文件自动清理掉。要打开一个由已经存在的堆转储快照文件，通过文件菜单中的“装入”功能，选择硬盘上的文件即可。
+![浏览dump文件](d7ba81a7/visualvm_heapdump.jpg)
+
+堆页签中的“摘要”面板可以看到应用程序dump时的运行时参数、System.getPro-perties()的内容、线程堆栈等信息；“类”面板则是以类为统计口径统计类的实例数量、容量信息；“实例”面板不能直接使用，因为VisualVM在此时还无法确定用户想查看哪个类的实例，所以需要通过“类”面板进入，在“类”中选择一个需要查看的类，然后双击即可在“实例”里面看到此类的其中500个实例的具体属性信息；“OQL控制台”面板则是运行OQL查询语句的，同jhat中介绍的OQL功能一样。如果读者想要了解具体OQL的语法和使用方法，可参见本书附录D的内容。
 
 # 实战相关
