@@ -8,6 +8,10 @@ tags:
 categories: Java系列
 ---
 
+# 背景
+JVM作为Java底层的核心，一直以来是我的短板，其底层等相关不甚了解。借此机会，通过这种方式学习，记录，分析&分享。
+书中涉及代码调试案例，收录在[learningjvm](https://github.com/nimbusking/learningjvm)项目中，各看官有需要可以自行查阅。
+
 # 书籍实录
 ## 第一章：走进JAVA
 ### Java发展史
@@ -523,5 +527,158 @@ jstack（Stack Trace for Java）命令用于生成虚拟机当前时刻的线程
 #### JHSDB：基于服务代理的调试工具
 JDK中提供了JCMD和JHSDB两个集成式的多功能工具箱，它们不仅整合了前面介绍的所有基础工具所能提供的专项功能，而且由于有着“后发优势”，能够做的往往比之前的老工具们更好、更强大。
 
+**注：** 本小节实践我实在jdk9.0.4版本下完成的，尝试在jdk8下实验，确实如作者所述在sa-jdi.jar包中存在HSDB工具类，但是尝试直接运行了，但是出现了找不到windbg.dll动态链接库的错误。因此，直接更换为jdk9运行。**故而以下文字记录，基于本书介绍的同时，涉及测试的结果，均是个人实验记录所得，可能跟原书中表现有些许差异。**
+
+**介绍**
+JHSDB是一款基于服务性代理（Serviceability Agent，SA）实现的进程外调试工具。
+服务性代理是HotSpot虚拟机中一组用于映射Java虚拟机运行信息的、主要基于Java语言（含少量JNI代码）实现的API集合。服务性代理以HotSpot内部的数据结构为参照物进行设计，把这些C++的数据抽象出Java模型对象，相当于HotSpot的C++代码的一个镜像。通过服务性代理的API，可以在一个独立的Java虚拟机的进程里分析其他HotSpot虚拟机的内部数据，或者从HotSpot虚拟机进程内存中dump出来的转储快照里还原出它的运行状态细节。
+
+测试代码(跟原书中略有差别，主要体现在变量命名的差异)，这片代码主要用于调试，三个对象分布在内存哪里？
+```java
+/**
+* staticObj、instanceObj、localObj存放在哪里？
+*/
+public class JHSDBTest {
+
+    static class Test {
+        static ObjectHolder staticObj = new ObjectHolder();
+        ObjectHolder instanceObj = new ObjectHolder();
+        void foo() {
+            ObjectHolder localObj = new ObjectHolder();
+            System.out.println("done"); // 调试运行的时候，在这里设置一个断点，用于通过jps获取jvm进程id
+        }
+    }
+
+    private static class ObjectHolder {}
+
+    public static void main(String[] args) {
+        Test test = new JHSDBTest.Test();
+        test.foo();
+    }
+
+}
+```
+
+
+**答案：** 根据前面的理论学习，不难分析出：**staticObj随着Test的类型信息存放在方法区，instanceObj随着Test的对象实例存放在Java堆，localObject则是存放在foo()方法栈帧的局部变量表中。**
+但是实际是这样的吗？
+由于JHSDB本身对压缩指针的支持存在很多缺陷，建议用64位系统的读者在实验时禁用压缩指针，另外为了后续操作时可以加快在内存中搜索对象的速度，也建议读者限制一下Java堆的大小。本例中，作者建议采用的运行参数如下：
+```java
+-Xmx10m -XX:+UseSerialGC -XX:-UseCompressedOops
+```
+
+程序执行后，通过jps查到测试程序进程ID，从下面片段中得知，15986就是我们测试程序所要的进程id
+```cmd
+C:\Users\kemi>jps -l
+15252 org.jetbrains.idea.maven.server.RemoteMavenServer36
+15444
+13868 jdk.jcmd/sun.tools.jps.Jps
+16172 D:\Program
+3628 org.jetbrains.jps.cmdline.Launcher
+8588 cc.nimbusk.jhsdb.JHSDBTest
+```
+
+紧接着，通过jhsdb命令，来运行可视化界面：
+```java
+jhsdb hsdb --pid 8588
+```
+
+运行之后，界面如下图所示
+![JHSDB的界面](d7ba81a7/hsdb_running_window.png)
+从运行效果来看其实生成的就是一个Swing的小程序，这点我们从jdk8的sa-jdi.jar包中的目录结构也能看出来
+![sa-jdi.jar包目录结构](d7ba81a7/sa-jdi_jar_infrastructure.png)
+
+点击菜单：**Tools->Heap Parameters**，就可以看到堆内存分配布局，由于作者的运行参数中 **指定了使用的是Serial收集器**，图中我们看到了典型的Serial的分代内存布局，Heap Parameters窗口中清楚列出了新生代的Eden、S1、S2和老年代的容量（单位为字节）以及它们的虚拟内存地址起止范围。
+![Serial收集器的堆布局](d7ba81a7/jhsdb_heap_parameters.png)
+实际如下所示：
+```
+Heap Parameters:
+Gen 0:   eden [0x0000026f4d200000,0x0000026f4d2d57c8,0x0000026f4d4b0000) space capacity = 2818048, 31.029989553052324 used
+  from [0x0000026f4d500000,0x0000026f4d550000,0x0000026f4d550000) space capacity = 327680, 100.0 used
+  to   [0x0000026f4d4b0000,0x0000026f4d4b0000,0x0000026f4d500000) space capacity = 327680, 0.0 usedInvocations: 1
+
+Gen 1:   old  [0x0000026f4d550000,0x0000026f4d670de0,0x0000026f4dc00000) space capacity = 7012352, 16.873083382009344 usedInvocations: 0
+
+```
+
+
+其中：**0x0000023653c00000** 就是起始虚拟内存地址（eden新生代起始），**0x0000023653f00000** 就是结束虚拟地址（To Survivor结束）
+
+再通过菜单Windows->Console窗口，打开命令行，使用scanoops命令在Java堆的新生代（从Eden起始地址到To Survivor结束地址）范围内查找ObjectHolder的实例
+```java
+scanoops 0x00000119d4400000 0x00000119d4700000 JHSDBTest$ObjectHolder
+```
+
+得到结果：
+```java
+
+hsdb> scanoops 0x0000026f4d200000 0x0000026f4d500000 JHSDBTest$ObjectHolder
+No such type.
+hsdb> scanoops 0x0000026f4d200000 0x0000026f4d500000 cc.nimbusk.jhsdb.JHSDBTest$ObjectHolder
+0x0000026f4d2cb4b0 cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder
+0x0000026f4d2cb4d8 cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder
+0x0000026f4d2cb4e8 cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder
+Error: sun.jvm.hotspot.debugger.DebuggerException: Windbg Error: ReadVirtual failed!
+hsdb> 
+```
+
+**注：** 这里跟书中作者有点区别，原书作者实例中，通过jps运行之后，得到的进程ID是没有包路径的，但是我自己实验的时候，发现是有的。这个在后面的scanoops命令使用的时候有用。如果不带包路径的话，在内存中是找不到的，会提示你***No such type.**
+
+我们从结果分析一下，确实在内存中找到三个ObjectHolder对象，我们再看看第一行地址分布：
+这三个对象的地址前缀都是：**0x0000026f4d2**，而我们通过前面的Heap Parameters拿到所有分代内存分布发现，只有Eden区域地址（eden [0x0000026f4d200000,0x0000026f4d2d57c8,0x0000026f4d4b0000)），**这也就顺带验证了：一般情况下新对象在Eden中创建的分配规则**。
+
+再使用：**Tools->Inspector** 功能确认一下这三个地址中存放的对象：
+![Insepector实例数据](d7ba81a7/jhsdb_tools_inspector.png)
+Inspector为我们展示了对象头和指向对象元数据的指针，里面包括了Java类型的名字、继承关系、实现接口关系，字段信息、方法信息、运行时常量池的指针、内嵌的虚方法表（vtable）以及接口方法表（itable）等。由于我们的确没有在ObjectHolder上定义过任何字段，所以图中并没有看到任何实例字段数据，读者在做实验时不妨定义一些不同数据类型的字段，观察它们在HotSpot虚拟机里面是如何存储的。
+
+**注：** 实际上，目前在实验的时候，发现点不开_metadata._klass: InstanceKlass for cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder，看不到里面具体的内容，后台报了一个数组越界的错误。尝试将
+
+接下来要根据堆中对象实例地址找出引用它们的指针，原本JHSDB的Tools菜单中有ComputeReverse Ptrs来完成这个功能，但是Swing本身可能会报空指针异常，这里直接通过命令来实现，revptrs命令后跟上第一个对象的地址。
+```java
+// 这里内存地址跟前文中看到的不一样，是因为，中途切换环境，我重新运行了。实际实验的时候，同样的方法，按照实际分配的地址即可。这里不再赘述
+revptrs 0x00000119d44ca868
+```
+得到结果：
+```java
+hsdb> revptrs 0x00000119d44ca868
+null
+Oop for java/lang/Class @ 0x00000119d44c9488
+
+```
+
+在通过Inspector查找这个地址：0x00000119d44c9488，得到如下图所示：
+![方法区实例内存地址](d7ba81a7/jhsdb_class_object.png)
+果然找到了一个引用该对象的地方，是在一个 ```java.lang.Class``` 的实例里，并且给出了这个实例的地址，通过Inspector查看该对象实例，可以清楚看到这确实是一个 ```java.lang.Class``` 类型的对象实例，里面有一个名为 **staticObj** 的实例字段。（在JDK 7以前，即还没有开始“去永久代”行动时，这些静态变量是存放在永久代上的，JDK 7起把静态变量、字符常量这些从永久代移除出去。）
+
+从《Java虚拟机规范》所定义的概念模型来看，所有Class相关的信息都应该存放在方法区之中，但方法区该如何实现，《Java虚拟机规范》并未做出规定，这就成了一件允许不同虚拟机自己灵活把握的事情。**JDK 7及其以后版本的HotSpot虚拟机选择把静态变量与类型在Java语言一端的映射Class对象存放在一起，存储于Java堆之中，从我们的实验中也明确验证了这一点。**
+
+接着查找第二个对象实例：
+```java
+hsdb> revptrs 0x00000119d44ca890
+null
+Oop for JHSDBTest$Test @ 0x00000119d44ca878
+```
+
+这次找到一个类型为JHSDBTest$Test的对象实例，在Inspector中该对象实例显示如图所示：
+![方法区实例内存地址](d7ba81a7/jhsdb_instance_object.png)
+这个结果完全符合我们的预期，第二个ObjectHolder的指针是在Java堆中JHSDBTest$Test对象的instanceObj字段上。
+
+我们查找第三个对象的时候，发现：
+```java
+hsdb> revptrs 0x00000119d44ca8a0
+null
+null
+hsdb> 
+```
+
+**看来revptrs命令并不支持查找栈上的指针引用，不过没有关系，得益于我们测试代码足够简洁，人工也可以来完成这件事情。** 在Java Thread窗口选中main线程后点击Stack Memory按钮查看该线程的栈内存，如图下图所示：
+![stack memory按钮](d7ba81a7/jhsdb_statck_memory.png)
+打开栈内存之后：
+![main线程的栈内存](d7ba81a7/jhsdb_statck_memory_view.png)
+
+观察一个唯一的栈上的分配的内存，如下图所示：
+![栈内存上的分配情况](d7ba81a7/jhsdb_statck_memory_collection.png)
+这个线程只有两个方法栈帧，尽管没有查找功能，**但通过肉眼观察在地址0x0000000cb5aff570上的值正好就是0x00000119d44ca8a0**，而且JHSDB在旁边已经自动生成注释，说明这里确实是引用了一个来自新生代的JHSDBTest$ObjectHolder对象。
+至此，本次实验中三个对象均已找到，并成功追溯到引用它们的地方，也就实践验证了开篇中提出的这些对象的引用是存储在什么地方的问题。
 
 # 实战相关

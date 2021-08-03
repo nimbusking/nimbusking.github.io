@@ -1,0 +1,1609 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="categories" content="Java系列">
+<meta name="tags" content=",- JVM,- 周志明">
+<meta name="date" content="2020-08-26 20:48:41">
+<meta name="abbrlink" content="d7ba81a7"><style>body {
+  max-width: 980px;
+  border: 1px solid #ddd;
+  outline: 1300px solid #fff;
+  margin: 16px auto;
+}
+
+body .markdown-body
+{
+  padding: 45px;
+}
+
+@font-face {
+  font-family: fontawesome-mini;
+  src: url(data:font/woff;charset=utf-8;base64,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) format('woff');
+}
+
+.markdown-body {
+  font-family: sans-serif;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  color: #333333;
+  overflow: hidden;
+  font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.markdown-body a {
+  background: transparent;
+}
+
+.markdown-body a:active,
+.markdown-body a:hover {
+  outline: 0;
+}
+
+.markdown-body b,
+.markdown-body strong {
+  font-weight: bold;
+}
+
+.markdown-body mark {
+  background: #ff0;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+
+.markdown-body sub,
+.markdown-body sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.markdown-body sup {
+  top: -0.5em;
+}
+.markdown-body sub {
+  bottom: -0.25em;
+}
+
+.markdown-body h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+.markdown-body img {
+  border: 0;
+}
+
+.markdown-body hr {
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  height: 0;
+}
+
+.markdown-body pre {
+  overflow: auto;
+}
+
+.markdown-body code,
+.markdown-body kbd,
+.markdown-body pre,
+.markdown-body samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+.markdown-body input {
+  color: inherit;
+  font: inherit;
+  margin: 0;
+}
+
+.markdown-body html input[disabled] {
+  cursor: default;
+}
+
+.markdown-body input {
+  line-height: normal;
+}
+
+.markdown-body input[type="checkbox"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.markdown-body td,
+.markdown-body th {
+  padding: 0;
+}
+
+.markdown-body .codehilitetable,
+.markdown-body .highlighttable {
+  border: 0;
+  border-spacing: 0;
+}
+
+.markdown-body .codehilitetable tr,
+.markdown-body .highlighttable {
+  border: 0;
+}
+
+.markdown-body .codehilitetable pre,
+.markdown-body .codehilitetable div.codehilite,
+.markdown-body .highlighttable pre,
+.markdown-body .highlighttable div.highlight {
+  margin: 0;
+}
+
+.markdown-body .linenos,
+.markdown-body .code,
+.markdown-body .codehilitetable td,
+.markdown-body .highlighttable td {
+  border: 0;
+  padding: 0;
+}
+
+.markdown-body td:not(.linenos) .linenodiv {
+  padding: 0 !important;
+}
+
+.markdown-body .code {
+  width: 100%;
+}
+
+.markdown-body .linenos div pre,
+.markdown-body .linenodiv pre,
+.markdown-body .linenodiv {
+  border: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  -webkit-border-top-left-radius: 3px;
+  -webkit-border-bottom-left-radius: 3px;
+  -moz-border-radius-topleft: 3px;
+  -moz-border-radius-bottomleft: 3px;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+}
+
+.markdown-body .code div pre,
+.markdown-body .code div {
+  border: 0;
+  -webkit-border-radius: 0;
+  -moz-border-radius: 0;
+  border-radius: 0;
+  -webkit-border-top-right-radius: 3px;
+  -webkit-border-bottom-right-radius: 3px;
+  -moz-border-radius-topright: 3px;
+  -moz-border-radius-bottomright: 3px;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.markdown-body * {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.markdown-body input {
+  font: 13px Helvetica, arial, freesans, clean, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
+  line-height: 1.4;
+}
+
+.markdown-body a {
+  color: #4183c4;
+  text-decoration: none;
+}
+
+.markdown-body a:hover,
+.markdown-body a:focus,
+.markdown-body a:active {
+  text-decoration: underline;
+}
+
+.markdown-body hr {
+  height: 0;
+  margin: 15px 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.markdown-body hr:before,
+.markdown-body hr:after {
+  display: table;
+  content: " ";
+}
+
+.markdown-body hr:after {
+  clear: both;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  line-height: 1.1;
+}
+
+.markdown-body h1 {
+  font-size: 30px;
+}
+
+.markdown-body h2 {
+  font-size: 21px;
+}
+
+.markdown-body h3 {
+  font-size: 16px;
+}
+
+.markdown-body h4 {
+  font-size: 14px;
+}
+
+.markdown-body h5 {
+  font-size: 12px;
+}
+
+.markdown-body h6 {
+  font-size: 11px;
+}
+
+.markdown-body blockquote {
+  margin: 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.markdown-body ol ol,
+.markdown-body ul ol {
+  list-style-type: lower-roman;
+}
+
+.markdown-body ul ul ol,
+.markdown-body ul ol ol,
+.markdown-body ol ul ol,
+.markdown-body ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+.markdown-body dd {
+  margin-left: 0;
+}
+
+.markdown-body code,
+.markdown-body pre,
+.markdown-body samp {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 12px;
+}
+
+.markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.markdown-body kbd {
+  background-color: #e7e7e7;
+  background-image: -moz-linear-gradient(#fefefe, #e7e7e7);
+  background-image: -webkit-linear-gradient(#fefefe, #e7e7e7);
+  background-image: linear-gradient(#fefefe, #e7e7e7);
+  background-repeat: repeat-x;
+  border-radius: 2px;
+  border: 1px solid #cfcfcf;
+  color: #000;
+  padding: 3px 5px;
+  line-height: 10px;
+  font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  display: inline-block;
+}
+
+.markdown-body>*:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+.markdown-body .headerlink {
+  font: normal 400 16px fontawesome-mini;
+  vertical-align: middle;
+  margin-left: -16px;
+  float: left;
+  display: inline-block;
+  text-decoration: none;
+  opacity: 0;
+  color: #333;
+}
+
+.markdown-body .headerlink:focus {
+  outline: none;
+}
+
+.markdown-body h1 .headerlink {
+  margin-top: 0.8rem;
+}
+
+.markdown-body h2 .headerlink,
+.markdown-body h3 .headerlink {
+  margin-top: 0.6rem;
+}
+
+.markdown-body h4 .headerlink {
+  margin-top: 0.2rem;
+}
+
+.markdown-body h5 .headerlink,
+.markdown-body h6 .headerlink {
+  margin-top: 0;
+}
+
+.markdown-body .headerlink:hover,
+.markdown-body h1:hover .headerlink,
+.markdown-body h2:hover .headerlink,
+.markdown-body h3:hover .headerlink,
+.markdown-body h4:hover .headerlink,
+.markdown-body h5:hover .headerlink,
+.markdown-body h6:hover .headerlink {
+  opacity: 1;
+  text-decoration: none;
+}
+
+.markdown-body h1 {
+  padding-bottom: 0.3em;
+  font-size: 2.25em;
+  line-height: 1.2;
+  border-bottom: 1px solid #eee;
+}
+
+.markdown-body h2 {
+  padding-bottom: 0.3em;
+  font-size: 1.75em;
+  line-height: 1.225;
+  border-bottom: 1px solid #eee;
+}
+
+.markdown-body h3 {
+  font-size: 1.5em;
+  line-height: 1.43;
+}
+
+.markdown-body h4 {
+  font-size: 1.25em;
+}
+
+.markdown-body h5 {
+  font-size: 1em;
+}
+
+.markdown-body h6 {
+  font-size: 1em;
+  color: #777;
+}
+
+.markdown-body p,
+.markdown-body blockquote,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body dl,
+.markdown-body table,
+.markdown-body pre,
+.markdown-body .admonition {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdown-body hr {
+  height: 4px;
+  padding: 0;
+  margin: 16px 0;
+  background-color: #e7e7e7;
+  border: 0 none;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 2em;
+}
+
+.markdown-body ul ul,
+.markdown-body ul ol,
+.markdown-body ol ol,
+.markdown-body ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.markdown-body li>p {
+  margin-top: 16px;
+}
+
+.markdown-body dl {
+  padding: 0;
+}
+
+.markdown-body dl dt {
+  padding: 0;
+  margin-top: 16px;
+  font-size: 1em;
+  font-style: italic;
+  font-weight: bold;
+}
+
+.markdown-body dl dd {
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.markdown-body blockquote {
+  padding: 0 15px;
+  color: #777;
+  border-left: 4px solid #ddd;
+}
+
+.markdown-body blockquote>:first-child {
+  margin-top: 0;
+}
+
+.markdown-body blockquote>:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  word-break: normal;
+  word-break: keep-all;
+}
+
+.markdown-body table th {
+  font-weight: bold;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  padding: 6px 13px;
+  border: 1px solid #ddd;
+}
+
+.markdown-body table tr {
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+}
+
+.markdown-body table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.markdown-body code,
+.markdown-body samp {
+  padding: 0;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(0,0,0,0.04);
+  border-radius: 3px;
+}
+
+.markdown-body code:before,
+.markdown-body code:after {
+  letter-spacing: -0.2em;
+  content: "\00a0";
+}
+
+.markdown-body pre>code {
+  padding: 0;
+  margin: 0;
+  font-size: 100%;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
+  border: 0;
+}
+
+.markdown-body .codehilite,
+.markdown-body .highlight {
+  margin-bottom: 16px;
+}
+
+.markdown-body .codehilite pre,
+.markdown-body .highlight pre,
+.markdown-body pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f7f7f7;
+  border-radius: 3px;
+}
+
+.markdown-body .codehilite pre,
+.markdown-body .highlight pre {
+  margin-bottom: 0;
+  word-break: normal;
+}
+
+.markdown-body pre {
+  word-wrap: normal;
+}
+
+.markdown-body pre code {
+  display: inline;
+  max-width: initial;
+  padding: 0;
+  margin: 0;
+  overflow: initial;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.markdown-body pre code:before,
+.markdown-body pre code:after {
+  content: normal;
+}
+
+/* Admonition */
+.markdown-body .admonition {
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  position: relative;
+  border-radius: 3px;
+  border: 1px solid #e0e0e0;
+  border-left: 6px solid #333;
+  padding: 10px 10px 10px 30px;
+}
+
+.markdown-body .admonition table {
+  color: #333;
+}
+
+.markdown-body .admonition p {
+  padding: 0;
+}
+
+.markdown-body .admonition-title {
+  font-weight: bold;
+  margin: 0;
+}
+
+.markdown-body .admonition>.admonition-title {
+  color: #333;
+}
+
+.markdown-body .attention>.admonition-title {
+  color: #a6d796;
+}
+
+.markdown-body .caution>.admonition-title {
+  color: #d7a796;
+}
+
+.markdown-body .hint>.admonition-title {
+  color: #96c6d7;
+}
+
+.markdown-body .danger>.admonition-title {
+  color: #c25f77;
+}
+
+.markdown-body .question>.admonition-title {
+  color: #96a6d7;
+}
+
+.markdown-body .note>.admonition-title {
+  color: #d7c896;
+}
+
+.markdown-body .admonition:before,
+.markdown-body .attention:before,
+.markdown-body .caution:before,
+.markdown-body .hint:before,
+.markdown-body .danger:before,
+.markdown-body .question:before,
+.markdown-body .note:before {
+  font: normal normal 16px fontawesome-mini;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  line-height: 1.5;
+  color: #333;
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding-top: 10px;
+  padding-left: 10px;
+}
+
+.markdown-body .admonition:before {
+  content: "\f056\00a0";
+  color: 333;
+}
+
+.markdown-body .attention:before {
+  content: "\f058\00a0";
+  color: #a6d796;
+}
+
+.markdown-body .caution:before {
+  content: "\f06a\00a0";
+  color: #d7a796;
+}
+
+.markdown-body .hint:before {
+  content: "\f05a\00a0";
+  color: #96c6d7;
+}
+
+.markdown-body .danger:before {
+  content: "\f057\00a0";
+  color: #c25f77;
+}
+
+.markdown-body .question:before {
+  content: "\f059\00a0";
+  color: #96a6d7;
+}
+
+.markdown-body .note:before {
+  content: "\f040\00a0";
+  color: #d7c896;
+}
+
+.markdown-body .admonition::after {
+  content: normal;
+}
+
+.markdown-body .attention {
+  border-left: 6px solid #a6d796;
+}
+
+.markdown-body .caution {
+  border-left: 6px solid #d7a796;
+}
+
+.markdown-body .hint {
+  border-left: 6px solid #96c6d7;
+}
+
+.markdown-body .danger {
+  border-left: 6px solid #c25f77;
+}
+
+.markdown-body .question {
+  border-left: 6px solid #96a6d7;
+}
+
+.markdown-body .note {
+  border-left: 6px solid #d7c896;
+}
+
+.markdown-body .admonition>*:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body .admonition>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+/* progress bar*/
+.markdown-body .progress {
+  display: block;
+  width: 300px;
+  margin: 10px 0;
+  height: 24px;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #ededed;
+  position: relative;
+  box-shadow: inset -1px 1px 3px rgba(0, 0, 0, .1);
+}
+
+.markdown-body .progress-label {
+  position: absolute;
+  text-align: center;
+  font-weight: bold;
+  width: 100%; margin: 0;
+  line-height: 24px;
+  color: #333;
+  text-shadow: 1px 1px 0 #fefefe, -1px -1px 0 #fefefe, -1px 1px 0 #fefefe, 1px -1px 0 #fefefe, 0 1px 0 #fefefe, 0 -1px 0 #fefefe, 1px 0 0 #fefefe, -1px 0 0 #fefefe, 1px 1px 2px #000;
+  -webkit-font-smoothing: antialiased !important;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.markdown-body .progress-bar {
+  height: 24px;
+  float: left;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  background-color: #96c6d7;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), inset 0 -1px 0 rgba(0, 0, 0, .1);
+  background-size: 30px 30px;
+  background-image: -webkit-linear-gradient(
+    135deg, rgba(255, 255, 255, .4) 27%,
+    transparent 27%,
+    transparent 52%, rgba(255, 255, 255, .4) 52%,
+    rgba(255, 255, 255, .4) 77%,
+    transparent 77%, transparent
+  );
+  background-image: -moz-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, .4) 27%, transparent 27%,
+    transparent 52%, rgba(255, 255, 255, .4) 52%,
+    rgba(255, 255, 255, .4) 77%, transparent 77%,
+    transparent
+  );
+  background-image: -ms-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, .4) 27%, transparent 27%,
+    transparent 52%, rgba(255, 255, 255, .4) 52%,
+    rgba(255, 255, 255, .4) 77%, transparent 77%,
+    transparent
+  );
+  background-image: -o-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, .4) 27%, transparent 27%,
+    transparent 52%, rgba(255, 255, 255, .4) 52%,
+    rgba(255, 255, 255, .4) 77%, transparent 77%,
+    transparent
+  );
+  background-image: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, .4) 27%, transparent 27%,
+    transparent 52%, rgba(255, 255, 255, .4) 52%,
+    rgba(255, 255, 255, .4) 77%, transparent 77%,
+    transparent
+  );
+}
+
+.markdown-body .progress-100plus .progress-bar {
+  background-color: #a6d796;
+}
+
+.markdown-body .progress-80plus .progress-bar {
+  background-color: #c6d796;
+}
+
+.markdown-body .progress-60plus .progress-bar {
+  background-color: #d7c896;
+}
+
+.markdown-body .progress-40plus .progress-bar {
+  background-color: #d7a796;
+}
+
+.markdown-body .progress-20plus .progress-bar {
+  background-color: #d796a6;
+}
+
+.markdown-body .progress-0plus .progress-bar {
+  background-color: #c25f77;
+}
+
+.markdown-body .candystripe-animate .progress-bar{
+  -webkit-animation: animate-stripes 3s linear infinite;
+  -moz-animation: animate-stripes 3s linear infinite;
+  animation: animate-stripes 3s linear infinite;
+}
+
+@-webkit-keyframes animate-stripes {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 60px 0;
+  }
+}
+
+@-moz-keyframes animate-stripes {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 60px 0;
+  }
+}
+
+@keyframes animate-stripes {
+  0% {
+    background-position: 0 0;
+  }
+
+  100% {
+    background-position: 60px 0;
+  }
+}
+
+.markdown-body .gloss .progress-bar {
+  box-shadow:
+    inset 0 4px 12px rgba(255, 255, 255, .7),
+    inset 0 -12px 0 rgba(0, 0, 0, .05);
+}
+
+/* MultiMarkdown Critic Blocks */
+.markdown-body .critic_mark {
+  background: #ff0;
+}
+
+.markdown-body .critic_delete {
+  color: #c82829;
+  text-decoration: line-through;
+}
+
+.markdown-body .critic_insert {
+  color: #718c00 ;
+  text-decoration: underline;
+}
+
+.markdown-body .critic_comment {
+  color: #8e908c;
+  font-style: italic;
+}
+
+.markdown-body .headeranchor {
+  font: normal normal 16px fontawesome-mini;
+  line-height: 1;
+  display: inline-block;
+  text-decoration: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.headeranchor:before {
+  content: '\e157';
+}
+
+.markdown-body .task-list-item {
+  list-style-type: none;
+}
+
+.markdown-body .task-list-item+.task-list-item {
+  margin-top: 3px;
+}
+
+.markdown-body .task-list-item input {
+  margin: 0 4px 0.25em -20px;
+  vertical-align: middle;
+}
+
+/* Media */
+@media only screen and (min-width: 480px) {
+  .markdown-body {
+    font-size:14px;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .markdown-body {
+    font-size:16px;
+  }
+}
+
+@media print {
+  .markdown-body * {
+    background: transparent !important;
+    color: black !important;
+    filter:none !important;
+    -ms-filter: none !important;
+  }
+
+  .markdown-body {
+    font-size:12pt;
+    max-width:100%;
+    outline:none;
+    border: 0;
+  }
+
+  .markdown-body a,
+  .markdown-body a:visited {
+    text-decoration: underline;
+  }
+
+  .markdown-body .headeranchor-link {
+    display: none;
+  }
+
+  .markdown-body a[href]:after {
+    content: " (" attr(href) ")";
+  }
+
+  .markdown-body abbr[title]:after {
+    content: " (" attr(title) ")";
+  }
+
+  .markdown-body .ir a:after,
+  .markdown-body a[href^="javascript:"]:after,
+  .markdown-body a[href^="#"]:after {
+    content: "";
+  }
+
+  .markdown-body pre {
+    white-space: pre;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .markdown-body pre,
+  .markdown-body blockquote {
+    border: 1px solid #999;
+    padding-right: 1em;
+    page-break-inside: avoid;
+  }
+
+  .markdown-body .progress,
+  .markdown-body .progress-bar {
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+  }
+
+  .markdown-body .progress {
+    border: 1px solid #ddd;
+  }
+
+  .markdown-body .progress-bar {
+    height: 22px;
+    border-right: 1px solid #ddd;
+  }
+
+  .markdown-body tr,
+  .markdown-body img {
+    page-break-inside: avoid;
+  }
+
+  .markdown-body img {
+    max-width: 100% !important;
+  }
+
+  .markdown-body p,
+  .markdown-body h2,
+  .markdown-body h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .markdown-body h2,
+  .markdown-body h3 {
+    page-break-after: avoid;
+  }
+}
+</style><style>/*GitHub*/
+.highlight {background-color:#fff;color:#333333;}
+.highlight .hll {background-color:#ffffcc;}
+.highlight .c{color:#999988;font-style:italic}
+.highlight .err{color:#a61717;background-color:#e3d2d2}
+.highlight .k{font-weight:bold}
+.highlight .o{font-weight:bold}
+.highlight .cm{color:#999988;font-style:italic}
+.highlight .cp{color:#999999;font-weight:bold}
+.highlight .c1{color:#999988;font-style:italic}
+.highlight .cs{color:#999999;font-weight:bold;font-style:italic}
+.highlight .gd{color:#000000;background-color:#ffdddd}
+.highlight .ge{font-style:italic}
+.highlight .gr{color:#aa0000}
+.highlight .gh{color:#999999}
+.highlight .gi{color:#000000;background-color:#ddffdd}
+.highlight .go{color:#888888}
+.highlight .gp{color:#555555}
+.highlight .gs{font-weight:bold}
+.highlight .gu{color:#800080;font-weight:bold}
+.highlight .gt{color:#aa0000}
+.highlight .kc{font-weight:bold}
+.highlight .kd{font-weight:bold}
+.highlight .kn{font-weight:bold}
+.highlight .kp{font-weight:bold}
+.highlight .kr{font-weight:bold}
+.highlight .kt{color:#445588;font-weight:bold}
+.highlight .m{color:#009999}
+.highlight .s{color:#dd1144}
+.highlight .n{color:#333333}
+.highlight .na{color:teal}
+.highlight .nb{color:#0086b3}
+.highlight .nc{color:#445588;font-weight:bold}
+.highlight .no{color:teal}
+.highlight .ni{color:purple}
+.highlight .ne{color:#990000;font-weight:bold}
+.highlight .nf{color:#990000;font-weight:bold}
+.highlight .nn{color:#555555}
+.highlight .nt{color:navy}
+.highlight .nv{color:teal}
+.highlight .ow{font-weight:bold}
+.highlight .w{color:#bbbbbb}
+.highlight .mf{color:#009999}
+.highlight .mh{color:#009999}
+.highlight .mi{color:#009999}
+.highlight .mo{color:#009999}
+.highlight .sb{color:#dd1144}
+.highlight .sc{color:#dd1144}
+.highlight .sd{color:#dd1144}
+.highlight .s2{color:#dd1144}
+.highlight .se{color:#dd1144}
+.highlight .sh{color:#dd1144}
+.highlight .si{color:#dd1144}
+.highlight .sx{color:#dd1144}
+.highlight .sr{color:#009926}
+.highlight .s1{color:#dd1144}
+.highlight .ss{color:#990073}
+.highlight .bp{color:#999999}
+.highlight .vc{color:teal}
+.highlight .vg{color:teal}
+.highlight .vi{color:teal}
+.highlight .il{color:#009999}
+.highlight .gc{color:#999;background-color:#EAF2F5}
+</style><title>深入理解Java虚拟机（第三版）</title></head><body><article class="markdown-body"><h1 id="_1">背景<a class="headerlink" href="#_1" title="Permanent link"></a></h1>
+<p>JVM作为Java底层的核心，一直以来是我的短板，其底层等相关不甚了解。借此机会，通过这种方式学习，记录，分析&amp;分享。
+书中涉及代码调试案例，收录在<a href="https://github.com/nimbusking/learningjvm">learningjvm</a>项目中，各看官有需要可以自行查阅。</p>
+<h1 id="_2">书籍实录<a class="headerlink" href="#_2" title="Permanent link"></a></h1>
+<h2 id="java">第一章：走进JAVA<a class="headerlink" href="#java" title="Permanent link"></a></h2>
+<h3 id="java_1">Java发展史<a class="headerlink" href="#java_1" title="Permanent link"></a></h3>
+<p>宏观上了解Java整个发展体系：
+- 1995年5月23日，Oak语言改名为Java，并且在SunWorld大会上正式发布Java1.0版本，并且提出“Write Once, Run Anyware”的口号。
+- 1996年1月23日，JDK1.0发布，代表技术包括：Java虚拟机、Applet、AWT等。
+<!-- more -->
+- 1997年2月19日，Sun公司发布JDK1.1，技术代表有：JAR文件格式、JDBC、JavaBeans、RMI等。语法特性有一定增强：如内部类（Inner Class）和反射（Reflaction）
+- 1998年12月4日，JDK1.2发布（工程代号：Playground），Sun拆分Java技术体系为三个方向：分片是面向桌面应用开发的J2SE、面向企业开发的J2EE、面向手机等移动终端开发的J2ME。技术代表如：EJB、Java Plug-in、Java IDL、Swing等，并且在这个版本中Java虚拟机第一次内置了JIT（Just In Time）及时编译器。
+- 2000年5月8日，JDK1.3发布（工程代号：Kestrel【美洲红隼】），代表技术：Java类库，使用CORBAIIOP来实现RMI的通信协议。
+- 2002年2月13日，JDK1.4发布（工程代号：Merlin【灰背隼】）技术特性例如：正则表达式、异常链、NIO、日志类、XML解析器和XSLT转换器等等。
+- 2004年9月30日，JDK5发布（工程代号：Tiger【老虎】）语法特性加强：自动装箱、泛型、动态注解、枚举、可变长参数、循环遍历（foreach循环）等等。虚拟机上，改进了Java内存模型（Java Memory Model，JMM）、提供了java.util.concurrent并发包等。
+- 2006年12月11日，JDK6发布（工程代号：Mustang【野马】）改进的包括：提供初步的动态语言支持（通过内置的Mozilla JavaScript Rhino引擎实现）、提供编译期注解处理器和微型HTTP服务器API，等等。Java虚拟机内部做了大量改进，包括锁与同步、垃圾收集、类加载等方面。
+- 2011年7月28日，JDK7正式版发布（工程代号Dopphin【海豚】）改进的包括：提供新的G1收集器、加强对非Java语言的调用支持、可并行的类加载架构等。
+- 2014年3月18日，JDK8发布，主要功能特性包括：
+    + JEP 126: 对Lambda表达式的支持，这让Java语言拥有了流畅的函数式表达能力
+    + JEP 104: 内置Nashorn JavaScript引擎的支持
+    + JEP 150: 新的时间、日期API
+    + JEP 122: 彻底移除HotSpot的永久代
+    + .....
+- 2017年9月21日，JDK9艰难面世：Jigsaw模块化功能、增强若干工具（JS Shell、JLink、JHSDB等），整顿了HotSpot各个模块各自为战的日志系统，支持HTTP2客户端API等91个JEP
+- 2018年3月20日，JDK10发布：主要目标，内部重构：统一源仓库、统一垃圾收集器接口、统一即时编译器接口（JVMCI在JDK9已经有了，这里引入新的Graal即时编译器）
+- 2018年9月25日，JDK11发布：包含17个JEP，其中有ZGC这样的革命性垃圾收集器出现，也有把JDK10中的类型推断加入Lambda语法这种可见性的改善
+- 2019年3月20日，JDK12发布：包含9个JEP：Switch表达式、Java微测试套件（JMH）等新功能，最引人注目的特性无疑是加入了由ReaHat
+- 领导开发的Shenadnoah垃圾收集器。</p>
+<h3 id="java_2">Java虚拟机家族<a class="headerlink" href="#java_2" title="Permanent link"></a></h3>
+<ul>
+<li>虚拟机始祖：Sun Classiz/Exact VM</li>
+<li>武林盟主：HotSpot VM
+    HotSpot虚拟机的热点代码探测能力可以通过执行计数器找出最具有编译价值的代码，然后通知及时编译器以方法为单位进行编译。</li>
+<li>小家碧玉：Mobile/Embedded VM</li>
+<li>天下第二：BEA JRockit/IBM J9 VM</li>
+<li>软硬合璧：BEA Liquid VM/Azul VM
+    Azul VM实例都可以管理至少数十个CPU和数百GB的内存的硬件资源，并提供巨大内存范围内停顿时间可控的垃圾收集器（即业内赫赫有名的PGC和C4收集器）
+    Zing虚拟机是一个从HotSpot某个旧版代码分支基础上独立出来重新开发的高性能Java虚拟机。要求低延迟、快速预热等场景中，Zing VM都要比HotSpot表现的更好。Zing的PGC、C4收集器可以轻易支持TB级别的Java堆内存，而且保证暂停时间仍然可以维持在不超过10毫秒的范围内，HotSpot要等到JDK11和JDK12的ZGC及Shenandoah收集器才达到了相同的目标，而且目前的效果仍然远不如C4。</li>
+<li>挑战者：Apache Harmony/Google Android Dalvik VM</li>
+<li>没有成功，但并非失败：Microsoft JVM及其它</li>
+</ul>
+<h2 id="java_3">第二章 Java内存区域与内存溢出异常<a class="headerlink" href="#java_3" title="Permanent link"></a></h2>
+<h3 id="_3">运行时数据区域<a class="headerlink" href="#_3" title="Permanent link"></a></h3>
+<p>Java虚拟机在执行Java程序的过程中会把它所管理的内存划分为若干个不同的数据区域。这些区域有各自的用途，以及创建和销毁的时间，有的区域随着需积极进程的启动而一直存在，有些区域则是以来用户线程的启用和结束而建立和销毁。分为：方法区（Method Area），虚拟机栈（VM Stack），本地方法栈（Native Method Stack），堆（Heap），程序计数器（Program Counter Register）</p>
+<h4 id="_4">程序计数器<a class="headerlink" href="#_4" title="Permanent link"></a></h4>
+<p>一块较小的内存空间，它可以看做是当前线程所执行的字节码的行号指示器。</p>
+<h4 id="java_4">Java虚拟机栈<a class="headerlink" href="#java_4" title="Permanent link"></a></h4>
+<p>线程私有，生命周期与线程相同。
+虚拟机栈描述的是Java <strong>方法执行</strong>的线程内存模型：每个方法被执行的时候，Java虚拟机都会同步创建一个栈帧（Stack Frame）用于存储局部变量表、操作数栈、动态连接、方法出口等等。
+每一个方法调用直至执行完毕的过程，就对应着一个栈帧在虚拟机占中从入栈到出站的过程。</p>
+<p>“栈”通常就是指这里讲的虚拟机栈，或者更多情况下只是指虚拟机栈中的局部变量表部分。</p>
+<p><strong>局部变量表</strong>存放了编译期可知的各种Java虚拟机基本数据类型（boolean、byte、char、short、int、float、long、double）、对象引用（reference类型，它并不等同于对象本身，可能是一个指向对象起始地址的引用指针，也可能是指向一个代表对象的句柄或者其他与此对象相关的位置）和returnAddress类型（指向了一条字节码指令的地址）。
+这些数据类型在局部变量表中的存储空间以 <strong>局部变量槽（slot）</strong>来表示，其中64位长度的long和double类型的数据会占用两个变量槽，其余的数据类型只占用一个。</p>
+<p>在《Java虚拟机规范》中，对栈区域规定了两类异常情况：
+- 如果线程请求的栈深度大雨虚拟机所允许的深度，将抛出 <strong>StackOverflowError</strong>异常
+- 如果Java虚拟机栈容量可以动态扩展（注：HotSpot虚拟机是不可以动态扩展的，只要线程申请成功了就不会有OOM，但是如果申请时就失败，仍然会出现OOM异常），当栈扩展时无法申请到足够的内存会抛出 <strong>OutOfMemoryError</strong>异常。</p>
+<h4 id="_5">本地方法栈<a class="headerlink" href="#_5" title="Permanent link"></a></h4>
+<p>Native Method Stack与虚拟机栈类似，一个是位虚拟机执行Java方法（字节码）服务；一个是为虚拟机用到的本地（native）方法服务。</p>
+<h4 id="java_5">Java堆<a class="headerlink" href="#java_5" title="Permanent link"></a></h4>
+<p>Java堆是被所有线程共享的一块内存区域，在虚拟机启动时创建。此内存区域唯一的目的就是存放对象实例，Java世界里“几乎”所有对象实例都在这里分配内存。</p>
+<p>Java堆是垃圾收集器管理的内存区域。从回收内存角度看，由于现代垃圾收集器大部分都是基于分代收集理论设计的，所以Java堆中经常会出现“新生代”，“老年代”，“永久代”，“Eden空间”，“From Survivor空间”，“To Survivor空间”等名词。</p>
+<p>无论从什么角度，无论如何划分，都不会改变Java堆中存储内容堆共性，无论是哪个区域，存储的都只能是对象的实例，将Java堆细分的目的 <strong>只是为了更好地回收内存，或者更快地分配内存</strong>。</p>
+<p>Java堆即可以被实现成固定大小，也可以是扩展的，不过当前主流的Java虚拟机都是按照可扩展来实现的（通过参数-Xmx和-Xms设定）。
+<strong>如果在Java堆中没有内存完成实例分配，并且堆也无法再扩展时，Java虚拟机将会抛出OutOfMemoryError异常</strong></p>
+<h4 id="_6">方法区<a class="headerlink" href="#_6" title="Permanent link"></a></h4>
+<p>与Java堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的 <strong>类型信息</strong>、<strong>常量</strong>、<strong>静态变量</strong>、即时编译器编译后的代码缓存数据等。
+方法区与“永久代”本来是两个概念，<strong>仅仅因为</strong>当时的HotSpot虚拟机设计团队选择把收集器的分代设计扩展至方法区，或者说使用“永久代”实现方法区而已，这样使得HotSpot的垃圾收集器能像管理Java堆一样管理这部分内存，省区专门为方法区编写内存管理代码的工作。</p>
+<ul>
+<li>JDK6时HotSpot开发团队就有放弃永久代，逐步改为采用本地内存（Native Memory）来实现方法区的计划里</li>
+<li>JDK7时，已经把原本放在永久代的字符串常量池、静态变量移出</li>
+<li>JDK8时，完全放弃永久代概念，该用与JRockit、J9一样在本地内存中实现的元空间（Metaspace）来代替，把JDK7中剩余的主要是类型信息，全部移动到元空间中。</li>
+</ul>
+<p><strong>如果方法区无法满足新的内存分配需求时，将抛出OutOfMemoryError异常</strong></p>
+<h4 id="_7">运行常量池<a class="headerlink" href="#_7" title="Permanent link"></a></h4>
+<p>Runtime Constant Pool是方法区的一部分。Class文件中除了有<strong>类的版本</strong>、<strong>字段</strong>、<strong>方法</strong>、<strong>接口</strong>等描述信息外，还有一项信息是<strong>常量池表</strong>。主要用于：<strong>存放编译期生成的各种字面量与符号引用，这部分内容将在类加载后存放到方法区的运行时常量池中</strong>。</p>
+<p>Java语言并不要求常量一定只有编译期才能产生，也就是说，并非预置入Class文件中常量池的内容才能进入方法区运行时常量池，运行期间也可以将新的常量放入池中，这种特性被开发人员利用的较多的是String类的 <strong>intern()</strong>方法。</p>
+<p><strong>当常量池无法再申请到内存时会抛出OutOfMemoryError（本来就是方法区一部分，自然收到方法区内存限制）</strong></p>
+<h4 id="_8">直接内存<a class="headerlink" href="#_8" title="Permanent link"></a></h4>
+<p>Direct Memory并不是虚拟机运行时数据区的一部分，也不是《Java虚拟机》中定义的内存区域。<strong>这部分内存也被频繁地使用，而且也可能导致OutOfMemoryError异常出现</strong></p>
+<h5 id="_9">背景<a class="headerlink" href="#_9" title="Permanent link"></a></h5>
+<p>在JDK1.4中新加入了NIO（New Input/Output）类。引入了一种基于通道（Channel）与缓冲区（Buffer）的I/O方式，<strong>它可以使用Native函数库直接分配堆外内存，然后通过一个存储在Java堆里面的DirectByteBuffer对象作为这块内存的引用进行操作。这样就能在一些场景中显著提高性能，因为避免了在Java堆和Native堆中来回复制数据</strong>。</p>
+<h5 id="_10">问题<a class="headerlink" href="#_10" title="Permanent link"></a></h5>
+<p>本机直接内存分配不受到Java堆大小限制，但是，既然时内存，肯定还是会受到本机总内存（包括物理内存、SWAP分区或者分页文件）大小以及处理器寻址空间的限制。
+<strong>一般服务器管理员配置虚拟机参数时，会根据实际内存去设置-Xmx等参数信息</strong>，但是会常常忽略直接内存，使得各个内存区域总和大于物理内存限制，<strong>从而导致动态扩展时出现OutOfMemoryError异常</strong></p>
+<h3 id="hotspot">HotSpot虚拟机对象探秘<a class="headerlink" href="#hotspot" title="Permanent link"></a></h3>
+<p>注：书中探讨的是常用的HotSpot虚拟机的Java堆中的 <strong>对象分配、布局和访问的全过程</strong>。</p>
+<h4 id="_11">对象的创建（过程）<a class="headerlink" href="#_11" title="Permanent link"></a></h4>
+<ul>
+<li>检查过程
+当Java虚拟机遇到一条字节码new指令时，首先将去检查这个指令的参数是否能在常量池中定位到另一个类的<strong>符号引用</strong>，并且检查这个符号引用代表的类是否加载、解析和初始化过。如果没有，那么必须先执行相应的<strong>类加载过程</strong>。</li>
+<li>分配过程
+类加载检查通过之后，接下来虚拟机将为新生对象分配内存。对象所需内存的大小在类加载完成之后便可完全确定，对象分配空间的任务实际上便等同于吧一块确定大小的内存块从Java堆中划分出来。
+当使用Serial、ParNew等带压缩整理过程的收集器时，系统采用的分配算法是<strong>指针碰撞</strong>，既简单又高效。而当使用CMS这种基于清除（Sweep）算法的收集器时，理论上就只能采用较为复杂的<strong>空闲列表</strong>来分配内存。</li>
+</ul>
+<p><strong>分配过程中的操作原子性</strong>
+    - 采用CAS配上失败重试的机制
+    - 把内存分配的动作按照线程划分在不同的空间之中进行，即每个线程在java堆中预先分配一小块内存，成为本地线程分配缓冲（Thread Local Allocation Buffer, TLAB），哪个线程要分配内存，就在哪个线程的本地缓冲区中分配，只有本地缓冲区用完了，分配新的缓冲区时才需要同步锁定。<strong>虚拟机是否需要使用TLAB，可以通过-XX：+/-UseTLAB参数来设定</strong>
+- 初始化过程
+内存分配完成之hi，虚拟机必须将分配到内存空间（但不包括对象头）都初始化成零值。
+    + 对象设置
+        对象是哪个类的实例、如何才能找到类的元数据信息、对象的哈希码、对象的GC分代年龄等信息。
+    + 构造函数初始化
+        new指令之后会接着执行<init>()方法，按照程序员的意愿对对象进行初始化。</p>
+<h4 id="_12">对象的内存布局<a class="headerlink" href="#_12" title="Permanent link"></a></h4>
+<p>在HotSpot虚拟机中，对象在堆内存中的存储布局可以划分为三个部分：<strong>对象头（Header）、实例数据（Instance Data）和对齐填充（Padding）</strong>。</p>
+<h5 id="_13">对象头信息<a class="headerlink" href="#_13" title="Permanent link"></a></h5>
+<ul>
+<li>一类：用于存储对象自身运行时数据，如：哈希码（HashCode）、GC分代年龄、锁状态标志、线程持有的锁、偏向线程ID、偏向时间戳等</li>
+<li>另一类：类型指针，即对象指向它的类型元数据的指针，Java虚拟机通过这个指针来确定该对象时哪个类型的实例。</li>
+</ul>
+<h5 id="_14">实例数据信息<a class="headerlink" href="#_14" title="Permanent link"></a></h5>
+<p>程序代码中定义的各种类型字段内容，无论是从父类继承下来的，还是在子类中定义的字段都必须记录起来。<em>这部分的存储顺序会收到虚拟机分配策略参数（-XX:FieldsAllocationStyle参数）和字段在Java源码中的定义顺序的影响</em></p>
+<h5 id="_15">对齐填充<a class="headerlink" href="#_15" title="Permanent link"></a></h5>
+<p>不是必然存在，也没有特别的含义，仅仅起着占位符的作用。任何对象大小都必须是8字节的整数倍。如果对象实例数据部分没有对齐的话，就需要通过对齐填充来补全。</p>
+<h4 id="_16">对象的访问定位<a class="headerlink" href="#_16" title="Permanent link"></a></h4>
+<p>Java程序会通过栈上的reference数据来操作对上的具体对象，但由于reference类型在《Java虚拟机规范》里面只规定了 <strong>它是一个指向对象的引用</strong>，并没有定义这个引用应该通过什么方式去定位、访问到堆中对象的具体位置。主流的访问方式有：<strong>句柄</strong> 和 <strong>直接指针</strong>。
+- 句柄访问：Java堆中可能会划分出一块内存来作为 <em>句柄池</em>，reference中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自具体的地址信息
+- 直接指针访问：reference中存储的直接就是对象的地址</p>
+<p><img alt="通过句柄访问内存" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/memory_hander_detect.png" />
+<img alt="通过直接指针访问内存" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/direct_memory_detect.png" /></p>
+<h4 id="outofmemoryerror">实战：OutOfMemoryError异常<a class="headerlink" href="#outofmemoryerror" title="Permanent link"></a></h4>
+<p><strong>注：</strong> 书中介绍了很多实战经验，这里仅记录一些经验相关事项，具体实例代码参考书中详细说明
+本节实战的主要目的有两个：
+- 通过代码验证《Java虚拟机规范》中描述的各个运行时区域存储的内容
+- 遇到实际的内存溢出异常时，能够根据异常的提示信息迅速得知时哪个区域的内存溢出，知道怎样的代码可能会导致这些区域内存溢出，以及出现这些异常后该如何处理。</p>
+<h5 id="java_6">Java堆溢出<a class="headerlink" href="#java_6" title="Permanent link"></a></h5>
+<p><strong>根本原因：</strong> Java堆用于存储对象实例，只要不断创建对象，并且保证GC Roots到对象之间有可达路径来避免垃圾回收机制清除这些对象，那么随着对象数量增加，总容量触及最大堆的容量限制后就会产生内存溢出异常。
+<strong>常规处理方法：</strong>
+- 先通过内存映像分析工具（如Eclipse Memory Analyzer）对Dump出来的堆转存储快照进行分析，首先确认内存中导致的OOM的对象是否时必要的，也就是到底时出现了 <strong>内存泄露（Memory Leak）</strong> 还是 <strong>内存溢出（Memory Overflow）</strong>
+- 如果是内存泄漏，可以通过工具查看泄漏对象到GC Roots的引用链，<em>找到泄漏对象是通过怎样的引用路径、与哪些GC Roots相关联，才导致垃圾收集器无法回收</em>，根据泄漏对象的类型信息以及它到GC Roots引用链的信息，一般可以比较准确的定位到这些对象的创建位置，进而找出产生内存泄漏的代码的具体位置。
+- 如果不是内存泄漏，就是对象必须要存活的话，就要分析Java虚拟机堆参数（-Xmx与-Xms）设置，与机器内存相比，是否还是有上调的空间。<em>再从代码上检查是否存在某些对象生命周期过长、持有状态时间过长、存储结构设计不合理等等，尽量减少程序运行期间的内存消耗。</em></p>
+<h5 id="_17">虚拟机和本地方法栈溢出<a class="headerlink" href="#_17" title="Permanent link"></a></h5>
+<p>《Java虚拟机规范》中描述了两种情况:
+- 如果线程请求的栈深度大于虚拟机所允许的最大深度，将抛出StackOverflowError异常
+- 如果虚拟机的栈内存允许动态扩展，当扩展栈容量无法申请到足够的内存时，将抛出OutOfMemoryError异常
+通常默认参数，对于正常的调用（包括不能做尾递归优化的递归调用），默认深度（1000~2000）完全够用。如果建立过多线程导致的内存溢出，在不能减少线程数量或者更换64位虚拟机的情况下，<strong>就只能通过减少最大堆和减少栈容量</strong> 来换取更多的线程</p>
+<h5 id="_18">方法区和运行时常量池溢出<a class="headerlink" href="#_18" title="Permanent link"></a></h5>
+<p>方法区溢出也是一种常见的内存溢出异常，一个类如果要被垃圾收集器回收，要达成的条件比较苛刻。
+在JDK8以后，永久代便完全退出了历史舞台，元空间作为其替代者登场，HotSpot提供了一些参数作为原空间的防御措施，主要包括：
+- -XX: MaxMetaspaceSize: 设置元空间最大值，默认是-1，即不限制，或者说只受限于本地内存大小
+- -XX: MetaspaceSize：指定元空间初始空间大小，以字节为单位，达到该值就会触发垃圾收集器进行类型卸载，同时收集器会对该值进行调整：如果释放了大量的空间，就适当降低该值；如果释放了很少的空间，那么在不超过XX: MaxMetaspaceSize（如果设置了的话）情况下，适当提高该值
+- -XX: MinMetaspaceFreeRatio：作用是在垃圾收集器之后控制最小的元空间剩余容量的百分比，可减少因为元空间不足导致的垃圾收集的频率。类似的还有 <code>-XX: MinMetaspaceFreeRatio</code> 控制最大的元空间剩余容量的百分比。</p>
+<h5 id="_19">本机直接内存溢出<a class="headerlink" href="#_19" title="Permanent link"></a></h5>
+<p><strong>注：</strong> 至少本人目前从来没有直接接触到在Java程序层面涉及到的直接内存分配的场景，所以这节不作记录。</p>
+<h2 id="_20">第三章 垃圾收集器与内存分配策略<a class="headerlink" href="#_20" title="Permanent link"></a></h2>
+<h3 id="_21">对象已死<a class="headerlink" href="#_21" title="Permanent link"></a></h3>
+<h4 id="_22">关于引用计数算法<a class="headerlink" href="#_22" title="Permanent link"></a></h4>
+<p>可以通过一个循环引用的Java程序实例就可以从侧面判定出，Java虚拟机并不是通过引用计数算法来判断对象是否存活的。</p>
+<h4 id="_23">可达性分析算法<a class="headerlink" href="#_23" title="Permanent link"></a></h4>
+<p>当前主流的商用程序语言的内存管理子系统，都是通过 <strong>可达性分析(Reachability Analysis)</strong> 算法来判定对象是否存活的。
+<strong>基本思想：</strong> 通过一系列称为“GC Roots”的根对象作为起始点集，从这些点开始，根据引用向下搜索，搜索过程所走的路径称之为“引用链”（Reference Chain），如果某个对象到GC Roots间没有任何引用链（Reference Chain），如果某个对象到GC Roots间没有任何引用链相连，或者说（图论）从GC Roots到这个对象不可达时，则证明此对象时不可能再引用的。</p>
+<p>Java技术体系中，可固定作为GC Roots对象包括以下几种类型：
+- 在虚拟机栈（栈帧中的本地变量表）中引用的对象，譬如各个线程被调用的方法堆栈中使用到的参数、局部变量、临时变量。
+- 在方法区中 <strong>类静态属性</strong> 引用的对象，譬如Java类的引用类型静态变量
+- 在本地方法栈中JNI（即通常所说的Native方法）引用的对象。
+- Java虚拟机内部的引用，如基本数据类型对应的Class对象，一些常驻的异常对象（比如NullPointException、OutOfMemoryError）等，还有系统类加载器。
+- 所有被同步锁（synchronized关键字）持有的对象。
+- 反映Java虚拟机内部情况的JMXBean、JVMTI中注册的回调、本地代码缓存等。</p>
+<p>除了这些固定GC Roots集合以外，根据用户所选用的垃圾收集器以及当前回收的内存区域不同，还可以有其它对象“临时性”地加入，共同构成完整的GC Roots集合。譬如后文将会提到的 <strong>分代收集</strong> 和 <strong>局部回收（Partial GC）</strong></p>
+<h4 id="_24">再谈引用<a class="headerlink" href="#_24" title="Permanent link"></a></h4>
+<p>在JDK1.2之后，Java对引用的概念进行了扩充，将引用分为 <strong>强引用（Strongly Re-ference）</strong>、<strong>软引用（Soft Reference）</strong>、<strong>弱引用（Weak Reference）</strong>、和 <strong>虚引用（Phantom Reference）</strong> 这4种，这4种引用强度依次逐渐减弱。</p>
+<ul>
+<li>强引用是最传统的“引用”的定义，是指在程序代码之中普遍存在的引用赋值，即类似“Object obj=new Object()”这种引用关系。无论任何情况下，<strong>只要强引用关系还存在，垃圾收集器就永远不会回收掉被引用的对象。</strong></li>
+<li>软引用是用来描述一些还有用，但非必须的对象。只被软引用关联着的对象，在系统将要发生内存溢出异常前，会把这些对象列进回收范围之中进行第二次回收，如果这次回收还没有足够的内存，才会抛出内存溢出异常。在JDK 1.2版之后提供了SoftReference类来实现软引用。</li>
+<li>弱引用也是用来描述那些非必须对象，但是它的强度比软引用更弱一些，被弱引用关联的对象只能生存到下一次垃圾收集发生为止。当垃圾收集器开始工作，无论当前内存是否足够，都会回收掉只被弱引用关联的对象。在JDK 1.2版之后提供了WeakReference类来实现弱引用。</li>
+<li>虚引用也称为“幽灵引用”或者“幻影引用”，它是最弱的一种引用关系。一个对象是否有虚引用的存在，完全不会对其生存时间构成影响，也无法通过虚引用来取得一个对象实例。 <strong>为一个对象设置虚引用关联的唯一目的只是为了能在这个对象被收集器回收时收到一个系统通知。</strong> 在JDK 1.2版之后提供了PhantomReference类来实现虚引用。</li>
+</ul>
+<h4 id="_25">生存还是死亡<a class="headerlink" href="#_25" title="Permanent link"></a></h4>
+<p>要真正宣告一个对象死亡，至少要经历两次标记的过程：
+- 如果对象在进行可达性分析后发现没有与GC Roots相连接的引用链，那他将会被第一次标记
+- 随后进行一次筛选，筛选的条件是次对象是是否必要执行finalize()方法。假如对象没有覆盖finalize()方法，或者finalize()方法已经被虚拟机调用过，那么虚拟机将这两种情况都视为“没有必要执行”。</p>
+<h4 id="_26">回收方法区<a class="headerlink" href="#_26" title="Permanent link"></a></h4>
+<p>《Java虚拟机规范》中提到过可以不要求虚拟机在方法区中实现垃圾收集器。
+方法区的垃圾收集主要回收两个部分： <strong>废弃的常量和不再使用的类型</strong>
+- 回收废弃常量与回收Java堆中的对象非常相似，如果没有任何字符串对象引用常量池中的常量，且虚拟机中也没有其它地方引用这个字面量。如果此时发生内存回收，而且垃圾收集器判定必要的话，则这个常量会被回收。
+- 判定一个类型是否属于“不再被使用的类”的条件就比较苛刻，需要同时满足下面三个条件：
+    + 该类所有的实例都已经被回收，也就是Java堆中不存在该类及其任何派生子类的实例
+    + 加载该类的类加载器已经被回收，这个条件除非是经过精心设计的可替换类加载器的场景，如OSGi、JSP的重加载等，否则通常是很难达成的
+    + 该类对应的java.lang.Class对象没有被任何地方引用，无法再任何地方通过反射访问该类。</p>
+<h3 id="_27">垃圾收集算法<a class="headerlink" href="#_27" title="Permanent link"></a></h3>
+<h4 id="_28">分代收集理论<a class="headerlink" href="#_28" title="Permanent link"></a></h4>
+<p>两个分代假说：
+- 弱分代假说（Weak Generational Hypothesis ）：绝大多数对象都是朝生夕灭的。
+- 强分代假说（String Generational Hypothesis）：熬过越多次垃圾收集过程的对象就越难以消亡。
+这两个分代假说共同奠定了多款常用的垃圾收集器的一致的设计原则：收集器应该将Java堆划分出不同的区域，然后将回收对象一句其年龄（年龄即对象熬过垃圾收集的过程的次数）分配到不同的区域之中存储。
+在Java堆划分出不同的区域之后，垃圾收集器才可以每次只回收其中某一个或者某些部分的区域——因而才有了 <strong>“Minor GC”“Major GC”“Full GC”</strong> 这样的回收类型的划分；也才能够针对不同的区域安排与里面存储对象存亡特征相匹配的垃圾收集算法——因而发展出了 <strong>“标记-复制算法”“标记-清除算法”“标记-整理算法”</strong> 等针对性的垃圾收集算法。</p>
+<p>通常意义下，直接可以按照不同内存区域中的对象，直接回收，但是往往存在一个明显的困难： <strong>对象不是孤立的，对象之间会存在跨代引用</strong>，为了解决这个问题，就需要对分代收集理论添加第三条经验法则：
+- 跨代引用假说（Intergenrational Reference Hypothesis）：跨代引用相对于同代引用来说仅占极少数。</p>
+<p>统一定义：
+- 部分收集（Partial GC）：指 <strong>目标不是完整收集整个Java堆的垃圾收集</strong>，其中又分为
+    + 新生代收集（Minor GC/Young GC）：<strong>指目标只是新生代的垃圾收集。</strong>
+    + 老年代收集（Major GC/Old GC）：<strong>指目标只是老年代的垃圾收集。</strong> 目前只有CMS收集器会有单独收集老年代的行为。另外请注意“Major GC”这个说法现在有点混淆，在不同资料上常有不同所指，读者需按上下文区分到底是指老年代的收集还是整堆收集。
+    + 混合收集（Mixed GC）：指目标是 <strong>收集整个新生代以及部分老年代的垃圾收集</strong>。目前只有G1收集器会有这种行为
+- 整堆收集（Full GC）：<strong>收集整个Java堆和方法区的垃圾收集</strong></p>
+<h4 id="-">标记-清除算法<a class="headerlink" href="#-" title="Permanent link"></a></h4>
+<p>算法分为 <strong>“标记”和“清除”</strong> 两个阶段：首先标记出所有需要回收的对象，在标记完成后，统一回收掉所有被标记的对象，也可以反过来，标记存活的对象，统一回收所有未被标记的对象。
+该算法主要的两个问题：
+- 第一个是执行效率不稳定，如果Java堆中包含大量对象，而且其中大部分是需要被回收的，这时必须 <em>进行大量标记和清除的动作</em>，导致标记和清除两个过程的执行效率都随对象数量增长而降低。
+- 第二个是 <strong>内存空间的碎片化问题</strong>，标记、清除之后会产生大量不连续的内存碎片，空间碎片太多可能会导致当以后在程序运行过程中需要分配较大对象时无法找到足够的连续内存而不得不提前触发另一次垃圾收集动作。</p>
+<h4 id="-_1">标记-复制算法<a class="headerlink" href="#-_1" title="Permanent link"></a></h4>
+<p>“半区复制”（Semispace Copying）的垃圾收集算法，它将可用内存按容量划分为大小相等的两块，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用过的内存空间一次清理掉。</p>
+<h5 id="-appel">该算法改进-Appel式回收<a class="headerlink" href="#-appel" title="Permanent link"></a></h5>
+<p>称为“Appel式回收”。HotSpot虚拟机的Serial、ParNew等新生代收集器均采用了这种策略来设计新生代的内存布局。
+Appel式回收的具体做法是：<strong>把新生代分为一块较大的Eden空间和两块较小的Survivor空间</strong>，每次分配内存只使用Eden和其中一块Survivor。发生垃圾搜集时，将Eden和Survivor中仍然存活的对象一次性复制到另外一块Survivor空间上，然后直接清理掉Eden和已用过的那块Survivor空间。HotSpot虚拟机默认Eden和Survivor的大小比例是8∶1，也即每次新生代中可用内存空间为整个新生代容量的90%（Eden的80%加上一个Survivor的10%），只有一个Survivor空间，即10%的新生代是会被“浪费”的。</p>
+<p><strong>特例：</strong> Appel式回收还有一个充当罕见情况的“逃生门”的安全设计，<strong>当Survivor空间不足以容纳一次Minor GC之后存活的对象时，就需要依赖其他内存区域（实际上大多就是老年代）进行分配担保（Handle Promotion）。</strong></p>
+<h4 id="-_2">标记-整理算法<a class="headerlink" href="#-_2" title="Permanent link"></a></h4>
+<p>1974年Edward Lueders提出了另外一种有针对性的“标记-整理”（Mark-Compact）算法，其中的标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象进行清理，<strong>而是让所有存活的对象都向内存空间一端移动，然后直接清理掉边界以外的内存</strong>，“标记-整理”算法的示意图如图所示：
+<img alt="“标记-整理”算法示意图" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/mark_compact_demostration.png" /></p>
+<h3 id="hotspot_1">HotSpot的算法细节实现<a class="headerlink" href="#hotspot_1" title="Permanent link"></a></h3>
+<p><strong>注：</strong> 这一节非常琐碎，对算法实现细节做了很多阐述，核心就是怎么高效的收集？与之带来的问题基本上是一环套一环的，可以暂时先了解，如遇到特定场景、特定问题之后，再回过头来啃一啃这里面的实现。暂时，也就记录一些名词，不去理解具体的实现细节。</p>
+<h4 id="_29">根节点枚举<a class="headerlink" href="#_29" title="Permanent link"></a></h4>
+<p>迄今为止，所有收集器在根节点枚举这一步骤时都是必须 <strong>暂停用户线程</strong> 的，因此毫无疑问根节点枚举与之前提及的整理内存碎片一样会面临相似的“Stop The World”的困扰。具体在HotSpot中的做法是：
+使用一组称为 <strong>OopMap的数据结构</strong> 来达到这个目的。一旦类加载动作完成的时候，HotSpot就会把对象内什么偏移量上是什么类型的数据计算出来，在即时编译（见第11章）过程中，也会在特定的位置记录下栈里和寄存器里哪些位置是引用。这样收集器在扫描时就可以直接得知这些信息了，并不需要真正一个不漏地从方法区等GC Roots开始查找。</p>
+<h4 id="_30">安全点<a class="headerlink" href="#_30" title="Permanent link"></a></h4>
+<p>前面提到的OopMap存在一个问题： <em>可能导致引用关系变化，或者说导致OopMap内容变化的指令非常多，如果为每一条指令都生成对应的OopMap，那将会需要大量的额外存储空间，这样垃圾收集伴随而来的空间成本就会变得无法忍受的高昂。</em></p>
+<p>实际上HotSpot也的确没有为每条指令都生成OopMap，前面已经提到，只是在“特定的位置”记录了这些信息，<strong>这些位置被称为安全点（Safepoint）。</strong>
+安全点位置的选取基本上是以“是否具有让程序长时间执行的特征”为标准进行选定的，因为每条指令执行的时间都非常短暂，程序不太可能因为指令流长度太长这样的原因而长时间执行，<strong>“长时间执行”的最明显特征</strong> 就是 <strong>指令序列的复用</strong>，例如方法调用、循环跳转、异常跳转等都属于指令序列复用，所以只有具有这些功能的指令才会产生安全点。</p>
+<p>对于安全点，另外一个需要考虑的问题是，如何在垃圾收集发生时让所有线程（这里其实不包括执行JNI调用的线程）都跑到最近的安全点，然后停顿下来。这里有两种方案可供选择：<strong>抢先式中断（Preemptive Suspension）和主动式中断（Voluntary Suspension）</strong></p>
+<h4 id="_31">安全区域<a class="headerlink" href="#_31" title="Permanent link"></a></h4>
+<p>安全点机制保证了程序执行时，在不太长的时间内就会遇到可进入垃圾收集过程的安全点。但是，程序“不执行”的时候呢？
+所谓的程序不执行就是没有分配处理器时间，典型的场景便是用户线程处于Sleep状态或者Blocked状态，这时候 <em>线程无法响应虚拟机的中断请求，不能再走到安全的地方去中断挂起自己，虚拟机也显然不可能持续等待线程重新被激活分配处理器时间。</em> 对于这种情况，就必须引入 <strong>安全区域（Safe Region）</strong> 来解决。</p>
+<p><strong>安全区域是指能够确保在某一段代码片段之中，引用关系不会发生变化，因此，在这个区域中任意地方开始垃圾收集都是安全的。我们也可以把安全区域看作被扩展拉伸了的安全点。</strong></p>
+<h4 id="_32">记忆集与卡表<a class="headerlink" href="#_32" title="Permanent link"></a></h4>
+<h5 id="_33">诞生的背景<a class="headerlink" href="#_33" title="Permanent link"></a></h5>
+<p>垃圾收集器在<strong>新生代</strong>中建立了名为记忆集（Remembered Set）的数据结构，用以避免把整个老年代加进GC Roots扫描范围。</p>
+<p>记忆集是一种用于记录从非收集区域指向收集区域的指针集合的抽象数据结构。</p>
+<h3 id="_34">写屏障<a class="headerlink" href="#_34" title="Permanent link"></a></h3>
+<p>在HotSpot虚拟机里是通过写屏障（Write Barrier）技术维护卡表状态的。</p>
+<h3 id="_35">并发的可达性分析<a class="headerlink" href="#_35" title="Permanent link"></a></h3>
+<p>想解决或者降低用户线程的停顿，就要先搞清楚为什么必须在一个能保障一致性的快照上才能进行对象图的遍历？
+我们引入<strong>三色标记（Tri-color M arking）</strong>作为工具来辅助推导，把遍历对象图过程中遇到的对象，按照“是否访问过”这个条件标记成以下三种颜色：
+- <strong>白色：</strong> 表示对象<strong>尚未</strong>被垃圾收集器访问过。显然在可达性分析刚刚开始的阶段，所有的对象都是白色的，若在分析结束的阶段，仍然是白色的对象，即代表不可达。
+- <strong>黑色：</strong> 表示对象<strong>已经</strong>被垃圾收集器访问过，且这个对象的<strong>所有引用</strong>都已经扫描过。黑色的对象代表已经扫描过，它是安全存活的，如果有其他对象引用指向了黑色对象，无须重新扫描一遍。黑色对象不可能直接（不经过灰色对象）指向某个白色对象。
+- <strong>灰色：</strong> 表示对象已经被垃圾收集器访问过，但这个对象上<strong>至少存在一个引用</strong>还没有被扫描过。</p>
+<h3 id="_36">经典垃圾收集器<a class="headerlink" href="#_36" title="Permanent link"></a></h3>
+<p>说明：使用“经典”二字是为了与几款目前仍处于实验状态，但执行效果上有革命性改进的高性能低延迟收集器区分开来，这些经典的收集器尽管已经算不上是最先进的技术，但它们曾在实践中千锤百炼，足够成熟，基本上可认为是现在到未来两、三年内，能够在商用生产环境上放心使用的全部垃圾收集器了。
+<img alt="HotSpot虚拟机的垃圾收集器" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/hotspot_gc.png" /></p>
+<h4 id="serial">Serial收集器<a class="headerlink" href="#serial" title="Permanent link"></a></h4>
+<p>这个收集器是一个单线程工作的收集器，但它的“单线程”的意义并不仅仅是说明它只会使用一个处理器或一条收集线程去完成垃圾收集工作，更重要的是强调在它进行垃圾收集时，必须暂停其他所有工作线程，直到它收集结束。
+<img alt="Serial/Serial Old收集器运行示意图" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/Serial_SerialOld.png" />
+<strong>Serial收集器对于运行在客户端模式下的虚拟机来说是一个很好的选择</strong></p>
+<h4 id="parnew">ParNew收集器<a class="headerlink" href="#parnew" title="Permanent link"></a></h4>
+<p>ParNew收集器实质上是Serial收集器的多线程并行版本，除了<strong>同时使用多条线程进行垃圾收集</strong>之外，其余的行为包括Serial收集器完全一致。
+<img alt="ParNew/Serial Old收集器运行示意图" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/ParNew_SerialOld.png" />
+不少运行在服务端模式下的HotSpot虚拟机，尤其是JDK 7之前的遗留系统中首选的新生代收集器，其中有一个与功能、性能无关但其实很重要的原因是：<em>除了Serial收集器外，目前只有它能与CMS收集器配合工作。</em>
+可以理解为：ParNew合并入CMS，成为它专门处理新生代的组成部分。ParNew可以说是HotSpot虚拟机中第一款退出历史舞台的垃圾收集器。</p>
+<p>ParNew收集器是激活CMS后（使用-XX：+UseConcMarkSweepGC选项）的默认新生代收集器，也可以使用-XX：+/-UseParNewGC选项来强制指定或者禁用它。</p>
+<h5 id="_37">并发与并行<a class="headerlink" href="#_37" title="Permanent link"></a></h5>
+<ul>
+<li><strong>并行（Parallel）：</strong> 并行描述的是多条垃圾收集器线程之间的关系，说明同一时间有多条这样的线程在协同工作，通常默认此时用户线程是处于等待状态。</li>
+<li><strong>并发（Concurrent）：</strong> 并发描述的是垃圾收集器线程与用户线程之间的关系，说明同一时间垃圾收集器线程与用户线程都在运行。由于用户线程并未被冻结，所以程序仍然能响应服务请求</li>
+</ul>
+<h4 id="parallel-scavenge">Parallel Scavenge收集器<a class="headerlink" href="#parallel-scavenge" title="Permanent link"></a></h4>
+<p>Parallel Scavenge收集器也是一款新生代收集器，它同样是<strong>基于标记-复制算法实现</strong>的收集器，也是能够并行收集的多线程收集器</p>
+<p>Parallel Scavenge收集器的特点是它的关注点与其他收集器不同，<em>CMS等收集器的关注点是尽可能地缩短垃圾收集时用户线程的停顿时间</em>，而Parallel Scavenge收集器的目标则是<strong>达到一个可控制的吞吐量（Throughput）</strong>。所谓<strong>吞吐量</strong>就是<em>处理器用于运行用户代码的时间与处理器总消耗时间的比值</em></p>
+<p>Parallel Scavenge收集器提供了两个参数用于精确控制吞吐量，分别是控制最大垃圾收集停顿时间的-XX：MaxGCPauseMillis参数以及直接设置吞吐量大小的-XX：GCTimeRatio参数。</p>
+<h4 id="serial-old">Serial Old收集器<a class="headerlink" href="#serial-old" title="Permanent link"></a></h4>
+<p>Serial Old是Serial收集器的老年代版本，它同样是一个单线程收集器，使用标记-整理算法。这个收集器的主要意义也是供客户端模式下的HotSpot虚拟机使用。
+<img alt="Serial Old收集器运行示意图" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/SerialOld.png" /></p>
+<h4 id="parallel-old">Parallel Old收集器<a class="headerlink" href="#parallel-old" title="Permanent link"></a></h4>
+<p>Parallel Old是Parallel Scavenge收集器的老年代版本，支持多线程并发收集，基于标记-整理算法实现。
+由于老年代Serial Old收集器在服务端应用性能上的“拖累”，使用Parallel Scavenge收集器也未必能在整体上获得吞吐量最大化的效果。同样，由于单线程的老年代收集中无法充分利用服务器多处理器的并行处理能力，<em>在老年代内存空间很大而且硬件规格比较高级的运行环境中</em>，<strong>这种组合的总吞吐量甚至不一定比ParNew加CMS的组合来得优秀。</strong>
+<img alt="ParallelOld收集器运行示意图" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/ParallelOld.png" /></p>
+<p>*<em>在注重吞吐量或者处理器资源较为稀缺的场合，都可以优先考虑Parallel Scavenge加Parallel Old收集器这个组合。
+*</em></p>
+<h4 id="cms">CMS收集器<a class="headerlink" href="#cms" title="Permanent link"></a></h4>
+<p>CMS（Concurrent Mark Sweep）收集器是一种以<strong>获取最短回收停顿时间</strong>为目标的收集器。基于标记-清除算法实现。
+基本分为四个步骤：
+- 1）初始标记（CMS initial mark）<strong>（Stop The World）</strong>：初始标记仅仅只是标记一下GCRoots能直接关联到的对象，速度很快；
+- 2）并发标记（CMS concurrent mark）：并发标记阶段就是从GC Roots的直接关联对象开始遍历整个对象图的过程，这个过程耗时较长但是不需要停顿用户线程，可以与垃圾收集线程一起并发运行；
+- 3）重新标记（CMS remark）<strong>（Stop The World）</strong>：而重新标记阶段则是为了修正并发标记期间，因用户程序继续运作而导致标记产生变动的那一部分对象的标记记录（详见3.4.6节中关于增量更新的讲解），这个阶段的停顿时间通常会比初始标记阶段稍长一些，但也远比并发标记阶段的时间短。
+- 4）并发清除（CMS concurrent sweep）：清理删除掉标记阶段判断的已经死亡的对象，由于不需要移动存活对象，所以这个阶段也是可以与用户线程同时并发的。
+<img alt="Concurrent Mark Sweep收集器运行示意图" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/Concurrent_Mark_Sweep.png" /></p>
+<p>CMS至少有以下三个明显的缺点：
+- CMS收集器对处理器资源非常敏感
+- 由于CMS收集器无法处理“浮动垃圾”（Floating Garbage），有可能出现“Con-current Mode Failure”失败进而导致另一次完全“Stop The World”的Full GC的产生。
+- CMS是一款基于“标记-清除”算法实现的收集器，就可能想到这意味着收集结束时会有大量空间碎片产生。空间碎片过多时，将会给大对象分配带来很大麻烦，往往会出现老年代还有很多剩余空间，但就是无法找到足够大的连续空间来分配当前对象，而不得不提前触发一次Full GC的情况。可以适当调高参数<strong>-XX：CMSInitiatingOccupancyFraction</strong>的值来提高CMS的触发百分比，降低内存回收频率，获取更好的性能。
+CMS收集器提供了一个-XX：+UseCMSCompactAtFullCollection开关参数（默认是开启的，此参数从<strong>JDK 9开始废弃</strong>），用于在CMS收集器不得不进行Full GC时开启内存碎片的合并整理过程，由于这个内存整理必须移动存活对象，（在Shenandoah和ZGC出现前）是无法并发的。这样空间碎片问题是解决了，但停顿时间又会变长，因此虚拟机设计者们还提供了另外一个参数-XX：CMSFullGCsBeforeCompaction（此参数从JDK 9开始废弃），这个参数的作用是要求CM S收集器在执行过若干次（数量由参数值决定）不整理空间的Full GC之后，下一次进入Full GC前会先进行碎片整理（默认值为0，表示每次进入Full GC时都进行碎片整理）。</p>
+<h4 id="garbage-first">Garbage First收集器<a class="headerlink" href="#garbage-first" title="Permanent link"></a></h4>
+<p>面向堆内存任何部分来组成回收集（Collection Set，一般简称CSet）进行回收，衡量标准不再是它属于哪个分代，而是哪块内存中存放的垃圾数量最多，回收收益最大，这就是G1收集器的Mixed GC模式。</p>
+<p>G1不再坚持固定大小以及固定数量的分代区域划分，而是把连续的Java堆划分为<strong>多个大小相等的独立区域（Region）</strong>，每一个Region都可以根据需要，扮演新生代的Eden空间、Survivor空间，或者老年代空间。</p>
+<p>Region中还有一类特殊的Humongous区域，专门用来存储大对象。G1认为只要大小超过了一个Region容量一半的对象即可判定为大对象。每个Region的大小可以通过参数-XX：G1HeapRegionSize设定，取值范围为1M B～32M B，且应为2的N次幂。</p>
+<p>G1收集器之所以能建立可预测的停顿时间模型：是因为它将Region作为单次回收的最小单元，即每次收集到的内存空间都是Region大小的整数倍，这样可以有计划地避免在整个Java堆中进行全区域的垃圾收集。</p>
+<h4 id="_38">低延迟垃圾收集器<a class="headerlink" href="#_38" title="Permanent link"></a></h4>
+<p>衡量垃圾收集器的三项最重要的指标是：内存占用（Footprint）、吞吐量（Throughput）和延迟（Latency），三者共同构成了一个“不可能三角”。</p>
+<h5 id="shenandoah">Shenandoah收集器<a class="headerlink" href="#shenandoah" title="Permanent link"></a></h5>
+<h5 id="zgc">ZGC收集器<a class="headerlink" href="#zgc" title="Permanent link"></a></h5>
+<p>ZGC和Shenandoah的目标是高度相似的，都希望在尽可能对吞吐量影响不太大的前提下，实现在任意堆内存大小下都可以把垃圾收集的停顿时间限制在十毫秒以内的低延迟。</p>
+<h3 id="_39">选择合适的垃圾收集器<a class="headerlink" href="#_39" title="Permanent link"></a></h3>
+<h4 id="epsilon">Epsilon收集器<a class="headerlink" href="#epsilon" title="Permanent link"></a></h4>
+<p>从JDK 10开始，为了隔离垃圾收集器与Java虚拟机解释、编译、监控等子系统的关系，RedHat提出了垃圾收集器的统一接口，即JEP 304提案，Epsilon是这个接口的有效性验证和参考实现，同时也用于需要剥离垃圾收集器影响的性能测试和压力测试。</p>
+<p><strong>背景：</strong>
+传统Java有着内存占用较大，在容器中启动时间长，即时编译需要缓慢优化等特点，这对大型应用来说并不是什么太大的问题，但对短时间、小规模的服务形式就有诸多不适。为了应对新的技术潮流，最近几个版本的JDK逐渐加入了提前编译、面向应用的类数据共享等支持。Epsilon也是有着类似的目标，如果读者的应用只要<strong>运行数分钟甚至数秒</strong>，只要Java虚拟机能正确分配内存，在堆耗尽之前就会退出，那显然运行负载极小、没有任何回收行为的Epsilon便是很恰当的选择。</p>
+<h4 id="_40">收集器的权衡<a class="headerlink" href="#_40" title="Permanent link"></a></h4>
+<p>我们应该如何选择一款适合自己应用的收集器呢？这个问题的答案主要受以下三个因素影响：
+- 应用程序的主要关注点是什么？
+    + 如果是数据分析、科学计算类的任务，目标是能尽快算出结果，那吞吐量就是主要关注点；
+    +  如果是SLA应用，那停顿时间直接影响服务质量，严重的甚至会导致事务超时，这样延迟就是主要关注点；
+    +  而如果是客户端应用或者嵌入式应用，那垃圾收集的内存占用则是不可忽视的。
+- 运行应用的基础设施如何？譬如硬件规格，要涉及的系统架构是x86-32/64、SPARC还是ARM /Aarch64；处理器的数量多少，分配内存的大小；选择的操作系统是Linux、Solaris还是Windows等。
+- 使用JDK的发行商是什么？版本号是多少？是ZingJDK/Zulu、OracleJDK、Open-JDK、OpenJ9抑或是其他公司的发行版？该JDK对应了《Java虚拟机规范》的哪个版本？</p>
+<h4 id="_41">虚拟机及垃圾收集器日志<a class="headerlink" href="#_41" title="Permanent link"></a></h4>
+<p><strong>阅读分析虚拟机和垃圾收集器的日志是处理Java虚拟机内存问题必备的基础技能</strong>，垃圾收集器日志是一系列人为设定的规则，多少有点随开发者编码时的心情而定，没有任何的“业界标准”可言，换句话说，每个收集器的日志格式都可能不一样。</p>
+<p>在JDK 9以前，HotSpot并没有提供统一的日志处理框架，虚拟机各个功能模块的日志开关分布在不同的参数上，<strong>日志级别、循环日志大小、输出格式、重定向等</strong> 设置在不同功能上都要单独解决。</p>
+<p>直到JDK 9，这种混乱不堪的局面才终于消失，HotSpot所有功能的日志都收归到了“-Xlog”参数上</p>
+<p>几个例子：
+- 查看GC基本信息，在JDK 9之前使用-XX：+PrintGC，JDK 9后使用-Xlog：gc
+- 查看GC详细信息，在JDK 9之前使用-XX：+PrintGCDetails，在JDK 9之后使用-X-log：gc*
+- 查看GC前后的堆、方法区可用容量变化，在JDK 9之前使用-XX：+PrintHeapAtGC，JDK 9之后使用-Xlog：gc+heap=debug
+- 查看GC过程中用户线程并发时间以及停顿的时间，在JDK 9之前使用-XX：+Print-GCApplicationConcurrentTime以及-XX：+PrintGCApplicationStoppedTime，JDK 9之后使用-Xlog：safepoint：
+- 查看收集器Ergonomics机制（自动设置堆空间各分代区域大小、收集目标等内容，从Parallel收集器开始支持）自动调节的相关信息。在JDK 9之前使用-XX：+PrintAdaptive-SizePolicy，JDK 9之后使用-Xlog：gc+ergo*=trace
+- 查看熬过收集后剩余对象的年龄分布信息，在JDK 9前使用-XX：+PrintTenuring-Distribution，JDK 9之后使用-Xlog：gc+age=trace</p>
+<h4 id="_42">垃圾收集器参数总结<a class="headerlink" href="#_42" title="Permanent link"></a></h4>
+<p><img alt="垃圾收集相关的常用参数1" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/gc_params1.png" />
+<img alt="垃圾收集相关的常用参数2" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/gc_params2.png" /></p>
+<h3 id="_43">实战：内存分配与回收策略<a class="headerlink" href="#_43" title="Permanent link"></a></h3>
+<p>Java技术体系的自动内存管理，最根本的目标是自动化地解决两个问题：<strong>自动给对象分配内存以及自动回收分配给对象的内存</strong>。</p>
+<h4 id="eden">对象优先分配再Eden内存<a class="headerlink" href="#eden" title="Permanent link"></a></h4>
+<p><strong>大多数情况下，对象再新生代Eden区中分配。当Eden区没有足够空间进行分配时，虚拟机将发起一次Minor GC</strong>。
+HotSpot虚拟机提供了 <code>-XX: +PrintGCDetails</code> 这个收集器参数日志，告诉虚拟机在发生垃圾收集行为时打印内存回收日志，并且在进程退出的时候出书当前的内存各个区域分配的情况。
+<div class="highlight"><pre><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">_1MB</span> <span class="o">=</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">;</span>
+<span class="cm">/**</span>
+<span class="cm">* VM参数：-verbose:gc -Xms20M -Xmx20M -Xmn10M -XX:+PrintGCDetails -XX:SurvivorRatio=8</span>
+<span class="cm">*/</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">testAllocation</span><span class="o">()</span> <span class="o">{</span>
+<span class="kt">byte</span><span class="o">[]</span> <span class="n">allocation1</span><span class="o">,</span> <span class="n">allocation2</span><span class="o">,</span> <span class="n">allocation3</span><span class="o">,</span> <span class="n">allocation4</span><span class="o">;</span>
+<span class="n">allocation1</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span>
+<span class="n">allocation2</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span>
+<span class="n">allocation3</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">2</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span>
+<span class="n">allocation4</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span> <span class="c1">// 出现一次Minor GC</span>
+<span class="o">}</span>
+</pre></div></p>
+<h4 id="_44">大对象直接进入老年代<a class="headerlink" href="#_44" title="Permanent link"></a></h4>
+<p>HotSpot虚拟机提供了 <code>-XX:PretenureSizeThreshold</code> 参数，指定大于该设置值的对象直接在老年代分配，这样做的目的就是避免在Eden区以及两个Survivor区之间来回复制，产生大量的内存复制操作。
+<strong>注意</strong>
+-XX：PretenureSizeThreshold参数只对Serial和ParNew两款新生代收集器有效，HotSpot的其他新生代收集器，如Parallel Scavenge并不支持这个参数。如果必须使用此参数进行调优，可考虑ParNew加CMS的收集器组合。</p>
+<div class="highlight"><pre><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">_1MB</span> <span class="o">=</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">;</span>
+<span class="cm">/**</span>
+<span class="cm">* VM参数：-verbose:gc -Xms20M -Xmx20M -Xmn10M -XX:+PrintGCDetails -XX:SurvivorRatio=8</span>
+<span class="cm">* -XX:PretenureSizeThreshold=3145728</span>
+<span class="cm">*/</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">testPretenureSizeThreshold</span><span class="o">()</span> <span class="o">{</span>
+<span class="kt">byte</span><span class="o">[]</span> <span class="n">allocation</span><span class="o">;</span>
+<span class="n">allocation</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span> <span class="c1">//直接分配在老年代中</span>
+<span class="o">}</span>
+</pre></div>
+
+<h4 id="_45">长期存活的对象将进入老年代<a class="headerlink" href="#_45" title="Permanent link"></a></h4>
+<p>HotSpot虚拟机中多数收集器都采用了<strong>分代收集来管理堆内存</strong>，那内存回收时就必须能决策哪些存活对象应当放在新生代，哪些存活对象放在老年代中。
+为做到这点，虚拟机给每个对象定义了一个<strong>对象年龄（Age）计数器</strong>，存储在对象头中（详见第2章）。对象通常在Eden区里诞生，如果经过第一次Minor GC后仍然存活，并且能被Survivor容纳的话，该对象会被移动到Survivor空间中，并且将其对象年龄设为1岁。对象在Survivor区中每熬过一次Minor GC，年龄就增加1岁，当它的年龄增加到一定程度（默认为15），就会被晋升到老年代中。对象晋升老年代的年龄阈值，可以通过参数 <code>-XX：MaxTenuringThreshold</code> 设置。</p>
+<div class="highlight"><pre><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">_1MB</span> <span class="o">=</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">;</span>
+<span class="cm">/**</span>
+<span class="cm">* VM参数：-verbose:gc -Xms20M -Xmx20M -Xmn10M -XX:+PrintGCDetails -XX:Survivor-</span>
+<span class="cm">Ratio=8 -XX:MaxTenuringThreshold=1</span>
+<span class="cm">* -XX:+PrintTenuringDistribution</span>
+<span class="cm">*/</span>
+<span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&quot;unused&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">testTenuringThreshold</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kt">byte</span><span class="o">[]</span> <span class="n">allocation1</span><span class="o">,</span> <span class="n">allocation2</span><span class="o">,</span> <span class="n">allocation3</span><span class="o">;</span>
+    <span class="n">allocation1</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">_1MB</span> <span class="o">/</span> <span class="mi">4</span><span class="o">];</span> <span class="c1">// 什么时候进入老年代决定于XX:MaxTenuringThreshold设置</span>
+    <span class="n">allocation2</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span>
+    <span class="n">allocation3</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span>
+    <span class="n">allocation3</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="n">allocation3</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span>
+<span class="o">}</span>
+</pre></div>
+
+<h4 id="_46">动态对象年龄判定<a class="headerlink" href="#_46" title="Permanent link"></a></h4>
+<p>为了能更好地适应不同程序的内存状况，HotSpot虚拟机<strong>并不是永远</strong>要求对象的年龄必须达到-XX：MaxTenuringThreshold才能晋升老年代，如果在Survivor空间中相同年龄所有对象大小的总和大于Survivor空间的一半，年龄大于或等于该年龄的对象就可以直接进入老年代，无须等到-XX：MaxTenuringThreshold中要求的年龄。</p>
+<div class="highlight"><pre><span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">_1MB</span> <span class="o">=</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="o">;</span>
+<span class="cm">/**</span>
+<span class="cm">* VM参数：-verbose:gc -Xms20M -Xmx20M -Xmn10M -XX:+PrintGCDetails -XX:SurvivorRatio=8</span>
+<span class="cm">-XX:MaxTenuringThreshold=15</span>
+<span class="cm">* -XX:+PrintTenuringDistribution</span>
+<span class="cm">*/</span>
+<span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">&quot;unused&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">testTenuringThreshold2</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kt">byte</span><span class="o">[]</span> <span class="n">allocation1</span><span class="o">,</span> <span class="n">allocation2</span><span class="o">,</span> <span class="n">allocation3</span><span class="o">,</span> <span class="n">allocation4</span><span class="o">;</span>
+    <span class="n">allocation1</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">_1MB</span> <span class="o">/</span> <span class="mi">4</span><span class="o">];</span> <span class="c1">// allocation1+allocation2大于survivo空间一半</span>
+    <span class="n">allocation2</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">_1MB</span> <span class="o">/</span> <span class="mi">4</span><span class="o">];</span>
+    <span class="n">allocation3</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span>
+    <span class="n">allocation4</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span>
+    <span class="n">allocation4</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="n">allocation4</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">_1MB</span><span class="o">];</span>
+<span class="o">}</span>
+</pre></div>
+
+<h4 id="_47">空间分配担保<a class="headerlink" href="#_47" title="Permanent link"></a></h4>
+<p>在发生Minor GC之前，虚拟机必须先检查老年代最大可用的连续空间<strong>是否大于</strong>新生代所有对象总空间，
+- 如果这个条件成立，那这一次Minor GC可以确保是安全的。
+- 如果不成立，则虚拟机会先查看-XX：HandlePromotionFailure参数的设置值是否允许担保失败（Handle Promotion Failure）；
+    + 如果允许，那会继续检查老年代最大可用的连续空间是否大于历次晋升到老年代对象的平均大小，
+    + 如果大于，将尝试进行一次Minor GC，尽管这次Minor GC是有风险的；
+    + 如果小于，或者-XX：HandlePromotionFailure设置不允许冒险，那这时就要改为进行一次Full GC。</p>
+<p><strong>注：</strong> 说白了，就是在MinorGC前，需要判定老年代要不要腾出空间来存储Survivor中的内存对象，如果老年代自己都不够，那就来一次Full GC腾出空间来与Survivor空间置换之后，再进行MinorGC。</p>
+<h2 id="_48">第四章 虚拟机性能监控、故障处理工具<a class="headerlink" href="#_48" title="Permanent link"></a></h2>
+<p><strong>给一个系统定位问题的时候，知识、经验是关键基础，数据是依据，工具是运用知识处理数据的手段。</strong>
+这里说的数据包括但不限于异常堆栈、虚拟机运行日志、垃圾收集器日志、线程快照（threaddump/javacore文件）、堆转储快照（heapdump/hprof文件）等。</p>
+<h3 id="_49">基础故障处理工具<a class="headerlink" href="#_49" title="Permanent link"></a></h3>
+<ul>
+<li>商业授权工具：主要是JMC（Java M ission Control）及它要使用到的JFR（Java Flight Recorder），JMC这个原本来自于JRockit的运维监控套件从JDK 7 Update 40开始就被集成到OracleJDK中，JDK 11之前都无须独立下载，但是在商业环境中使用它则是要付费的。</li>
+<li>正式支持工具：这一类工具属于被长期支持的工具，不同平台、不同版本的JDK之间，这类工具可能会略有差异，但是不会出现某一个工具突然消失的情况。</li>
+<li>实验性工具：这一类工具在它们的使用说明中被声明为“没有技术支持，并且是实验性质的”（Unsupported and Experimental）产品，日后可能会转正，也可能会在某个JDK版本中无声无息地消失。但事实上它们通常都非常稳定而且功能强大，也能在处理应用程序性能问题、定位故障时发挥很大的作用。</li>
+</ul>
+<h4 id="jps">jps: 虚拟机进程状况工具<a class="headerlink" href="#jps" title="Permanent link"></a></h4>
+<p>除了名字像UNIX的ps命令之外，它的功能也和ps命令类似：可以列出正在运行的虚拟机进程，并显示虚拟机执行主类（Main Class，main()函数所在的类）名称以及这些进程的本地虚拟机唯一ID（LVMID，Local Virtual M achine Identifier）。</p>
+<p><strong>作用：</strong> 如果同时启动了多个虚拟机进程，无法根据进程名称定位时，那就必须依赖jps命令显示主类的功能才能区分了。
+<img alt="jps工具主要选项" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jps_params.png" /></p>
+<h4 id="jstat">jstat：虚拟机统计信息监视工具<a class="headerlink" href="#jstat" title="Permanent link"></a></h4>
+<p>jstat（JVM Statistics M onitoring Tool）是用于监视虚拟机各种运行状态信息的命令行工具。它可以显示本地或者远程虚拟机进程中的<strong>类加载、内存、垃圾收集、即时编译等运行时数据</strong>，在没有GUI图形界面、只提供了纯文本控制台环境的服务器上，它将是运行期定位虚拟机性能问题的常用工具。</p>
+<p><img alt="jstat工具主要选项" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jstat_params.png" /></p>
+<h4 id="jinfojava">jinfo：Java配置信息工具<a class="headerlink" href="#jinfojava" title="Permanent link"></a></h4>
+<p>jinfo（Configuration Info for Java）的作用是实时查看和调整虚拟机各项参数。使用jps命令的-v参数可以查看虚拟机启动时显式指定的参数列表，但如果想知道未被显式指定的参数的系统默认值，除了去找资料外，就只能使用jinfo的-flag选项进行查询了。</p>
+<h4 id="jmapjava">jmap：Java内存映像工具<a class="headerlink" href="#jmapjava" title="Permanent link"></a></h4>
+<p>jmap（Memory Map for Java）命令用于生成堆转储快照（一般称为heapdump或dump文件）。如果不使用jmap命令，要想获取Java堆转储快照也还有一些比较“暴力”的手段：譬如在第2章中用过的-XX：+HeapDumpOnOutOfMemoryError参数，可以让虚拟机在内存溢出异常出现之后自动生成堆转储快照文件，通过-XX：+HeapDumpOnCtrlBreak参数则可以使用[Ctrl]+[Break]键让虚拟机生成堆转储快照文件，又或者在Linux系统下通过<strong>Kill -3</strong>命令发送进程退出信号“恐吓”一下虚拟机，也能顺利拿到堆转储快照。</p>
+<p><img alt="jmap工具主要选项" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jmap_params.png" /></p>
+<h4 id="jhat">jhat：虚拟机堆转储快照分析工具<a class="headerlink" href="#jhat" title="Permanent link"></a></h4>
+<p>JDK提供jhat（JVM Heap Analysis Tool）命令与jmap搭配使用，来分析jmap生成的堆转储快照。jhat内置了一个微型的HTTP/Web服务器，生成堆转储快照的分析结果后，可以在浏览器中查看。<em>不过实事求是地说，在实际工作中，除非手上真的没有别的工具可用，否则多数人是不会直接使用jhat命令来分析堆转储快照文件的。</em></p>
+<h4 id="jstackjava">jstack：Java堆栈跟踪工具<a class="headerlink" href="#jstackjava" title="Permanent link"></a></h4>
+<p>jstack（Stack Trace for Java）命令用于生成虚拟机当前时刻的线程快照（一般称为threaddump或者javacore文件）。线程快照就是当前虚拟机内每一条线程正在执行的方法堆栈的集合，生成线程快照的目的通常是定位线程出现长时间停顿的原因，如线程间死锁、死循环、请求外部资源导致的长时间挂起等，都是导致线程长时间停顿的常见原因。</p>
+<p><img alt="jstack工具主要选项" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jstack_params.png" /></p>
+<h3 id="_50">可视化故障处理工具<a class="headerlink" href="#_50" title="Permanent link"></a></h3>
+<p>注：本小结介绍了几种集中可视化分析内存的方案，各有特色，值得仔细研究，这是理论与实践相结合的最佳实践。</p>
+<h4 id="jhsdb">JHSDB：基于服务代理的调试工具<a class="headerlink" href="#jhsdb" title="Permanent link"></a></h4>
+<p>JDK中提供了JCMD和JHSDB两个集成式的多功能工具箱，它们不仅整合了前面介绍的所有基础工具所能提供的专项功能，而且由于有着“后发优势”，能够做的往往比之前的老工具们更好、更强大。</p>
+<p><strong>注：</strong> 本小节实践我实在jdk9.0.4版本下完成的，尝试在jdk8下实验，确实如作者所述在sa-jdi.jar包中存在HSDB工具类，但是尝试直接运行了，但是出现了找不到windbg.dll动态链接库的错误。因此，直接更换为jdk9运行。<strong>故而以下文字记录，基于本书介绍的同时，涉及测试的结果，均是个人实验记录所得，可能跟原书中表现有些许差异。</strong></p>
+<p><strong>介绍</strong>
+JHSDB是一款基于服务性代理（Serviceability Agent，SA）实现的进程外调试工具。
+服务性代理是HotSpot虚拟机中一组用于映射Java虚拟机运行信息的、主要基于Java语言（含少量JNI代码）实现的API集合。服务性代理以HotSpot内部的数据结构为参照物进行设计，把这些C++的数据抽象出Java模型对象，相当于HotSpot的C++代码的一个镜像。通过服务性代理的API，可以在一个独立的Java虚拟机的进程里分析其他HotSpot虚拟机的内部数据，或者从HotSpot虚拟机进程内存中dump出来的转储快照里还原出它的运行状态细节。</p>
+<p>测试代码(跟原书中略有差别，主要体现在变量命名的差异)，这片代码主要用于调试，三个对象分布在内存哪里？
+<div class="highlight"><pre><span class="cm">/**</span>
+<span class="cm">* staticObj、instanceObj、localObj存放在哪里？</span>
+<span class="cm">*/</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JHSDBTest</span> <span class="o">{</span>
+
+    <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Test</span> <span class="o">{</span>
+        <span class="kd">static</span> <span class="n">ObjectHolder</span> <span class="n">staticObj</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ObjectHolder</span><span class="o">();</span>
+        <span class="n">ObjectHolder</span> <span class="n">instanceObj</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ObjectHolder</span><span class="o">();</span>
+        <span class="kt">void</span> <span class="nf">foo</span><span class="o">()</span> <span class="o">{</span>
+            <span class="n">ObjectHolder</span> <span class="n">localObj</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ObjectHolder</span><span class="o">();</span>
+            <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;done&quot;</span><span class="o">);</span> <span class="c1">// 调试运行的时候，在这里设置一个断点，用于通过jps获取jvm进程id</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">ObjectHolder</span> <span class="o">{}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Test</span> <span class="n">test</span> <span class="o">=</span> <span class="k">new</span> <span class="n">JHSDBTest</span><span class="o">.</span><span class="na">Test</span><span class="o">();</span>
+        <span class="n">test</span><span class="o">.</span><span class="na">foo</span><span class="o">();</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div></p>
+<p><strong>答案：</strong> 根据前面的理论学习，不难分析出：<strong>staticObj随着Test的类型信息存放在方法区，instanceObj随着Test的对象实例存放在Java堆，localObject则是存放在foo()方法栈帧的局部变量表中。</strong>
+但是实际是这样的吗？
+由于JHSDB本身对压缩指针的支持存在很多缺陷，建议用64位系统的读者在实验时禁用压缩指针，另外为了后续操作时可以加快在内存中搜索对象的速度，也建议读者限制一下Java堆的大小。本例中，作者建议采用的运行参数如下：
+<div class="highlight"><pre><span class="o">-</span><span class="n">Xmx10m</span> <span class="o">-</span><span class="n">XX</span><span class="o">:+</span><span class="n">UseSerialGC</span> <span class="o">-</span><span class="n">XX</span><span class="o">:-</span><span class="n">UseCompressedOops</span>
+</pre></div></p>
+<p>程序执行后，通过jps查到测试程序进程ID，从下面片段中得知，15986就是我们测试程序所要的进程id
+<div class="highlight"><pre>C:\Users\kemi&gt;jps -l
+15252 org.jetbrains.idea.maven.server.RemoteMavenServer36
+15444
+13868 jdk.jcmd/sun.tools.jps.Jps
+16172 D:\Program
+3628 org.jetbrains.jps.cmdline.Launcher
+8588 cc.nimbusk.jhsdb.JHSDBTest
+</pre></div></p>
+<p>紧接着，通过jhsdb命令，来运行可视化界面：
+<div class="highlight"><pre><span class="n">jhsdb</span> <span class="n">hsdb</span> <span class="o">--</span><span class="n">pid</span> <span class="mi">8588</span>
+</pre></div></p>
+<p>运行之后，界面如下图所示
+<img alt="JHSDB的界面" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/hsdb_running_window.png" />
+从运行效果来看其实生成的就是一个Swing的小程序，这点我们从jdk8的sa-jdi.jar包中的目录结构也能看出来
+<img alt="sa-jdi.jar包目录结构" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/sa-jdi_jar_infrastructure.png" /></p>
+<p>点击菜单：<strong>Tools-&gt;Heap Parameters</strong>，就可以看到堆内存分配布局，由于作者的运行参数中 <strong>指定了使用的是Serial收集器</strong>，图中我们看到了典型的Serial的分代内存布局，Heap Parameters窗口中清楚列出了新生代的Eden、S1、S2和老年代的容量（单位为字节）以及它们的虚拟内存地址起止范围。
+<img alt="Serial收集器的堆布局" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jhsdb_heap_parameters.png" />
+实际如下所示：
+<div class="highlight"><pre>Heap Parameters:
+Gen 0:   eden [0x0000026f4d200000,0x0000026f4d2d57c8,0x0000026f4d4b0000) space capacity = 2818048, 31.029989553052324 used
+  from [0x0000026f4d500000,0x0000026f4d550000,0x0000026f4d550000) space capacity = 327680, 100.0 used
+  to   [0x0000026f4d4b0000,0x0000026f4d4b0000,0x0000026f4d500000) space capacity = 327680, 0.0 usedInvocations: 1
+
+Gen 1:   old  [0x0000026f4d550000,0x0000026f4d670de0,0x0000026f4dc00000) space capacity = 7012352, 16.873083382009344 usedInvocations: 0
+</pre></div></p>
+<p>其中：<strong>0x0000023653c00000</strong> 就是起始虚拟内存地址（eden新生代起始），<strong>0x0000023653f00000</strong> 就是结束虚拟地址（To Survivor结束）</p>
+<p>再通过菜单Windows-&gt;Console窗口，打开命令行，使用scanoops命令在Java堆的新生代（从Eden起始地址到To Survivor结束地址）范围内查找ObjectHolder的实例
+<div class="highlight"><pre><span class="n">scanoops</span> <span class="mh">0x00000119d4400000</span> <span class="mh">0x00000119d4700000</span> <span class="n">JHSDBTest$ObjectHolder</span>
+</pre></div></p>
+<p>得到结果：
+<div class="highlight"><pre><span class="n">hsdb</span><span class="o">&gt;</span> <span class="n">scanoops</span> <span class="mh">0x0000026f4d200000</span> <span class="mh">0x0000026f4d500000</span> <span class="n">JHSDBTest$ObjectHolder</span>
+<span class="n">No</span> <span class="n">such</span> <span class="n">type</span><span class="o">.</span>
+<span class="n">hsdb</span><span class="o">&gt;</span> <span class="n">scanoops</span> <span class="mh">0x0000026f4d200000</span> <span class="mh">0x0000026f4d500000</span> <span class="n">cc</span><span class="o">.</span><span class="na">nimbusk</span><span class="o">.</span><span class="na">jhsdb</span><span class="o">.</span><span class="na">JHSDBTest$ObjectHolder</span>
+<span class="mh">0x0000026f4d2cb4b0</span> <span class="n">cc</span><span class="o">/</span><span class="n">nimbusk</span><span class="o">/</span><span class="n">jhsdb</span><span class="o">/</span><span class="n">JHSDBTest$ObjectHolder</span>
+<span class="mh">0x0000026f4d2cb4d8</span> <span class="n">cc</span><span class="o">/</span><span class="n">nimbusk</span><span class="o">/</span><span class="n">jhsdb</span><span class="o">/</span><span class="n">JHSDBTest$ObjectHolder</span>
+<span class="mh">0x0000026f4d2cb4e8</span> <span class="n">cc</span><span class="o">/</span><span class="n">nimbusk</span><span class="o">/</span><span class="n">jhsdb</span><span class="o">/</span><span class="n">JHSDBTest$ObjectHolder</span>
+<span class="nl">Error:</span> <span class="n">sun</span><span class="o">.</span><span class="na">jvm</span><span class="o">.</span><span class="na">hotspot</span><span class="o">.</span><span class="na">debugger</span><span class="o">.</span><span class="na">DebuggerException</span><span class="o">:</span> <span class="n">Windbg</span> <span class="n">Error</span><span class="o">:</span> <span class="n">ReadVirtual</span> <span class="n">failed</span><span class="o">!</span>
+<span class="n">hsdb</span><span class="o">&gt;</span> 
+</pre></div></p>
+<p><strong>注：</strong> 这里跟书中作者有点区别，原书作者实例中，通过jps运行之后，得到的进程ID是没有包路径的，但是我自己实验的时候，发现是有的。这个在后面的scanoops命令使用的时候有用。如果不带包路径的话，在内存中是找不到的，会提示你<em>*</em>No such type.**</p>
+<p>我们从结果分析一下，确实在内存中找到三个ObjectHolder对象，我们再看看第一行地址分布：
+这三个对象的地址前缀都是：<strong>0x0000026f4d2</strong>，而我们通过前面的Heap Parameters拿到所有分代内存分布发现，只有Eden区域地址（eden [0x0000026f4d200000,0x0000026f4d2d57c8,0x0000026f4d4b0000)），<strong>这也就顺带验证了：一般情况下新对象在Eden中创建的分配规则</strong>。</p>
+<p>再使用：<strong>Tools-&gt;Inspector</strong> 功能确认一下这三个地址中存放的对象：
+<img alt="Insepector实例数据" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jhsdb_tools_inspector.png" />
+Inspector为我们展示了对象头和指向对象元数据的指针，里面包括了Java类型的名字、继承关系、实现接口关系，字段信息、方法信息、运行时常量池的指针、内嵌的虚方法表（vtable）以及接口方法表（itable）等。由于我们的确没有在ObjectHolder上定义过任何字段，所以图中并没有看到任何实例字段数据，读者在做实验时不妨定义一些不同数据类型的字段，观察它们在HotSpot虚拟机里面是如何存储的。</p>
+<p><strong>注：</strong> 实际上，目前在实验的时候，发现点不开_metadata._klass: InstanceKlass for cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder，看不到里面具体的内容，后台报了一个数组越界的错误。尝试将</p>
+<p>接下来要根据堆中对象实例地址找出引用它们的指针，原本JHSDB的Tools菜单中有ComputeReverse Ptrs来完成这个功能，但是Swing本身可能会报空指针异常，这里直接通过命令来实现，revptrs命令后跟上第一个对象的地址。
+<div class="highlight"><pre><span class="c1">// 这里内存地址跟前文中看到的不一样，是因为，中途切换环境，我重新运行了。实际实验的时候，同样的方法，按照实际分配的地址即可。这里不再赘述</span>
+<span class="n">revptrs</span> <span class="mh">0x00000119d44ca868</span>
+</pre></div>
+得到结果：
+<div class="highlight"><pre><span class="n">hsdb</span><span class="o">&gt;</span> <span class="n">revptrs</span> <span class="mh">0x00000119d44ca868</span>
+<span class="kc">null</span>
+<span class="n">Oop</span> <span class="k">for</span> <span class="n">java</span><span class="o">/</span><span class="n">lang</span><span class="o">/</span><span class="n">Class</span> <span class="err">@</span> <span class="mh">0x00000119d44c9488</span>
+</pre></div></p>
+<p>在通过Inspector查找这个地址：0x00000119d44c9488，得到如下图所示：
+<img alt="方法区实例内存地址" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jhsdb_class_object.png" />
+果然找到了一个引用该对象的地方，是在一个 <code>java.lang.Class</code> 的实例里，并且给出了这个实例的地址，通过Inspector查看该对象实例，可以清楚看到这确实是一个 <code>java.lang.Class</code> 类型的对象实例，里面有一个名为 <strong>staticObj</strong> 的实例字段。（）</p>
+<p>从《Java虚拟机规范》所定义的概念模型来看，所有Class相关的信息都应该存放在方法区之中，但方法区该如何实现，《Java虚拟机规范》并未做出规定，这就成了一件允许不同虚拟机自己灵活把握的事情。<strong>JDK 7及其以后版本的HotSpot虚拟机选择把静态变量与类型在Java语言一端的映射Class对象存放在一起，存储于Java堆之中，从我们的实验中也明确验证了这一点。</strong></p>
+<p>接着查找第二个对象实例：
+<div class="highlight"><pre><span class="n">hsdb</span><span class="o">&gt;</span> <span class="n">revptrs</span> <span class="mh">0x00000119d44ca890</span>
+<span class="kc">null</span>
+<span class="n">Oop</span> <span class="k">for</span> <span class="n">JHSDBTest$Test</span> <span class="err">@</span> <span class="mh">0x00000119d44ca878</span>
+</pre></div></p>
+<p>这次找到一个类型为JHSDBTest$Test的对象实例，在Inspector中该对象实例显示如图所示：
+<img alt="方法区实例内存地址" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jhsdb_instance_object.png" />
+这个结果完全符合我们的预期，第二个ObjectHolder的指针是在Java堆中JHSDBTest$Test对象的instanceObj字段上。</p>
+<p>我们查找第三个对象的时候，发现：
+<div class="highlight"><pre><span class="n">hsdb</span><span class="o">&gt;</span> <span class="n">revptrs</span> <span class="mh">0x00000119d44ca8a0</span>
+<span class="kc">null</span>
+<span class="kc">null</span>
+<span class="n">hsdb</span><span class="o">&gt;</span> 
+</pre></div></p>
+<p><strong>看来revptrs命令并不支持查找栈上的指针引用，不过没有关系，得益于我们测试代码足够简洁，人工也可以来完成这件事情。</strong> 在Java Thread窗口选中main线程后点击Stack Memory按钮查看该线程的栈内存，如图下图所示：
+<img alt="stack memory按钮" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jhsdb_statck_memory.png" />
+打开栈内存之后：
+<img alt="main线程的栈内存" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jhsdb_statck_memory_view.png" /></p>
+<p>观察一个唯一的栈上的分配的内存，如下图所示：
+<img alt="栈内存上的分配情况" src="/D:/Develop/hexo/website/nimbusking.github.io/source/_posts/d7ba81a7/jhsdb_statck_memory_collection.png" />
+这个线程只有两个方法栈帧，尽管没有查找功能，<strong>但通过肉眼观察在地址0x0000000cb5aff570上的值正好就是0x00000119d44ca8a0</strong>，而且JHSDB在旁边已经自动生成注释，说明这里确实是引用了一个来自新生代的JHSDBTest$ObjectHolder对象。
+至此，本次实验中三个对象均已找到，并成功追溯到引用它们的地方，也就实践验证了开篇中提出的这些对象的引用是存储在什么地方的问题。</p>
+<h1 id="_51">实战相关<a class="headerlink" href="#_51" title="Permanent link"></a></h1></article></body></html>
