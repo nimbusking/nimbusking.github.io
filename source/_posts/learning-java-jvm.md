@@ -602,11 +602,11 @@ Gen 1:   old  [0x0000026f4d550000,0x0000026f4d670de0,0x0000026f4dc00000) space c
 ```
 
 
-其中：**0x0000023653c00000** 就是起始虚拟内存地址（eden新生代起始），**0x0000023653f00000** 就是结束虚拟地址（To Survivor结束）
+其中：**0x0000026f4d200000** 就是起始虚拟内存地址（eden新生代起始），**0x0000026f4d500000** 就是结束虚拟地址（To Survivor结束）
 
 再通过菜单Windows->Console窗口，打开命令行，使用scanoops命令在Java堆的新生代（从Eden起始地址到To Survivor结束地址）范围内查找ObjectHolder的实例
 ```java
-scanoops 0x00000119d4400000 0x00000119d4700000 JHSDBTest$ObjectHolder
+scanoops 0x0000026f4d200000 0x0000026f4d500000 JHSDBTest$ObjectHolder
 ```
 
 得到结果：
