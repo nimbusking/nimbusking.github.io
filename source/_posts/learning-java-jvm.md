@@ -606,13 +606,13 @@ Gen 1:   old  [0x0000026f4d550000,0x0000026f4d670de0,0x0000026f4dc00000) space c
 
 再通过菜单Windows->Console窗口，打开命令行，使用scanoops命令在Java堆的新生代（从Eden起始地址到To Survivor结束地址）范围内查找ObjectHolder的实例
 ```java
-scanoops 0x0000026f4d200000 0x0000026f4d500000 JHSDBTest$ObjectHolder
+scanoops 0x0000026f4d200000 0x0000026f4d500000 cc.nimbusk.jhsdb.JHSDBTest$ObjectHolder
 ```
 
 得到结果：
 ```java
 
-hsdb> scanoops 0x0000026f4d200000 0x0000026f4d500000 JHSDBTest$ObjectHolder
+hsdb> scanoops 0x0000026f4d200000 0x0000026f4d500000 cc.nimbusk.jhsdb.JHSDBTest$ObjectHolder
 No such type.
 hsdb> scanoops 0x0000026f4d200000 0x0000026f4d500000 cc.nimbusk.jhsdb.JHSDBTest$ObjectHolder
 0x0000026f4d2cb4b0 cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder
@@ -622,7 +622,7 @@ Error: sun.jvm.hotspot.debugger.DebuggerException: Windbg Error: ReadVirtual fai
 hsdb> 
 ```
 
-**注：** 这里跟书中作者有点区别，原书作者实例中，通过jps运行之后，得到的进程ID是没有包路径的，但是我自己实验的时候，发现是有的。这个在后面的scanoops命令使用的时候有用。如果不带包路径的话，在内存中是找不到的，会提示你***No such type.**
+**注：** 这里跟书中作者有点区别，原书作者实例中，通过jps运行之后，得到的进程ID是没有包路径的，但是我自己实验的时候，发现是有的。这个在后面的scanoops命令使用的时候有用。如果不带包路径的话，在内存中是找不到的，会提示你 **No such type**
 
 我们从结果分析一下，确实在内存中找到三个ObjectHolder对象，我们再看看第一行地址分布：
 这三个对象的地址前缀都是：**0x0000026f4d2**，而我们通过前面的Heap Parameters拿到所有分代内存分布发现，只有Eden区域地址（eden [0x0000026f4d200000,0x0000026f4d2d57c8,0x0000026f4d4b0000)），**这也就顺带验证了：一般情况下新对象在Eden中创建的分配规则**。
