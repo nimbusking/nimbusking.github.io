@@ -53,7 +53,7 @@
 <meta property="og:image" content="https://nimbusk.cc/post/d7ba81a7/jhsdb_statck_memory_view.png">
 <meta property="og:image" content="https://nimbusk.cc/post/d7ba81a7/jhsdb_statck_memory_collection.png">
 <meta property="article:published_time" content="2020-08-26T20:48:41.000Z">
-<meta property="article:modified_time" content="2021-08-03T09:59:05.725Z">
+<meta property="article:modified_time" content="2021-08-03T10:02:32.309Z">
 <meta property="article:author" content="nimbusk">
 <meta property="article:tag" content="JVM">
 <meta property="article:tag" content="周志明">
@@ -283,7 +283,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-08-03 09:59:05" itemprop="dateModified" datetime="2021-08-03T09:59:05+00:00">2021-08-03</time>
+        <time title="修改时间：2021-08-03 10:02:32" itemprop="dateModified" datetime="2021-08-03T10:02:32+00:00">2021-08-03</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -617,12 +617,13 @@
 
 <p>其中：<strong>0x0000026f4d200000</strong> 就是起始虚拟内存地址（eden新生代起始），<strong>0x0000026f4d500000</strong> 就是结束虚拟地址（To Survivor结束）</p>
 <p>再通过菜单Windows-&gt;Console窗口，打开命令行，使用scanoops命令在Java堆的新生代（从Eden起始地址到To Survivor结束地址）范围内查找ObjectHolder的实例</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scanoops <span class="number">0x0000026f4d200000</span> <span class="number">0x0000026f4d500000</span> JHSDBTest$ObjectHolder</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scanoops <span class="number">0x0000026f4d200000</span> <span class="number">0x0000026f4d500000</span> cc.nimbusk.jhsdb.JHSDBTest$ObjectHolder</span><br></pre></td></tr></table></figure>
 <p>得到结果：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">hsdb&gt; scanoops <span class="number">0x0000026f4d200000</span> <span class="number">0x0000026f4d500000</span> JHSDBTest$ObjectHolder</span><br><span class="line">No such type.</span><br><span class="line">hsdb&gt; scanoops <span class="number">0x0000026f4d200000</span> <span class="number">0x0000026f4d500000</span> cc.nimbusk.jhsdb.JHSDBTest$ObjectHolder</span><br><span class="line"><span class="number">0x0000026f4d2cb4b0</span> cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder</span><br><span class="line"><span class="number">0x0000026f4d2cb4d8</span> cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder</span><br><span class="line"><span class="number">0x0000026f4d2cb4e8</span> cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder</span><br><span class="line">Error: sun.jvm.hotspot.debugger.DebuggerException: Windbg Error: ReadVirtual failed!</span><br><span class="line">hsdb&gt; </span><br></pre></td></tr></table></figure>
-<p><strong>注：</strong> 这里跟书中作者有点区别，原书作者实例中，通过jps运行之后，得到的进程ID是没有包路径的，但是我自己实验的时候，发现是有的。这个在后面的scanoops命令使用的时候有用。如果不带包路径的话，在内存中是找不到的，会提示你*<strong>No such type.</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">hsdb&gt; scanoops <span class="number">0x0000026f4d200000</span> <span class="number">0x0000026f4d500000</span> cc.nimbusk.jhsdb.JHSDBTest$ObjectHolder</span><br><span class="line">No such type.</span><br><span class="line">hsdb&gt; scanoops <span class="number">0x0000026f4d200000</span> <span class="number">0x0000026f4d500000</span> cc.nimbusk.jhsdb.JHSDBTest$ObjectHolder</span><br><span class="line"><span class="number">0x0000026f4d2cb4b0</span> cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder</span><br><span class="line"><span class="number">0x0000026f4d2cb4d8</span> cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder</span><br><span class="line"><span class="number">0x0000026f4d2cb4e8</span> cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder</span><br><span class="line">Error: sun.jvm.hotspot.debugger.DebuggerException: Windbg Error: ReadVirtual failed!</span><br><span class="line">hsdb&gt; </span><br></pre></td></tr></table></figure>
+<p><strong>注：</strong> 这里跟书中作者有点区别，原书作者实例中，通过jps运行之后，得到的进程ID是没有包路径的，但是我自己实验的时候，发现是有的。这个在后面的scanoops命令使用的时候有用。如果不带包路径的话，在内存中是找不到的，会提示你 <strong>No such type</strong></p>
 <p>我们从结果分析一下，确实在内存中找到三个ObjectHolder对象，我们再看看第一行地址分布：<br>这三个对象的地址前缀都是：<strong>0x0000026f4d2</strong>，而我们通过前面的Heap Parameters拿到所有分代内存分布发现，只有Eden区域地址（eden [0x0000026f4d200000,0x0000026f4d2d57c8,0x0000026f4d4b0000)），<strong>这也就顺带验证了：一般情况下新对象在Eden中创建的分配规则</strong>。</p>
-<p>再使用：<strong>Tools-&gt;Inspector</strong> 功能确认一下这三个地址中存放的对象：<br><img data-src="d7ba81a7/jhsdb_tools_inspector.png" alt="Insepector实例数据"><br>Inspector为我们展示了对象头和指向对象元数据的指针，里面包括了Java类型的名字、继承关系、实现接口关系，字段信息、方法信息、运行时常量池的指针、内嵌的虚方法表（vtable）以及接口方法表（itable）等。由于我们的确没有在ObjectHolder上定义过任何字段，所以图中并没有看到任何实例字段数据，读者在做实验时不妨定义一些不同数据类型的字段，观察它们在HotSpot虚拟机里面是如何存储的。</p>
+<p>再使用：<strong>Tools-&gt;Inspector</strong> 功能确认一下这三个地址中存放的对象：<br><img data-src="d7ba81a7/jhsdb_tools_inspector.png" alt="Insepector实例数据"></p>
+<p>Inspector为我们展示了对象头和指向对象元数据的指针，里面包括了 <strong>Java类型的名字、继承关系、实现接口关系，字段信息、方法信息、运行时常量池的指针、内嵌的虚方法表（vtable）以及接口方法表（itable）等。</strong> 由于我们的确没有在ObjectHolder上定义过任何字段，所以图中并没有看到任何实例字段数据，读者在做实验时不妨定义一些不同数据类型的字段，观察它们在HotSpot虚拟机里面是如何存储的。</p>
 <p><strong>注：</strong> 实际上，目前在实验的时候，发现点不开_metadata._klass: InstanceKlass for cc/nimbusk/jhsdb/JHSDBTest$ObjectHolder，看不到里面具体的内容，后台报了一个数组越界的错误。尝试将JHSDBTest类包路径去除，重新运行发现又报了一个空指针错误。。。嗯，看来这个swing问题不少，暂时没去研究了</p>
 <p>接下来要根据堆中对象实例地址找出引用它们的指针，原本JHSDB的Tools菜单中有ComputeReverse Ptrs来完成这个功能，但是Swing本身可能会报空指针异常，这里直接通过命令来实现，revptrs命令后跟上第一个对象的地址。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里内存地址跟前文中看到的不一样，是因为，中途切换环境，我重新运行了。实际实验的时候，同样的方法，按照实际分配的地址即可。这里不再赘述</span></span><br><span class="line">revptrs <span class="number">0x00000119d44ca868</span></span><br></pre></td></tr></table></figure>
