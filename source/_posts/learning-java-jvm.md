@@ -913,4 +913,178 @@ JDK 9之后VisulalVM形成了一个独立项目：[VisualVM主页](https://visua
 
 堆页签中的“摘要”面板可以看到应用程序dump时的运行时参数、System.getPro-perties()的内容、线程堆栈等信息；“类”面板则是以类为统计口径统计类的实例数量、容量信息；“实例”面板不能直接使用，因为VisualVM在此时还无法确定用户想查看哪个类的实例，所以需要通过“类”面板进入，在“类”中选择一个需要查看的类，然后双击即可在“实例”里面看到此类的其中500个实例的具体属性信息；“OQL控制台”面板则是运行OQL查询语句的，同jhat中介绍的OQL功能一样。如果读者想要了解具体OQL的语法和使用方法，可参见本书附录D的内容。
 
-# 实战相关
+
+#### Java Mission Control：可持续在线的监控工具
+Oracle Java SE Advanced & Suite与普通Oracle Java SE在功能上的主要差别是前者包含了一系列的监控、管理工具，譬如用于企业JRE定制管理的AMC（Java Advanced M anagement Console）控制台、JUT（Java Usage Tracker）跟踪系统，用于持续收集数据的JFR（Java Flight Recorder）飞行记录仪和用于监控Java虚拟机的JMC（Java M ission Control）。
+这些功能全部都是需要商业授权才能在生产环境中使用，但根据Oracle Binary Code协议，在个人开发环境中，允许免费使用JMC和JFR，本节笔者将简要介绍它们的原理和使用。
+
+JFR是一套内建在HotSpot虚拟机里面的监控和基于事件的信息搜集框架，与其他的监控工具（如JProfiling）相比，Oracle特别强调它“可持续在线”（Always-On）的特性。 **JFR在生产环境中对吞吐量的影响一般不会高于1%（甚至号称是Zero Performance Overhead）**，而且JFR监控过程的开始、停止都是完全可动态的，即不需要重启应用。JFR的监控对应用也是完全透明的，即不需要对应用程序的源码做任何修改，或者基于特定的代理来运行。
+
+
+### HotSpot虚拟机插件及工具
+开发团队曾经编写（或者收集）过不少虚拟机的插件和辅助工具，它们存放在HotSpot源码hotspot/src/share/tools目录下，包括（含曾经有过但新版本中已被移除的）：
+- Ideal Graph Visualizer：用于可视化展示C2即时编译器是如何将字节码转化为理想图，然后转化为机器码的。
+- Client Compiler Visualizer：用于查看C1即时编译器生成高级中间表示（HIR），转换成低级中间表示（LIR）和做物理寄存器分配的过程。
+- MakeDeps：帮助处理HotSpot的编译依赖的工具。
+- Project Creator：帮忙生成Visual Studio的.project文件的工具。
+- LogCompilation：将-XX：+LogCompilation输出的日志整理成更容易阅读的格式的工具。
+- HSDIS：即时编译器的反汇编插件。
+
+#### HSDIS：JIT生成代码反汇编
+《Java虚拟机规范》中的规定逐渐成为Java虚拟机实现的“概念模型”，即实现只保证与规范描述等效，而不一定是按照规范描述去执行。由于这个原因，我们在讨论程序的执行语义问题（虚拟机做了什么）时，在字节码层面上分析完全可行，**但讨论程序的执行行为问题（虚拟机是怎样做的、性能如何）时，在字节码层面上分析就没有什么意义了，必须通过其他途径解决。**
+
+HSDIS是一个被官方推荐的HotSpot虚拟机即时编译代码的反汇编插件，它包含在HotSpot虚拟机的源码当中，在OpenJDK的网站[3](https://hg.openjdk.java.net/jdk7u/jdk7u/hotspot/file/tip/src/share/tools/hsdis/)也可以找到单独的源码下载，但并没有提供编译后的程序。
+
+HSDIS插件的作用是让HotSpot的-XX：+PrintAssembly指令调用它来把即时编译器动态生成的本地代码还原为汇编代码输出，同时还会自动产生大量非常有价值的注释，这样我们就可以通过输出的汇编代码来从最本质的角度分析问题。读者可以根据自己的操作系统和处理器型号，**从网上直接搜索、下载编译好的插件，直接放到JDK_HOME/jre/bin/server目录（JDK 9以下）或JDK_HOME/lib/amd64/server（JDK 9或以上）中即可使用。** 
+**注：** 这里我自己编译了一个64位windows的![hsdis-amd64.dll](d7ba81a7/hsdis-amd64.dll)，运行jdk版本是：1.8.211
+
+如果读者使用的是SlowDebug或者FastDebug版的HotSpot，那可以直接通过-XX：+PrintAssembly指令使用的插件；如果读者使用的是Product版的HotSpot，则还要额外加入一个-XX：+UnlockDiagnosticVMOptions参数才可以工作。
+测试代码如下：
+```java
+package cc.nimbusk.learningjvm.hsdis;
+
+/**
+ * TODO
+ * 虚拟机参数：-XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly -Xcomp -XX:CompileCommand=dontinline,*Bar.sum -XX:CompileCommand=compileonly,*Bar.sum
+ * 命令行：java -XX:+UnlockDiagnosticVMOptions -XX:+PrintAssembly -Xcomp -XX:CompileCommand=dontinline,*Bar.sum -XX:CompileCommand=compileonly,*Bar.sum cc.nimbusk.learningjvm.hsdis.Bar
+ * @author nimbus.k 2021-08-07 11:51
+ * @version 1.0
+ */
+public class Bar {
+
+    int a = 1;
+    static int b = 2;
+
+    public int sum(int c) {
+        return a + b + c;
+    }
+
+    public static void main(String[] args) {
+        new Bar().sum(3);
+    }
+
+}
+
+```
+
+**解读参数：**
+其中，参数-Xcomp是让虚拟机以编译模式执行代码，这样不需要执行足够次数来预热就能触发即时编译。两个-XX：CompileCommand的意思是让编译器不要内联sum()并且只编译sum()，-XX：+PrintAssembly就是输出反汇编内容。
+
+**作者运行结果：**
+```java
+[Disassembling for mach='i386']
+[Entry Point]
+[Constants]
+# {method} 'sum' '(I)I' in 'test/Bar'
+# this: ecx = 'test/Bar'
+# parm0: edx = int
+# [sp+0x20] (sp of caller)
+……
+0x01cac407: cmp 0x4(%ecx),%eax
+0x01cac40a: jne 0x01c6b050 ; {runtime_call}
+[Verified Entry Point]
+0x01cac410: mov %eax,-0x8000(%esp)
+0x01cac417: push %ebp
+0x01cac418: sub $0x18,%esp ; *aload_0
+; - test.Bar::sum@0 (line 8)
+;; block B0 [0, 10]
+0x01cac41b: mov 0x8(%ecx),%eax ; *getfield a
+; - test.Bar::sum@1 (line 8)
+0x01cac41e: mov $0x3d2fad8,%esi ; {oop(a
+'java/lang/Class' = 'test/Bar')}
+0x01cac423: mov 0x68(%esi),%esi ; *getstatic b
+; - test.Bar::sum@4 (line 8)
+0x01cac426: add %esi,%eax
+0x01cac428: add %edx,%eax
+0x01cac42a: add $0x18,%esp
+0x01cac42d: pop %ebp
+0x01cac42e: test %eax,0x2b0100 ; {poll_return}
+0x01cac434: ret
+```
+
+**笔者运行结果：**
+看了一下，我是在64位环境下编译的，还是跟作者书中32位的有差距的，但是整体没什么问题。比如一个最明显的： ```ret``` 跟 ```retq``` ，为了更好的比较，我这里就都贴出来，但是后文中的分析还是摘录作者文章中分析示例
+```java
+CompilerOracle: dontinline *Bar.sum
+CompilerOracle: compileonly *Bar.sum
+Loaded disassembler from G:\Program Files\Java\jdk1.8.0_211\jre\bin\server\hsdis-amd64.dll
+Decoding compiled method 0x0000000002dcca50:
+Code:
+[Disassembling for mach='i386:x86-64']
+[Entry Point]
+[Constants]
+  # {method} {0x0000000025a92ab0} 'sum' '(I)I' in 'cc/nimbusk/learningjvm/hsdis/Bar'
+  # this:     rdx:rdx   = 'cc/nimbusk/learningjvm/hsdis/Bar'
+  # parm0:    r8        = int
+  #           [sp+0x40]  (sp of caller)
+  0x0000000002dccba0: mov    0x8(%rdx),%r10d
+  0x0000000002dccba4: shl    $0x3,%r10
+  0x0000000002dccba8: cmp    %rax,%r10
+  0x0000000002dccbab: jne    0x0000000002b65f60  ;   {runtime_call}
+  0x0000000002dccbb1: data16 data16 nopw 0x0(%rax,%rax,1)
+  0x0000000002dccbbc: data16 data16 xchg %ax,%ax
+[Verified Entry Point]
+  0x0000000002dccbc0: mov    %eax,-0x6000(%rsp)
+  0x0000000002dccbc7: push   %rbp
+  0x0000000002dccbc8: sub    $0x30,%rsp
+  0x0000000002dccbcc: movabs $0x25a92d70,%rax   ;   {metadata(method data for {method} {0x0000000025a92ab0} 'sum' '(I)I' in 'cc/nimbusk/learningjvm/hsdis/Bar')}
+  0x0000000002dccbd6: mov    0xdc(%rax),%esi
+  0x0000000002dccbdc: add    $0x8,%esi
+  0x0000000002dccbdf: mov    %esi,0xdc(%rax)
+  0x0000000002dccbe5: movabs $0x25a92aa8,%rax   ;   {metadata({method} {0x0000000025a92ab0} 'sum' '(I)I' in 'cc/nimbusk/learningjvm/hsdis/Bar')}
+  0x0000000002dccbef: and    $0x0,%esi
+  0x0000000002dccbf2: cmp    $0x0,%esi
+  0x0000000002dccbf5: je     0x0000000002dccc1c  ;*aload_0
+                                                ; - cc.nimbusk.learningjvm.hsdis.Bar::sum@0 (line 15)
+
+  0x0000000002dccbfb: mov    0xc(%rdx),%eax     ;*getfield a
+                                                ; - cc.nimbusk.learningjvm.hsdis.Bar::sum@1 (line 15)
+
+  0x0000000002dccbfe: movabs $0x715d56770,%rsi  ;   {oop(a 'java/lang/Class' = 'cc/nimbusk/learningjvm/hsdis/Bar')}
+  0x0000000002dccc08: mov    0x68(%rsi),%esi    ;*getstatic b
+                                                ; - cc.nimbusk.learningjvm.hsdis.Bar::sum@4 (line 15)
+
+  0x0000000002dccc0b: add    %esi,%eax
+  0x0000000002dccc0d: add    %r8d,%eax
+  0x0000000002dccc10: add    $0x30,%rsp
+  0x0000000002dccc14: pop    %rbp
+  0x0000000002dccc15: test   %eax,-0xaacb1b(%rip)        # 0x0000000002320100
+                                                ;   {poll_return}
+  0x0000000002dccc1b: retq  
+```
+**书中作者解读**
+虽然是汇编，但代码并不多，我们一句一句来阅读：
+- mov%eax，-0x8000(%esp)：检查栈溢。
+- push%ebp：保存上一栈帧基址。
+- sub$0x18，%esp：给新帧分配空间。
+- mov 0x8(%ecx)，%eax：取实例变量a，这里0x8(%ecx)就是ecx+0x8的意思，前面代码片段“[Constants]”中提示了“this：ecx='test/Bar'”，即ecx寄存器中放的就是this对象的地址。偏移0x8是越过this对象的对象头，之后就是实例变量a的内存位置。这次是访问Java堆中的数据。
+- mov$0x3d2fad8，%esi：取test.Bar在方法区的指针。
+- mov 0x68(%esi)，%esi：取类变量b，这次是访问方法区中的数据。
+- add%esi，%eax、add%edx，%eax：做2次加法，求a+b+c的值，前面的代码把a放在eax中，把b放在esi中，而c在[Constants]中提示了，“parm0：edx=int”，说明c在edx中。
+- add$0x18，%esp：撤销栈帧。
+- pop%ebp：恢复上一栈帧。
+- test%eax，0x2b0100：轮询方法返回处的SafePoint。
+- ret：方法返回。
+
+**笔者64位运行环境下结果比较**
+目前笔者能力有限，汇编的知识早已还给老师了。主要从[Verified Entry Point]下面看起，跟32位环境，以及作者并没有介绍示例代码运行的JDK环境，至少能看出来，在1.8下，hotspot运行在分配内存的时候，还是要多做了一些事情的。
+
+
+[JITWatch](https://github.com/AdoptOpenJDK/jitwatch)是HSDIS经常搭配使用的可视化的编译日志分析工具，为便于在JITWatch中读取，读
+者可使用以下参数把日志输出到logfile文件：
+```java
+-XX:+UnlockDiagnosticVMOptions
+-XX:+TraceClassLoading
+-XX:+LogCompilation
+-XX:LogFile=/tmp/logfile.log
+-XX:+PrintAssembly
+-XX:+TraceClassLoading
+```
+**注：** GitHub页面上有对应的release包使用，直接访问下载即可。重新修改参数之后，运行一下得到运行结果的log，这里贴一下我运行的![logfile.log](d7ba81a7/logfile.log)
+
+运行界面如下图所示（由于作者没有继续深入，暂时这块笔者暂定，后续有机会再补充详细设定）：
+![JITWatch运行界面](d7ba81a7/JITWatch_window.jpg)
+
+##### JITWatch详细使用
+
+
