@@ -321,6 +321,19 @@
       </tags>
   </entry>
   <entry>
+    <title>Java并发之-CompleteableFuture</title>
+    <url>/post/9f02a2a0.html</url>
+    <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><h1 id="CompleteableFuture"><a href="#CompleteableFuture" class="headerlink" title="CompleteableFuture"></a>CompleteableFuture</h1><h1 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h1><h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1>]]></content>
+      <categories>
+        <category>Java系列</category>
+      </categories>
+      <tags>
+        <tag>Java并发</tag>
+        <tag>Java8新特性</tag>
+        <tag>并发编程</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Final Cut Pro X 10.1非线性编辑高级教程</title>
     <url>/post/17b99938.html</url>
     <content><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>早些时候买的一本书，一直没怎么看。今天粗略的看了一下，确实要比市面上，在视频网站上看到的教程更为细致，更为精准。<br>在B站上看过一些视频，所谓的教程视频，要么蜻蜓点水，要么就非常过于功利！你看完之后，可能还是一头雾水。<br>这本书不同，主要是通过实战练习的方式，一点一点的来学习。这也是很多做的视频教程中所极度缺失的，点可能介绍到了，但是练习的地方很少，导致你即便跟着上手学，可能最后还是一头雾水。</p>
