@@ -175,7 +175,225 @@ future.onComplete(username =>
 
 ##### 使用Future进行响应的Actor
 ###### Java示例
-所有返回Future的异步方法返回的所有返回Future 的异步方法返回的
+所有返回Future的异步方法返回的所有返回Future 的异步方法返回的都是Scala的scala.concurrent.Future
+
+**创建Actor**
+首先创建一个ActorSystem，然后通过actorOf在刚创建的Actor系统中创建一个Actor，
+```java
+ActorSystem system = ActorSystem.create();
+ActorRef actorRef = system.actorOf(Props.create(JavaPongActor.class));
+```
+现在向Actor询问其对于某个消息的响应：
+```java
+final Future sFuture = ask(actorRef, "Ping", 1000);
+```
+这一做法相当直接，我们调用ask方法，传入以下参数：
+- 消息发送至的Actor 引用；
+- 想要发送给Actor 的消息；
+- Future的超时参数：等待结果多久以后就认为询问失败。
+ask会返回一个Scala Future，作为响应的占位符。在Actor的代码中，Actor会向sender()发送回一条消息，这条消息就是在ask 返回的Scala Future中将接收到的响应。
+虽然我们无法在Java 8中使用Scala Future，但是可以通过之前导入的库将其转换为CompletableFuture：
+```java
+final CompletionStage<String> cs = toJava(sFuture);
+final CompletableFuture<String> jFuture = (CompletableFuture<String>) cs;
+```
+
+首先使用 ```scala.compat.java8.FutureConverters.toJava``` 对Scala Future 进行转换，该方法会返回一个CompletionStage。CompletionStage是CompletableFuture 实现的接口，而且这是一个只读的接口。为了调用get 方法，我们将结果的类型转换为CompletableFuture。在测试用例外部，我们并不需要进行该转换。
+
+**要注意的是，** 我们在Future内存放的数据类型是String，而Actor 是无类型的，会返回Object，因此读者可能会觉得这种无限制的类型转换有问题。当然，**在ActorSystem外部与Actor 进行通信的时候需要在这方面多加小心。**
+
+###### Scala示例
+
+
+##### 理解Future和Promise
+Future隐式地处理了两种情况：**失败与延迟**。要了解如何把阻塞式的IO转为非阻塞式IO，需要学习 **一些不同的表示失败处理和延时处理的抽象概念。**
+
+**Future-在类型中表达失败与延迟**
+像ask模式这样的异步API会返回一个占位符，类似前面提到的Future类型。
+准备一个简单的Java示例：
+```java
+/**
+ * 这是一个封装Future方法的示例
+ * @param message
+ * @return
+ */
+public CompletionStage<String> askPong(String message) {
+    Future sFuture = ask(actorRef, message, 1000);
+    // 调用toJava转换CompletionStage
+    final CompletionStage<String> cs = toJava(sFuture);
+    return cs;
+}
+
+//Future Examples，在里面调用askPong
+@Test
+public void shouldPrintToConsole() throws Exception {
+    askPong("Ping").thenAccept(x -> System.out.println("replied with: " + x));
+    Thread.sleep(100);
+    //no assertion - just prints to console. Try to complete a CompletableFuture instead.
+}
+```
+
+Scala示例：
+```scala
+def askPong(message: String): Future[String] = (pongActor ? message).mapTo[String]
+
+describe("FutureExamples"){
+  import scala.concurrent.ExecutionContext.Implicits.global
+  it("should print to console"){
+    (pongActor ? "Ping").onSuccess({
+      case x: String => println("replied with: " + x)
+    })
+    Thread.sleep(100)
+  }
+}
+```
+
+###### 剖析Future
+Future[T]/CompletableFuture<T>成功时会返回一个类型为T 的值，失败时则会返回Throwable。我们将分别学习如何处理这两种情况（成功与失败），以及如何将Future的值转换成有用的结果。
+
+**成功情况的处理**
+就像上面的例子中那样，在Java 8中，可以使用thenAccept来操作返回结果。
+```java
+askPong("Ping").thenAccept(x -> System.out.println("replied with: " + x));
+```
+
+而在Scala中，可以使用onSuccess：
+```scala
+(pongActor ? "Ping").onSuccess(){
+  case x: String => println("replied with: " + x)
+})
+```
+
+**失败情况的处理**
+失败情况是有可能发生的，而我们也需要去处理这些失败情况。所有的失败情况最终都会由一个Throwable 来表示。和成功的情况类似，有许多方法可以帮助我们来处理失败情况，甚至是从失败中恢复。
+
+##### 在失败情况下执行代码
+很多时候，我们都想要在失败情况下做些什么。最基本的就是在失败情况下向日志中打印一些信息。在Scala中，有一种很简单的方法支持这种需求：onFailure。这个方法接受一个部分函数作为参数，而这个部分函数接受一个Throwable。
+```scala
+askPong("causeError").onFailure {
+  case e: Exception => println("Got exception")
+}
+```
+不幸的是，在Java 8中，没有面向用户的用于失败处理的方法，因此我们在这里引入handle()来处理这种情况：
+```java
+// 这一点是在异常场景中，需要特别注意的
+askPong("cause error").handle((x, t) -> {
+  if(t != null){
+    System.out.println("Error: " + t);
+  }
+  return null;
+});
+```
+
+**对于这个场景的java代码的说明：**
+handle 接受一个BiFunction 作为参数，该函数会对成功或失败情况进行转换。handle中的函数在成功情况下会提供结果，在失败情况下则会提供Throwable，因此需要检查Throwable 是否存在（结果和Throwable 中只有一个不是null）。如果Throwable 存在，就向日志输出一条语句。由于我们需要在该函数中返回一个值，而失败情况下又不需要对返回值做任何操作，因此直接返回null。
+
+##### 从失败中恢复
+很多时候，在发生错误的时候我们仍然想要使用某个结果值。如果想要从错误中恢复的话，可以对该Future 进行转换，使之包含一个成功的结果值。
+在Java中，可以使用exceptionally将Throwable 转换为一个可用的值。
+```java
+CompletionStage<String> cs = askPong("cause error")
+  .exceptionally(t -> {
+    return "default";
+});
+```
+在Scala中，有一个recover方法提供相同的功能。同样地，recover方法也接受一个PartialFunction 作为参数，所以我们可以对异常的类型进行模式匹配：
+```scala
+val f = askPong("causeError").recover {
+  case t: Exception => "default"
+}
+```
+
+##### 异步地从失败中恢复
+我们经常需要在发生错误时使用另一个异步方法来恢复，例如下面是两个用例：
+- 重试某个失败的操作。
+- 没有命中缓存时，需要调用另一个服务的操作。
+
+例如一则Java示例：
+```java
+askPong("cause error")
+  .handle( (pong, ex) -> ex == null
+    ? CompletableFuture.completedFuture(pong)
+    : askPong("Ping")
+  ).thenCompose(x -> x);
+```
+首先，检查exception是否为null。如果为null，就返回包含结果的Future，否则返回重试的Future。接着，调用thenCompose将CompletionStage[CompletionStage[String]]扁平化。
+而在Scala中，我们要调用的函数是recoverWith：类似专门用于错误情况的flatMap。
+```scala
+askPong("causeError").recoverWith({
+  case t: Exception => askPong("Ping")
+})
+```
+
+##### 组合Future
+在Java 中，可以使用CompletableFuture的thenCombine方法，在Future的值可用时访问到这些值：
+```java
+askPong("Ping")
+  .thenCombine(askPong("Ping"), (a,b) -> {
+    return a + b; //"PongPong"
+});
+```
+
+在Scala 中，也可以使用for推导式将多个Future组合起来。我们能够像处理任何其他集合一样，解析出两个Future 的结果并对它们进行处理。（要注意的是，这只不过是flatMap的一个“语法糖”）
+```scala
+// 注：在scala中，这种语法非常灵活
+val f1 = Future {4}
+val f2 = Future {5}
+val futureAddition: Future[Int] =
+for (
+  res1 <- f1;
+  res2 <- f2
+) yield res1 + res2
+```
+
+##### 处理Future List
+**注：** 这个场景，我真没想到什么情况下会使用，暂时先跳过本小节阅读，记得在scala中有这么一种反转的处理方式
+```scala
+val listOfFutures: List[Future[String]] = List("Pong", "Pong", "failed").map(x => askPong(x))
+val futureOfList: Future[List[String]] = Future.sequence(listOfFutures)
+```
+
+##### Future速查表
+**注：** 在书中提到的本小节涉及的一些Future操作
+![Future操作对应表](b709cacd/future_collection_scala_java.png)
+
+### 第三章 传递消息
+了解不同的消息模式，也就是在不同Actor 之间传递消息的不同方法。
+#### 消息传递
+有4种核心的Actor消息模式：tell、ask、forward 和pipe。我们已经了解过tell和ask，不过sender()都不是Actor。在这里，将从Actor之间发送消息的角度来介绍所有关于消息传递的概念。
+- Ask：向Actor发送一条消息，返回一个Future。当Actor 返回响应时，会完成Future。不会向消息发送者的邮箱返回任何消息。
+- Tell：向Actor发送一条消息。所有发送至sender()的响应都会返回给发送消息的Actor。
+- Forward：将接收到的消息再发送给另一个Actor。所有发送至sender()的响应都会返回给原始消息的发送者。
+- Pipe：用于将Future的结果返回给sender()或另一个Actor。如果正在使用Ask或是处理一个Future，那么使用Pipe 可以正确地返回Future 的结果。
+
+##### Ask消息模式
+Ask模式会生成一个Future，表示Actor返回的响应。ActorSystem外部的普通对象与Actor进行通信时经常会使用这种模式。
+**实际运作模式**
+在调用ask 向Actor 发起请求时，Akka 实际上会在Actor 系统中创建一个临时Actor。接收请求的Actor 在返回响应时使用的sender()引用就是这个临时Actor。当一个Actor接收到ask 请求发来的消息并返回响应时，这个临时Actor 会使用返回的响应来完成Future。如下图所示：
+![Ask模式](b709cacd/ask_communication.png)
+Ask模式要求定义一个超时参数，如果对方没有在超时参数限定的时间内返回这个ask的响应，那么Future就会返回失败。在Java中可以使用akka.util.Timeout来定义：
+```java
+static import akka.pattern.Patterns.ask;
+Timeout timeout = new akka.util.Timeout(
+  1,
+  java.util.concurrent.TimeUnit.SECONDS
+);
+Future future = ask(actor, message, timeout);
+```
+在Scala中，则可以使用scala.concurrent.duration来定义Timeout。Scala的duration领域特定语言（Domain Specific Languages，DSL）很强大，允许用户直接使用1 second这样的方式来定义一段时间。在Scala中，ask 的超时参数是隐式传入的，这样有助于简化ask的语义，并且使得ask语句更为简洁：
+```scala
+import scala.concurrent.duration._
+import akka.pattern.ask
+// 隐式写法
+implicit val timeout = akka.util.Timeout(1 second)
+val future = actorRef ? "message"
+```
+
+##### Tell
+Tell是最简单的消息模式，不过要花上一些时间才能够学会这种模式的最佳实践。这也是为什么我们先介绍ask，再介绍tell的原因。Tell 通常被看做是一种“fire and forget”消息传递机制，无需指定发送者。不过通过一些巧妙的方法，也可以使用tell来完成“request/reply”风格的消息传递。如下图所示：
+![Tell模式](b709cacd/tell_communication.png)
+**Tell是ActorRef/ActorSelection 类的一个方法。它也可以接受一个响应地址作为参数，接收消息的Actor 中的sender()其实就是这个响应地址。** 在Scala 中，默认情况下，sender会被隐式定义为发送消息的Actor。如果没有sender（如在Actor 外部发起请求），那么响应地址不会默认设置为任何邮箱（叫做DeadLetters）。
+
 
 
 
