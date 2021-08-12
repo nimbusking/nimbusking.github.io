@@ -394,7 +394,108 @@ Tell是最简单的消息模式，不过要花上一些时间才能够学会这�
 ![Tell模式](b709cacd/tell_communication.png)
 **Tell是ActorRef/ActorSelection 类的一个方法。它也可以接受一个响应地址作为参数，接收消息的Actor 中的sender()其实就是这个响应地址。** 在Scala 中，默认情况下，sender会被隐式定义为发送消息的Actor。如果没有sender（如在Actor 外部发起请求），那么响应地址不会默认设置为任何邮箱（叫做DeadLetters）。
 
+**使用Tell处理响应**
+由于在返回消息时可以访问到指向发送者的引用，所以要对某条消息做出响应是很容易的。不过，*在处理响应的时候，我们需要知道Actor收到的是哪一条消息的响应。* 如果我们在Actor中存储一些状态，记录Actor 希望收到响应的消息，那么就能够高效地向Actor发送请求，解决前面提到的ask模式的问题。
 
+**我们可以在Actor中将一些上下文信息存储在一个map中，将map的key 放在消息中一起发送。然后，当有着相同key的消息返回时，就可以恢复上下文，完成消息的处理了。**
+![Actor中传递Map参数](b709cacd/actor_with_map_parameters.png)
+
+##### Forward
+Tell在语义上是用于将一条消息发送至另一个Actor，并将响应地址设置为当前的Actor。而Forward 和邮件转发非常类似：**初始发送者保持不变，只不过新增了一个收件人。**
+在使用tell时，我们指定了一个响应地址，或是将响应地址隐式设为发送消息的Actor。而使用forward传递消息时，响应地址就是原始消息的发送者，如下图所示：
+![Forword模式](b709cacd/actor_forword.png)
+有时候我们需要将接受到的消息传递给另一个Actor来处理，**而最终的处理结果需要传回给初始发起请求的一方**。此时forward是很有用的。
+**处理过程：** 处理中间步骤的Actor转发接收到的消息，或是发送一条新消息，但是仍然会将初始发送者与新消息一起发送。
+
+### 第四章 Actor的生命周期——处理状态与错误
+这一节介绍了几个有意思的点，这些点都是在目前工作中经常会遇到会涉及到，不排除需要着手去处理的场景
+- 分布式计算的误区（The Fallacies of Distributed Computing）
+- 当Actor 运行失败时会发生什么；
+- 如何通过监督Actor 来处理失败；
+- 如何利用become()以及有限自动机来修改Actor 的行为。
+
+#### 分布式计算的8个误区
+分布式计算误区由Sun Microsystems的一个团队总结出来，包含缺乏经验的开发者对于在网络上通信的系统的一些错误的假设。
+具体场景可以参考维基百科上具体细节[Fallacies_of_distributed_computing](https://en.wikipedia.org/wiki/Fallacies_of_distributed_computing)
+##### 网络是可靠的（The network is reliable）
+我们很容易会用和处理本地系统相同的方式来处理远程系统，也就会像跟本地Actor进行交互一样和远程Actor 进行交互。而Akka在这个错误的假设上更进一步，通过提高网络通信的抽象层次为我们提供了位置透明性。
+##### 没有延迟（Latency is zero）
+##### 带宽是无限的（Bandwidth is infinite）
+在大型的分布式系统中，经常会使用能够在CPU上快速执行的压缩算法，比如Snappy和LZO（例如，Cassandra将LZO 用于节点内部的通信）。如果要将对这一点的考虑实际应用到数据库中，就要通过压缩来减少消息的大小。压缩也是有开销的：它会消耗CPU 资源。有一些专用的算法把重点放在压缩效率，而非压缩比上。**我们可以使用其中之一（比如Snappy），在将序列化后的消息发送到远程Actor前先对其进行压缩，接收到消息后先解压缩，再反序列化。**
+##### 网络是安全的（The network is secure）
+##### 网络拓扑不会改变（Topology doesn't change）
+##### 只有一个管理员（There is one administrator）
+##### 网络传输没有开销（Transport cost is zero）
+##### 网络是同构的（The network is homogeneous）
+
+#### 错误
+使用Akka的一个附带的好处就是容错性。（oh，笔者在目前老框架架构下，似乎并没有很好的处理好相应的功能）
+##### 隔离错误
+先了解一些在分布式应用程序中都应该遵循的通用策略：**隔离错误。**
+假设每个组件都是一个定时炸弹，那么我们希望能够确保无论其中任何一个发生爆炸，都不会引发链式反应，导致其他组件也爆炸。也可以说，我们希望能够隔离错误，或是将可能引发失败情况的组件分离开来。
+
+**冗余**
+保持系统在发生错误时仍能运行的方法之一就是实现各组件的冗余性，确保不存在单点故障。假设我们有一个服务，那么有多种方法可以通过冗余设计来保证服务的高可用性。
+
+#### 监督
+**Erlang将容错性引入了Actor模型，它使用的概念叫做监督（supervision）**。监督的核心思想就是把对于失败的响应和可能引起失败的组件分隔开，并且把可能发生错误的组件通过层级结构来组织，以便管理。
+**监督的层级结构**
+Akka使用Actor层级结构来描述监督。当我们创建Actor时，新建的Actor都是作为另一个Actor的子Actor，父Actor负责监督子Actor。Actor的路径结构就展示了它的层级结构，所以和文件系统中的文件夹有点像。
+**监督策略**
+- 继续（resume）：Actor继续处理下一条消息
+- 停止（stop）：停止Actor，不再做任何操作
+- 重启（restart）：新建一个Actor，代替原来的Actor
+- 向上反映（escalate）：将异常信息传递给下一个监督者。
+
+##### 定义监督策略
+Actor有默认的监督策略。如果没有修改监督策略，那么监督Actor的行为基本上和如下场景：
+- Actor 运行过程中抛出异常：restart()；
+- Actor 运行过程中发生错误：escalate()；
+- Actor 初始化过程中发生异常：stop()。
+
+在默认监督策略中还定义了另一种情况：ActorKilledException。如果Actor 被“杀”（kill）了，那么这个Actor 的监督者会接收到一个ActorKilledException，执行stop()会接收到该异常。
+
+在Java中定义：
+```java
+// java中通过DeciderBuilder来创建一个Scala的PartialFunction，用于表示策略。
+@Override
+public akka.actor.SupervisorStrategy supervisorStrategy() {
+  return new OneForOneStrategy(5, Duration.create("1 minute"),
+    akka.japi.pf.DeciderBuilder
+    .match(BrokenPlateException.class, e -> SupervisorStrategy.resume())
+    .match(DrunkenFoolException.class, e -> SupervisorStrategy.restart())
+    .match(RestaurantFireError.class, e -> SupervisorStrategy.escalate())
+    .match(TiredChefException.class, e -> SupervisorStrategy.stop())
+    .matchAny(e -> SupervisorStrategy.escalate())
+    .build()
+  );
+}
+```
+在scala中要相对简洁一点：
+```scala
+// 在Scala的例子中，我们还是重写Actor的supervisorStrategy方法，然后定义一个PartialFunction，匹配抛出的异常，并返回Directive
+override def supervisorStrategy = {
+  OneForOneStrategy() {
+    case BrokenPlateException => Resume
+    case DrunkenFoolException => Restart
+    case RestaurantFireError =>Escalate
+    case TiredChefException => Stop
+    case _ => Escalate
+  }
+}
+```
+
+##### Actor生命周期
+在Actor 的生命周期中会调用几个方法，我们在需要时可以重写这些方法:
+- prestart()：在构造函数之后调用。
+- postStop()：在重启之前调用。
+- preRestart(reason, message)：默认情况下会调用postStop()。
+- postRestart()：默认情况下会调用preStart()。
+
+在Actor生命周期中个事件的发生顺序如下图所示：
+[Actor生命周期调用](b709cacd/actor_lifecycle.png)
+**注意**
+要注意的是preRestart和postRestart只在重启的时候才会被调用。它们默认调用了preStart和postStop，但是调用它们的时候就不再直接调用preStart和postStop了。这样我们就能够决定，到底是只在Actor启动或停止的时候调用一次preStart和postStop，还是每次重启一个Actor的时候就调用preStart和postStop。
 
 
 # 主要内容
