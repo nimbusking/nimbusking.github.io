@@ -37,7 +37,7 @@ date: 2018-08-17 00:06:18
 书中写的很有意思：如果读者早已熟稔Scala 的Future，Play 的Promise或是Java8的CompletableFuture，那么可以跳过本章。如果曾经使用过Guava 或Spring 的ListenableFuture，可能需要了解本章所介绍API的不同之处。如果从来没有使用过monadic风格的Future，那就需要花点时间学习一下本章了。
 对于我来说，还真是一个都不懂。。。
 #### 响应式系统设计
-源自一个响应式宣言（Reactive Manifesto /ˌmanəˈfestō/，有些地方翻译为反应时宣言，一个意思。），原文在这里![the-reactive-manifesto-2.0](b709cacd/the-reactive-manifesto-2.0.pdf)，这里面提到了四个准则：
+源自一个响应式宣言（Reactive Manifesto /ˌmanəˈfestō/，有些地方翻译为反应时宣言，一个意思。），原文在这里[the-reactive-manifesto-2.0](b709cacd/the-reactive-manifesto-2.0.pdf) ，这里面提到了四个准则：
 ##### 灵敏性
 应用程序应该尽可能快地对请求做出响应。
 ##### 伸缩性

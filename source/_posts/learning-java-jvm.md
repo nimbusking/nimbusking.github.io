@@ -1175,3 +1175,308 @@ at org.apache.axis.transport.http.HTTPSender.invoke(HTTPSender.java:143)
 通知OA门户方修复无法使用的集成接口，并将**异步调用改为生产者/消费者模式的消息队列**实现后，系统恢复正常。
 
 #### 不恰当数据结构导致内存占用过大
+
+
+## 第6章 类文件结构
+根据《Java虚拟机规范》的规定，Class文件格式采用一种类似于C语言结构体的伪结构来存储数据，这种伪结构中只有两种数据类型：**“无符号数”和“表”。**
+- **无符号数**属于基本的数据类型，以u1、u2、u4、u8来分别代表1个字节、2个字节、4个字节和8个字节的无符号数，无符号数可以用来描述数字、索引引用、数量值或者按照UTF-8编码构成字符串值。
+- **表**是由多个无符号数或者其他表作为数据项构成的*复合数据类型*，为了便于区分，所有表的命名都习惯性地以“_info”结尾。表用于描述有层次关系的复合结构的数据，整个Class文件本质上也可以视作是一张表，这张表由表6-1所示的数据项按严格顺序排列构成。
+![Class文件格式](d7ba81a7/class_file_infrastracture.jpg)
+无论是无符号数还是表，当需要描述同一类型但数量不定的多个数据时，经常会使用一个前置的容量计数器加若干个连续的数据项的形式，这时候称这一系列连续的某一类型的数据为某一类型的“集合”。
+
+### 魔数与Class文件的版本
+每个Class文件的头4个字节被称为魔数（Magic Number），它的唯一作用是确定这个文件是否为一个能被虚拟机接受的Class文件。。Class文件的魔数取得很有“浪漫气息”，值为0xCAFEBABE。
+紧接着魔数的4个字节存储的是Class文件的版本号：第5和第6个字节是次版本号（MinorVersion），第7和第8个字节是主版本号（Major Version）。
+一则测试代码：
+```java
+package org.fenixsoft.clazz;
+public class TestClass {
+    private int m;
+    public int inc() {
+        return m + 1;
+    }
+}
+```
+**注：**书中作者都是用JDK1.6编译运行的，后文贴图等相关，均会是我通过JDK1.9编译运行
+![Java Class文件结构-主版本号](d7ba81a7/data_interpretor_major_version.jpg)
+如书中所述：开头4个字节的十六进制表示是0xCAFEBABE，代表次版本号的第5个和第6个字节值为0x0000，而主版本号的值为0x0035，也即是十进制的53，也就是支持JDK1.9版本
+关于次版本号：而到了JDK 12时期，由于JDK提供的功能集已经非常庞大，有一些复杂的新特性需要以“公测”的形式放出，所以设计者重新启用了副版本号，将它用于标识“技术预览版”功能特性的支持。如果Class文件中使用了该版本JDK尚未列入正式特性清单中的预览功能，则必须把次版本号标识为65535，以便Java虚拟机在加载类文件时能够区分出来。
+
+### 常量池
+紧接着主、次版本号之后的是常量池入口，常量池可以比喻为Class文件里的资源仓库，*它是Class文件结构中与其他项目关联最多的数据*，通常也是占用Class文件空间最大的数据项目之一，另外，它还是在Class文件中第一个出现的表类型数据项目。
+由于常量池中常量的数量是不固定的，所以在常量池的入口需要放置一项u2类型的数据，代表常量池容量计数值（constant_pool_count）。与Java中语言习惯不同，这个容量计数是从1而不是0开始的。如下图所示：
+![常量池计数](d7ba81a7/data_interpretor_constant_poll_count.jpg)
+**注** 常量池容量（偏移地址：0x00000008）为十六进制数0x0013，即十进制的19，这就代表常量池中有18项常量。（这个跟作者的1.6编译的，不一样，书中标注的有21项，整整少了3项）。
+**之所以常量池从1开始计数：** 设计者将第0项常量空出来是有特殊考虑的，这样做的目的在于，如果后面某些指向常量池的索引值的数据在特定情况下需要表达“不引用任何一个常量池项目”的含义，可以把索引值设置为0来表示。Class文件结构中只有常量池的容量计数是从1开始，对于其他集合类型，包括接口索引集合、字段表集合、方法表集合等的容量计数都与一般习惯相同，是从0开始。
+常量池中主要存放两大类常量：**字面量（Literal）和符号引用（Symbolic References）。**字面量比较接近于Java语言层面的常量概念，如文本字符串、被声明为final的常量值等。而 *符号引用则属于编译原理方面* 的概念，主要包括下面几类常量：
+- 被模块导出或者开放的包（Package）
+- 类和接口的全限定名（Fully Qualified Name）
+- 字段的名称和描述符（Descriptor）
+- 方法的名称和描述符
+- 方法句柄和方法类型（Method Handle、Method Type、Invoke Dynamic）
+- 动态调用点和动态常量（Dynamically-Computed Call Site、Dynamically-Computed Constant）
+Java代码在进行Javac编译的时候，并不像C和C++那样有“连接”这一步骤，而是在虚拟机加载Class文件的时候进行动态连接（具体见第7章）。也就是说，**在Class文件中不会保存各个方法、字段最终在内存中的布局信息**，这些字段、方法的符号引用不经过虚拟机在运行期转换的话是无法得到真正的内存入口地址，也就无法直接被虚拟机使用的。当虚拟机做类加载时，将会从常量池获得对应的符号引用，再在类创建时或运行时解析、翻译到具体的内存地址之中。
+常量池中每一项常量都是一个表，最初常量表中共有11种结构各不相同的表结构数据，后来为了更好地支持动态语言调用，额外增加了4种动态语言相关的常量[1]，为了支持Java模块化系统（Jigsaw），又加入了CONSTANT_M odule_info和CONSTANT_Package_info两个常量，所以截至JDK13，常量表中分别有17种不同类型的常量。
+![常量池的项目类型](d7ba81a7/data_interpretor_constant_poll_tags.jpg)
+*之所以说常量池是最烦琐的数据，是因为这17种常量类型各自有着完全独立的数据结构，两两之间并没有什么共性和联系，因此只能逐项进行讲解。*
+**注：**笔者也会根据The Java Virtual Machine Specification Java SE 9 Edition版本中的相关章节描述进行补充说明，由于实际在win10系统下编译跟书本中描述出入有点大，后续关于具体细致内容，主要以书本介绍为主。具体自行编译结果，后续等章节末尾，会单独开小节去研究。
+![常量池结构](d7ba81a7/constant_pool_structure.jpg)
+第一项常量，它的标志位（偏移地址：0x0000000A）是0x07，查表的标志列可知这个常量属于 **CONSTANT_Class_info**类型，此类型的常量代表一个类或者接口的符号引用。CONSTANT_Class_info的结构比较简单：
+![CONSTANT_Class_info型常量的结构](d7ba81a7/CONSTANT_Class_info.jpg)
+书中示例用javap分析Class文件字节码：
+```
+C:\>javap -verbose TestClass
+Compiled from "TestClass.java"
+public class org.fenixsoft.clazz.TestClass extends java.lang.Object
+SourceFile: "TestClass.java"
+minor version: 0
+major version: 50
+Constant pool:
+const #1 = class #2; // org/fenixsoft/clazz/TestClass
+const #2 = Asciz org/fenixsoft/clazz/TestClass;
+const #3 = class #4; // java/lang/Object
+const #4 = Asciz java/lang/Object;
+const #5 = Asciz m;
+const #6 = Asciz I;
+const #7 = Asciz <init>;
+const #8 = Asciz ()V;
+const #9 = Asciz Code;
+const #10 = Method #3.#11; // java/lang/Object."<init>":()V
+const #11 = NameAndType #7:#8;// "<init>":()V
+const #12 = Asciz LineNumberTable;
+const #13 = Asciz LocalVariableTable;
+const #14 = Asciz this;
+const #15 = Asciz Lorg/fenixsoft/clazz/TestClass;;
+const #16 = Asciz inc;
+const #17 = Asciz ()I;
+const #18 = Field #1.#19; // org/fenixsoft/clazz/TestClass.m:I
+const #19 = NameAndType #5:#6; // m:I
+const #20 = Asciz SourceFile;
+const #21 = Asciz TestClass.java;
+```
+
+#### 访问标志
+在常量池结束之后，紧接着的2个字节代表访问标志（access_flags），这个标志用于识别一些类或者接口层次的访问信息，包括：这个Class是类还是接口；是否定义为public类型；是否定义为abstract类型；如果是类的话，是否被声明为final；等等。如下图所示：
+![访问标志](d7ba81a7/access_flag.jpg)
+**分析过程：**access_flags中一共有16个标志位可以使用，当前只定义了其中9个，没有使用到的标志位要求一律为零。以代码清单6-1中的代码为例，TestClass是一个普通Java类，不是接口、枚举、注解或者模块，被public关键字修饰但没有被声明为final和abstract，并且它使用了JDK 1.2之后的编译器进行编译，因此它的ACC_PUBLIC、ACC_SUPER标志应当为真，而ACC_FINAL、ACC_INTERFACE、ACC_ABSTRACT、ACC_SYNTHETIC、ACC_ANNOTATION、ACC_ENUM、ACC_M ODULE这七个标志应当为假，因此它的access_flags的值应为：0x0001|0x0020=0x0021。从图6-5中看到，access_flags标志（偏移地址：0x000000EF）的确为0x0021。
+#### 类索引、父类索引与接口索引集合
+类索引（this_class）和父类索引（super_class）都是一个u2类型的数据，而接口索引集合（interfaces）是一组u2类型的数据的集合，Class文件中由这三项数据来确定该类型的继承关系。类索引用于确定这个类的全限定名，父类索引用于确定这个类的父类的全限定名。由于Java语言不允许多重继承，所以父类索引只有一个，除了java.lang.Object之外，所有的Java类都有父类，因此除了java.lang.Object外，所有Java类的父类索引都不为0。接口索引集合就用来描述这个类实现了哪些接口，这些被实现的接口将按implements关键字（如果这个Class文件表示的是一个接口，则应当是extends关键字）后的接口顺序从左到右排列在接口索引集合中。
+#### 字段表集合
+字段表（field_info）用于描述接口或者类中声明的变量。Java语言中的“字段”（Field）包括类级变量以及实例级变量，但不包括在方法内部声明的局部变量。读者可以回忆一下在Java语言中描述一个字段可以包含哪些信息。字段可以包括的修饰符有字段的作用域（public、private、protected修饰符）、是实例变量还是类变量（static修饰符）、可变性（final）、并发可见性（volatile修饰符，是否强制从主内存读写）、可否被序列化（transient修饰符）、字段数据类型（基本类型、对象、数组）、字段名称。
+#### 方法表集合
+Class文件存储格式中对方法的描述与对字段的描述采用了几乎完全一致的方式，方法表的结构如同字段表一样，依次包括访问标志（access_flags）、名称索引（name_index）、描述符索引（descriptor_index）、属性表集合（attributes）几项
+#### 属性表集合
+对于每一个属性，它的名称都要从常量池中引用一个CONSTANT_Utf8_info类型的常量来表示，而属性值的结构则是完全自定义的，只需要通过一个u4的长度属性去说明属性值所占用的位数即可。
+
+### 字节码指令简介
+Java虚拟机的指令由一个字节长度的、代表着某种特定操作含义的数字（称为操作码，Opcode）以及跟随其后的零至多个代表此操作所需的参数（称为操作数，Operand）构成。由于Java虚拟机采用面向操作数栈而不是面向寄存器的架构（这两种架构的执行过程、区别和影响将在第8章中探讨），**所以大多数指令都不包含操作数，只有一个操作码**，指令参数都存放在操作数栈中。
+大部分指令都没有支持整数类型byte、char和short，甚至没有任何指令支持boolean类型。编译器会在编译期或运行期将byte和short类型的数据带符号扩展（Sign-Extend）为相应的int类型数据，将boolean和char类型数据零位扩展（Zero-Extend）为相应的int类型数据。与之类似，在处理boolean、byte、short和char类型的数组时，也会转换为使用对应的int类型的字节码指令来处理。**因此，大多数对于boolean、byte、short和char类型数据的操作，实际上都是使用相应的对int类型作为运算类型（Computational Type）来进行的。**
+
+#### 加载和存储指令
+加载和存储指令用于将数据在栈帧中的局部变量表和操作数栈（见第2章关于内存区域的介绍）之间来回传输，这类指令包括：
+- 将一个局部变量加载到操作栈：iload、iload_<n>、lload、lload_<n>、fload、fload_<n>、dload、dload_<n>、aload、aload_<n>
+- 将一个数值从操作数栈存储到局部变量表：istore、istore_<n>、lstore、lstore_<n>、fstore、fstore_<n>、dstore、dstore_<n>、astore、astore_<n>
+- 将一个常量加载到操作数栈：bipush、sipush、ldc、ldc_w、ldc2_w、aconst_null、iconst_m1、iconst_<i>、lconst_<l>、fconst_<f>、dconst_<d>
+- 扩充局部变量表的访问索引的指令：wide
+上面所列举的指令助记符中，有一部分是以尖括号结尾的（例如iload_<n>），这些指令助记符实际上代表了一组指令（例如iload_<n>，它代表了iload_0、iload_1、iload_2和iload_3这几条指令）。这几组指令都是某个带有一个操作数的通用指令（例如iload）的特殊形式，对于这几组特殊指令，它们省略掉了显式的操作数，不需要进行取操作数的动作，因为实际上操作数就隐含在指令中。
+#### 运算指令
+算术指令用于对两个操作数栈上的值进行某种特定运算，并把结果重新存入到操作栈顶。大体上运算指令可以分为两种：*对整型数据进行运算的指令与对浮点型数据进行运算的指令。*
+无论是哪种算术指令，均是使用Java虚拟机的算术类型来进行计算的，换句话说是不存在直接支持byte、short、char和boolean类型的算术指令，对于上述几种数据的运算，应使用操作int类型的指令代替。所有的算术指令包括：
+- 加法指令：iadd、ladd、fadd、dadd
+- 减法指令：isub、lsub、fsub、dsub
+- 乘法指令：imul、lmul、fmul、dmul
+- 除法指令：idiv、ldiv、fdiv、ddiv
+- 求余指令：irem、lrem、frem、drem
+- 取反指令：ineg、lneg、fneg、dneg
+- 位移指令：ishl、ishr、iushr、lshl、lshr、lushr
+- 按位或指令：ior、lor
+- 按位与指令：iand、land
+- 按位异或指令：ixor、lxor
+- 局部变量自增指令：iinc
+- 比较指令：dcmpg、dcmpl、fcmpg、fcmpl、lcmp
+
+数据运算可能会导致溢出，《Java虚拟机规范》中并没有明确定义过整型数据溢出具体会得到什么计算结果，仅规定了在处理整型数据时，**只有除法指令（idiv和ldiv）以及求余指令（irem和lrem）**中当 **出现除数为零**时会导致虚拟机抛出ArithmeticException异常，其余任何整型数运算场景都不应该抛出运行时异常。
+
+#### 类型转化指令
+类型转换指令可以将两种不同的数值类型相互转换，这些转换操作一般用于实现用户代码中的显式类型转换操作。
+Java虚拟机直接支持（即转换时无须显式的转换指令）以下数值类型的宽化类型转换（Widening Numeric Conversion，即小范围类型向大范围类型的安全转换）：
+- int类型到long、float或者double类型
+- long类型到float、double类型
+- float类型到double类型
+与之相对的，处理窄化类型转换（Narrowing Numeric Conversion）时，*就必须显式地使用转换指令来完成*，这些转换指令包括i2b、i2c、i2s、l2i、f2i、f2l、d2i、d2l和d2f。**窄化类型转换可能会导致转换结果产生不同的正负号、不同的数量级的情况，转换过程很可能会导致数值的精度丢失。**
+
+#### 对象创建与访问指令
+虽然类实例和数组都是对象，但Java虚拟机对类实例和数组的创建与操作使用了不同的字节码指令（在下一章会讲到数组和普通类的类型创建过程是不同的）。对象创建后，就可以通过对象访问指令获取对象实例或者数组实例中的字段或者数组元素，这些指令包括：
+-创建类实例的指令：new
+-创建数组的指令：newarray、anewarray、multianewarray
+-访问类字段（static字段，或者称为类变量）和实例字段（非static字段，或者称为实例变量）的指令：getfield、putfield、getstatic、putstatic
+-把一个数组元素加载到操作数栈的指令：baload、caload、saload、iaload、laload、faload、daload、aaload
+-将一个操作数栈的值储存到数组元素中的指令：bastore、castore、sastore、iastore、fastore、dastore、aastore
+-取数组长度的指令：arraylength
+-检查类实例类型的指令：instanceof、checkcast
+
+#### 操作数栈管理指令
+如同操作一个普通数据结构中的堆栈那样，Java虚拟机提供了一些用于直接操作操作数栈的指令，包括：
+- 将操作数栈的栈顶一个或两个元素出栈：pop、pop2
+- 复制栈顶一个或两个数值并将复制值或双份的复制值重新压入栈顶：dup、dup2、dup_x1、dup2_x1、dup_x2、dup2_x2
+- 将栈最顶端的两个数值互换：swap
+
+#### 控制转移指令
+控制转移指令可以让Java虚拟机有条件或无条件地从指定位置指令（而不是控制转移指令）的下一条指令继续执行程序，从概念模型上理解，可以认为控制指令就是在有条件或无条件地修改PC寄存器的值。控制转移指令包括：
+- 条件分支：ifeq、iflt、ifle、ifne、ifgt、ifge、ifnull、ifnonnull、if_icmpeq、if_icmpne、if_icmplt、if_icmpgt、if_icmple、if_icmpge、if_acmpeq和if_acmpne
+- 复合条件分支：tableswitch、lookupswitch
+- 无条件分支：goto、goto_w、jsr、jsr_w、ret
+由于各种类型的比较最终都会转化为int类型的比较操作，int类型比较是否方便、完善就显得尤为重要，而Java虚拟机提供的int类型的条件分支指令是最为丰富、强大的。
+
+#### 方法调用和返回指令
+方法调用（分派、执行过程）将在第8章具体讲解，这里仅列举以下五条指令用于方法调用：
+- invokevirtual指令：用于调用对象的实例方法，根据对象的实际类型进行分派（虚方法分派），这也是Java语言中最常见的方法分派方式。
+- invokeinterface指令：用于调用接口方法，它会在运行时搜索一个实现了这个接口方法的对象，找出适合的方法进行调用。
+- invokespecial指令：用于调用一些需要特殊处理的实例方法，包括实例初始化方法、私有方法和父类方法。
+- invokestatic指令：用于调用类静态方法（static方法）。
+- invokedynamic指令：用于在运行时动态解析出调用点限定符所引用的方法。并执行该方法。前面四条调用指令的分派逻辑都固化在Java虚拟机内部，用户无法改变，而invokedynamic指令的分派逻辑是由用户所设定的引导方法决定的。
+
+#### 异常处理指令
+在Java程序中显式抛出异常的操作（throw语句）都由athrow指令来实现，除了用throw语句显式抛出异常的情况之外，《Java虚拟机规范》还规定了许多运行时异常会在其他Java虚拟机指令检测到异常状况时自动抛出。例如前面介绍整数运算中，当除数为零时，虚拟机会在idiv或ldiv指令中抛出ArithmeticException异常。
+#### 同步指令
+Java虚拟机可以支持方法级的同步和方法内部一段指令序列的同步，这两种同步结构都是使用 **管程（Monitor，更常见的是直接将它称为“锁”）**来实现的。
+**注：**关于管程的概念，想要具体了解的，需要通过查阅操作系统原理相关的书籍介绍，例如：《Operating Systems: Internals and Design Principles.》（操作系统：精髓与设计原理），第七版中，第5章，5.4节中关于管程的介绍。
+方法级的同步是隐式的，无须通过字节码指令来控制，它实现在方法调用和返回操作之中。虚拟机可以从方法常量池中的方法表结构中的ACC_SYNCHRONIZED访问标志得知一个方法是否被声明为同步方法。
+当方法调用时，调用指令将会检查方法的ACC_SYNCHRONIZED访问标志是否被设置，*如果设置了*，执行线程就要求先成功持有管程，然后才能执行方法，最后当方法完成（无论是正常完成还是非正常完成）时释放管程。在方法执行期间，执行线程持有了管程，其他任何线程都无法再获取到同一个管程。如果一个同步方法执行期间抛出了异常，并且在方法内部无法处理此异常，那这个同步方法所持有的管程将在异常抛到同步方法边界之外时自动释放。
+同步代码示例：
+```java
+void onlyMe(Foo f) {
+    synchronized(f) {
+        doSomething();
+    }
+}
+```
+解释后的字节码序列如下：
+```
+Method void onlyMe(Foo)
+0 aload_1 // 将对象f入栈
+1 dup 　　 // 复制栈顶元素（即f的引用）
+2 astore_2 // 将栈顶元素存储到局部变量表变量槽 2中
+3 monitorenter // 以栈定元素（即f）作为锁，开始同步
+4 aload_0 // 将局部变量槽 0（即this指针）的元素入栈
+5 invokevirtual #5 // 调用doSomething()方法
+8 aload_2 // 将局部变量Slow 2的元素（即f）入栈
+9 monitorexit // 退出同步
+10 goto 18 // 方法正常结束，跳转到18返回
+13 astore_3 // 从这步开始是异常路径，见下面异常表的Taget 13
+14 aload_2 // 将局部变量Slow 2的元素（即f）入栈
+15 monitorexit // 退出同步
+16 aload_3 // 将局部变量Slow 3的元素（即异常对象）入栈
+17 athrow // 把异常对象重新抛出给onlyMe()方法的调用者
+18 return // 方法正常返回
+Exception table:
+FromTo Target Type
+4 10 13 any
+13 16 13 any
+```
+
+### 公有设计，私有实现
+《Java虚拟机规范》描绘了Java虚拟机应有的共同程序存储格式：Class文件格式以及字节码指令集。
+虚拟机实现者可以使用这种伸缩性来让Java虚拟机获得更高的性能、更低的内存消耗或者更好的可移植性，选择哪种特性取决于Java虚拟机实现的目标和关注点是什么，虚拟机实现的方式主要有以下两种：
+- 将输入的Java虚拟机代码在加载时或执行时翻译成另一种虚拟机的指令集；
+- 将输入的Java虚拟机代码在加载时或执行时翻译成宿主机处理程序的本地指令集（即即时编译器代码生成技术）。
+
+# 第7章 虚拟机类加载机制
+## 概述
+Java虚拟机把描述类的数据从Class文件加载到内存，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作 **虚拟机的类加载机制。**
+## 类加载的时机
+一个类型从被加载到虚拟机内存中开始，到卸载出内存为止，它的整个生命周期将会经历加载（Loading）、验证（Verification）、准备（Preparation）、解析（Resolution）、初始化（Initialization）、使用（Using）和卸载（Unloading）七个阶段，其中验证、准备、解析三个部分统称为连接（Linking）。
+![类的生命周期](d7ba81a7/class_lifecycle.jpg)
+加载、验证、准备、初始化和卸载这五个阶段的顺序是确定的，类型的加载过程必须按照这种顺序按部就班地开始，而 **解析阶段则不一定**：它在某些情况下可以在初始化阶段之后再开始，这是为了支持Java语言的运行时绑定特性（也称为动态绑定或晚期绑定）
+类加载过程的第一个阶段“加载”，《Java虚拟机规范》中并*没有进行强制约束*，这点可以交给虚拟机的具体实现来自由把握。但是对于*初始化阶段*，《Java虚拟机规范》则是**严格**规定了有且只有六种情况必须立即对类进行“初始化”（而加载、验证、准备自然需要在此之前开始）：
+- 遇到new、getstatic、putstatic或invokestatic这四条字节码指令时，如果类型没有进行过初始化，则需要先触发其初始化阶段。能够生成这四条指令的典型Java代码场景有：
+    + 使用new关键字实例化对象的时候。
+    + 读取或设置一个类型的静态字段（被final修饰、已在编译期把结果放入常量池的静态字段除外）的时候。
+    + 调用一个类型的静态方法的时候。
+- 使用java.lang.reflect包的方法对类型进行反射调用的时候，如果类型没有进行过初始化，则需要先触发其初始化。
+- 当初始化类的时候，如果发现其父类还没有进行过初始化，则需要先触发其父类的初始化。
+- 当虚拟机启动时，用户需要指定一个要执行的主类（包含main()方法的那个类），虚拟机会先初始化这个主类。
+- 当使用JDK 7新加入的动态语言支持时，如果一个java.lang.invoke.M ethodHandle实例最后的解析结果为REF_getStatic、REF_putStatic、REF_invokeStatic、REF_newInvokeSpecial四种类型的方法句柄，并且这个方法句柄对应的类没有进行过初始化，则需要先触发其初始化。
+- 当一个接口中定义了JDK 8新加入的默认方法（被default关键字修饰的接口方法）时，如果有这个接口的实现类发生了初始化，那该接口要在其之前被初始化。
+
+对于这六种会触发类型进行初始化的场景，《Java虚拟机规范》中使用了一个**非常强烈的限定语——“有且只有”**，这六种场景中的行为称为对一个类型进行主动引用。除此之外，所有引用类型的方式都不会触发初始化，称为被动引用。
+### 被动引用例子1
+一则代码：
+```java
+/**
+ * 通过子类引用父类的静态字段，不会导致子类初始化
+ *
+ * @author nimbus.k 2021-08-16 17:38
+ * @version 1.0
+ */
+public class SuperClass {
+
+    static {
+        System.out.println("SuperClass init");
+    }
+
+    public static int value = 123;
+
+}
+public class SubClass extends SuperClass {
+    static {
+        System.out.println("subClass init!");
+    }
+}
+
+public class NoInitialization {
+
+    public static void main(String[] args) {
+        System.out.println(SubClass.value);
+    }
+
+}
+```
+**对于静态字段，只有直接定义这个字段的类才会被初始化，因此通过其子类来引用父类中定义的静态字段，只会触发父类的初始化而不会触发子类的初始化。**
+
+### 被动引用例子2
+代码片段：
+```java
+/**
+* 被动使用类字段演示二：
+* 通过数组定义来引用类，不会触发此类的初始化
+**/
+public class NotInitialization {
+    public static void main(String[] args) {
+        SuperClass[] sca = new SuperClass[10];
+    }
+}
+```
+运行之后发现没有输出“SuperClass init！”，说明并没有触发类org.fenixsoft.classloading.SuperClass的初始化阶段。但是这段代码里面触发了另一个名为“[Lorg.fenixsoft.classloading.SuperClass”的类的初始化阶段，对于用户代码来说，这并不是一个合法的类型名称，它是一个由虚拟机自动生成的、直接继承于java.lang.Object的子类，**创建动作由字节码指令newarray触发**。
+### 被动引用例子3
+代码片段：
+```java
+/**
+* 被动使用类字段演示三：
+* 常量在编译阶段会存入调用类的常量池中，本质上没有直接引用到定义常量的类，因此不会触发定义常量的
+类的初始化
+**/
+public class ConstClass {
+    static {
+        System.out.println("ConstClass init!");
+    }
+    public static final String HELLOWORLD = "hello world";
+}
+/**
+* 非主动使用类字段演示
+**/
+public class NotInitialization {
+    public static void main(String[] args) {
+        System.out.println(ConstClass.HELLOWORLD);
+    }
+}
+```
+上述代码运行之后，也没有输出“ConstClass init！”，这是因为虽然在Java源码中确实引用了ConstClass类的常量HELLOWORLD，但其实在**编译阶段通过常量传播优化，已经将此常量的值“helloworld”直接存储在NotInitialization类的常量池中**，以后NotInitialization对常量ConstClass.HELLOWORLD的引用，实际都被转化为NotInitialization类对自身常量池的引用了。也就是说，实际上NotInitialization的Class文件之中并没有ConstClass类的符号引用入口，这两个类在编译成Class文件后就已不存在任何联系了。
+**注：**关于这个示例，我们可以通过两个途径来作证：第一：前文提到的开启JVM的+TraceClassLoading参数可以看的加载过程。第二：我们通过反编译工具看一下，常量持有的情况
+![被动引用3反编译](d7ba81a7/decompile_java_const_pool_transfering.jpg)
+
+## 类加载的过程
+加载、验证、准备、解析和初始化这五个阶段所执行的具体动作。
+
+# 引用
+[1] 关于JLS()与JVMS(Java Virtual Machine Specification)发行版本地址：https://docs.oracle.com/javase/specs/
