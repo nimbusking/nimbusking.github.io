@@ -1274,11 +1274,13 @@ Java虚拟机的指令由一个字节长度的、代表着某种特定操作含�
 
 #### 加载和存储指令
 加载和存储指令用于将数据在栈帧中的局部变量表和操作数栈（见第2章关于内存区域的介绍）之间来回传输，这类指令包括：
-- 将一个局部变量加载到操作栈：iload、iload_<n>、lload、lload_<n>、fload、fload_<n>、dload、dload_<n>、aload、aload_<n>
-- 将一个数值从操作数栈存储到局部变量表：istore、istore_<n>、lstore、lstore_<n>、fstore、fstore_<n>、dstore、dstore_<n>、astore、astore_<n>
-- 将一个常量加载到操作数栈：bipush、sipush、ldc、ldc_w、ldc2_w、aconst_null、iconst_m1、iconst_<i>、lconst_<l>、fconst_<f>、dconst_<d>
+- 将一个局部变量加载到操作栈： ```iload、iload_<n>、lload、lload_<n>、fload、fload_<n>、dload、dload_<n>、aload、aload_<n>```
+- 将一个数值从操作数栈存储到局部变量表： ```istore、istore_<n>、lstore、lstore_<n>、fstore、fstore_<n>、dstore、dstore_<n>、astore、astore_<n>```
+- 将一个常量加载到操作数栈： ```bipush、sipush、ldc、ldc_w、ldc2_w、aconst_null、iconst_m1、iconst_<i>、lconst_<l>、fconst_<f>、dconst_<d>```
 - 扩充局部变量表的访问索引的指令：wide
-上面所列举的指令助记符中，有一部分是以尖括号结尾的（例如iload_<n>），这些指令助记符实际上代表了一组指令（例如iload_<n>，它代表了iload_0、iload_1、iload_2和iload_3这几条指令）。这几组指令都是某个带有一个操作数的通用指令（例如iload）的特殊形式，对于这几组特殊指令，它们省略掉了显式的操作数，不需要进行取操作数的动作，因为实际上操作数就隐含在指令中。
+
+上面所列举的指令助记符中，有一部分是以尖括号结尾的（例如 ```iload_<n>``` ），这些指令助记符实际上代表了一组指令（例如 ```iload_<n>`` `，它代表了iload_0、iload_1、iload_2和iload_3这几条指令）。这几组指令都是某个带有一个操作数的通用指令（例如iload）的特殊形式，对于这几组特殊指令，它们省略掉了显式的操作数，不需要进行取操作数的动作，因为实际上操作数就隐含在指令中。
+
 #### 运算指令
 算术指令用于对两个操作数栈上的值进行某种特定运算，并把结果重新存入到操作栈顶。大体上运算指令可以分为两种：*对整型数据进行运算的指令与对浮点型数据进行运算的指令。*
 无论是哪种算术指令，均是使用Java虚拟机的算术类型来进行计算的，换句话说是不存在直接支持byte、short、char和boolean类型的算术指令，对于上述几种数据的运算，应使用操作int类型的指令代替。所有的算术指令包括：
@@ -1381,10 +1383,10 @@ FromTo Target Type
 - 将输入的Java虚拟机代码在加载时或执行时翻译成另一种虚拟机的指令集；
 - 将输入的Java虚拟机代码在加载时或执行时翻译成宿主机处理程序的本地指令集（即即时编译器代码生成技术）。
 
-# 第7章 虚拟机类加载机制
-## 概述
+## 第7章 虚拟机类加载机制
+### 概述
 Java虚拟机把描述类的数据从Class文件加载到内存，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作 **虚拟机的类加载机制。**
-## 类加载的时机
+### 类加载的时机
 一个类型从被加载到虚拟机内存中开始，到卸载出内存为止，它的整个生命周期将会经历加载（Loading）、验证（Verification）、准备（Preparation）、解析（Resolution）、初始化（Initialization）、使用（Using）和卸载（Unloading）七个阶段，其中验证、准备、解析三个部分统称为连接（Linking）。
 ![类的生命周期](d7ba81a7/class_lifecycle.jpg)
 加载、验证、准备、初始化和卸载这五个阶段的顺序是确定的，类型的加载过程必须按照这种顺序按部就班地开始，而 **解析阶段则不一定**：它在某些情况下可以在初始化阶段之后再开始，这是为了支持Java语言的运行时绑定特性（也称为动态绑定或晚期绑定）
@@ -1400,7 +1402,7 @@ Java虚拟机把描述类的数据从Class文件加载到内存，并对数据�
 - 当一个接口中定义了JDK 8新加入的默认方法（被default关键字修饰的接口方法）时，如果有这个接口的实现类发生了初始化，那该接口要在其之前被初始化。
 
 对于这六种会触发类型进行初始化的场景，《Java虚拟机规范》中使用了一个**非常强烈的限定语——“有且只有”**，这六种场景中的行为称为对一个类型进行主动引用。除此之外，所有引用类型的方式都不会触发初始化，称为被动引用。
-### 被动引用例子1
+#### 被动引用例子1
 一则代码：
 ```java
 /**
@@ -1434,7 +1436,7 @@ public class NoInitialization {
 ```
 **对于静态字段，只有直接定义这个字段的类才会被初始化，因此通过其子类来引用父类中定义的静态字段，只会触发父类的初始化而不会触发子类的初始化。**
 
-### 被动引用例子2
+#### 被动引用例子2
 代码片段：
 ```java
 /**
@@ -1448,7 +1450,7 @@ public class NotInitialization {
 }
 ```
 运行之后发现没有输出“SuperClass init！”，说明并没有触发类org.fenixsoft.classloading.SuperClass的初始化阶段。但是这段代码里面触发了另一个名为“[Lorg.fenixsoft.classloading.SuperClass”的类的初始化阶段，对于用户代码来说，这并不是一个合法的类型名称，它是一个由虚拟机自动生成的、直接继承于java.lang.Object的子类，**创建动作由字节码指令newarray触发**。
-### 被动引用例子3
+#### 被动引用例子3
 代码片段：
 ```java
 /**
@@ -1475,8 +1477,10 @@ public class NotInitialization {
 **注：**关于这个示例，我们可以通过两个途径来作证：第一：前文提到的开启JVM的+TraceClassLoading参数可以看的加载过程。第二：我们通过反编译工具看一下，常量持有的情况
 ![被动引用3反编译](d7ba81a7/decompile_java_const_pool_transfering.jpg)
 
-## 类加载的过程
+### 类加载的过程
 加载、验证、准备、解析和初始化这五个阶段所执行的具体动作。
+#### 加载
+
 
 # 引用
 [1] 关于JLS()与JVMS(Java Virtual Machine Specification)发行版本地址：https://docs.oracle.com/javase/specs/
