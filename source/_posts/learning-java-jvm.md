@@ -1536,6 +1536,117 @@ public static int value = 123;
 类的初始化阶段是类加载过程的最后一个步骤，之前介绍的几个类加载的动作里，除了在加载阶段用户应用程序可以通过自定义类加载器的方式局部参与外，其余动作都完全由Java虚拟机来主导控制。*直到初始化阶段，Java虚拟机才真正开始执行类中编写的Java程序代码，将主导权移交给应用程序。*
 
 ### 类加载器
+Java虚拟机设计团队有意把类加载阶段中的“通过一个类的全限定名来获取描述该类的二进制字节流”这个动作放到Java虚拟机外部去实现，以便让应用程序自己决定如何去获取所需的类。实现这个动作的代码被称为“类加载器”（Class Loader）。
+#### 类与类加载器
+比较两个类是否“相等”，只有在这两个类是由同一个类加载器加载的前提下才有意义，否则，即使这两个类来源于同一个Class文件，被同一个Java虚拟机加载，只要加载它们的类加载器不同，那这两个类就必定不相等。这里所指的“相等”，包括代表类的Class对象的equals()方法、isAssignableFrom()方法、isInstance()方法的返回结果，也包括了使用instanceof关键字做对象所属关系判定等各种情况。一段示例，演示intanceof在不同类加载器下运算结果：
+```java
+package cc.nimbusk.learningjvm.classloading;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * 类加载器与instanceof关键字演示
+ *
+ * @author nimbus.k 2021-08-18 20:24
+ * @version 1.0
+ */
+public class ClassLoaderTest {
+
+    public static void main(String[] args) throws Exception {
+        ClassLoader myLoader = new ClassLoader() {
+            @Override
+            public Class<?> loadClass(String name) throws ClassNotFoundException {
+                try {
+                    String fileName = name.substring(name.lastIndexOf(".") + 1) + ".class";
+                    InputStream is = getClass().getResourceAsStream(fileName);
+                    if (is == null) {
+                        return super.loadClass(name);
+                    }
+                    byte[] b = new byte[is.available()];
+                    is.read(b);
+                    return defineClass(name, b, 0, b.length);
+                } catch (IOException e) {
+                    throw new ClassNotFoundException(name);
+                }
+            }
+        };
+        Object obj = myLoader.loadClass("cc.nimbusk.learningjvm.classloading.ClassLoaderTest").newInstance();
+        System.out.println(obj.getClass());
+        System.out.println(obj instanceof cc.nimbusk.learningjvm.classloading.ClassLoaderTest);
+    }
+
+}
+```
+运行结果:
+```java
+class cc.nimbusk.learningjvm.classloading.ClassLoaderTest
+false
+```
+
+返回了false。这是因为Java虚拟机中同时存在了两个ClassLoaderTest类，一个是由虚拟机的应用程序类加载器所加载的，另外一个是由我们自定义的类加载器加载的，虽然它们都来自同一个Class文件，但在Java虚拟机中仍然是两个互相独立的类，做对象所属类型检查时的结果自然为false。
+
+#### 双亲委派模型
+双亲委派模型站在Java虚拟机的角度来看，只存在两种不同的类加载器：一种是启动类加载器（BootstrapClassLoader），这个类加载器使用C++语言实现，是虚拟机自身的一部分；另外一种就是其他所有的类加载器，这些类加载器都由Java语言实现，独立存在于虚拟机外部，并且全都继承自抽象类 ```java.lang.ClassLoader```。
+自JDK 1.2以来，Java一直保持着 **三层类加载器、双亲委派的类加载架构**
+##### 启动类加载器（Bootstrap Class Loader）
+启动类加载器（Bootstrap Class Loader）：前面已经介绍过，这个类加载器负责加载存放在<JAVA_HOME>\lib目录，或者被-Xbootclasspath参数所指定的路径中存放的，而且是Java虚拟机能够识别的（按照文件名识别，如rt.jar、tools.jar，名字不符合的类库即使放在lib目录中也不会被加载）**类库加载到虚拟机的内存中**。启动类加载器无法被Java程序直接引用，用户在编写自定义类加载器时，如果需要把加载请求委派给引导类加载器去处理，那直接使用null代替即可，下面代码展示的就是```java.lang.ClassLoader.getClassLoader()```方法的代码片段，其中的注释和代码实现都明确地说明了以null值来代表引导类加载器的约定规则。
+##### 扩展类加载器（Extension Class Loader）
+这个类加载器是在类```sun.misc.Launcher$ExtClassLoader```中以Java代码的形式实现的。它负责加载```<JAVA_HOME>\lib\ext```目录中，或者被java.ext.dirs系统变量所指定的路径中所有的类库。
+##### 应用程序类加载器（Application Class Loader）
+这个类加载器由```sun.misc.Launcher$AppClassLoader```来实现。由于应用程序类加载器是ClassLoader类中的```getSystem-ClassLoader()```方法的返回值，所以有些场合中也称它为“系统类加载器”。它负责加载用户类路径（ClassPath）上所有的类库，开发者同样可以直接在代码中使用这个类加载器。如果应用程序中没有自定义过自己的类加载器，一般情况下这个就是程序中默认的类加载器。
+
+**类加载器的“双亲委派模型（Parents DelegationModel）”**。双亲委派模型要求除了顶层的启动类加载器外，其余的类加载器都应有自己的父类加载
+器。不过这里类加载器之间的父子关系一般不是以继承（Inheritance）的关系来实现的，而是通常使用组合（Composition）关系来复用父加载器的代码。
+双亲委派模型对于保证Java程序的稳定运作极为重要，但它的实现却异常简单，用以实现双亲委派的代码只有短短十余行，全部集中在```java.lang.ClassLoader的loadClass()```方法之中。
+```java
+protected synchronized Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        // 首先，检查请求的类是否已经被加载过了
+        Class c = findLoadedClass(name);
+        if (c == null) {
+            try {
+                if (parent != null) {
+                    c = parent.loadClass(name, false);
+                } else {
+                    c = findBootstrapClassOrNull(name);
+                }
+            } catch (ClassNotFoundException e) {
+                // 如果父类加载器抛出ClassNotFoundException
+                // 说明父类加载器无法完成加载请求
+            }
+            if (c == null) {
+                // 在父类加载器无法加载时
+                // 再调用本身的findClass方法来进行类加载
+                c = findClass(name);
+            }
+        }
+        if (resolve) {
+            resolveClass(c);
+        }
+        return c;
+    }
+```
+
+##### 破坏双亲委派模型
+**注：** 书中列举了几个不是严格按照双亲委派模型来进行的场景，比如早期的JNDI服务需要借助于```java.lang.Thread类的setContext-ClassLoader()方法```进行设置。以及为了解决这个问题，*在JDK6之后提供的 ```java.util.ServiceLoader``` 类，以META-INF/services中的配置信息，辅以责任链模式，这才算是给SPI的加载提供了一种相对合理的解决方案。*
+#### Java模块化系统
+在JDK 9中引入的Java模块化系统（Java Platform Module System，JPMS）是对Java技术的一次重要升级，为了能够实现模块化的关键目标——*可配置的封装隔离机制*，Java虚拟机对类加载架构也做出了相应的变动调整，才使模块化系统得以顺利地运作。JDK 9的模块不仅仅像之前的JAR包那样只是简单地充当代码的容器，除了代码外，Java的模块定义还包含以下内容：
+- 依赖其他模块的列表。
+- 导出的包列表，即其他模块可以使用的列表。
+- 开放的包列表，即其他模块可反射访问模块的列表。
+- 使用的服务列表。
+- 提供服务的实现列表。
+
+##### 模块的兼容性
+为了使可配置的封装隔离机制能够兼容传统的类路径查找机制，JDK 9提出了与“类路径”（ClassPath）相对应的“模块路径”（ModulePath）的概念。
+
+## 第8章 虚拟机字节码执行引擎
+### 运行时栈帧结构
+Java虚拟机以方法作为最基本的执行单元，“栈帧”（Stack Frame）则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈（Virtual MachineStack）的栈元素。
+每一个栈帧都包括了局部变量表、操作数栈、动态连接、方法返回地址和一些额外的附加信息。在编译Java程序源码的时候，栈帧中需要多大的局部变量表，需要多深的操作数栈就已经被分析计算出来，并且写入到方法表的Code属性之中。
+对于执行引擎来讲，在活动线程中，只有位于栈顶的方法才是在运行的，只有位于栈顶的栈帧才是生效的，其被称为“当前栈帧”（Current Stack Frame），与这个栈帧所关联的方法被称为“当前方法”（Current Method）。
+![栈帧概念结构](d7ba81a7/stack_frame_model.jpg)
+#### 局部变量表
 
 
 # 引用
