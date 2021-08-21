@@ -1072,7 +1072,7 @@ Code:
 
 [JITWatch](https://github.com/AdoptOpenJDK/jitwatch)是HSDIS经常搭配使用的可视化的编译日志分析工具，为便于在JITWatch中读取，读
 者可使用以下参数把日志输出到logfile文件：
-```java
+```
 -XX:+UnlockDiagnosticVMOptions
 -XX:+TraceClassLoading
 -XX:+LogCompilation
@@ -1080,8 +1080,9 @@ Code:
 -XX:+PrintAssembly
 -XX:+TraceClassLoading
 ```
-**注：** GitHub页面上有对应的release包使用，直接访问下载即可。重新修改参数之后，运行一下得到运行结果的log，这里贴一下我运行的![logfile.log](d7ba81a7/logfile.log)
 
+**注：** GitHub页面上有对应的release包使用，直接访问下载即可。重新修改参数之后，运行一下得到运行结果的log，这里贴一下我运行的
+![logfile.log](d7ba81a7/logfile.log)
 运行界面如下图所示（由于作者没有继续深入，暂时这块笔者暂定，后续有机会再补充详细设定）：
 ![JITWatch运行界面](d7ba81a7/JITWatch_window.jpg)
 
@@ -1647,6 +1648,10 @@ Java虚拟机以方法作为最基本的执行单元，“栈帧”（Stack Fram
 对于执行引擎来讲，在活动线程中，只有位于栈顶的方法才是在运行的，只有位于栈顶的栈帧才是生效的，其被称为“当前栈帧”（Current Stack Frame），与这个栈帧所关联的方法被称为“当前方法”（Current Method）。
 ![栈帧概念结构](d7ba81a7/stack_frame_model.jpg)
 #### 局部变量表
+局部变量表（Local Variables Table）是一组变量值的存储空间，用于存放方法参数和方法内部定义的局部变量。在Java程序被编译为Class文件时，就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量。
+#### 操作数栈
+操作数栈（Operand Stack）也常被称为操作栈，它是一个后入先出（Last In First Out，LIFO）栈。同局部变量表一样，操作数栈的最大深度也在编译的时候被写入到Code属性的max_stacks数据项之中。操作数栈的每一个元素都可以是包括long和double在内的任意Java数据类型。32位数据类型所占的栈容量为1，64位数据类型所占的栈容量为2。
+
 
 
 # 引用
