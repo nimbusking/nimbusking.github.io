@@ -1087,9 +1087,8 @@
 </ul>
 <p><strong>笔者64位运行环境下结果比较</strong><br>目前笔者能力有限，汇编的知识早已还给老师了。主要从[Verified Entry Point]下面看起，跟32位环境，以及作者并没有介绍示例代码运行的JDK环境，至少能看出来，在1.8下，hotspot运行在分配内存的时候，还是要多做了一些事情的。</p>
 <p><a href="https://github.com/AdoptOpenJDK/jitwatch">JITWatch</a>是HSDIS经常搭配使用的可视化的编译日志分析工具，为便于在JITWatch中读取，读<br>者可使用以下参数把日志输出到logfile文件：</p>
-<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">-XX:+UnlockDiagnosticVMOptions</span><br><span class="line">-XX:+TraceClassLoading</span><br><span class="line">-XX:+LogCompilation</span><br><span class="line">-XX:LogFile=/tmp/logfile.log</span><br><span class="line">-XX:+PrintAssembly</span><br><span class="line">-XX:+TraceClassLoading</span><br></pre></td></tr></table></figure>
-<p><strong>注：</strong> GitHub页面上有对应的release包使用，直接访问下载即可。重新修改参数之后，运行一下得到运行结果的log，这里贴一下我运行的<img data-src="d7ba81a7/logfile.log" alt="logfile.log"></p>
-<p>运行界面如下图所示（由于作者没有继续深入，暂时这块笔者暂定，后续有机会再补充详细设定）：<br><img data-src="d7ba81a7/JITWatch_window.jpg" alt="JITWatch运行界面"></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">-XX:+UnlockDiagnosticVMOptions</span><br><span class="line">-XX:+TraceClassLoading</span><br><span class="line">-XX:+LogCompilation</span><br><span class="line">-XX:LogFile&#x3D;&#x2F;tmp&#x2F;logfile.log</span><br><span class="line">-XX:+PrintAssembly</span><br><span class="line">-XX:+TraceClassLoading</span><br></pre></td></tr></table></figure>
+<p><strong>注：</strong> GitHub页面上有对应的release包使用，直接访问下载即可。重新修改参数之后，运行一下得到运行结果的log，这里贴一下我运行的<br><img data-src="d7ba81a7/logfile.log" alt="logfile.log"><br>运行界面如下图所示（由于作者没有继续深入，暂时这块笔者暂定，后续有机会再补充详细设定）：<br><img data-src="d7ba81a7/JITWatch_window.jpg" alt="JITWatch运行界面"></p>
 <h5 id="JITWatch详细使用"><a href="#JITWatch详细使用" class="headerlink" title="JITWatch详细使用"></a>JITWatch详细使用</h5><h2 id="调优案例分析与实战"><a href="#调优案例分析与实战" class="headerlink" title="调优案例分析与实战"></a>调优案例分析与实战</h2><p><strong>注：</strong> 作者在书中是这么说的：<strong>在前面3章笔者系统性地介绍了处理Java虚拟机内存问题的知识与工具，在处理应用中的实际问题时，除了知识与工具外，经验同样是一个很重要的因素。</strong>，对于笔者个人来说又何尝不是如此呢？本章都是作者经验之笔，所以我在摘录的时候，多数直接从文章中拎出来了。</p>
 <h3 id="案例分析"><a href="#案例分析" class="headerlink" title="案例分析"></a>案例分析</h3><p>本章内容将着重考虑如何在应用部署层面去解决问题，有不少案例中的问题的确可以在设计和开发阶段就先行避免，但这并不是本书要讨论的话题。也有一些问题可以直接通过升级硬件或者使用最新JDK版本里的新技术去解决，但我们同时也会探讨如何在不改变已有软硬件版本和规格的前提下，调整部署和配置策略去解决或者缓解问题。</p>
 <h4 id="大内存硬件上的程序部署策略"><a href="#大内存硬件上的程序部署策略" class="headerlink" title="大内存硬件上的程序部署策略"></a>大内存硬件上的程序部署策略</h4><p>每一款Java虚拟机中的每一款垃圾收集器都有自己的应用目标与最适合的应用场景，如果在特定场景中选择了不恰当的配置和部署方式，自然会事倍功半。目前单 <strong>体应用在较大内存</strong>的硬件上主要的部署方式有两种：</p>
@@ -1305,7 +1304,9 @@
 </ul>
 <h5 id="模块的兼容性"><a href="#模块的兼容性" class="headerlink" title="模块的兼容性"></a>模块的兼容性</h5><p>为了使可配置的封装隔离机制能够兼容传统的类路径查找机制，JDK 9提出了与“类路径”（ClassPath）相对应的“模块路径”（ModulePath）的概念。</p>
 <h2 id="第8章-虚拟机字节码执行引擎"><a href="#第8章-虚拟机字节码执行引擎" class="headerlink" title="第8章 虚拟机字节码执行引擎"></a>第8章 虚拟机字节码执行引擎</h2><h3 id="运行时栈帧结构"><a href="#运行时栈帧结构" class="headerlink" title="运行时栈帧结构"></a>运行时栈帧结构</h3><p>Java虚拟机以方法作为最基本的执行单元，“栈帧”（Stack Frame）则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈（Virtual MachineStack）的栈元素。<br>每一个栈帧都包括了局部变量表、操作数栈、动态连接、方法返回地址和一些额外的附加信息。在编译Java程序源码的时候，栈帧中需要多大的局部变量表，需要多深的操作数栈就已经被分析计算出来，并且写入到方法表的Code属性之中。<br>对于执行引擎来讲，在活动线程中，只有位于栈顶的方法才是在运行的，只有位于栈顶的栈帧才是生效的，其被称为“当前栈帧”（Current Stack Frame），与这个栈帧所关联的方法被称为“当前方法”（Current Method）。<br><img data-src="d7ba81a7/stack_frame_model.jpg" alt="栈帧概念结构"></p>
-<h4 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h4><h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><p>[1] 关于JLS()与JVMS(Java Virtual Machine Specification)发行版本地址：<a href="https://docs.oracle.com/javase/specs/">https://docs.oracle.com/javase/specs/</a></p>
+<h4 id="局部变量表"><a href="#局部变量表" class="headerlink" title="局部变量表"></a>局部变量表</h4><p>局部变量表（Local Variables Table）是一组变量值的存储空间，用于存放方法参数和方法内部定义的局部变量。在Java程序被编译为Class文件时，就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量。</p>
+<h4 id="操作数栈"><a href="#操作数栈" class="headerlink" title="操作数栈"></a>操作数栈</h4><p>操作数栈（Operand Stack）也常被称为操作栈，它是一个后入先出（Last In First Out，LIFO）栈。同局部变量表一样，操作数栈的最大深度也在编译的时候被写入到Code属性的max_stacks数据项之中。操作数栈的每一个元素都可以是包括long和double在内的任意Java数据类型。32位数据类型所占的栈容量为1，64位数据类型所占的栈容量为2。</p>
+<h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><p>[1] 关于JLS()与JVMS(Java Virtual Machine Specification)发行版本地址：<a href="https://docs.oracle.com/javase/specs/">https://docs.oracle.com/javase/specs/</a></p>
 ]]></content>
       <categories>
         <category>Java系列</category>
