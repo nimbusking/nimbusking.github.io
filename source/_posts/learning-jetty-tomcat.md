@@ -14,6 +14,8 @@ Tomcat是一个业界非常优秀的web容器框架，学习里面核心的实�
 [create-a-java-web-application-using-embedded-tomcat](https://devcenter.heroku.com/articles/create-a-java-web-application-using-embedded-tomcat)
 [github/devcenter-embedded-tomcat](https://github.com/heroku/devcenter-embedded-tomcat)
 
+<!-- more -->
+
 # 学习实录
 ## 极客时间-深入拆解Tomcat
 **注：** 这个课程中使用的是Tomcat 9.x的版本，其它版本的源码可能略有不同
