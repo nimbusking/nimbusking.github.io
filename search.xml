@@ -321,6 +321,27 @@
       </tags>
   </entry>
   <entry>
+    <title>JavaNIO探索</title>
+    <url>/post/9c2a984.html</url>
+    <content><![CDATA[<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>前言中，引用著名NIO书籍《Java NIO》(Ron Hitchens)中的引言，关于NIO的。原文如下：</p>
+<blockquote class="blockquote-center">
+<p>Java NIO explores the new I/O capabilities of version 1.4 in detail and shows you how to put these features to work to greatly improve the efficiency of the Java code you write. This compact volume examines the typical challenges that Java programmers face with I/O and shows you how to take advantage of the capabilities of the new I/O features. You’ll learn how to put these tools to work using examples of common, real-world I/O problems and see how the new features have a direct impact on responsiveness, scalability, and reliability.</p>
+
+</blockquote>
+
+<p>最后一句，直接点题：<strong>see how the new features have a direct impact on responsiveness, scalability, and reliability.</strong></p>
+<a id="more"></a>
+
+<h1 id="学习记录"><a href="#学习记录" class="headerlink" title="学习记录"></a>学习记录</h1>]]></content>
+      <categories>
+        <category>Java系列</category>
+      </categories>
+      <tags>
+        <tag>Java NIO</tag>
+        <tag>New I/O</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Tomcat 学习实录</title>
     <url>/post/8a72db17.html</url>
     <content><![CDATA[<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>Tomcat是一个业界非常优秀的web容器框架，学习里面核心的实现机制，扩展自己的知识面还是很有必要的。每个做Java的，应该没有人没接触过Tomcat。<br>学习Tomcat，有一个核心的命题，看源码。既然要看源码，自然少不了调试，如何调试Tomcat，这里在学习极客时间相关课程中提到过一个方式，可以很好的在IDE中进行调试，那就是通过嵌入式手工创建Tomcat来进行，具体请参考如下链接教程说明以及对应的代码示例：<br><a href="https://devcenter.heroku.com/articles/create-a-java-web-application-using-embedded-tomcat">create-a-java-web-application-using-embedded-tomcat</a><br><a href="https://github.com/heroku/devcenter-embedded-tomcat">github/devcenter-embedded-tomcat</a></p>
