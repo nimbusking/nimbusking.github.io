@@ -306,3 +306,25 @@ final class StandardEngineValve extends ValveBase {
 这个基础阀实现非常简单，就是把请求转发到 Host 容器。你可能好奇，从代码中可以看到，处理请求的 Host 容器对象是从请求中拿到的，请求对象中怎么会有 Host 容器呢？这是因为请求到达 Engine 容器中之前，Mapper 组件已经对请求进行了路由处理，Mapper 组件通过请求的 URL 定位了相应的容器，并且把容器对象保存到了请求对象中。
 
 ### NioEndpoint 组件
+
+## Tomcat架构解析-刘光瑞
+这本书基于8.5.x介绍的，里面包含很多高级特性，值得阅读
+### tomcat介绍
+Tomcat运行目录介绍：
+![Tomcat目录说明](8a72db17/tomcat_config_path.png)
+#### 8.5之后的一些新特性
+### Tomcat 整体架构
+**注：** 这个章节介绍了，Tomcat整体的架构设计，分别列出了几个核心组件以及相关核心设计
+#### Server
+#### Connector & Container
+##### Container设计
+#### LifeCycle
+#### Pipeline & Valve
+在增强组件的灵活性和可扩展方面，**责任链模式** 是一种比较好的选择。在Tomcat中每个Container组件通过执行一个责任链来完成具体的请求处理。
+Tomcat定义了Pipeline（管道）和Valve（阈）两个接口。*前者用于构造责任链，后者代表责任链上的每个处理器。*
+#### Connector设计
+#### Executor
+#### Bootstrap & Catalina
+#### Tomcat启动
+Tomcat应用启动该过程非常标准化，统一按照生命周期管理接口Lifecycle的定义进行启动，首先通过调用init方法进行组件的逐级初始化，然后在调用start方法进行启动。
+![应用服务器启动](8a72db17/tomcat_start_sequence.png)
