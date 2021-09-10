@@ -159,18 +159,18 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-count">61</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-count">21</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">99</span>
+        <span class="site-state-item-count">102</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -220,6 +220,106 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/35e48191.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/post/35e48191.html" class="post-title-link" itemprop="url">MySQL相关读书笔记</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-08-21 21:45:20" itemprop="dateCreated datePublished" datetime="2019-08-21T21:45:20+00:00">2019-08-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%95%B0%E6%8D%AE%E7%9B%B8%E5%85%B3/" itemprop="url" rel="index"><span itemprop="name">数据相关</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          <blockquote class="blockquote-center">
+<p>Good code is its own best documentation. As you’re about to add a comment, ask yourself, “How can I improve the code so that this comment isn’t needed?”<br>Steve McConnell</p>
+
+</blockquote>
+
+<h1 id="Effective-MySQL之SQL语句最优化"><a href="#Effective-MySQL之SQL语句最优化" class="headerlink" title="Effective MySQL之SQL语句最优化"></a>Effective MySQL之SQL语句最优化</h1><h2 id="MySQL索引"><a href="#MySQL索引" class="headerlink" title="MySQL索引"></a>MySQL索引</h2><p>MySQL主要用到的索引数据结构有：</p>
+<ul>
+<li>B-树：<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Btree">B-树</a></li>
+<li>B+树:<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/B%2B_tree">B+树</a></li>
+<li>散列：<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Hash_table">散列</a></li>
+<li>通信R-树：<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/R-tree">R-树</a></li>
+<li>全文本:<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Full_text_search">全文本</a><h3 id="MySQL不同存储引擎数据结构"><a href="#MySQL不同存储引擎数据结构" class="headerlink" title="MySQL不同存储引擎数据结构"></a>MySQL不同存储引擎数据结构</h3><h4 id="MyISAM"><a href="#MyISAM" class="headerlink" title="MyISAM"></a>MyISAM</h4>MyISAM存储引擎使用B-树数据结构来实现<strong>主码索引</strong>、<strong>唯一索引</strong>以及<strong>非主码索引</strong>。<br>MyISAM索引是在内存的一个公共键缓存中管理的，这个缓存大小可以通过<code>key_buffer_size</code>或者其他命名键缓存来定义。<h4 id="InnoDB"><a href="#InnoDB" class="headerlink" title="InnoDB"></a>InnoDB</h4><h5 id="B-树聚簇主码"><a href="#B-树聚簇主码" class="headerlink" title="B+树聚簇主码"></a>B+树聚簇主码</h5>InnoDB用聚簇主码存储数据，底层信息占用的磁盘空间的大小很大程度上取决于页面的填充因子；所有InnoDB数据和索引都是在内存中通过<code>innodb_buffer_pool_size</code>设置选项定义InnoDB缓冲池进行管理。<h5 id="B-树非主码"><a href="#B-树非主码" class="headerlink" title="B-树非主码"></a>B-树非主码</h5>非主码索引使用B-树数据结构，与MyISAM区别在于，InnoDB中，非主码索引存储的是主码实际值，而在MyISAM中，非主码索引存储的是包含主码值的数据的指针。<h4 id="内存散列索引"><a href="#内存散列索引" class="headerlink" title="内存散列索引"></a>内存散列索引</h4>只有MEMORY引擎支持散列的数据结构。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/post/35e48191.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
     <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/93780ad2.html">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -253,7 +353,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
       </span>
 
   
@@ -325,7 +425,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -423,7 +523,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -523,7 +623,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -620,7 +720,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -724,7 +824,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -810,7 +910,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1139,7 +1239,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1233,7 +1333,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
+        <time title="修改时间：2021-09-10 20:08:52" itemprop="dateModified" datetime="2021-09-10T20:08:52+00:00">2021-09-10</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1284,98 +1384,8 @@
 
 
 
-    
-
-
-<div class="post-block">
-  
-  
-
-  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/84ea90f7.html">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="nimbusk">
-      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="NimbusK's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          <a href="/post/84ea90f7.html" class="post-title-link" itemprop="url">JavaScript系列</a>
-        </h2>
-
-        <div class="post-meta-container">
-          <div class="post-meta">
-
-  
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-calendar"></i>
-      </span>
-      <span class="post-meta-item-text">发表于</span>
-
-      <time title="创建时间：2018-08-11 18:15:10" itemprop="dateCreated datePublished" datetime="2018-08-11T18:15:10+00:00">2018-08-11</time>
-    </span>
-      <span class="post-meta-item">
-        <span class="post-meta-item-icon">
-          <i class="far fa-calendar-check"></i>
-        </span>
-        <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2021-09-10 09:31:00" itemprop="dateModified" datetime="2021-09-10T09:31:00+00:00">2021-09-10</time>
-      </span>
-    <span class="post-meta-item">
-      <span class="post-meta-item-icon">
-        <i class="far fa-folder"></i>
-      </span>
-      <span class="post-meta-item-text">分类于</span>
-        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-          <a href="/categories/JavaScript%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">JavaScript系列</span></a>
-        </span>
-    </span>
-
-  
-</div>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-          <p>JavaScript系列目录</p>
-<ul>
-<li>读书笔记<ul>
-<li>《高性能JavaScript》</li>
-<li>《Effective JavaScript》</li>
-</ul>
-</li>
-<li>问题剖析</li>
-</ul>
-
-      
-    </div>
-
-    
-    
-    
-
-    <footer class="post-footer">
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-</div>
-
-
-
-
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
   </nav>
 
 </div>
