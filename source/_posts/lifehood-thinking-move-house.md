@@ -60,11 +60,11 @@ categories: 生活
         * 收纳箱：前缀统一为BOX，后续分配自增序号，总长度待研究设备之后再定义修改
         * 自定义物品：前缀统一为ITEM，后续分配自增序号
     + 封箱登记流程：
-        * 在扫描常规正常条形码、自定义物品信息后，扫描结果传送至服务器
+        * 在扫描常规正常条形码、自定义物品信息后，~~扫描结果传送至服务器~~ 扫码枪，与pc通信是借助于一个usb收发器来完成的，传输到PC端是向PC输入窗口来实现的。
         * 当扫描到统一前缀BOX的条码时，后台进行封箱登记操作：将前面的所有扫描的物品进行打包，登记当前物品所在的箱子是在当前条码箱子内
     + 统一信息处理后台：这个后台，集中处理所有物品信息，条码信息，封箱信息等后台管理平台。
 ## 需求设计
-个人统一信息处理后台(LifeMana)
+家庭收纳信息处理后台(TakeInEverything, TIE)
 ### 技术栈选型
 一个后台，多种前端。
 后台核心相关主要：
@@ -80,6 +80,62 @@ web前端：
 
 
 ## 详细设计
+### 一期
+先把核心功能做出来
+#### 后台表
+- 分类表(tie_classification)
+    + id
+    + 一级大类(top_sub)
+    + 二级小类(second_sub)
+    + 添加时间(create_time)
+    + 修改时间(update_time)
+    + 添加人(add_user)
+    + 修改人(update_user)
+    + 备注(remark)
+- 物品明细表(tie_item_detail)
+    + id
+    + 物品条码(item_barcode)
+    + 物品名称(item_name)
+    + 物品品牌(item_brand)
+    + 物品供应商(item_supplier)
+    + 物品类别(item_class)
+    + 添加时间(create_time)
+    + 修改时间(update_time)
+    + 添加人(add_user)
+    + 修改人(update_user)
+    + 备注(remark)
+- 收纳明细表(tie_box_detail)
+    + id
+    + 收纳箱条码(box_barcode)
+    + 收纳箱名称(box_name)
+    + 收纳箱描述(box_description)
+    + 收纳箱分类(box_class)
+    + 添加时间(create_time)
+    + 修改时间(update_time)
+    + 添加人(add_user)
+    + 修改人(update_user)
+    + 备注(remark)
+- 物品收纳表(tie_item_boxing)
+    + id
+    + 物品条码(item_barcode)
+    + 收纳箱条码(box_barcode)
+    + 收纳时间(take_in_time)
+    + 创建时间(create_time)
+- 收纳流水表(tie_takein_log)
+    + id
+    + 条码(barcode)
+    + 创建时间(create_time)
+- 用户信息表(tie_user_info)(TODO)
+    + id
+    + 用户名(username)
+    + 用户密码(password)
+    + 
+
+#### 收纳流程
+1. 分配
+1. 采集流程
+2. 
+
 
 ## 落地
 
