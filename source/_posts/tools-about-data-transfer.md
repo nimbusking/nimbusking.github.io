@@ -13,6 +13,8 @@ categories: 工具
 
 将待迁移数据到Excel中之后，接下来问题就来了，怎么将Excel数据导入到目的数据库中呢？
 
+<!-- more -->
+
 #### 尝试过的方案
 - 实在没辙：自己写代码，解析Excel，直接通过JPA或者其它的组件进行对数据库操作，生成DML。
 - Kettle：一款功能比较丰富的，大数据迁移软件
@@ -37,3 +39,6 @@ DataGrip目前使用导入场景来说，最好的一点就是，如果有错误
 ![navicat导入](b0471e7f/import_with_navicat.png)
 
 ### DataGrip
+关于DataGrip的一些介绍，[官网传送门](https://www.jetbrains.com/datagrip/)
+
+IDEA的手册，写的还是比较详细的，可以参考dg在关于导入的时候的步骤：https://www.jetbrains.com/help/datagrip/import-file-name-format-dialog.html
