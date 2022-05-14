@@ -46,8 +46,8 @@ date: 2018-04-15 10:37:03
 
 ##### 打开文件新打开标签页，而不是不替换当前标签页
 路径：Preferences->Settings
-~~在默认设置页中设置即可~~：**"open_files_in_new_window": true**
-如果发现默认设置页面中就是上述设置，那么在右侧用户设置 **"preview_on_click":false**
+~~在默认设置页中设置即可~~： ```"open_files_in_new_window": true```
+如果发现默认设置页面中就是上述设置，那么在右侧用户设置 ```"preview_on_click":false```
 此时唯一区别就是打开文件的时候需要双击
 ##### 卸载插件
 Ctrl+Shift+P，输入Remove，选择Remove Package，之后选择相应的插件，直接回车即可
