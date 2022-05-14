@@ -45,7 +45,7 @@
 <meta property="og:image" content="https://nimbusk.cc/post/a4b1030a/readytoanalys.jpg">
 <meta property="og:image" content="https://nimbusk.cc/post/a4b1030a/SystemServiceException.png">
 <meta property="article:published_time" content="2018-04-15T10:37:03.000Z">
-<meta property="article:modified_time" content="2022-05-14T01:59:39.209Z">
+<meta property="article:modified_time" content="2022-05-14T03:37:34.715Z">
 <meta property="article:author" content="nimbusk">
 <meta property="article:tag" content="工具使用">
 <meta name="twitter:card" content="summary">
@@ -173,7 +173,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-count">61</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -272,7 +272,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-05-14 01:59:39" itemprop="dateModified" datetime="2022-05-14T01:59:39+00:00">2022-05-14</time>
+        <time title="修改时间：2022-05-14 03:37:34" itemprop="dateModified" datetime="2022-05-14T03:37:34+00:00">2022-05-14</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -308,7 +308,7 @@
 <h5 id="安装Markdown-Editing插件之后文本编辑区域过窄问题"><a href="#安装Markdown-Editing插件之后文本编辑区域过窄问题" class="headerlink" title="安装Markdown Editing插件之后文本编辑区域过窄问题"></a>安装Markdown Editing插件之后文本编辑区域过窄问题</h5><p>跟该插件的默认设置有关，解决方案：<br>打开路径：Preferences-&gt;Package Settings-&gt;Markdown Editing-&gt;Markdown GFM Settings –User，在配置下添加关于<strong>wrap_width</strong>的属性，我修改成了130，如下图所示：<br><img data-src="a4b1030a/MarkdownEditingUserConfiguration.jpg" alt="MarkdownEditing用户配置"><br>设置前效果：<br><img data-src="a4b1030a/BeforeConfiguring.jpg" alt="设置前"><br>设置后效果：<br><img data-src="a4b1030a/AfterConfiguring.jpg" alt="设置后"><br><strong>效果明显！</strong></p>
 <h5 id="Markdown-Editing插件配置"><a href="#Markdown-Editing插件配置" class="headerlink" title="Markdown Editing插件配置"></a>Markdown Editing插件配置</h5><p>推荐几个自己常用的配置：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&quot;color_scheme&quot;: &quot;Packages/Boxy Theme/schemes/Boxy Monokai.tmTheme&quot;, // 修改风格的主题,我这里是sublime的boxy主题自带的,默认有这几种主题</span><br><span class="line">    <span class="comment">// &quot;color_scheme&quot;: &quot;Packages/MarkdownEditing/MarkdownEditor.tmTheme&quot;,</span></span><br><span class="line">    <span class="comment">// &quot;color_scheme&quot;: &quot;Packages/MarkdownEditing/MarkdownEditor-Dark.tmTheme&quot;,</span></span><br><span class="line">    <span class="comment">// &quot;color_scheme&quot;: &quot;Packages/MarkdownEditing/MarkdownEditor-Yellow.tmTheme&quot;,</span></span><br><span class="line">&quot;highlight_line&quot;: true, // 高亮正在编辑的行</span><br><span class="line">&quot;line_numbers&quot;: true,   // 显示行号</span><br><span class="line">&quot;tab_size&quot;: 4,          // tab宽度</span><br><span class="line">&quot;translate_tabs_to_spaces&quot;: true,   // tab转换为空格</span><br><span class="line">&quot;trim_trailing_white_space_on_save&quot;: true,  // 保存时去掉行尾空格</span><br><span class="line">&quot;word_wrap&quot;: true,      // 自动换行</span><br><span class="line">&quot;wrap_width&quot;: &quot;auto&quot;,    // 换行的宽度,默认80会造成左侧大量留白</span><br><span class="line">&quot;mde.keep_centered&quot;: true,  // 可以保持你正在编辑的行始终处于屏幕的中间</span><br></pre></td></tr></table></figure>
-<h5 id="打开文件新打开标签页，而不是不替换当前标签页"><a href="#打开文件新打开标签页，而不是不替换当前标签页" class="headerlink" title="打开文件新打开标签页，而不是不替换当前标签页"></a>打开文件新打开标签页，而不是不替换当前标签页</h5><p>路径：Preferences-&gt;Settings<br><del>在默认设置页中设置即可</del>：**”open_files_in_new_window”: true**<br>如果发现默认设置页面中就是上述设置，那么在右侧用户设置 <strong>“preview_on_click”:false</strong><br>此时唯一区别就是打开文件的时候需要双击</p>
+<h5 id="打开文件新打开标签页，而不是不替换当前标签页"><a href="#打开文件新打开标签页，而不是不替换当前标签页" class="headerlink" title="打开文件新打开标签页，而不是不替换当前标签页"></a>打开文件新打开标签页，而不是不替换当前标签页</h5><p>路径：Preferences-&gt;Settings<br><del>在默认设置页中设置即可</del>： <code>&quot;open_files_in_new_window&quot;: true</code><br>如果发现默认设置页面中就是上述设置，那么在右侧用户设置 <code>&quot;preview_on_click&quot;:false</code><br>此时唯一区别就是打开文件的时候需要双击</p>
 <h5 id="卸载插件"><a href="#卸载插件" class="headerlink" title="卸载插件"></a>卸载插件</h5><p>Ctrl+Shift+P，输入Remove，选择Remove Package，之后选择相应的插件，直接回车即可</p>
 <h5 id="快速插入代码片段"><a href="#快速插入代码片段" class="headerlink" title="快速插入代码片段"></a>快速插入代码片段</h5><p>打开代码片段（Snippet）: Tools -&gt; Develop -&gt; New Snippet<br>例如，我想要再markdown中快速生成插入shell代码的片段，那么可以安装下图中的方式编写，很简单：<br>这里面的语法很简单：<br><strong><![CDATA[写入你想要快速插入的代码片段]]></strong> 这个XML转义票签里面就是写入你想要快速插入的代码片段<br><strong>tabTrigger</strong>就是你需要再什么单词后按tab键自动插入上述你编写的代码片段<br><img data-src="a4b1030a/ConfigSublimeSnippet.jpg" alt="配置Sublime Snippet"><br>Ctrl + S 保存，目录默认即可，文件名随意，文件后缀名必须是：**.sublime-snippet**，效果就如下图所示：<br><img data-src="a4b1030a/shellAfterPressTabButton.gif" alt="演示效果"></p>
 <h5 id="快速查找重复行"><a href="#快速查找重复行" class="headerlink" title="快速查找重复行"></a>快速查找重复行</h5><p>Ctrl + F 打开查找控制面板，输入：</p>
