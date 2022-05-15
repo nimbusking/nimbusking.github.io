@@ -3,7 +3,7 @@ title: Java集合框架
 mathjax: false
 tags:
   - Java集合
-categories: Java系列
+categories: Java源码系列
 abbrlink: 9753a2e
 date: 2018-03-14 08:25:11
 ---

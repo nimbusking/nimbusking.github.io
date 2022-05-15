@@ -6,7 +6,7 @@ tags:
     - Java并发
     - Java8新特性
     - 并发编程
-categories: Java系列
+categories: Java源码系列
 ---
 
 # 背景
