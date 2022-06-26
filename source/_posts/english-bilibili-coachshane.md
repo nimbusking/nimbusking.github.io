@@ -6,7 +6,6 @@ tags:
     - 英语
     - 听写
 categories: 英语
-top: true
 ---
 
 ## 背景
