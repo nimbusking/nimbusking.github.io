@@ -148,6 +148,8 @@ static final CharacterData of(int ch) {
 
 ##### Class<T> && ClassLoader && ClassValue<T>
 这三个作为一个整体，单独研究研究。
+细节参考下面的传送门：
+{% post_link java-lang-Class %}
 
 ##### Compiler
 ##### Double
