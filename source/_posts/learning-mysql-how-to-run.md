@@ -1079,7 +1079,7 @@ mysql> show variables like '%dive%';
 - 单词查询驱动表的成本
 - 多次查询被驱动表的成本
 
-我们把查询驱动表后得到的记录称之为**驱动表的扇出（fanout）**。
+我们把查询驱动表后得到的记录称之为**驱动表的扇出（fanout）**(【备注】在MySQL 8中对这块有巨大的提升优化：https://dev.mysql.com/doc/refman/8.0/en/performance-schema-events-waits-current-table.html)。
 
 在实际查询过程中，往往会通过关联条件的过程中，进行数据量猜测**，把这个猜测的过程称之为条件过滤(Condition Filtering)**。这个过程可能使用到索引、也可能使用到统计数据等等。
 
@@ -1102,3 +1102,599 @@ mysql> show variables like '%dive%';
 #### innodb_table_status
 
 ![innodb_table_status表中各个列的用途](109c2b6b/innodb_table_status表中各个列的用途.jpg)
+
+#### innodb_index_status
+
+![innodb_index_status各个列的用途](109c2b6b/innodb_index_status各个列的用途.jpg)
+
+### 基于规则的优化
+
+#### 子查询形式
+
+一般子查询有两种展现形式：
+
+- 一种在SELECT子句中
+- 一种在FROM子句中：这种往往在FROM后面会带上子查询的别名，这种别名也称之为派生表
+- 在WHERE或ON子句的表达式中
+
+#### 子查询的过程
+
+
+
+### EXPLAIN详解
+
+【备注】explain是在我们工作中经常要关注的一个工具，为了写出更高效的语句，通常往往要借助MySQL的explain工具进行语句分析，看看执行器是不是高效的运作了。
+
+![explain语句中输出的各个列的含义](109c2b6b/explain语句中输出的各个列的含义.jpg)
+
+#### 执行计划输出中的各列详解
+
+##### table
+
+EXPLALN语句输出的每条记录都对应着某个单表的访问方法， 该条记录的table列代表该表的表名。
+
+##### id
+
+查询语句中每出现一个SELECT关键字， 设计MySQL的大叔就会为它分配一个唯一的地值， 这个id值就是EXPLAN时输出的第一列。
+
+普通连接查询中，即使有多个select，ID分配的也是相同的。但是如果包含子查询的场景，则会内外顺序进行区分，例如下面查询：
+
+```sql
+mysql> explain select * from single_table where key1 in (select key1 from single_table2) or key3 = 'a';
++----+-------------+---------------+------------+-------+---------------+----------+---------+------+-------+----------+-------------+
+| id | select_type | table         | partitions | type  | possible_keys | key      | key_len | ref  | rows  | filtered | Extra       |
++----+-------------+---------------+------------+-------+---------------+----------+---------+------+-------+----------+-------------+
+|  1 | PRIMARY     | single_table  | NULL       | ALL   | idx_key3      | NULL     | NULL    | NULL | 10167 |   100.00 | Using where |
+|  2 | SUBQUERY    | single_table2 | NULL       | index | idx_key1      | idx_key1 | 303     | NULL |  9923 |   100.00 | Using index |
++----+-------------+---------------+------------+-------+---------------+----------+---------+------+-------+----------+-------------+
+2 rows in set, 1 warning (0.02 sec)
+```
+
+
+
+##### select_type
+
+![select_type取值](109c2b6b/select_type取值.jpg)
+
+分别都来看看每个类型的含义：
+
+- SIMPLE：查询语句中不包含UNION 或者子查询的查询都算作SIMPLE类型；连接查询的select_type也是SIMPLE。
+- PRIMARY：对于包含UNION 、UNION ALL或者子查询的大查询来说，它是由几个小查询组成的，其中最左边那个查询的select_type 值就是PRlMARY。
+- UNION：对于包含UNION 或者UNION ALL的大查询来说，它是由几个小查询组成的；其中**除了最左边**的那个小查询以外，**其余小查询的select_type值就是UNION**。
+- UNION RESULT：MySQL选择使用临时表来完成UNION查询的去重工作，**针对该临时表的查询的select_type就是UNION RESULT**。
+- SUBQUERY：如果包含子查询的查询语句**不能够**转为对应的**半连接**形式，并且该子查询是不相关子查询，而且查询优化器决定采用将该子查询物化的方案来执行该子查询时，该子查询的第一个SELECT关键字代表的那个查询的select_type就是SUBQUERY。
+- DEPENDANENT SUBQUERY：如果包含子查询的查询语句不能够转为对应的半连接形式， 并且该子查询被查询优化器转换为相关子查询的形式，则该子查询的第一个SELECT关键字代表的那个查询的select_type就是DEPENDENT SUBQUERY。
+- DEPENDANENT UNION：在包含UNION 或者UNION ALL 的大查询中，如果各个小查询部依赖于外层查询，则除了最左边的那个小查询之外，其余小查询的select_type 的值就是DEPENDENT UNlON。
+- DERIVED：包含派生表的查询中，如果是以物化派生表的方式执行查询。
+- MATERIALIZED：当查询优化器在执行包含子查询的语句时，选择将予查询物化之后与外层查询进行连接查询。
+
+##### partitions
+
+这个mysql的分区表的含义，标记的是分区表的编号，即这个查询扫描过的分区表
+
+##### type
+
+单表的查询方式，前面也有提到过一些。完整的有：system 、const、eq_ref、ref、fulltext、ref_or_null 、index_range 、index_subquery、range、index、ALL。
+
+- system：当表中只有一条记录并且该表使用的存储引攀(比如MyISAM 、MEMORY )的统计数据是精确的， 那么对该表的访问方法就是system。当然如果换成InnoDB，即使就是一条记录，这个也是会成ALL的。
+- const：根据**主键**或者**唯一索引列**与**常量进行等值匹配**的时候
+- eq_ref：执行连接查询时，如果被驱动表是通过主键或者不允许存储NULL值的唯一二级索引列等值匹配的方式进行访问的(如果该主键或者不允许存储NULL值的唯一二级索引是联合索引，则所有的索引列都必须进行等值比较) ，则对该被驱动袤的访问方法就是eq_ref。
+- ref：当通过普通的二级索引列与常值进行等值匹配的方式来查询某个表时
+- fulltext：全文索引
+- ref_or_null：当对普通二二级索引列进行等值匹配且该索引列的值也可以是NULL 值时
+- index_range：一般情况下只会为单个索引生成扫描区间
+- unique_subquery：类似于两表连接中被驱动表的eq_ref访问方法，unique_subquery针对的是一些包含肘子查询的查询语句。如果查询优化器决定将IN子查询转换为EXISTS子查询， 而且子查询在转换之后可以使用主键或者不允许存储NULL值的唯一二级索引进行等值匹配。如下面执行所示：
+
+```sql
+mysql> explain select * from single_table s1 where common_feild in (select id from single_table2 s2 where s1.common_feild = s2.common_feild) or s1.key3 = 'a';
++----+--------------------+-------+------------+-----------------+---------------+---------+---------+------+-------+----------+-------------+
+| id | select_type        | table | partitions | type            | possible_keys | key     | key_len | ref  | rows  | filtered | Extra       |
++----+--------------------+-------+------------+-----------------+---------------+---------+---------+------+-------+----------+-------------+
+|  1 | PRIMARY            | s1    | NULL       | ALL             | idx_key3      | NULL    | NULL    | NULL | 10167 |   100.00 | Using where |
+|  2 | DEPENDENT SUBQUERY | s2    | NULL       | unique_subquery | PRIMARY       | PRIMARY | 4       | func |     1 |    10.00 | Using where |
++----+--------------------+-------+------------+-----------------+---------------+---------+---------+------+-------+----------+-------------+
+2 rows in set, 2 warnings (0.00 sec)
+```
+
+- index_subquery：与unique_subquery类似，只不过访问子查询中的表时使用的时普通的索引。
+- range：如果使用泵'引获取某些单点扫描区间的记录，那么就可能使用到range访问方法。
+- index：当可以使用索引覆盖，但需要扫描全部的索引记录时。通常往往出现在联合索引中，返回列是联合索引中的一列，查询条件也是联合索引中的一列，但是查询条件不能形成有效的扫描区间，所以只能全量扫描索引了。
+- ALL：全表扫描
+
+##### possible_key和key
+
+possible keys 列表示在某个查询语句中，对某个表执行单表查询的时候可能用到的索引有哪些；key则表示实际用到的索引。
+
+##### key_len
+
+例如下面这个语句：
+
+```sql
+explain select * from single_table s1 where s1.key1 > 'a' and s1.key1 < 'b';
+```
+
+执行计划是这样的：
+
+![关于key_len的一则执行计划](109c2b6b/关于key_len的一则执行计划.jpg)
+
+根据我们经验得出，这个扫描区间就是('a', 'b')，有时候我们想通过执行计划判断出形成的扫描区间是什么，此时key_len字段就有用处了。MySQL的设计者们，为边界条件中包含的列位于了一个key_len的值，我们看到上述语句的key_len是303，303是怎么来的呢？
+
+对于key_len值，是由下面3个部分组成的：
+
+1. 该列的实际数据最多占用的存储空间的长度。对于固定的长度的，如INT的，就是4个字节；对于变长的，例如varchar(100)，在UTF8字符集下最多就是300字节，而在utf8mb4下，就是400.
+2. 如果该列可以存储NULL值，**则key_len在上述基础之上再加1**。
+3. 对于变长类型的列来说，都会有2个字节的空间来存储该变列的实际数据占用的存储空间长度，key_len的值在原先的基础上还要加2。（【备注】如果对这个有疑问的，看看前面的存储结构）
+
+所以上面我们执行的语句的执行计划的key_len是303是这么来的：`key_len = 100 * 3 + 1 + 2`
+
+##### ref
+
+当访问方法是const、eq_ref、ref、ref_or_null 、unique_subquery、index_ subquery 中的其中一个时， ref列展示的就是与索引列进行等值匹配的东西是啥。
+
+##### rows
+
+在查询优化器决定使用全表扫描的方式对某个表执行查询时，执行计划的rows列就代表该表的估计行数.如果使用索引来执行查询，执行计划的rows列就代表预计扫描的索引记录数。
+
+##### filtered
+
+一句话概括，可以用于来评估当前表执行计划中，总共命中扫描数(rows) 与 其余查询条件估计范围(filtered)可以预测出最终结果数。例如下面的查询语句：
+
+```sql
+mysql> explain select * from single_table inner join single_table2 on single_table.key1 = single_table2.key1 where single_table.common_feild = 'a';
++----+-------------+---------------+------------+------+---------------+----------+---------+------------------------+-------+----------+-------------+
+| id | select_type | table         | partitions | type | possible_keys | key      | key_len | ref                    | rows  | filtered | Extra       |
++----+-------------+---------------+------------+------+---------------+----------+---------+------------------------+-------+----------+-------------+
+|  1 | SIMPLE      | single_table  | NULL       | ALL  | idx_key1      | NULL     | NULL    | NULL                   | 10167 |    10.00 | Using where |
+|  1 | SIMPLE      | single_table2 | NULL       | ref  | idx_key1      | idx_key1 | 303     | test.single_table.key1 |     1 |   100.00 | NULL        |
++----+-------------+---------------+------------+------+---------------+----------+---------+------------------------+-------+----------+-------------+
+2 rows in set, 1 warning (0.00 sec)
+```
+
+分析一下就是：以single_table为驱动表，用的是idx_key1索引，满足条件的记录是10167条。而filtered就是满足其余条件（这里指common_feild='a'）所占的比例，这里是10%。就意味着，10167条数据中有10%的记录满足`common_feild='a'`。
+
+##### extra
+
+顾名思义， Extra 列是用来说明一些额外信息的， 我们可以通过这些额外信息来更准确地理解MySQL到底如何执行给定的查询语句。
+
+### optimizer trace的神奇功效
+
+【备注】这张值得仔细研究，往往你通过explain分析了SQL语句的执行计划，只知其一，但是你并不一定了解其中为什么这么选择了。经验丰富的老手，可能会通过以往的经验，告诉你为什么这里用了这个索引，为什么没有命中，为什么效率比较差什么的。但是，通常情况下，要怎么来分析呢？MySQL（特别注意：5.6版本以后才有这个功能）提供了一个非常有意思的机制，就是optimizer trace。通过这个玩意儿，你就能很清楚的值得，优化器优化执行的步骤是怎样的。所以，在研究学习阶段，建议你可以把这个功能打开，完了仔细研究学习一哈。
+
+#### 关于optimizer trace
+
+通过如下语句可以看当前MySQL的optimizer trace的配置
+
+```sql
+mysql> show variables like 'optimizer_trace';
++-----------------+--------------------------+
+| Variable_name   | Value                    |
++-----------------+--------------------------+
+| optimizer_trace | enabled=off,one_line=off |
++-----------------+--------------------------+
+1 row in set, 1 warning (0.00 sec)
+```
+
+默认情况下enabled=off，也就是关闭的。one_line就算了，结果一行输出，我们又不是程序，一行太难看了。
+
+通过:
+
+```sql
+set optimizer_trace = 'enabled=on';
+```
+
+来打开这个功能。
+
+optimizer trace表分别有4列：
+
+- query：输入的查询语句
+- trace：优化过程的JSON格式文本
+- missing_bytes_beyond_max_mem_size：在执行计划的生成过程中可能会输出很多内容，如果超过某个限制，多余的文本将不会显示。
+- insufficient_privileges：表示是否有权限查看执行计划的生成过程， 默认值是0. 表示有权限查看执行计划的生成过程；只有某些特殊情况下，它的值才是1 .我们暂时不关心这个字段的值。
+
+##### 使用optimizer trace的过程
+
+1. 打开optimizer trace：打开方式上文介绍了
+
+2. 输入自己的查询语句（也可以是执行计划）
+
+3. 从optimizer_trace表中查看上一个查询的过程优化：
+
+   ```sql
+   select * from information_schema.optimizer_trace；
+   ```
+
+4. 可能还要观察其他语句执行的优化过程：重复2、3两步。
+
+5. 当停止查看语句的优化过程时，把optimizer_trace功能关闭
+
+这里贴一个示例SQL，供后续分析使用：
+
+```sql
+select * from single_table where
+key1 > 'a' and
+key2 < 1000000 and
+key3 in ('a', 'b', 'c') and
+common_feild = 'abc';
+```
+
+【备注】如果是随机插入字符串的，按照这个条件改造几条数据。
+
+#### 分析过程
+
+【备注】这个过程会很长，请耐心看看，建议你直接copy到一个JSON格式化工具中，方便查看。下述步骤，结合书中的介绍，以及自己的造的数据相关，在你的数据库中，可能执行结果并不是这样，这个要具体场景具体分析，理解其中的步骤含义即可。
+
+**注意：**如果你要自己执行，通过命令行的方式连接到你的MySQL服务器上执行，我在我windows机器上，用的社区版的MySQL安装大礼包中，自带的MySQL 5.7 Command Line Client执行的（本质就是命令行，就是省去了第一步的连接过程，运行输入个密码就行了）
+
+```json
+{
+    "steps": [
+        {
+            "join_preparation": {	// prepare阶段
+                "select#": 1, 
+                "steps": [
+                    {
+                        "IN_uses_bisection": true
+                    }, 
+                    {
+                        // 展开后的查询
+                        "expanded_query": "/* select#1 */ select `single_table`.`ID` AS `ID`,`single_table`.`key1` AS `key1`,`single_table`.`key2` AS `key2`,`single_table`.`key3` AS `key3`,`single_table`.`key_part1` AS `key_part1`,`single_table`.`key_part2` AS `key_part2`,`single_table`.`key_part3` AS `key_part3`,`single_table`.`common_feild` AS `common_feild` from `single_table` where ((`single_table`.`key1` > 'a') and (`single_table`.`key2` < 1000000) and (`single_table`.`key3` in ('a','b','c')) and (`single_table`.`common_feild` = 'abc'))"
+                    }
+                ] /* steps */
+            } /* join_preparation */
+        }, 
+        {
+            "join_optimization": {	// optimize阶段
+                "select#": 1, 
+                "steps": [
+                    {
+                        "condition_processing": {	// 处理搜索条件
+                            "condition": "WHERE", 
+                            // 原始搜索条件
+                            "original_condition": "((`single_table`.`key1` > 'a') and (`single_table`.`key2` < 1000000) and (`single_table`.`key3` in ('a','b','c')) and (`single_table`.`common_feild` = 'abc'))", 
+                            "steps": [
+                                {
+                                    // 等值传递条件
+                                    "transformation": "equality_propagation", 
+                                    "resulting_condition": "((`single_table`.`key1` > 'a') and (`single_table`.`key2` < 1000000) and (`single_table`.`key3` in ('a','b','c')) and (`single_table`.`common_feild` = 'abc'))"
+                                }, 
+                                {
+                                    // 常量传值条件
+                                    "transformation": "constant_propagation", 
+                                    "resulting_condition": "((`single_table`.`key1` > 'a') and (`single_table`.`key2` < 1000000) and (`single_table`.`key3` in ('a','b','c')) and (`single_table`.`common_feild` = 'abc'))"
+                                }, 
+                                {
+                                    // 去除没用的条件
+                                    "transformation": "trivial_condition_removal", 
+                                    "resulting_condition": "((`single_table`.`key1` > 'a') and (`single_table`.`key2` < 1000000) and (`single_table`.`key3` in ('a','b','c')) and (`single_table`.`common_feild` = 'abc'))"
+                                }
+                            ]
+                        }
+                    }, 
+                    {
+                        // 替换虚拟生成列
+                        "substitute_generated_columns": { }
+                    }, 
+                    {
+                        // 表的依赖信息
+                        "table_dependencies": [
+                            {
+                                "table": "`single_table`", 
+                                "row_may_be_null": false, 
+                                "map_bit": 0, 
+                                "depends_on_map_bits": [ ]
+                            }
+                        ]
+                    }, 
+                    {
+                        "ref_optimizer_key_uses": [ ]
+                    }, 
+                    {
+                        // 预估不同单表访问方法的访问成本
+                        "rows_estimation": [
+                            {
+                                "table": "`single_table`", 
+                                "range_analysis": {
+                                    "table_scan": {	// 全表扫描的行数及成本
+                                        "rows": 10112, 
+                                        "cost": 2121.5
+                                    }, 
+                                    // 可能使用到的索引
+                                    "potential_range_indexes": [
+                                        {
+                                            "index": "PRIMARY", 
+                                            "usable": false, 
+                                            "cause": "not_applicable"	// PRIMARY不可用
+                                        }, 
+                                        {
+                                            "index": "uk_key2", 	// uk_key2可能被使用
+                                            "usable": true, 
+                                            "key_parts": [
+                                                "key2"
+                                            ]
+                                        }, 
+                                        {
+                                            "index": "idx_key1", 	// idx_key1可能被使用
+                                            "usable": true, 
+                                            "key_parts": [	// 键值部分，侧面也就说明了，非聚簇索引的存储结构
+                                                "key1", 
+                                                "ID"
+                                            ]
+                                        }, 
+                                        {
+                                            "index": "idx_key3", 	// idx_key3可能被使用
+                                            "usable": true, 
+                                            "key_parts": [
+                                                "key3", 
+                                                "ID"
+                                            ]
+                                        }, 
+                                        {
+                                            "index": "idx_key_part", 	// idx_key_part不可用
+                                            "usable": false, 
+                                            "cause": "not_applicable"
+                                        }
+                                    ], 
+                                    "setup_range_conditions": [ ], 
+                                    "group_index_range": {
+                                        "chosen": false, 
+                                        "cause": "not_group_by_or_distinct"
+                                    }, 
+                                    // 分析各个可能使用索引的成本
+                                    "analyzing_range_alternatives": {
+                                        "range_scan_alternatives": [
+                                            {
+                                                // 使用uk_key2的成本分析
+                                                "index": "uk_key2", 
+                                                // 使用uk_key2的扫描区间
+                                                "ranges": [
+                                                    "NULL < key2 < 1000000"
+                                                ], 
+                                                "index_dives_for_eq_ranges": true, 	// 是否使用index dive
+                                                "rowid_ordered": false, 	// 使用该索引获取的记录是否按照主键排序
+                                                "using_mrr": false, 		// 是否使用MRR
+                                                "index_only": false, 		// 是否是覆盖索引
+                                                "rows": 10000, 		// 使用该索引获取的记录条数
+                                                "cost": 12001, 		// 使用该索引的成本(为啥是这个，翻翻前面的介绍)
+                                                "chosen": false, 	// 是否选择该索引
+                                                "cause": "cost"		// 不选择的原因，成本太大
+                                            }, 
+                                            {
+                                                // 含义同上
+                                                "index": "idx_key1", 
+                                                "ranges": [
+                                                    "a < key1"
+                                                ], 
+                                                "index_dives_for_eq_ranges": true, 
+                                                "rowid_ordered": false, 
+                                                "using_mrr": false, 
+                                                "index_only": false, 
+                                                "rows": 5056, 
+                                                "cost": 6068.2, 
+                                                "chosen": false, 
+                                                "cause": "cost"
+                                            }, 
+                                            {
+                                                "index": "idx_key3", 
+                                                "ranges": [
+                                                    "a <= key3 <= a", 
+                                                    "b <= key3 <= b", 
+                                                    "c <= key3 <= c"
+                                                ], 
+                                                "index_dives_for_eq_ranges": true, 
+                                                "rowid_ordered": false, 
+                                                "using_mrr": false, 
+                                                "index_only": false, 
+                                                "rows": 3, 
+                                                "cost": 6.61, 
+                                                "chosen": true // 选择该索引
+                                            }
+                                        ], 
+                                        // 分析使用索引合并的成本
+                                        "analyzing_roworder_intersect": {
+                                            "usable": false, 
+                                            "cause": "too_few_roworder_scans"
+                                        }
+                                    }, 
+                                    // 对于上述单表访问查询的最优访问方法
+                                    "chosen_range_access_summary": {
+                                        "range_access_plan": {
+                                            "type": "range_scan", 
+                                            "index": "idx_key3", 
+                                            "rows": 3, 
+                                            "ranges": [
+                                                "a <= key3 <= a", 
+                                                "b <= key3 <= b", 
+                                                "c <= key3 <= c"
+                                            ]
+                                        }, 
+                                        "rows_for_plan": 3, 
+                                        "cost_for_plan": 6.61, 
+                                        "chosen": true
+                                    }
+                                }
+                            }
+                        ]
+                    }, 
+                    {
+                        // 分析各种可能的执行计划
+                        // （对于多表查询，可能有很多种不同的方案：单表查询的方案上面分析的就是，直接选取idx_key3就行）
+                        "considered_execution_plans": [
+                            {
+                                "plan_prefix": [ ], 
+                                "table": "`single_table`", 
+                                "best_access_path": {
+                                    "considered_access_paths": [
+                                        {
+                                            "rows_to_scan": 3, 
+                                            "access_type": "range", 
+                                            "range_details": {
+                                                "used_index": "idx_key3"
+                                            }, 
+                                            "resulting_rows": 3, 
+                                            "cost": 7.21, 
+                                            "chosen": true
+                                        }
+                                    ]
+                                }, 
+                                "condition_filtering_pct": 100, 
+                                "rows_for_plan": 3, 
+                                "cost_for_plan": 7.21, 
+                                "chosen": true
+                            }
+                        ]
+                    }, 
+                    {
+                        // 尝试给查询添加一些其它的查询条件（这个语句没啥好尝试的，最后其实跟我们写的一样）
+                        "attaching_conditions_to_tables": {
+                            "original_condition": "((`single_table`.`key1` > 'a') and (`single_table`.`key2` < 1000000) and (`single_table`.`key3` in ('a','b','c')) and (`single_table`.`common_feild` = 'abc'))", 
+                            "attached_conditions_computation": [ ], 
+                            "attached_conditions_summary": [
+                                {
+                                    "table": "`single_table`", 
+                                    "attached": "((`single_table`.`key1` > 'a') and (`single_table`.`key2` < 1000000) and (`single_table`.`key3` in ('a','b','c')) and (`single_table`.`common_feild` = 'abc'))"
+                                }
+                            ]
+                        }
+                    }, 
+                    {
+                        // 执行计划微调
+                        "refine_plan": [
+                            {
+                                "table": "`single_table`", 
+                                "pushed_index_condition": "(`single_table`.`key3` in ('a','b','c'))", 	// 注意这块，是前面代价分析过程最后选取的最优代价形成的最终有效条件
+                                "table_condition_attached": "((`single_table`.`key1` > 'a') and (`single_table`.`key2` < 1000000) and (`single_table`.`common_feild` = 'abc'))"
+                            }
+                        ]
+                    }
+                ]
+            }
+        }, 
+        {
+            // 执行阶段
+            "join_execution": {
+                "select#": 1, 
+                "steps": [ ]
+            }
+        }
+    ]
+}
+```
+
+后面还有两列，分别都是0，说明一：没有因为优化过程文本太多而丢弃的文本。说明二：权限字段也是0，这部分就略去不展示了。
+
+虽然很多，但是还是非常有规律可循的，我们来总结一下：
+
+- prepare阶段
+- optimize阶段
+- execute阶段
+
+而对于单表查询阶段：**主要关注的是optimize阶段的row_estimation过程**
+
+对于多表连接查询来说：**我们主要关注的是considered_execution_plans过程**
+
+### 阅读楔子(中篇)
+
+到这里，按照本书的章节脉络，中篇执行优化过程，还剩一篇缓存的介绍就结束了，在MySQL中使用的一些核心的逻辑，跟其他使用缓存的也是相通的。
+
+笔者在阅读缓存的开始的时候，有了一个很强的感受。
+
+以前听到有些同学会时不时提到，我们学习算法啊、数据结构有什么用啊？
+
+对，当时的你感觉可能是用不到，那是因为平时可能就写写CRUD的业务代码就可以了（没有贬低之意，这是现实）。所以，给你造成的感觉就是，学这些玩意儿根本没有用的。
+
+但是，当你看到这里时，当你挖掘一个优秀的组件的底层时，其实都离不开那些个优秀的算法和数据结构。所以，如果你想跟笔者一样慢慢积淀一些知识的话，一起得空再去学习学习数据结构和算法吧。
+
+差不多的时候，再回过头看看看MySQL会有种释然的感觉 :)
+
+过去这里，本书就剩下最后一大块，事务管理，来看看MySQL中是怎么来管理事务的！
+
+加油！
+
+### InnoDB的Buffer Pool
+
+#### 啥是Buffer Pool
+
+在开始学习InnoDB存储结构的时候，我们就知道，MySQL的存储的数据按照数据页的方式存储到磁盘上的。但是，我们访问的时候，不可能时刻访问磁盘（效率巨低）。此时我们要改善访问过程怎么办呢？MySQL的设计者们，就通过引入缓存的概念，来优化从磁盘加载数据的过程。在MySQL中这部分缓存就称之为buffer Pool(缓冲池)。
+
+在MySQL中默认的大小是128MB，可以通过查看系统变量查看：`show variables like '%buffer_pool_size%';`
+
+#### Buffer Pool的组成
+
+首先要知道，缓冲池是MySQL向操作系统内存申请的一块连续的内存存储空间（为啥要连续，翻看介绍InnoDB的存储结构的相关章节）。缓冲池中为每一个缓冲页（就是数据页，为了和正常的数据页区分，这里称之为缓冲页）都设置了一个控制块，每个控制块中包含了，如表空间编号、页号、缓冲页所在的缓冲池的地址、链表节点信息等等。对于的内存空间，看起来像下面这样：
+
+![BuferPool对于的内存空间示意图](109c2b6b/BuferPool对于的内存空间示意图.jpg)
+
+中间的碎片就会，当加载好的缓冲页并为其分配好控制块信息之后，剩下来的空间，就是碎片信息。当然，也可能刚好就够了，没有碎片。
+
+#### Free链表管理
+
+先来想一个问题，现在要将磁盘中的数据页读到缓冲池中的缓冲页中去，我们怎么知道哪个缓冲页的是空闲的？结合前面学习存储结构的时候说到的那一堆链表，这里你可能也会立马想到类似的方法。没错，这里使用到的是一个Free链表。我们假设当前这个Buffer Pool中可容纳的缓冲页的数量是n，那么增加了free链表（一个双向链表）的效果图，如下所示：
+
+![BufferPool中的free链表效果示意图](109c2b6b/BufferPool中的free链表效果示意图.jpg)
+
+注意看这个双向链表，有个头节点，这里面存放了这个链表的收尾地址和节点数量等信息。注意这块节点存储，并不在缓冲池申请的内存区域中。
+
+有了这个节点，读取存放的时候，就容易了，从头往后读，拿到空闲的缓冲页后，填上对应的控制块信息并从free链表中移除该节点，就表明这个缓冲页已经被使用了。
+
+#### 缓冲页的哈希表
+
+通过建立表**空间号+页号**的Key，把缓冲页的控制块信息作为Value，建立一个哈希表，就可以快速访问了。
+
+#### flush链表的管理
+
+如果我修改了缓冲池中的某个缓冲页的数据，如果此时数据还没回写到磁盘上，那么此时数据就与磁盘上的数据不一致了，这样的缓冲页也称之为**脏页（dirty page）**。当然，你说我更新完，立马回写到磁盘上行不行？行，但是这不又回到我们为啥要加缓冲区的问题上了么？所以，在围绕磁盘读写IO上，MySQL设计者们真的是下足了功夫。
+
+这时候，如果我们不立马更新到磁盘上，那么后面如果要更新到磁盘上的时候，我们又怎么知道哪个页是脏页呢？
+
+不得不新开一组链表来维护这些信息，而维护脏页的链表就称之为flush链表。结构就略了，跟上面的free链表一样的玩法。
+
+等等，似乎还有一个问题，什么时候刷新？这个后面会介绍
+
+#### LRU链表的管理
+
+没错，正如这个小节标题所示，这个算法就是大学数据结构、操作系统等课程中提到的，最常用的一种页面置换算法，这不MySQL这里也用到了。
+
+在介绍InnoDB是怎么用LRU算法之前，先考虑个最基本的问题，缓冲池大小是固定的，势必有用完的时候。用完之后，我们势必要考虑淘汰哪个页的问题，我们这里就用到一个LRU链表，来按最近最少使用的原则去淘汰缓冲页。
+
+##### 简单的LRU链表
+
+正如上述所述，我们可以用一个简单的LRU链表来管理这些页，当需要访问某个页时，可以按照下面的方式处理LRU链表：
+
+- 如果该页不在Buffer Pool中， 在把该页从磁盘加载到Buffer Pool中的缓冲页时，就把该缓冲页对应的控制块作为节点塞到LRU 链表的头部；
+- 如果该页已经被加载到Buffer Pool 中， 则直接把该页对应的控制块移动到LRU链表的头部。
+
+##### 划分区域的LRU链表
+
+这里又会有两个场景的问题：
+
+- MySQL预读功能（read ahead）会影响缓冲页的命中率，也就是预读进去的内容，不是我们访问所需的，那么势必又要从磁盘去加载。
+- 一不小心全表扫描了，有非常多的使用频率偏低的页被同时加载到Buffer Pool中，会把那些使用频率非常高的页从BufferPool中淘汰。
+
+针对这两种场景，InnoDB的设计者，则将LRU链表分成了下面两块区域：
+
+- 一部分存储使用频率非常高的缓冲页，这一部分链表也称为热数据，或者称之为young区域
+- 另一部分存储使用频率不高的缓冲页，这部分链表也称为冷数据，或者称之为old区域。
+
+![LRU链表分区域管理示意图](109c2b6b/LRU链表分区域管理示意图.jpg)
+
+【备注】书中后面还提到了一些关于LRU链表优化措施，笔者这里就不在这里总结了，用书中作者的话，不管我们怎么优化LRU链表，其本质目的就一个：提供BufferPool的命中率！
+
+#### 刷新脏页到磁盘
+
+了解一个原理两种形式：MySQL后台有专门负责的线程每隔一段时间就把脏页刷新到磁盘，刷新的方式主要有两种：
+
+- 从LRU链表的冷数据中刷新一部分到磁盘
+- 从flush链表中刷新一部分页面到磁盘
+
+#### 关于多个缓冲池
+
+MySQL可以通过配置系统参数，来指定BufferPool的实例数，因为在多线程的访问环境下，如果只有单一的缓冲池，每次操作的时候，都要加锁处理，所以势必影响效率。
+
+【备注】这部分内容，笔者暂时略过了，因为不是从事DBA的我来说，我暂时知道有这个玩意儿就行了 :)
+
+
+
+
+
+
+
