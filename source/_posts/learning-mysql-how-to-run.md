@@ -29,6 +29,9 @@ categories: MySQL
 	+ 等等
 
 ##### CHAR(M)列的存储格式
+
+<!-- more -->
+
 ##### 溢出列
 当出现溢出列时，即当前列用于存储的数据长度，超出当前InnoDB存储页大小之后，用【溢出页地址】来存储剩余下一页地址
 
@@ -1098,4 +1101,4 @@ mysql> show variables like '%dive%';
 
 #### innodb_table_status
 
-![innodb_table_status表中各个列的用途](learning-mysql-how-to-run/innodb_table_status表中各个列的用途.jpg)
+![innodb_table_status表中各个列的用途](109c2b6b/innodb_table_status表中各个列的用途.jpg)
