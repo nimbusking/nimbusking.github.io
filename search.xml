@@ -853,6 +853,88 @@ Boolean的hashCode返回了是俩数字，而不是其它的。理论，<strong>
 <li>提交的（committed）：当一个处于部分提交的状态的事务将修改过的数据都刷新到磁盘中之后，我们就可以说该事务处于<strong>提交的状态</strong>。</li>
 </ul>
 <p><img data-src="109c2b6b/%E4%BA%8B%E5%8A%A1%E7%8A%B6%E6%80%81%E8%BD%AC%E6%8D%A2%E5%9B%BE.jpg" alt="事务状态转换图"></p>
+<h4 id="MySQL中的事务表现"><a href="#MySQL中的事务表现" class="headerlink" title="MySQL中的事务表现"></a>MySQL中的事务表现</h4><p>【备注】先要明白一点，目前只有InnoDB和NDB（分布式），这两种存储引擎，才支持事务。</p>
+<p>在InnoDB中，知道几种语法，一般我们很少直接通过手工命令方式来执行事务，在正常业务代码中，都会通过数据库连接中间件来统一管理事务。</p>
+<h3 id="redo日志"><a href="#redo日志" class="headerlink" title="redo日志"></a>redo日志</h3><h4 id="redo日志概念"><a href="#redo日志概念" class="headerlink" title="redo日志概念"></a>redo日志概念</h4><p>【备注】关于redo日志概念部分很好理解，在缓冲池那节，我们提到过，在更新了缓冲页还没有刷新磁盘的时候，如果出现问题，这个中间过程是可能会导致数据不一致的。再来上节中提到的事务操作，我们怎么保证持久性，即使碰到数据库崩溃的场景，我们依旧能恢复崩溃前的状态？</p>
+<p>MySQL的设计者们，通过一种类似于记录操作流水的方式来做的持久性的。</p>
+<p><strong>因为在系统因崩溃而重启时严要按照上述内容所记录的步骤重新更新数据页，所以上述内容也称为重做日志(redo log) 。</strong></p>
+<p>记住redo log的两个特点：</p>
+<ul>
+<li>redo日志占用空间非常小</li>
+<li>redo日志顺序写入磁盘的</li>
+</ul>
+<h3 id="undo日志"><a href="#undo日志" class="headerlink" title="undo日志"></a>undo日志</h3><p>事务的原子性告诉我们，要么做，要么统一不做，所以每当要对一条记录进行修改的时候（insert、delete、update）：</p>
+<ul>
+<li>在<strong>插入一条</strong>记录时，至少要把这条记录的主键值记下来，这样之后回滚时只需要把这个主键值对应的记录删掉就好了;</li>
+<li>在<strong>删除一条</strong>记录时，至少要把这条记录中的内容都记下来，这样之后回滚时再把由这些内容组成的记录插入到表中就好了。</li>
+<li>在<strong>修改一条</strong>记录时，至少要把被更新的列的旧值记下来，这样之后回滚时再把这些列更新为旧值就好了。</li>
+</ul>
+<p>这些为了回滚而记录的东西称为撤销日志(undo log)，称之为undo日志。</p>
+<h4 id="事务ID"><a href="#事务ID" class="headerlink" title="事务ID"></a>事务ID</h4><p>只有在事务对表中的记录进待改动时才会为这个事务分配一个唯一的事务id。</p>
+<h3 id="事务隔离级别和MVCC"><a href="#事务隔离级别和MVCC" class="headerlink" title="事务隔离级别和MVCC"></a>事务隔离级别和MVCC</h3><p>【备注】要深刻理解事务隔离的原因，书中是用的两个账户，A和B。其中A账户前后两次向B账户发起的转账过程中，如果事务不进行隔离带来的后果。</p>
+<p>虽然数据库管理系统可以通过redo日志、undo日志这些手段来保证<strong>事务的原子性</strong>。但是，如果出现了并发场景，即不同的客户端、不同时间前后分别对同一数据主题进行操作，就可能带来问题。比如，上面提到的A账户向B账户前后发起了两笔转账，这两笔事务操作，假设称之为T1、T2，且看下图：</p>
+<p><img data-src="109c2b6b/T1%E5%92%8CT2%E7%9A%84%E6%89%A7%E8%A1%8C%E9%A1%BA%E5%BA%8F.jpg" alt="T1和T2的执行顺序"></p>
+<p>在这个场景下的事务一致性的要求是“参与转账的账户的总余额保持不变”，而在上面这个场景过程中，很显然不满足一致性要求。</p>
+<p>这就要求我们使用某种手段?虽制让这些事务按照顺序一个一个单独地执行， 或者最终执行的效果和单独执行一样。也就七是说我们希望让这些事务” 隔离”地执行，互不干涉，这也就是<strong>事务的隔离性</strong>。</p>
+<p>这章使用到的示例表，如下：</p>
+<figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> hero (</span><br><span class="line">	number <span class="type">int</span>, <span class="comment">-- 这里主键id设置为number，主要是书中为了和后文种的事务id相区分而已</span></span><br><span class="line">    name <span class="type">varchar</span>(<span class="number">100</span>),</span><br><span class="line">    country <span class="type">varchar</span>(<span class="number">100</span>),</span><br><span class="line">    <span class="keyword">primary</span> key(number)</span><br><span class="line">) Engine<span class="operator">=</span>InnoDB CHARSET<span class="operator">=</span>utf8;</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="事务并发执行时遇到的一致性问题"><a href="#事务并发执行时遇到的一致性问题" class="headerlink" title="事务并发执行时遇到的一致性问题"></a>事务并发执行时遇到的一致性问题</h4><h5 id="脏写（Dirty-Write）"><a href="#脏写（Dirty-Write）" class="headerlink" title="脏写（Dirty Write）"></a>脏写（Dirty Write）</h5><p>如果一个事务修改了另一个未提交的事务修改过的数据，这就意味着出现了脏写的现象。</p>
+<h5 id="脏读（Dirty-Read）"><a href="#脏读（Dirty-Read）" class="headerlink" title="脏读（Dirty Read）"></a>脏读（Dirty Read）</h5><p>如果一个事务读到了另一个未提交事务修改过的数据，就意味着发生了脏读现象。</p>
+<h5 id="不可重复读（Non-Repeatable-Read）"><a href="#不可重复读（Non-Repeatable-Read）" class="headerlink" title="不可重复读（Non-Repeatable Read）"></a>不可重复读（Non-Repeatable Read）</h5><p>如果一个事务修改了另一个未提交事务读取的数据， 就意味着发生了不可重复读现象，或者叫模糊读( Fuzzy Read) 现象。</p>
+<h5 id="幻读-Phantom-ˈfan-t-əm"><a href="#幻读-Phantom-ˈfan-t-əm" class="headerlink" title="幻读(Phantom, /ˈfan(t)əm/)"></a>幻读(Phantom, /ˈfan(t)əm/)</h5><p>如果一个事务先根据某些搜索条件查询出一些记录，在该事务未提交时，另一个事务写入一些了符合那些搜索条件的记录(这里的写入可以指INSERT、DELETE、UPDATE 操作) ，就意味着发生了幻读现象</p>
+<p>【备注】在书中补充说明了在MySQL场景下，幻读的现象：对于MySQL 来说，幻读强调的就是一个事务在按照某个相同的搜索条件多次读取记录时，在后读取时读到了之前没有读到的记录。这个”**后读取到的之前没有读到的记录”**可以是由别的事务执行INSERT 语句插入的，也可能是别的事务执行了更新记录键值的UPDATE语句而插入的。</p>
+<h4 id="SQL标准中的4种隔离级别"><a href="#SQL标准中的4种隔离级别" class="headerlink" title="SQL标准中的4种隔离级别"></a>SQL标准中的4种隔离级别</h4><p>我们按照可能导致一致性问题的严重性给这些现象排一下序：<code>脏写 &gt; 脏读 &gt; 不可重复读 &gt; 幻读</code></p>
+<p>SQL标准中，根据上面4个不同的严重程度，设立了4个隔离级别，以“舍弃一部分隔离性来换取一部分性能”，具体如下4种：</p>
+<ul>
+<li>READ UNCOMMITTED：未提交读</li>
+<li>READ COMMITTED：已提交读</li>
+<li>REPEATABLE READ：可重复读</li>
+<li>SERIALIZABLE：可串行化</li>
+</ul>
+<p><img data-src="109c2b6b/SQL%E6%A0%87%E5%87%86%E4%B8%AD%E8%A7%84%E5%AE%9A%E7%9A%84%E5%B9%B6%E5%8F%91%E4%BA%8B%E5%8A%A1%E6%89%A7%E8%A1%8C%E8%BF%87%E7%A8%8B%E4%B8%AD%E5%8F%AF%E8%83%BD%E5%8F%91%E7%94%9F%E7%9A%84%E7%8E%B0%E8%B1%A1.jpg" alt="SQL标准中规定的并发事务执行过程中可能发生的现象"></p>
+<p>【备注】书中还提到了一个延申的知识点，SQL92标准中没有定义脏写的现象，在95年发表的论文《A critique of ANSI SQL isolation levels》中阐述了更为细致的事务隔离级别，如丢失更新、读偏斜、写偏斜等，有兴趣的可以直接戳连接下载该PDF文档阅读一番。 [A critique of ANSI SQL isolation levels.pdf](109c2b6b\A critique of ANSI SQL isolation levels.pdf) </p>
+<h4 id="MySQL中支持的4种隔离级别"><a href="#MySQL中支持的4种隔离级别" class="headerlink" title="MySQL中支持的4种隔离级别"></a>MySQL中支持的4种隔离级别</h4><p>MySQL 虽然支持4种隔离级别， 但与SQL标准中规定的各级隔离级别允许发生的现象却有些出入，MySQL在REPEATABLE READ隔离级别下，<strong>可以很大程度上禁止幻读现象的发生</strong>(关于如何禁止会在后文详细说明)。</p>
+<p><strong>MySQL的默认隔离级别是REPEATABLE READ。</strong></p>
+<h4 id="MVCC原理"><a href="#MVCC原理" class="headerlink" title="MVCC原理"></a>MVCC原理</h4><p>【备注】这部分需要花点时间理解理解，这部分内容已经属于进阶的内容了。书中在介绍MVCC之前，铺垫了一个场景，仔细看一下。</p>
+<p>对于使用InnoDB存储引擎的表来说， 它的聚簇索引记录中都包含下面这两个必要的隐藏列（row_id 并不是必要的; 在创建的表中有主键时，或者有不允许为NULL的UNIQUE键时，都不会包含row_id列)：</p>
+<ul>
+<li><strong>trx_id</strong>：一个事务每次对某条聚簇索引记录进行改动时，都会把该事务的事务id赋值给trx_id隐藏列。</li>
+<li><strong>roll_pointer</strong>：每次对某条聚簇索引记录进行改动时， 都会把旧的版本写入到undo日志种。这个隐藏列就相当于一个指针，可以通过它找到该记录修改前的信息。</li>
+</ul>
+<p>假设，此时hero表种有一条数据，如下图所示：</p>
+<p><img data-src="learning-mysql-how-to-run/mvcc%E7%A4%BA%E4%BE%8B%E6%95%B0%E6%8D%AE.jpg" alt="mvcc示例数据"></p>
+<p>假设插入该记录的事务id为80，那么此条记录的示意图如下图所示：</p>
+<p><img data-src="learning-mysql-how-to-run/mvcc%E7%A4%BA%E4%BE%8B%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg" alt="mvcc示例数据结构示意图"></p>
+<p>假设之后两个事务id分别为100、200的事务对这条记录进行update操作，操作流程如下图所示：</p>
+<p><img data-src="learning-mysql-how-to-run/update%E6%93%8D%E4%BD%9C%E6%B5%81%E7%A8%8B.jpg" alt="update操作流程"></p>
+<p>由于每对记录进行一次改动，都会记录一条undo日志。每条undo日志也都有一条roll_pointer属性，通过这个属性可以将这些undo日志串联成一个链表，所以现在的情况就如下图所示：</p>
+<p><img data-src="learning-mysql-how-to-run/undo%E6%97%A5%E5%BF%97%E4%B8%B2%E6%88%90%E4%B8%80%E4%B8%AA%E9%93%BE%E8%A1%A8.jpg" alt="undo日志串成一个链表"></p>
+<p>这里只是为了方便清楚看到结构，所以每条undo日志都会有country列，实际上由于我们这个例子中并没有对该列进行过update操作，所以实际是对应的undo日志中并没有该列数据的。</p>
+<p>在每次更新该记录后，都会将旧值放到一条undo 日志中(就算是该记录的一个旧版本)。随着更新次数的增多，所有的版体都会被roll_pointer 属性连接成一个链表， 这个链表称为<strong>版本链</strong>。版本链的头节点就是当前记录的最新值。另外，<strong>每个版本中还包含生成该版本时对应的事务id</strong>。这个很重要，后面就会用这个记录的版本链来控制并发事务访问相同时的行为，我们把这种机制称之为多版本并发控制（Multi-Version Concurrency Control, MVCC）。</p>
+<h5 id="ReadView"><a href="#ReadView" class="headerlink" title="ReadView"></a>ReadView</h5><p>再来看看，针对4种事务隔离级别场景，我们怎么用版本链中的事务版本信息来满足隔离性的要求：</p>
+<ul>
+<li>READ UNCOMMITTED：由于可以允许读到未提交事务修改过的记录，所以<strong>直接读取记录的最新版本</strong>就行了。</li>
+<li>SERIALIZABLE：MySQL是通过<strong>加锁</strong>的方式来实现的</li>
+<li>READ COMMITTED和REPEATABLE READ，都要保证读到以及提交的事务的修改记录。换到版本链的场景就是，需要判断版本链中的哪个版本是当前事务可见的。</li>
+</ul>
+<p>针对上面的问题，提出ReadView（也称为：“一致性视图”）的概念。ReadView里面主要包含4个重要的内容：</p>
+<ul>
+<li><strong>m_ids</strong>：在生成ReadView时，当前系统中活跃的读写事务的事务id 列表。</li>
+<li><strong>min_trx_id</strong>：在生成ReadView时，当前系统中活跃的读写事务中最小的事务id; 也就是m_ids中的最小值。</li>
+<li><strong>max_trx_id</strong>：在生成ReadView时，系统应该分配给下一个事务的事务id值（不是m_ids中的最大值）</li>
+<li><strong>creator_trx_id</strong>：生成该ReadView的事务的事务id。</li>
+</ul>
+<p>有了这个ReadView后，在访问某条记录时， 只需要按照下面的步骤来判断记录的某个版本是否可见。</p>
+<ul>
+<li>如果被访问版本的trx_id属性值与ReadView中的creator_trx_id 值相同，意味着当前事务在访问它自己修改过的记录，所以该版本可以被当前事务访问</li>
+<li>如果被访问版本的回id属性值小于ReadView中的min_trx_id值，表明生成该版本的事务在当前事务生成ReadView前已经提交，所以该版本可以被当前事务访问。</li>
+<li>如果被访问版本的trx_id ，属性值大于或等于ReadView 中的max_trx_id值， 表明生成该版本的事务在当前事务生成ReadVìew后才开启，所以该版本不可以被当前事务访问。</li>
+<li>如果被访问版本的trx_id属性值在ReadView的min_trx_id 和max_trx_id之间，则需要判断trx_id属性值是否在m_ids列表中。如果在，说明创建ReadView时生成该版本的事务还是活跃的，该版本不可能被访问；如果不在，说明创建ReadView时生成该版本的事务已经被提交，该原本可以被访问。</li>
+</ul>
+<p>如果某个版本的事务的数据对当前事务不可见，那就顺着版本链找到下一个版本数据，并继续执行上面的步骤来判断记录的可见性；以此类推，直到版本链中的最后一个版本。如果记录的最后一个版本也不可见，就意味着该条记录对当前事务完全不可见，查询结果就不包含该记录。</p>
+<p>【备注】书中上述文字介绍的很清楚，但是看起来还是不够直白，这里笔者画了一个流程图以供诸位更好的理解这个过程。</p>
 ]]></content>
       <categories>
         <category>MySQL</category>
