@@ -178,6 +178,18 @@ Boolean的hashCode返回了是俩数字，而不是其它的。理论，<strong>
       </tags>
   </entry>
   <entry>
+    <title>读书笔记-InnoDB存储引擎</title>
+    <url>/post/ff43c837.html</url>
+    <content><![CDATA[<h2 id="第2章-InnoDB存储引擎"><a href="#第2章-InnoDB存储引擎" class="headerlink" title="第2章 InnoDB存储引擎"></a>第2章 InnoDB存储引擎</h2><h2 id="第3章-文件"><a href="#第3章-文件" class="headerlink" title="第3章 文件"></a>第3章 文件</h2><h2 id="第4章-表"><a href="#第4章-表" class="headerlink" title="第4章 表"></a>第4章 表</h2><h2 id="第5章-索引与算法"><a href="#第5章-索引与算法" class="headerlink" title="第5章 索引与算法"></a>第5章 索引与算法</h2><h2 id="第6章-锁"><a href="#第6章-锁" class="headerlink" title="第6章 锁"></a>第6章 锁</h2>]]></content>
+      <categories>
+        <category>MySQL</category>
+      </categories>
+      <tags>
+        <tag>MySQL</tag>
+        <tag>InnoDB</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>读书笔记-MySQL是怎样运行的</title>
     <url>/post/109c2b6b.html</url>
     <content><![CDATA[<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><h3 id="InnoDB记录存储结构"><a href="#InnoDB记录存储结构" class="headerlink" title="InnoDB记录存储结构"></a>InnoDB记录存储结构</h3><h4 id="COMPACT行格式"><a href="#COMPACT行格式" class="headerlink" title="COMPACT行格式"></a>COMPACT行格式</h4><p>有两大块组成：</p>

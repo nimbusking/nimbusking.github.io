@@ -21,26 +21,29 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.12.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"JKC51AYK2C","apiKey":"4f0be6dde67b9323867fdfa3b214b0a4","indexName":"nimbuskblog","hits":{"per_page":10}}}</script><script src="/js/config.js"></script>
 
-    <meta name="description" content="严而求之，谨而写之，写好一个有态度的博客">
-<meta property="og:type" content="website">
-<meta property="og:title" content="NimbusK&#39;s Blog">
-<meta property="og:url" content="https://nimbusk.cc/archives/2021/01/index.html">
+    <meta name="description" content="第2章 InnoDB存储引擎第3章 文件第4章 表第5章 索引与算法第6章 锁">
+<meta property="og:type" content="article">
+<meta property="og:title" content="读书笔记-InnoDB存储引擎">
+<meta property="og:url" content="https://nimbusk.cc/post/ff43c837.html">
 <meta property="og:site_name" content="NimbusK&#39;s Blog">
-<meta property="og:description" content="严而求之，谨而写之，写好一个有态度的博客">
+<meta property="og:description" content="第2章 InnoDB存储引擎第3章 文件第4章 表第5章 索引与算法第6章 锁">
 <meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-27T20:31:59.000Z">
+<meta property="article:modified_time" content="2022-07-27T13:29:02.146Z">
 <meta property="article:author" content="nimbusk">
-<meta property="article:tag" content="Hexo, NexT, NimbusK">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="InnoDB">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://nimbusk.cc/archives/2021/01/">
+<link rel="canonical" href="https://nimbusk.cc/post/ff43c837.html">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":false,"lang":"zh-CN","comments":"","permalink":"","path":"archives/2021/01/index.html","title":""}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/ff43c837.html","path":"post/ff43c837.html","title":"读书笔记-InnoDB存储引擎"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>归档 | NimbusK's Blog</title>
+<title>读书笔记-InnoDB存储引擎 | NimbusK's Blog</title>
   
 
 
@@ -71,7 +74,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">NimbusK's Blog</h1>
+      <p class="site-title">NimbusK's Blog</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -126,7 +129,7 @@
 
   <aside class="sidebar">
 
-    <div class="sidebar-inner sidebar-overview-active">
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
       <ul class="sidebar-nav">
         <li class="sidebar-nav-toc">
           文章目录
@@ -139,6 +142,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC2%E7%AB%A0-InnoDB%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E"><span class="nav-number">1.</span> <span class="nav-text">第2章 InnoDB存储引擎</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC3%E7%AB%A0-%E6%96%87%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">第3章 文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC4%E7%AB%A0-%E8%A1%A8"><span class="nav-number">3.</span> <span class="nav-text">第4章 表</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC5%E7%AB%A0-%E7%B4%A2%E5%BC%95%E4%B8%8E%E7%AE%97%E6%B3%95"><span class="nav-number">4.</span> <span class="nav-text">第5章 索引与算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC6%E7%AB%A0-%E9%94%81"><span class="nav-number">5.</span> <span class="nav-text">第6章 锁</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -203,71 +207,146 @@
 </noscript>
 
 
-    <div class="main-inner archive posts-collapse">
+    <div class="main-inner post posts-expand">
 
 
   
-  
-  
-  <div class="post-block">
-    <div class="post-content">
-      <div class="collection-title">
-        
-        <span class="collection-header">不错! 目前共计 66 篇日志。 继续努力。</span>
-      </div>
 
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/ff43c837.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="读书笔记-InnoDB存储引擎 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          读书笔记-InnoDB存储引擎
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
       
-    <div class="collection-year">
-      <span class="collection-header">2021</span>
+
+      <time title="创建时间：2022-07-27 20:31:59 / 修改时间：13:29:02" itemprop="dateCreated datePublished" datetime="2022-07-27T20:31:59+00:00">2022-07-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="第2章-InnoDB存储引擎"><a href="#第2章-InnoDB存储引擎" class="headerlink" title="第2章 InnoDB存储引擎"></a>第2章 InnoDB存储引擎</h2><h2 id="第3章-文件"><a href="#第3章-文件" class="headerlink" title="第3章 文件"></a>第3章 文件</h2><h2 id="第4章-表"><a href="#第4章-表" class="headerlink" title="第4章 表"></a>第4章 表</h2><h2 id="第5章-索引与算法"><a href="#第5章-索引与算法" class="headerlink" title="第5章 索引与算法"></a>第5章 索引与算法</h2><h2 id="第6章-锁"><a href="#第6章-锁" class="headerlink" title="第6章 锁"></a>第6章 锁</h2>
     </div>
 
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2021-01-20T20:10:12+00:00"
-              content="2021-01-20">
-          01-20
-        </time>
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/ff43c837.html" title="读书笔记-InnoDB存储引擎">https://nimbusk.cc/post/ff43c837.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+        <a target="_blank" class="social-link" href="/atom.xml">
+          <span class="icon">
+            <i class="fa fa-rss"></i>
+          </span>
+
+          <span class="label">RSS</span>
+        </a>
       </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/post/fcecb73d.html" itemprop="url">
-            <span itemprop="name">蓝光原盘电影重置教程</span>
-          </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-      <div class="post-meta-container">
-        <time itemprop="dateCreated"
-              datetime="2021-01-13T23:02:30+00:00"
-              content="2021-01-13">
-          01-13
-        </time>
-      </div>
-
-      <div class="post-title">
-          <a class="post-title-link" href="/post/f3b827b0.html" itemprop="url">
-            <span itemprop="name">Linux下Nexus私服搭建</span>
-          </a>
-      </div>
-
-      
-    </header>
-  </article>
-
-
-    </div>
   </div>
-  
-  
-  
+</div>
 
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/InnoDB/" rel="tag"># InnoDB</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/109c2b6b.html" rel="prev" title="读书笔记-MySQL是怎样运行的">
+                  <i class="fa fa-chevron-left"></i> 读书笔记-MySQL是怎样运行的
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
 </div>
   </main>
 
@@ -337,7 +416,7 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
 
-<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"558aa542b66654e8731f506a0b4d91bd8e5251fe","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js","integrity":"sha256-Pmj85ojLaPOWwRtlMJwmezB/Qg8BzvJp5eTzvXaYAfA="},"path_md5":"29c11a724b60d91499051820ac6c1b6d"}</script>
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"558aa542b66654e8731f506a0b4d91bd8e5251fe","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js","integrity":"sha256-Pmj85ojLaPOWwRtlMJwmezB/Qg8BzvJp5eTzvXaYAfA="},"path_md5":"bd56deef3556e80a1ec41bae9548b107"}</script>
 <script src="/js/third-party/comments/gitalk.js"></script>
 
 </body>
