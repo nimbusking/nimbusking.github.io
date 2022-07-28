@@ -257,7 +257,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-07-27 13:29:02" itemprop="dateModified" datetime="2022-07-27T13:29:02+00:00">2022-07-27</time>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -357,7 +357,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-07-27 13:29:02" itemprop="dateModified" datetime="2022-07-27T13:29:02+00:00">2022-07-27</time>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -455,10 +455,16 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">发表于</span>
-      
 
-      <time title="创建时间：2022-07-27 20:31:59 / 修改时间：13:29:02" itemprop="dateCreated datePublished" datetime="2022-07-27T20:31:59+00:00">2022-07-27</time>
+      <time title="创建时间：2022-07-27 20:31:59" itemprop="dateCreated datePublished" datetime="2022-07-27T20:31:59+00:00">2022-07-27</time>
     </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
+      </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
         <i class="far fa-folder"></i>
@@ -479,7 +485,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h2 id="第2章-InnoDB存储引擎"><a href="#第2章-InnoDB存储引擎" class="headerlink" title="第2章 InnoDB存储引擎"></a>第2章 InnoDB存储引擎</h2><h2 id="第3章-文件"><a href="#第3章-文件" class="headerlink" title="第3章 文件"></a>第3章 文件</h2><h2 id="第4章-表"><a href="#第4章-表" class="headerlink" title="第4章 表"></a>第4章 表</h2><h2 id="第5章-索引与算法"><a href="#第5章-索引与算法" class="headerlink" title="第5章 索引与算法"></a>第5章 索引与算法</h2><h2 id="第6章-锁"><a href="#第6章-锁" class="headerlink" title="第6章 锁"></a>第6章 锁</h2>
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>这本书介绍的知识点，emm，过于零碎，更像是“翻译”了一下底层设计而已，关于脉络主线等内容，需要花很大力气去啃。因此，本篇文章，我主要记录，我薄弱的地方，比如关于事务、MVCC和锁这块内容。这部分会仔细加注。</p>
+<h2 id="第4章-表"><a href="#第4章-表" class="headerlink" title="第4章 表"></a>第4章 表</h2><h3 id="InnoDB逻辑存储结构"><a href="#InnoDB逻辑存储结构" class="headerlink" title="InnoDB逻辑存储结构"></a>InnoDB逻辑存储结构</h3><p>InnoDB的表空间（tablespace）由段（segment）、区（extent）、页（page）组成</p>
+<p><img data-src="ff43c837/InnoDB%E9%80%BB%E8%BE%91%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84.jpg" alt="InnoDB逻辑存储结构"></p>
+<h2 id="第5章-索引与算法"><a href="#第5章-索引与算法" class="headerlink" title="第5章 索引与算法"></a>第5章 索引与算法</h2><h2 id="第6章-锁"><a href="#第6章-锁" class="headerlink" title="第6章 锁"></a>第6章 锁</h2>
       
     </div>
 
@@ -543,7 +552,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-07-27 13:29:02" itemprop="dateModified" datetime="2022-07-27T13:29:02+00:00">2022-07-27</time>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -565,7 +574,11 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><h3 id="InnoDB记录存储结构"><a href="#InnoDB记录存储结构" class="headerlink" title="InnoDB记录存储结构"></a>InnoDB记录存储结构</h3><h4 id="COMPACT行格式"><a href="#COMPACT行格式" class="headerlink" title="COMPACT行格式"></a>COMPACT行格式</h4><p>有两大块组成：</p>
+          <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>这本书作为了解MySQL底层设计的，是一部不错的数据，从浅到深依次介绍，只要你<strong>耐心的依次</strong>看完，会有不少收获的。对没错，需要以此看完，这也是本书的特点之一，章节前后是有很大联系的。我根据自己的阅读理解，将本书分成了三个大块（细节可以看看【阅读楔子】中的介绍）。</p>
+<p>个人认为，这个对于接触一个完全不理解的领域，这种模式会更容易接受一点~而相关技术书籍，也是缺乏这块的引子，导致可能你一遍看完了，根本没有体会。再来第二遍。</p>
+<p>当然，虽然本书，你看着看着，可能会第一感受，作者真的<strong>啰嗦</strong>。哈哈哈，正常，我第一次看本书的时候也有相同体会。</p>
+<p>但是，看完之后，发现，作者反复的啰嗦，是以一种更接近口语化的方式来诉说。虽然当时会有点厌烦，但是看完之后，发现重复唠叨，对于理解一些重要概念是无可厚非的。<br>所以，如果你有相同的感受，那就不妨耐心看完。</p>
+<h3 id="InnoDB记录存储结构"><a href="#InnoDB记录存储结构" class="headerlink" title="InnoDB记录存储结构"></a>InnoDB记录存储结构</h3><h4 id="COMPACT行格式"><a href="#COMPACT行格式" class="headerlink" title="COMPACT行格式"></a>COMPACT行格式</h4><p>有两大块组成：</p>
 <ul>
 <li>记录的额外信息<ul>
 <li>边长字段长度列表</li>
@@ -655,7 +668,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-07-27 13:29:02" itemprop="dateModified" datetime="2022-07-27T13:29:02+00:00">2022-07-27</time>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -741,7 +754,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-07-27 13:29:02" itemprop="dateModified" datetime="2022-07-27T13:29:02+00:00">2022-07-27</time>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -827,7 +840,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-07-27 13:29:02" itemprop="dateModified" datetime="2022-07-27T13:29:02+00:00">2022-07-27</time>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -922,7 +935,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-07-27 13:29:02" itemprop="dateModified" datetime="2022-07-27T13:29:02+00:00">2022-07-27</time>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1021,7 +1034,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-07-27 13:29:02" itemprop="dateModified" datetime="2022-07-27T13:29:02+00:00">2022-07-27</time>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
       </span>
 
   
@@ -1098,7 +1111,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-07-27 13:29:02" itemprop="dateModified" datetime="2022-07-27T13:29:02+00:00">2022-07-27</time>
+        <time title="修改时间：2022-07-28 12:10:31" itemprop="dateModified" datetime="2022-07-28T12:10:31+00:00">2022-07-28</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
