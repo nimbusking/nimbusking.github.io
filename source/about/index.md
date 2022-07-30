@@ -55,14 +55,15 @@ Valine似乎已亡，评论区插件切换至GTalk，不折腾了。。。
           - Java多线程
           - JVM相关
           - Java性能调优
-          - JavaFX
        - Scala
          + Akka
        - Python
        - 中间件系列
           - 消息中间件
-             - IBM WebSphere MQ
              - ActiveMQ
+          - Zookeeper
+          - RPC
+             - DUBBO
     - 前端
        - JavaScript
        - NodeJS
@@ -86,8 +87,7 @@ Valine似乎已亡，评论区插件切换至GTalk，不折腾了。。。
           - Google Home
     - 技巧
     - 工具
-      + 工具使用
-      + 工具激活
+      + 工具使用 & TIPS
     - 杂项
 
 ### 博客相关内容限定
