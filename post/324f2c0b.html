@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 5.3.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.2/css/all.min.css" integrity="sha256-xejo6yLi6vGtAjcMIsY8BHdKsLg7QynVlFMzdQgUuy8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.12.3","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":false,"style":null},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"algolia":{"appID":"JKC51AYK2C","apiKey":"4f0be6dde67b9323867fdfa3b214b0a4","indexName":"nimbuskblog","hits":{"per_page":10}}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前言从Paxos到ZooKeeper">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZooKeeper学习">
+<meta property="og:url" content="https://nimbusk.cc/post/324f2c0b.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="前言从Paxos到ZooKeeper">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/learning-zookeeper/CAP%E5%AE%9A%E7%90%86%E5%BA%94%E7%94%A8.jpg">
+<meta property="article:published_time" content="2022-08-01T12:20:32.000Z">
+<meta property="article:modified_time" content="2022-08-01T12:38:02.806Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="ZooKeeper">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/learning-zookeeper/CAP%E5%AE%9A%E7%90%86%E5%BA%94%E7%94%A8.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/324f2c0b.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/324f2c0b.html","path":"post/324f2c0b.html","title":"ZooKeeper学习"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ZooKeeper学习 | NimbusK's Blog</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="NimbusK's Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container"></div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container">
+  <div class="algolia-stats"><hr></div>
+  <div class="algolia-hits"></div>
+  <div class="algolia-pagination"></div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%8EPaxos%E5%88%B0ZooKeeper"><span class="nav-number">2.</span> <span class="nav-text">从Paxos到ZooKeeper</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC1%E7%AB%A0-%E5%88%86%E5%B8%83%E5%BC%8F%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">第1章 分布式架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">2.1.1.</span> <span class="nav-text">分布式的特点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E7%8E%AF%E5%A2%83%E7%9A%84%E5%90%84%E7%A7%8D%E9%97%AE%E9%A2%98"><span class="nav-number">2.1.2.</span> <span class="nav-text">分布式环境的各种问题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="nav-number">2.1.3.</span> <span class="nav-text">分布式事务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E4%BA%8ECAP%E4%B8%8EBASE"><span class="nav-number">2.1.4.</span> <span class="nav-text">关于CAP与BASE</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E4%BA%8EBASE"><span class="nav-number">2.1.4.1.</span> <span class="nav-text">关于BASE</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC2%E7%AB%A0-%E4%B8%80%E8%87%B4%E6%80%A7%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.2.</span> <span class="nav-text">第2章 一致性协议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2PC"><span class="nav-number">2.2.1.</span> <span class="nav-text">2PC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3PC"><span class="nav-number">2.2.2.</span> <span class="nav-text">3PC</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Paxos"><span class="nav-number">2.2.3.</span> <span class="nav-text">Paxos</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC3%E7%AB%A0-Paxos%E7%9A%84%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5"><span class="nav-number">2.3.</span> <span class="nav-text">第3章 Paxos的工程实践</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC4%E7%AB%A0-ZooKeeper%E4%B8%8EPaxos"><span class="nav-number">2.4.</span> <span class="nav-text">第4章 ZooKeeper与Paxos</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC5%E7%AB%A0-%E4%BD%BF%E7%94%A8ZooKeeper"><span class="nav-number">2.5.</span> <span class="nav-text">第5章 使用ZooKeeper</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC6%E7%AB%A0-ZooKeeper%E7%9A%84%E5%85%B8%E5%9E%8B%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">2.6.</span> <span class="nav-text">第6章 ZooKeeper的典型应用场景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC7%E7%AB%A0-ZooKeeper%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95"><span class="nav-number">2.7.</span> <span class="nav-text">第7章 ZooKeeper技术内幕</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC8%E7%AB%A0-ZooKeeper%E8%BF%90%E7%BB%B4"><span class="nav-number">2.8.</span> <span class="nav-text">第8章 ZooKeeper运维</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">严而求之，谨而写之，写好一个有态度的博客</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">67</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">24</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">108</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license site-overview-item animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdn.jsdelivr.net/npm/@creativecommons/vocabulary@2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/324f2c0b.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="严而求之，谨而写之，写好一个有态度的博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ZooKeeper学习 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ZooKeeper学习
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2022-08-01 12:20:32 / 修改时间：12:38:02" itemprop="dateCreated datePublished" datetime="2022-08-01T12:20:32+00:00">2022-08-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ZooKeeper/" itemprop="url" rel="index"><span itemprop="name">ZooKeeper</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h2 id="从Paxos到ZooKeeper"><a href="#从Paxos到ZooKeeper" class="headerlink" title="从Paxos到ZooKeeper"></a>从Paxos到ZooKeeper</h2><a id="more"></a>
+
+<h3 id="第1章-分布式架构"><a href="#第1章-分布式架构" class="headerlink" title="第1章 分布式架构"></a>第1章 分布式架构</h3><h4 id="分布式的特点"><a href="#分布式的特点" class="headerlink" title="分布式的特点"></a>分布式的特点</h4><ul>
+<li><strong>分布性</strong>：分布式系统中的多台计算机都会在空间上随意分布。</li>
+<li><strong>对等性</strong>：分布式系统中的计算机没有主／从之分， 既没有控制整个系统的主机，也没有被控 制的从机，组成分布式系统的所有计算机节点都是对等的。</li>
+<li><strong>并发性</strong>：如果在并发场景下协调好共享资源</li>
+<li><strong>缺乏全局时钟</strong>：在分布式系统中，很难定义两个事件究竟谁先谁后，原因就是因为分布式系统缺乏一个全局的时钟序列控制。 </li>
+<li><strong>故障总会发生</strong>：组成分布式系统的所有计算机，都有可能发生任何形式的故障。</li>
+</ul>
+<h4 id="分布式环境的各种问题"><a href="#分布式环境的各种问题" class="headerlink" title="分布式环境的各种问题"></a>分布式环境的各种问题</h4><ul>
+<li>通信异常：分布式节点之间需要网络通信，网络通信就带来，比如延迟等异常情况</li>
+<li>网络分区：组成分布式系统的所有节点，因为网络异常，导致一部分节点能通信，一部分节点不能通信，这个现象称之为网络分区，俗称为“脑裂”。</li>
+<li>三态：分布式系统的每一次请求与响应，存在特有的“三态”，即成功、失败和超时。</li>
+<li>节点故障：</li>
+</ul>
+<h4 id="分布式事务"><a href="#分布式事务" class="headerlink" title="分布式事务"></a>分布式事务</h4><p>分布式事务场景下的数据一致性等问题</p>
+<h4 id="关于CAP与BASE"><a href="#关于CAP与BASE" class="headerlink" title="关于CAP与BASE"></a>关于CAP与BASE</h4><p>关于CAP的应用，我们要知道，分布式系统无法同时满足这三个需求的。往往只能满足其中两项，关于这点，在书中有个表格，这里贴出来，需要的时候可以看看缺失其中一项的应用场景是什么：</p>
+<p><img data-src="learning-zookeeper/CAP%E5%AE%9A%E7%90%86%E5%BA%94%E7%94%A8.jpg" alt="CAP定理应用"></p>
+<p>另外，在分布式场景下，分区容错性（P）是一定要解决的，不然怎么称之为分布式系统？</p>
+<h5 id="关于BASE"><a href="#关于BASE" class="headerlink" title="关于BASE"></a>关于BASE</h5><p>BASE是由Basically Available(基本可用)、Soft state（软状态）和Eventually consistend（最终一致性）这三个短语构成的。</p>
+<p>来自EBAY工程师Dan Pritchett在2008年发布的一篇文章中提到的概念，笔者从ACM网站上下载了下来，有需要可以翻阅看看。</p>
+<p> [Introduce BASE different with ACID.pdf](324f2c0b\Introduce BASE different with ACID.pdf) </p>
+<p>原文文章连接：<a target="_blank" rel="noopener" href="https://dl.acm.org/doi/10.1145/1394127.1394128">https://dl.acm.org/doi/10.1145/1394127.1394128</a></p>
+<p>【备注】书中介绍了一下ACID背景以及带来的问题，通过引入交易转账的两张小表来阐述怎么做到最终一致性，以及最终一致性的目标。读者可以仔细看看，例子不难，对于理解最终一致性是很有帮助的。</p>
+<p>BASE是对CAP中一致性和可用性权衡的结果，其来源于对大规模互联网系统分布式实践的总结，是基于CAP定理逐步演化而来的，其核心思想是：<strong>即使无法做到强一致性(Strong consistency)，但每个应用都可以根据自身的业务特点，采用适当的方式来使系统达到最终一致性(Eventual consistency)。</strong></p>
+<p>【备注】关于最终一致性，书中还介绍了五类主要的变种，分别是：</p>
+<ul>
+<li>因果一致性（Causal consistency）</li>
+<li>读己之所写（Read your writes）</li>
+<li>会话一致性（Session consistency）</li>
+<li>单调读一致性（Monotonic /ˌmänəˈtänik/ read consistency）</li>
+<li>单调写一致性（Monotonic write consistency）</li>
+</ul>
+<h3 id="第2章-一致性协议"><a href="#第2章-一致性协议" class="headerlink" title="第2章 一致性协议"></a>第2章 一致性协议</h3><p>【备注】这个章节中介绍了三种经典的分布式一致性算法，分别是二段提交（2PC, Two-Phase Commit）、三段提交（3PC, Three-Phase Commit）以及大名鼎鼎的Paxos算法。</p>
+<p>在介绍二、三段提交算法之前，书中引入了“段式”提交的核心理念：</p>
+<p>当一个事务操作需要跨越多个分布式节点的时候， 为了保持事务处理的ACID特性， 就需要引入 一个称为 ＂协调者(Coordinator)” 的组件来统一调度所有分布式节点的执行逻辑， 这些被调度的分布式节点则被称为 “参与者” (Participant)。 <strong>协调者负责调度参与者的行为，并最终决定这些参与者是否要把事务真正进行提交。</strong> </p>
+<h4 id="2PC"><a href="#2PC" class="headerlink" title="2PC"></a>2PC</h4><p>PC, 是Two-Phase Commit的缩写， 即二阶段提交，是计算机网络尤其是在数据库领域内， 为了使基于分布式系统架构下的所有节点在进行事务处理过程中能够保持原子性和一致性而设计的一种算法。</p>
+<p>【备注】你可能也听过另外一个二段：二段锁（2PL, Two-Phase Locking），这俩个是完全不同的东西哦。二段锁，是解决单机事务中的数据的一致性和隔离性而诞生的。而，二段提交是处理的分布式事务。</p>
+<h4 id="3PC"><a href="#3PC" class="headerlink" title="3PC"></a>3PC</h4><h4 id="Paxos"><a href="#Paxos" class="headerlink" title="Paxos"></a>Paxos</h4><h3 id="第3章-Paxos的工程实践"><a href="#第3章-Paxos的工程实践" class="headerlink" title="第3章 Paxos的工程实践"></a>第3章 Paxos的工程实践</h3><h3 id="第4章-ZooKeeper与Paxos"><a href="#第4章-ZooKeeper与Paxos" class="headerlink" title="第4章 ZooKeeper与Paxos"></a>第4章 ZooKeeper与Paxos</h3><h3 id="第5章-使用ZooKeeper"><a href="#第5章-使用ZooKeeper" class="headerlink" title="第5章 使用ZooKeeper"></a>第5章 使用ZooKeeper</h3><h3 id="第6章-ZooKeeper的典型应用场景"><a href="#第6章-ZooKeeper的典型应用场景" class="headerlink" title="第6章 ZooKeeper的典型应用场景"></a>第6章 ZooKeeper的典型应用场景</h3><h3 id="第7章-ZooKeeper技术内幕"><a href="#第7章-ZooKeeper技术内幕" class="headerlink" title="第7章 ZooKeeper技术内幕"></a>第7章 ZooKeeper技术内幕</h3><h3 id="第8章-ZooKeeper运维"><a href="#第8章-ZooKeeper运维" class="headerlink" title="第8章 ZooKeeper运维"></a>第8章 ZooKeeper运维</h3>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/324f2c0b.html" title="ZooKeeper学习">https://nimbusk.cc/post/324f2c0b.html</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+        <a target="_blank" class="social-link" href="/atom.xml">
+          <span class="icon">
+            <i class="fa fa-rss"></i>
+          </span>
+
+          <span class="label">RSS</span>
+        </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" rel="tag"># 中间件</a>
+              <a href="/tags/ZooKeeper/" rel="tag"># ZooKeeper</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/ff43c837.html" rel="prev" title="读书笔记-InnoDB存储引擎">
+                  <i class="fa fa-chevron-left"></i> 读书笔记-InnoDB存储引擎
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nimbusk</span>
+</div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script>
+
+  
+<script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.14.2/dist/algoliasearch-lite.umd.js" integrity="sha256-dImjLPUsG/6p3+i7gVKBiDM8EemJAhQ0VvkRK2pVsQY=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.43.1/dist/instantsearch.production.min.js" integrity="sha256-jLNoKrKRDKAOg8JBqkl8jSy2tpqCGQ1/++9QRYtWl8k=" crossorigin="anonymous"></script><script src="/js/third-party/search/algolia-search.js"></script>
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"558aa542b66654e8731f506a0b4d91bd8e5251fe","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdn.jsdelivr.net/npm/gitalk@1.7.2/dist/gitalk.min.js","integrity":"sha256-Pmj85ojLaPOWwRtlMJwmezB/Qg8BzvJp5eTzvXaYAfA="},"path_md5":"5aeb9d396891be95a1eed662321f06b5"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>
