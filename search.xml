@@ -239,7 +239,55 @@ Boolean的hashCode返回了是俩数字，而不是其它的。理论，<strong>
 <p><strong>缺点</strong>：参与者接收到preCommit消息后，如果网络出现分区，此时协调者所在的节点和参与者无法进行正常的网络通信，在这种情况下，该参与者依然会进行事务的提交，这必然出现数据的不一致性。</p>
 <h4 id="Paxos"><a href="#Paxos" class="headerlink" title="Paxos"></a>Paxos</h4><p>Paxos算法是莱斯利·兰伯特( <a href="https://en.wikipedia.org/wiki/Leslie_Lamport">Leslie Lamport</a>) （【备注】计算机界的一位巨佬，其在分布式领域的贡献不亚于Dijkstra这些巨佬的贡献，2013年图灵奖获得者）注2 千1990年提出的一种基于消息传递且具有高度容错特性的一致性算法，是目前公认的解决分布式一致性问题最有效的算法之一。</p>
 <p>Paxos主要解决的问题就是在前面提到的，在分布式系统中，如果出现了诸如机器宕机或网络异常等情况。Paxos算法需要解决的问题就是<strong>如何在一个可能发生上述异常的分布式系统中，快速且正确地在集群内部对某个数据的值达成一致，并且保证不论发生以上任何异常，都不会破坏整个系统的一致性。</strong></p>
-<h3 id="第3章-Paxos的工程实践"><a href="#第3章-Paxos的工程实践" class="headerlink" title="第3章 Paxos的工程实践"></a>第3章 Paxos的工程实践</h3><h3 id="第4章-ZooKeeper与Paxos"><a href="#第4章-ZooKeeper与Paxos" class="headerlink" title="第4章 ZooKeeper与Paxos"></a>第4章 ZooKeeper与Paxos</h3><h3 id="第5章-使用ZooKeeper"><a href="#第5章-使用ZooKeeper" class="headerlink" title="第5章 使用ZooKeeper"></a>第5章 使用ZooKeeper</h3><h3 id="第6章-ZooKeeper的典型应用场景"><a href="#第6章-ZooKeeper的典型应用场景" class="headerlink" title="第6章 ZooKeeper的典型应用场景"></a>第6章 ZooKeeper的典型应用场景</h3><h3 id="第7章-ZooKeeper技术内幕"><a href="#第7章-ZooKeeper技术内幕" class="headerlink" title="第7章 ZooKeeper技术内幕"></a>第7章 ZooKeeper技术内幕</h3><h3 id="第8章-ZooKeeper运维"><a href="#第8章-ZooKeeper运维" class="headerlink" title="第8章 ZooKeeper运维"></a>第8章 ZooKeeper运维</h3>]]></content>
+<h3 id="第3章-Paxos的工程实践"><a href="#第3章-Paxos的工程实践" class="headerlink" title="第3章 Paxos的工程实践"></a>第3章 Paxos的工程实践</h3><h4 id="关于Chubby"><a href="#关于Chubby" class="headerlink" title="关于Chubby"></a>关于Chubby</h4><p>要知道：Chubby提供了粗粒度的分布式锁服务，开发人员不需要使用复杂的同步协议，而是直接调用Chubby的锁服务接口即可实现分布式系统中多个进程之间粗粒度的同步控制，从而保证了分布式数据的一致性。</p>
+<h3 id="第4章-ZooKeeper与Paxos"><a href="#第4章-ZooKeeper与Paxos" class="headerlink" title="第4章 ZooKeeper与Paxos"></a>第4章 ZooKeeper与Paxos</h3><h4 id="初识ZooKeeper"><a href="#初识ZooKeeper" class="headerlink" title="初识ZooKeeper"></a>初识ZooKeeper</h4><p>ZooKeeper的设计目标是将那些复杂且容易出错的分布式一致性服务封装起来，构成一个高效可靠的原语集，并以一系列简单易用的接口提供给用户使用。</p>
+<p>ZooKeeper是一个典型的分布式数据一致性的解决方案，分布式应用程序可以基于它实现诸如现诸如<strong>数据发布／订阅、负载均衡、命名服务、分布式协调／通知、集群管理、Master选举、分布式锁和分布式队列</strong>等功能。ZooKeeper可以保证如下分布式一致性特性：</p>
+<ul>
+<li><strong>顺序一致性</strong>：从同一个客户端发起的事务请求， 最终将会严格地按照其发起顺序被应用到ZooKeeper中去。</li>
+<li><strong>原子性：</strong>所有事务请求的处理结果在整个集群中所有机器上的应用情况是一致的，也就是说，要么整个集群所有机器都成功应用了某一个事务， 要么都没有应用。</li>
+<li><strong>单一视图（Single System Image）</strong>：无论客户端连接的是哪个ZooKeeper服务器，其看到的服务端数据模型都是一致的。</li>
+<li><strong>可靠性：</strong>一旦服务端成功地应用了一个事务，并完成对客户端的响应，那么该事务所引起的服务端状态变更将会被一直保留下来， 除非有另一个事务又对其进行了变更。</li>
+<li><strong>实时性</strong>：ZooKeeper 仅仅保证在一定的时间段内， 客户端最终一定能够从服务端上读取到最新的数据状态。</li>
+</ul>
+<h4 id="ZooKeeper的基本概念"><a href="#ZooKeeper的基本概念" class="headerlink" title="ZooKeeper的基本概念"></a>ZooKeeper的基本概念</h4><p>【备注】这里只是介绍的基本概念，详细细节再第7章中会详细介绍</p>
+<h5 id="集群角色"><a href="#集群角色" class="headerlink" title="集群角色"></a>集群角色</h5><p>ZooKeeper不同于传统的Master/Slave模式，将整个集群分为Leader、Follower、Observer三种机器。</p>
+<ul>
+<li>关于<strong>Leader机器</strong>：ZooKeeper集群中的所有机器通过一个Leader选举过程来选定一台被称为”Leader”的机器，Leader服务器为客户端提供读和写服务。</li>
+<li><strong>关于Follower和Observer机器</strong>：Follower和Observer都能够提供读服务，唯一的区别在干，Observer机器不参与Leader选举过程，也不参与写操作的“过半写成功”策略。</li>
+</ul>
+<h5 id="会话（Session）"><a href="#会话（Session）" class="headerlink" title="会话（Session）"></a>会话（Session）</h5><p>客户端启动的时候，首先会与服务器建立一个TCP连接， 从第一次连接建立开始，客户端会话的生命周期也开始了，通过这个连接，客户端能够通过心跳检测与服务器保持有效的会话，同时也能够向ZooKeeper服务器发送请求并接受响应，同时还能够通过该连接<strong>接收来自服务器的Watch事件通知</strong>。</p>
+<h5 id="数据节点（Znode）"><a href="#数据节点（Znode）" class="headerlink" title="数据节点（Znode）"></a>数据节点（Znode）</h5><p>这里指的数据节点，是指的ZooKeeper的内存数据结构。在ZooKeeper中，ZNode可以分为持久节点和临时节点两类，其中：</p>
+<ul>
+<li><strong>持久节点</strong>：指一且这个ZNode被创建了，除非主动进行ZNode的移除操作，否则这个ZNode将一直保存在ZooKeeper上。</li>
+<li><strong>临时节点</strong>：它的生命周期和客户端会话绑定，一且客户端会话失效，那么这个客户端创建的所有临时节点都会被移除</li>
+</ul>
+<p>数据节点还有另外一个额外的属性，<strong>SEQUENTIAL</strong> <em>/səˈkwen(t)SHəl/</em> ，一旦被标记这个属性，那么这个节点将被创建的时候，会在节点名称后面追加上一个整型数字，这个整型数字是由<strong>父节点维护的一个自增数字</strong>。</p>
+<h5 id="版本"><a href="#版本" class="headerlink" title="版本"></a>版本</h5><p>每个ZNode，ZooKeeper都会为其维护一个叫作<strong>Stat</strong>的数据结构，Stat中记录了这个ZNode的三个数据版本，分别是<strong>version（当前ZNode的版本）</strong>、cversioo（当前ZNode子节点的版本）和<strong>aversion（当前ZNode的ACL版本）</strong>。</p>
+<h5 id="事件监听器（Watcher）"><a href="#事件监听器（Watcher）" class="headerlink" title="事件监听器（Watcher）"></a>事件监听器（Watcher）</h5><p>ZooKeeper允许用户在指定节点上注册一些Watcher, 并且在一些特定事件触发的时候，ZooKeeper服务端会将事件通知到感兴趣的客户端上去，该机制是ZooKeeper实现分布式协调服务的重要特性。</p>
+<h5 id="ACL"><a href="#ACL" class="headerlink" title="ACL"></a>ACL</h5><p>ZooKeeper采用ACL (Access Control Lists)策略来进行权限控制，类似于UNIX文件系统的权限控制。其中ZooKeeper定义了如下5中权限：</p>
+<ul>
+<li><strong>CREATE</strong>：创建<strong>子节点</strong>权限</li>
+<li><strong>READ</strong>：获取节点数据和<strong>子节点</strong>列表的权限</li>
+<li><strong>WRITE</strong>：更新节点数据的权限</li>
+<li><strong>DELETE</strong>：删除子节点的权限</li>
+<li><strong>ADMIN</strong>：设置节点ACL的权限</li>
+</ul>
+<h4 id="ZooKeeper的ZAB协议"><a href="#ZooKeeper的ZAB协议" class="headerlink" title="ZooKeeper的ZAB协议"></a>ZooKeeper的ZAB协议</h4><h5 id="ZAB协议概述"><a href="#ZAB协议概述" class="headerlink" title="ZAB协议概述"></a>ZAB协议概述</h5><p>要明白一点，ZooKeeper并没有完全采用Paxos算法，而是使用了一种称为**Zookeeper Atomic Broadcast(ZAB，Zookeeper原子消息广播协议)**的协议作为其数据一致性的核心算法。</p>
+<p>在ZooKeeper中，<strong>主要依赖ZAB协议来实现分布式数据一致性</strong>，基于该协议，ZooKeeper实现了一种主备模式的系统架构来保持集群中各副本之间数据的一致性。具体过程概括如下：</p>
+<p><strong>首先：</strong>ZooKeeper使用<strong>一个单一的主进程</strong>来接收并处理客户端的<strong>所有事务请求</strong>，并采用ZAB的原子广播协议，将服务器数据的状态变更以事务Proposal的形式广播到所有的副本进程上去。这个过程的特点是：ZAB协议的这个主备模型架构保证了同一时刻集群中只能够有一个主进程来广播服务器的状态变更，因此能够很好地处理客户端大量的井发请求。</p>
+<p><strong>其次：</strong>考虑到在分布式环境中，顺序执行的一些状态变更其前后会存在一定的依赖关系，有些状态变更必须依赖于比它早生成的那些状态变更。例如变更C需要依赖变更A和变更B。 这样的依赖关系也对ZAB协议提出了一个要求：<strong>ZAB协议必须能够保证一个全局的变更序列被顺序应用</strong>，也就是说，ZAB协议需要保证如果一个状态变更已经被处理了，那么所有其依赖的状态变更都应该巳经被提前处理掉了。</p>
+<p><strong>最后</strong>：考虑到主进程在任何时候都有可能出现崩溃退出或重启现象，因此，ZAB协议还需要做到在当前主进程出现上述异常情况的时候， 依旧能够正常工作。</p>
+<p>上述步骤的概述，就是：</p>
+<p><em>所有事务请求必须由<strong>一个全局唯一的服务器</strong>来协调处理， 这样的服务器被称为 Leader 服务器， 而余下的其他服务器则成为 Follower 服务器。 Leader 服务器负责将一<strong>个客户端事务请求</strong>转换成<strong>一个事务 Proposal</strong>（提议）， 并将该 Proposal <strong>分发</strong>给集群中所有的Follower 服务器。 之后 Leader服务器需要等待所有 Follower 服务器的反馈， 一旦超过半数的 Follower 服务器进行了正确的反馈后， 那么 Leader 就会再次向所有的 Follower 服务器分发 Commit 消息要求其将前一个 Proposal 进行提交。</em></p>
+<h5 id="ZAB协议介绍"><a href="#ZAB协议介绍" class="headerlink" title="ZAB协议介绍"></a>ZAB协议介绍</h5><p>ZAB协议包含两个基本的模式，分别是崩溃恢复和消息广播。</p>
+<h6 id="消息广播"><a href="#消息广播" class="headerlink" title="消息广播"></a>消息广播</h6><p>ZAB协议的消息广播过程使用的是一个原子广播协议，*<strong>类似于</strong>一个二阶段提交过程*。针ZAB协议的消息广播过程使用的是对客户端的事务请求，Leader服务器会为其生成对应的事务Proposal, 并将其发送给集群中其余所有的机器， 然后再分别收集各自的选票， 最后进行事务提交，如下图所示：</p>
+<p><img data-src="324f2c0b/ZAB%E5%8D%8F%E8%AE%AE%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD%E6%B5%81%E7%A8%8B%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg" alt="ZAB协议消息广播流程示意图"></p>
+<p>前文中提到这个过程仅仅是类似于一个2PC过程，但是又与2PC过从不同的是：</p>
+<ul>
+<li>移除了中断逻辑，所有的Follower服务器要么正常反馈Leader 提出的事务Proposal，要么就抛弃Leader服务器。意味着我们可以在过半的Follower服务器已经反馈Ack之后就开始提交事务Proposal了。当然这个过程是解决不了Leader崩溃的问题的，所以由后面的恢复模式来解决这个问题。</li>
+<li></li>
+</ul>
+<h6 id="崩溃恢复"><a href="#崩溃恢复" class="headerlink" title="崩溃恢复"></a>崩溃恢复</h6><h3 id="第5章-使用ZooKeeper"><a href="#第5章-使用ZooKeeper" class="headerlink" title="第5章 使用ZooKeeper"></a>第5章 使用ZooKeeper</h3><h3 id="第6章-ZooKeeper的典型应用场景"><a href="#第6章-ZooKeeper的典型应用场景" class="headerlink" title="第6章 ZooKeeper的典型应用场景"></a>第6章 ZooKeeper的典型应用场景</h3><h3 id="第7章-ZooKeeper技术内幕"><a href="#第7章-ZooKeeper技术内幕" class="headerlink" title="第7章 ZooKeeper技术内幕"></a>第7章 ZooKeeper技术内幕</h3><h3 id="第8章-ZooKeeper运维"><a href="#第8章-ZooKeeper运维" class="headerlink" title="第8章 ZooKeeper运维"></a>第8章 ZooKeeper运维</h3>]]></content>
       <categories>
         <category>ZooKeeper</category>
       </categories>
