@@ -33,7 +33,7 @@
 <meta property="og:image" content="https://nimbusk.cc/post/324f2c0b/%E4%B8%89%E6%AE%B5%E4%BA%8B%E5%8A%A1%E6%8F%90%E4%BA%A4%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg">
 <meta property="og:image" content="https://nimbusk.cc/post/324f2c0b/ZAB%E5%8D%8F%E8%AE%AE%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD%E6%B5%81%E7%A8%8B%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg">
 <meta property="article:published_time" content="2022-08-01T12:20:32.000Z">
-<meta property="article:modified_time" content="2022-08-04T12:35:02.306Z">
+<meta property="article:modified_time" content="2022-08-06T06:59:18.266Z">
 <meta property="article:author" content="nimbusk">
 <meta property="article:tag" content="中间件">
 <meta property="article:tag" content="ZooKeeper">
@@ -261,7 +261,7 @@
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2022-08-04 12:35:02" itemprop="dateModified" datetime="2022-08-04T12:35:02+00:00">2022-08-04</time>
+        <time title="修改时间：2022-08-06 06:59:18" itemprop="dateModified" datetime="2022-08-06T06:59:18+00:00">2022-08-06</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -388,16 +388,19 @@
 <p><strong>其次：</strong>考虑到在分布式环境中，顺序执行的一些状态变更其前后会存在一定的依赖关系，有些状态变更必须依赖于比它早生成的那些状态变更。例如变更C需要依赖变更A和变更B。 这样的依赖关系也对ZAB协议提出了一个要求：<strong>ZAB协议必须能够保证一个全局的变更序列被顺序应用</strong>，也就是说，ZAB协议需要保证如果一个状态变更已经被处理了，那么所有其依赖的状态变更都应该巳经被提前处理掉了。</p>
 <p><strong>最后</strong>：考虑到主进程在任何时候都有可能出现崩溃退出或重启现象，因此，ZAB协议还需要做到在当前主进程出现上述异常情况的时候， 依旧能够正常工作。</p>
 <p>上述步骤的概述，就是：</p>
-<p><em>所有事务请求必须由<strong>一个全局唯一的服务器</strong>来协调处理， 这样的服务器被称为 Leader 服务器， 而余下的其他服务器则成为 Follower 服务器。 Leader 服务器负责将一<strong>个客户端事务请求</strong>转换成<strong>一个事务 Proposal</strong>（提议）， 并将该 Proposal <strong>分发</strong>给集群中所有的Follower 服务器。 之后 Leader服务器需要等待所有 Follower 服务器的反馈， 一旦超过半数的 Follower 服务器进行了正确的反馈后， 那么 Leader 就会再次向所有的 Follower 服务器分发 Commit 消息要求其将前一个 Proposal 进行提交。</em></p>
+<p><em>所有事务请求必须由<strong>一个全局唯一的服务器</strong>来协调处理， 这样的服务器被称为 Leader 服务器， 而余下的其他服务器则成为 Follower 服务器。 Leader 服务器负责将一<strong>个客户端事务请求</strong>转换成<strong>一个事务 Proposal</strong>（提议）， 并将该 Proposal <strong>分发</strong>给集群中所有的Follower 服务器。 之后 Leader服务器需要等待所有 Follower 服务器的反馈， 一旦<strong>超过半数</strong>的 Follower 服务器进行了正确的反馈后， 那么 Leader 就会再次向所有的 Follower 服务器分发 Commit 消息要求其将前一个 Proposal 进行提交。</em></p>
 <h5 id="ZAB协议介绍"><a href="#ZAB协议介绍" class="headerlink" title="ZAB协议介绍"></a>ZAB协议介绍</h5><p>ZAB协议包含两个基本的模式，分别是崩溃恢复和消息广播。</p>
 <h6 id="消息广播"><a href="#消息广播" class="headerlink" title="消息广播"></a>消息广播</h6><p>ZAB协议的消息广播过程使用的是一个原子广播协议，*<strong>类似于</strong>一个二阶段提交过程*。针ZAB协议的消息广播过程使用的是对客户端的事务请求，Leader服务器会为其生成对应的事务Proposal, 并将其发送给集群中其余所有的机器， 然后再分别收集各自的选票， 最后进行事务提交，如下图所示：</p>
 <p><img data-src="324f2c0b/ZAB%E5%8D%8F%E8%AE%AE%E6%B6%88%E6%81%AF%E5%B9%BF%E6%92%AD%E6%B5%81%E7%A8%8B%E7%A4%BA%E6%84%8F%E5%9B%BE.jpg" alt="ZAB协议消息广播流程示意图"></p>
 <p>前文中提到这个过程仅仅是类似于一个2PC过程，但是又与2PC过从不同的是：</p>
 <ul>
 <li>移除了中断逻辑，所有的Follower服务器要么正常反馈Leader 提出的事务Proposal，要么就抛弃Leader服务器。意味着我们可以在过半的Follower服务器已经反馈Ack之后就开始提交事务Proposal了。当然这个过程是解决不了Leader崩溃的问题的，所以由后面的恢复模式来解决这个问题。</li>
-<li></li>
+<li>整个消息广播协议是基于具有FFIO特性的TCP协议来进行网络通信的，因此能够很容易地保证消息广播过程中消息接收与发送的顺序性。</li>
 </ul>
-<h6 id="崩溃恢复"><a href="#崩溃恢复" class="headerlink" title="崩溃恢复"></a>崩溃恢复</h6><h3 id="第5章-使用ZooKeeper"><a href="#第5章-使用ZooKeeper" class="headerlink" title="第5章 使用ZooKeeper"></a>第5章 使用ZooKeeper</h3><h3 id="第6章-ZooKeeper的典型应用场景"><a href="#第6章-ZooKeeper的典型应用场景" class="headerlink" title="第6章 ZooKeeper的典型应用场景"></a>第6章 ZooKeeper的典型应用场景</h3><h3 id="第7章-ZooKeeper技术内幕"><a href="#第7章-ZooKeeper技术内幕" class="headerlink" title="第7章 ZooKeeper技术内幕"></a>第7章 ZooKeeper技术内幕</h3><h3 id="第8章-ZooKeeper运维"><a href="#第8章-ZooKeeper运维" class="headerlink" title="第8章 ZooKeeper运维"></a>第8章 ZooKeeper运维</h3>
+<h6 id="崩溃恢复"><a href="#崩溃恢复" class="headerlink" title="崩溃恢复"></a>崩溃恢复</h6><p>崩溃恢复是为了解决Leader节点崩溃或者因为网络原因导致的，失去过半的Follower联系的，就会进入恢复模式。</p>
+<p>根本解决的问题是，重新选举的同时，还能很好的通知到整个集群。</p>
+<h3 id="第5章-使用ZooKeeper"><a href="#第5章-使用ZooKeeper" class="headerlink" title="第5章 使用ZooKeeper"></a>第5章 使用ZooKeeper</h3><p>【备注】这里还是非常建议，哪怕是照着书本配置，敲一下，提升一下基础印象还是很有必要的。</p>
+<h3 id="第6章-ZooKeeper的典型应用场景"><a href="#第6章-ZooKeeper的典型应用场景" class="headerlink" title="第6章 ZooKeeper的典型应用场景"></a>第6章 ZooKeeper的典型应用场景</h3><h3 id="第7章-ZooKeeper技术内幕"><a href="#第7章-ZooKeeper技术内幕" class="headerlink" title="第7章 ZooKeeper技术内幕"></a>第7章 ZooKeeper技术内幕</h3><h3 id="第8章-ZooKeeper运维"><a href="#第8章-ZooKeeper运维" class="headerlink" title="第8章 ZooKeeper运维"></a>第8章 ZooKeeper运维</h3>
     </div>
 
     
