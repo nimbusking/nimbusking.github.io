@@ -585,7 +585,7 @@ valine:
   enable: false
   appId:  #
   appKey:  #
-  serverURLs: https://nimbusk.cc
+  serverURLs: https://nimbik.cc
   placeholder: Just go go # comment box placeholder
   avatar: mm # gravatar style
   meta: [nick, mail] # Custom comment header
