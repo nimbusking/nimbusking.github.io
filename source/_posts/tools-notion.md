@@ -10,9 +10,17 @@ categories: 工具
 
 
 ## 前言
+### 关于Notion
 
 
-## 使用总结
+## 关于Notion概念
+### workspace
+
+### page
+#### empty page
+#### database
+
+### block
 
 
 ## 其它
