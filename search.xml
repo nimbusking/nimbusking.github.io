@@ -1106,7 +1106,7 @@ Boolean的hashCode返回了是俩数字，而不是其它的。理论，<strong>
   <entry>
     <title>Notion使用总结</title>
     <url>/post/4b138f9d.html</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h2 id="使用总结"><a href="#使用总结" class="headerlink" title="使用总结"></a>使用总结</h2><h2 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h2>]]></content>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h3 id="关于Notion"><a href="#关于Notion" class="headerlink" title="关于Notion"></a>关于Notion</h3><h2 id="关于Notion概念"><a href="#关于Notion概念" class="headerlink" title="关于Notion概念"></a>关于Notion概念</h2><h3 id="workspace"><a href="#workspace" class="headerlink" title="workspace"></a>workspace</h3><h3 id="page"><a href="#page" class="headerlink" title="page"></a>page</h3><h4 id="empty-page"><a href="#empty-page" class="headerlink" title="empty page"></a>empty page</h4><h4 id="database"><a href="#database" class="headerlink" title="database"></a>database</h4><h3 id="block"><a href="#block" class="headerlink" title="block"></a>block</h3><h2 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h2>]]></content>
       <categories>
         <category>工具</category>
       </categories>
