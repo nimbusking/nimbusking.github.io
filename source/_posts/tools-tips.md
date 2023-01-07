@@ -27,6 +27,7 @@ date: 2018-04-15 10:37:03
 设置后效果：
 ![设置后](a4b1030a/AfterConfiguring.jpg)
 **效果明显！**
+
 ##### Markdown Editing插件配置
 推荐几个自己常用的配置：
 ```json
@@ -51,6 +52,7 @@ date: 2018-04-15 10:37:03
 此时唯一区别就是打开文件的时候需要双击
 ##### 卸载插件
 Ctrl+Shift+P，输入Remove，选择Remove Package，之后选择相应的插件，直接回车即可
+
 ##### 快速插入代码片段
 打开代码片段（Snippet）: Tools -> Develop -> New Snippet
 例如，我想要再markdown中快速生成插入shell代码的片段，那么可以安装下图中的方式编写，很简单：
@@ -60,12 +62,20 @@ Ctrl+Shift+P，输入Remove，选择Remove Package，之后选择相应的插件
 ![配置Sublime Snippet](a4b1030a/ConfigSublimeSnippet.jpg)
 Ctrl + S 保存，目录默认即可，文件名随意，文件后缀名必须是：**.sublime-snippet**，效果就如下图所示：
 ![演示效果](a4b1030a/shellAfterPressTabButton.gif)
+
 ##### 快速查找重复行
 Ctrl + F 打开查找控制面板，输入：
 ``` javascript
 ^(.+)$[\r\n](^\1$[\r\n]{0,1})+
 ```
 点击Find即可。
+
+##### 设置行间距相关
+在个人用户设置里面加上下面的两行json配置即可，段前段后增加间距，设置2个人感觉刚刚好：
+```json
+   "line_padding_bottom": 2,
+   "line_padding_top": 2
+```
 
 ### 办公相关
 
