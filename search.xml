@@ -1201,11 +1201,15 @@ Boolean的hashCode返回了是俩数字，而不是其它的。理论，<strong>
 </li>
 <li>语言<ul>
 <li>英语</li>
-<li>汉语</li>
+<li>韩语</li>
 <li>日语</li>
 </ul>
 </li>
-<li>摄影</li>
+<li>摄影<ul>
+<li>构图</li>
+<li>色彩</li>
+</ul>
+</li>
 <li>影视后期</li>
 <li>博物</li>
 </ul>
