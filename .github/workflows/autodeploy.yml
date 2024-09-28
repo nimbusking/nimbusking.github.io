@@ -56,8 +56,8 @@ jobs:
 
     - name: 处理相关变量
       run: |
-        sed -i "s/GITALK_CLIENT_ID/${secrets.GITALK_CLIENT_ID}/g" ./_config.next.yml
-        sed -i "s/GITALK_CLIENT_SECRET/${secrets.GITALK_CLIENT_SECRET}/g" ./_config.next.yml
+        sed -i 's/GITALK_CLIENT_ID/${{ secrets.GITALK_CLIENT_ID }}/g' ./_config.next.yml
+        sed -i 's/GITALK_CLIENT_SECRET/${{ secrets.GITALK_CLIENT_SECRET }}/g' ./_config.next.yml
         # 处理自定义配置
         git clone -b customer_config https://github.com/nimbusking/nimbusking.github.io.git temp
         cp -f ./temp/post-meta.njk ./node_modules/hexo-theme-next/layout/_partials/post
