@@ -1,0 +1,66 @@
+# 脚本2，仅供有其他需要在部署前运行的插件（如gulp、hexo-bangumi-bilibili等）的博客使用，请根据自己博客的实际情况修改下面的脚本代码
+name: hexo_blog_audo_deploy
+on:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - published
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 检查分支
+      uses: actions/checkout@v2
+      with:
+        ref: master
+
+    - name: 安装 Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: "12.x"
+
+    - name: 安装 Hexo
+      run: |
+        export TZ='Asia/Shanghai'
+        npm install hexo-cli -g
+
+    - name: 缓存 Hexo
+      uses: actions/cache@v1
+      id: cache
+      with:
+        path: node_modules
+        key: ${{runner.OS}}-${{hashFiles('**/package-lock.json')}}
+
+    - name: 安装依赖
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        npm install hexo-theme-next --save
+        npm install hexo-deployer-git --save
+        npm install hexo-generator-searchdb --save
+        npm install hexo-generator-feed
+        npm install hexo-wordcount --save
+        npm install hexo-abbrlink --save
+        npm install lozad --save
+        npm uninstall hexo-generator-index --save
+        npm install hexo-generator-index-pin-top --save
+        npm install --save
+
+    - name: 生成静态文件
+      run: |
+        hexo clean
+        hexo bangumi -u #bilibili番剧更新
+        hexo generate
+        gulp
+
+    - name: 部署 #此处master:master 指从本地的master分支提交到远程仓库的master分支，若远程仓库没有对应分支则新建一个。如有其他需要，可以根据自己的需求更改。
+      run: |
+        cd ./public
+        git init
+        git config --global user.name '${{ secrets.GITHUBUSERNAME }}'
+        git config --global user.email '${{ secrets.GITHUBEMAIL }}'
+        git add .
+        git commit -m "${{ github.event.head_commit.message }} $(date +"%Z %Y-%m-%d %A %H:%M:%S") Updated By Github Actions"
+        git push --force --quiet "https://${{ secrets.GITHUBUSERNAME }}:${{ secrets.GITHUBTOKEN }}@github.com/${{ secrets.GITHUBUSERNAME }}/${{ secrets.GITHUBUSERNAME }}.github.io.git" master:main
