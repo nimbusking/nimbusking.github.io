@@ -61,6 +61,47 @@ tcp        0      0 0.0.0.0:8081            0.0.0.0:*               LISTEN      
 
 ### 创建角色
 ### 创建用户
+
+### 设置自动启动
+通过systemctl来进行管理，在/etc/systemd/system目录下见一个名为*nexus.service*的文件，文件内容如下
+```shell
+[Unit]
+Description=Nexus Repository Manager
+After=network.target
+
+[Service]
+Type=forking
+
+# nexus运行的用户和组
+User=nexus
+Group=nexus
+
+# 运行环境，nexus运行的依赖项，JAVA_HOME的运行环境
+Environment=INSTALL4J_JAVA_HOME=/etc/java/jdk1.8.0_211
+ExecStart=/usr/local/bin/nexus start
+ExecStop=/usr/local/bin/nexus stop 
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+设置服务自启动
+```shell
+## 加载新的unit配置文件
+sudo systemctl daemon-reload
+## 设置允许服务自启动
+sudo systemctl enable nexus.service
+## 服务启动
+sudo systemctl start nexus.service
+## 服务停止
+sudo systemctl stop nexus.service
+## 服务启动状态
+sudo systemctl status nexus.service
+```
+
+**如果在start过程中遇到问题，systemctl status nexus.service命令查看运行结果，如果还是有问题，通过journalctl -xe查看**
+
 ### 设置代理仓库
 阿里云仓库的URL：https://maven.aliyun.com/nexus/content/groups/public/
 
