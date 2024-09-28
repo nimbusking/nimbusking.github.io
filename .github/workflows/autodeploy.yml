@@ -1,4 +1,3 @@
-# 脚本2，仅供有其他需要在部署前运行的插件（如gulp、hexo-bangumi-bilibili等）的博客使用，请根据自己博客的实际情况修改下面的脚本代码
 name: hexo_blog_audo_deploy
 on:
   push:
