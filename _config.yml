@@ -109,7 +109,7 @@ plugins:
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: git
-  # repo: git@github.com:nimbusking/nimbuskblog.git
+  repo: git@github.com:nimbusking/nimbusking.github.io.git
   branch: gh-pages
 
 filter_optimize:
