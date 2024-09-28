@@ -630,8 +630,8 @@ gitalk:
   enable: true
   github_id: nimbusking
   repo: blog_comments
-  client_id: gitalk_client_id
-  client_secret: gitalk_client_secret
+  client_id: GITALK_CLIENT_ID
+  client_secret: GITALK_CLIENT_SECRET
   admin_user: nimbusking
   distraction_free_mode: true # Facebook-like distraction free mode
   # Gitalk's display language depends on user's browser or system environment

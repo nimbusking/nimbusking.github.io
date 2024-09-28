@@ -140,9 +140,9 @@ filter_optimize:
 
 
 algolia:
-  applicationID: algolia_applicationID
-  apiKey: algolia_apiKey
-  indexName: algolia_indexName
+  applicationID: ALGOLIA_APPLICATIONID
+  apiKey: ALGOLIA_APIKEY
+  indexName: ALGOLIA_INDEXNAME
   chunkSize: 5000
   fields:
     - title
