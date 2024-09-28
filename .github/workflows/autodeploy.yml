@@ -1,0 +1,81 @@
+# 脚本2，仅供有其他需要在部署前运行的插件（如gulp、hexo-bangumi-bilibili等）的博客使用，请根据自己博客的实际情况修改下面的脚本代码
+name: hexo_blog_audo_deploy
+on:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - published
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: 检查分支
+      uses: actions/checkout@v2
+      with:
+        ref: master
+
+    - name: 安装 Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: "12.x"
+
+    - name: 安装 Hexo
+      run: |
+        export TZ='Asia/Shanghai'
+        npm install hexo-cli -g --save
+
+    - name: 缓存 Hexo
+      id: cache
+      uses: actions/cache@v1
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+    - name: 安装依赖
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        npm install hexo-theme-next --save
+        npm install hexo-deployer-git --save
+        npm install hexo-generator-searchdb --save
+        npm install hexo-generator-feed
+        npm install hexo-wordcount --save
+        npm install hexo-abbrlink --save
+        npm install lozad --save
+        npm uninstall hexo-generator-index --save
+        npm install hexo-generator-index-pin-top --save
+        npm install --save
+
+    - name: 处理相关变量
+      run: |
+        sed -i "s/GITALK_CLIENT_ID/${secrets.GITALK_CLIENT_ID}/g" ./_config.next.yml
+        sed -i "s/GITALK_CLIENT_SECRET/${secrets.GITALK_CLIENT_SECRET}/g" ./_config.next.yml
+        # 处理自定义配置
+        git clone -b customer_config https://github.com/nimbusking/nimbusking.github.io.git temp
+        cp -f ./temp/post-meta.njk ./node_modules/hexo-theme-next/layout/_partials/post
+        rm -rf ./temp
+        
+    - name: 配置环境
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        mkdir -p ~/.ssh/
+          echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.email "useremail" 
+          git config --global user.name "username"
+          ssh-keygen -y -f ~/.ssh/id_rsa
+
+    - name: 部署 Nimbusk博客
+      run: |
+        hexo clean
+        hexo d
