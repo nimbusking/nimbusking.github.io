@@ -54,5 +54,28 @@ jobs:
         npm install hexo-generator-index-pin-top --save
         npm install --save
 
+    - name: 处理相关变量
+      run: |
+        sed -i "s/GITALK_CLIENT_ID/${secrets.GITALK_CLIENT_ID}/g" ./_config.next.yml
+        sed -i "s/GITALK_CLIENT_SECRET/${secrets.GITALK_CLIENT_SECRET}/g" ./_config.next.yml
+        # 处理自定义配置
+        git clone -b customer_config https://github.com/nimbusking/nimbusking.github.io.git temp
+        cp -f ./temp/post-meta.njk ./node_modules/hexo-theme-next/layout/_partials/post
+        rm -rf ./temp
+        
     - name: 配置环境
-    
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+      run: |
+        mkdir -p ~/.ssh/
+          echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config --global user.email "useremail" 
+          git config --global user.name "username"
+          ssh-keygen -y -f ~/.ssh/id_rsa
+
+    - name: 部署 Nimbusk博客
+      run: |
+        hexo clean
+        hexo d
