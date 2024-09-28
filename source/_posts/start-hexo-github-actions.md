@@ -13,7 +13,7 @@ categories: 站点
 ## 背景
 以前本博客是借助Travis来进行CI的，配置NodeJs及Hexo环境自动编译等。有兴趣，可以看看，该文章：https://nimbik.cc/post/e62993b1.html
 （也是惭愧，有1年有余没有跟新博客了，导致Travis收费都不知道，今天开始更新的时候，发现远端编译失败了。。。。提示要收费）
-遂，果断迁移之GitHub Actions。
+遂，果断弃之并迁移之GitHub Actions。
 
 <!-- more -->
 
@@ -27,7 +27,7 @@ categories: 站点
 准备一组新的github的deploy公私钥，通过ssh-keygen生成即可，后面需要用到。
 
 ## GitHub Actions配置过程
-在配置actions脚本的时候，需要先配置两处东西
+在配置actions脚本的时候，需要在仓库的Settings界面先配置两处东西
 ### 仓库Settings界面
 点开你的仓库，点开Settings
 ![仓库Settings](9bb5c5d6/Github Repository Setttings.png)
@@ -45,7 +45,7 @@ categories: 站点
 
 ### 脚本编写
 这部分不用过多赘述，直接看我的脚本注释里面即可。
-有两种方式创建脚本，一种通过仓库页面选项卡的上方“Actions选项卡”进行创建；另一种是你直接创建相关的yml文件，路径放在你博客源码仓库页面的：.github/workflows/xxx.yml即可。文件名自定义。
+有两种方式创建脚本，一种通过仓库页面选项卡的上方“Actions选项卡”进行创建；另一种是你直接创建相关的yml文件，路径放在你博客源码仓库页面的：*.github/workflows/xxx.yml* 即可。文件名自定义。
 
 下面是我的脚本内容（包含了若干自己博客所需的hexo插件，你按需更改相关命令即可）：
 ```yaml
@@ -132,4 +132,5 @@ jobs:
         hexo d
 ```
 
-没写那么细致，一个简单的actions脚本就完成了，不是特别复杂。更高级的actions语法，需要你参考actions具体教程。
+没写那么细致，一个简单的actions脚本就完成了，不是特别复杂。
+更高级的actions语法，需要你参考actions具体教程。
