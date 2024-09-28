@@ -36,6 +36,7 @@ categories: 站点
 1. Deploy keys
 	这个地方，将刚才*准备过程*中新生成的公钥（id_rsa.pub文件中），不漏的copy上，完了点击右上角的“Add depoly key”之后，在下图中填上，标题随便，Key就是刚才你粘贴的那个公钥内容。
 	![AddDeployKeys](9bb5c5d6/AddDeployKeys.png)
+	**注意勾上写权限**
 2. Secrets and variables
 	这个里面主要设置一些变量相关的内容，步骤不多赘述。这里主要是配置一些，在hexo配置文件中使用到的一些变量相关的值，特别是一些插件的client_id，授权密钥相关的敏感信息都可以放在这个里面配置。在后面配置脚本的时候，可以看到在哪里用到。
 	![secrets and variables](9bb5c5d6/secrets and variables.png)
