@@ -71,15 +71,86 @@ Service 本身没有做什么重要的事情，只是在连接器和容器外面
 ![linux线程阻塞示意图](2f453177/linux线程阻塞示意图.png)
 阻塞的本质就是将进程的task_struct移出运行队列，添加到等待队列，并且将进程的状态的置为TASK_UNINTERRUPTIBLE或者TASK_INTERRUPTIBLE，重新触发一次 CPU调度让出 CPU
 
-### Socket Read系统调用过程
-以Linux操作系统为例，一次socket read 系统调用的过程：
+### IO模型下的异步/同步，阻塞/非阻塞问题
+**I/O 模型是为了解决内存和外部设备速度差异的问题。
+我们平时说的阻塞或非阻塞是指应用程序在发起 I/O 操作时，是立即返回还是等待。
+而同步和异步，是指应用程序在与内核通信时，数据从内核空间到应用空间的拷贝，是由内核主动发起还是由应用程序来触发。**
+如果是需要应用程序主动再次发起，那就是同步；反之，由内核空间自己将数据拷贝到用户进程缓冲区，那就是异步；
+
+#### Socket Read系统调用过程
+通过一个例子来理解，以Linux操作系统为例，一次socket read 系统调用的过程：
 - 首先 CPU 在用户态执行应用程序的代码，访问进程虚拟地址空间的用户空间；
 - read 系统调用时 CPU 从用户态切换到内核态，执行内核代码，内核检测到Socket 上的数据未就绪时，将进程的task_struct结构体从运行队列中移到等待队列，并触发一次 CPU 调度，这时进程会让出 CPU；
 - 当网卡数据到达时，内核将数据从内核空间拷贝到用户空间的 Buffer，接着将进程的task_struct结构体重新移到运行队列，这样进程就有机会重新获得 CPU 时间片，系统调用返回，CPU 又从内核态切换到用户态，访问用户空间的数据。
 **总结**：
 当用户线程发起 I/O 调用后，网络数据读取操作会经历两个步骤：
-1) **用户线程等待内核将数据从网卡拷贝到内核空间。**
+1) **用户线程等待内核将数据从网卡拷贝到内核空间。（数据准备阶段）**
 2) **内核将数据从内核空间拷贝到用户空间（应用进程的缓冲区）。**
 
 $\color{red}{各种 I/O 模型的区别就是：它们实现这两个步骤的方式是不一样的。}$
 ![IO调用用户态和内核态数据交换示意图.png](2f453177/IO调用用户态和内核态数据交换示意图.png)
+
+### Unix(Linux)下的5种IO模型
+Linux 系统下的 I/O 模型有 5 种：
+1. 同步阻塞I/O（bloking I/O）
+2. 同步非阻塞I/O（non-blocking I/O）
+3. I/O多路复用（multiplexing I/O）
+4. 信号驱动式I/O（signal-driven I/O）(*不常用*)
+5. 异步I/O（asynchronous I/O）
+
+![同步阻塞IO模型分类.png](2f453177/同步阻塞IO模型分类.png)
+各种IO模型行为的差异对比示意图：
+![各种IO模型行为差异](2f453177/各种IO模型行为差异.png)
+
+一个非常简单的在Java中实现的BIO：
+```java
+public class BioServer {
+	// 数据准备和数据读取阶段两步阻塞
+    public static void main(String[] args) {
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        try {
+            // 启动服务，绑定8080端口
+            ServerSocket serverSocket = new ServerSocket();
+            serverSocket.bind(new InetSocketAddress(8080));
+            System.out.println("开启服务");
+
+            while (true){
+                System.out.println("等待客户端建立连接");
+                // 监听8080端口，获取客户端连接
+                Socket socket = serverSocket.accept(); //阻塞
+                System.out.println("建立连接："+socket);
+                // 用线程池，模拟多连接场景，否则会一直阻塞（BIO的缺点）
+                executorService.submit(()->{
+                    //TODO 业务处理
+                    try {
+                        handler(socket);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            //TODO 资源回收
+        }
+    }
+
+    private static void handler(Socket socket) throws IOException {
+        while(true){
+            byte[] bytes = new byte[1024];
+            System.out.println("等待读取数据");
+            int read = socket.getInputStream().read(bytes); // 阻塞
+            if(read !=-1) {
+                System.out.println("读取客户端发送的数据：" +
+                        new String(bytes, 0, read));
+            }else {
+                break;
+            }
+        }
+
+    }
+}
+
+```
