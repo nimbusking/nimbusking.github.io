@@ -14,6 +14,8 @@ categories: Java系列
 - Tomcat的线程模型详解及其调优
 - Tomcat的类加载机制和热加载部署的实现原理
 
+<!-- more -->
+
 ## Tomcat架构相关
 **Tomcat核心： Http服务器+Servlet容器**
 ![Tomcat请求调用链](2f453177/Tomcat请求调用链.png)
