@@ -171,6 +171,35 @@ MD5值：2EC7F4417E8C233F4F36B52DF6D564CD
 因此，找到一个免费的SSL证书，并替换esxi后台的默认ssl证书即可。
 由于我本站博客域名国内的DNS解析加速选择的是dnspod，所以这里就以腾讯DNSpod申请免费证书为例，其它国内诸如阿里云、七牛云等等，都有提供免费申请SSL证书的渠道，不过目前来看，似乎腾讯的dnspod审批的比较快。
 dnspod免费的ssl证书提供商是亚信，自己本地玩无所谓的。
+###### mkcert（推荐）
+严格意义上来说，这种exsi服务器，不对公网，其实完全自签证书就可以了，不需要搞那么多费神的东西。
+使用github上一个开源工具：[mkcert](https://github.com/FiloSottile/mkcert)
+这里的自签一次是2年3个月的（主要原因是考虑到mac和ios限制），如果你想一次10年，可以使用我这个找到的 ![mkcert_10years](c07c0078/mkcert_10years.zip)
+
+1. 下载下来使用命令行（管理员权限）执行下面两个命令
+```shell
+mkcert_10years.exe 192.168.**.**【替换成你的IP】
+mkcert_10years.exe -install
+```
+
+如下图所示：
+![执行命令](c07c0078/mkcert_10_years.png)
+
+2. 准备exsi证书文件
+经过上述命令行执行过后，会在对应目录下生成两个文件，**并依次替换**（别整错了）：
+- [你的ip].pem --> rui.crt
+- [你的ip]-key.pem --> rui.key
+
+3. rui.crt和rui.key丢到exsi后台，路径： ```/etc/vmware/ssl/```
+4. 重启服务：
+```shell
+/etc/init.d/hostd restart
+/etc/init.d/vpxa restart
+```
+5. 此时再访问后台，就不会再提示ssl证书问题了
+6. 如果需要在其它电脑上，只需要把证书导出后，安装即可，如下图所示：
+![证书管理器页面](c07c0078/mkcert_install.png)
+
 ###### dnspod申请免费SSL证书
 登录到DNSPOD控制台：https://console.dnspod.cn/
 搜索SSL证书，或直接访问URL：https://console.cloud.tencent.com/ssl 如下图所示：

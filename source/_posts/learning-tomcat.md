@@ -55,9 +55,9 @@ Service 本身没有做什么重要的事情，只是在连接器和容器外面
 - 应用层协议解析。
 - Tomcat Request/Response 与 ServletRequest/ServletResponse 的转化。
 **分别对应的三个功能来实现这3个功能：**
-- ==EndPoint== 负责提供字节流给 Processor；
--  ==Processor== 负责提供 Tomcat Request 对象给 Adapter；
-- ==Adapter== 负责提供 ServletRequest 对象给容器。
+- EndPoint 负责提供字节流给 Processor；
+- Processor 负责提供 Tomcat Request 对象给 Adapter；
+- Adapter 负责提供 ServletRequest 对象给容器。
 
 #### ProtocalHandle组件
 ![ProtocalHandler架构示意图](2f453177/ProtocalHandler架构示意图.png)
