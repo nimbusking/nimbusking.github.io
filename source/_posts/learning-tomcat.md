@@ -162,5 +162,138 @@ public class BioServer {
 | NIO（NioEndpoint）    | 同步非阻塞式IO，jdk1.4 之后实现的新IO。该模式基于多路复用选择器监测连接状态再同步通知线程处理，从而达到非阻塞的目的。比传统BIO能更好的支持并发性能。Tomcat 8.0之后默认采用该模式。NIO方式适用于连接数目多且连接比较短（轻操作） 的架构， 比如聊天服务器， 弹幕系统， 服务器间通讯，编程比较复杂    |
 | AIO (Nio2Endpoint) | 异步非阻塞式IO，jdk1.7后之支持 。与nio不同在于不需要多路复用选择器，而是请求处理线程执行完成进行回调通知，继续执行后续操作。Tomcat 8之后支持。一般适用于连接数较多且连接时间较长的应用 |
 | APR（AprEndpoint） | 全称是 Apache Portable Runtime/Apache可移植运行库)，是ApacheHTTP服务器的支持库。AprEndpoint 是通过 JNI 调用 APR 本地库而实现非阻塞 I/O 的。使用需要编译安装APR 库 |
+注意： Linux 内核没有很完善地支持异步 I/O 模型，因此 JVM 并没有采用原生的 Linux 异步 I/O，而是在应用层面通过 epoll 模拟了异步 I/O 模型。因此在 Linux 平台上，JavaNIO 和 Java NIO.2 底层都是通过 epoll 来实现的，但是 Java NIO 更加简单高效。
 
+### Tomcat对线程池的扩展
+Tomcat的线程池管理线程的时候，首次遇到投放失败的时候，会有一个重新向阻塞队列里面投放的过程。
+由于自己定义了一个TaskQueue（继承LinkedBlockingQueue）,这里面对offer方法重写了就遇到了一个很有意思的问题：
+对于原生的Java线程池定义的阻塞队列，当前线程池核心队列满的同时小于最大线程的时候，**是不会创建非核心线程的，是直接往队列里面丢**。
+而在tomcat重新的offer方法里面，**这种情况会直接返回false，让其放入队列失败，进而直接去创建非核心线程去了。**
+贴上两段代码：
+```java
+//// 代码位置：org.apache.tomcat.util.threads.ThreadPoolExecutor#executeInternal
+/**
+     * Executes the given task sometime in the future.  The task
+     * may execute in a new thread or in an existing pooled thread.
+     *
+     * If the task cannot be submitted for execution, either because this
+     * executor has been shutdown or because its capacity has been reached,
+     * the task is handled by the current {@link RejectedExecutionHandler}.
+     *
+     * @param command the task to execute
+     * @throws RejectedExecutionException at discretion of
+     *         {@code RejectedExecutionHandler}, if the task
+     *         cannot be accepted for execution
+     * @throws NullPointerException if {@code command} is null
+     */
+    private void executeInternal(Runnable command) {
+        if (command == null) {
+            throw new NullPointerException();
+        }
+        /*
+         * Proceed in 3 steps:
+         *
+         * 1. If fewer than corePoolSize threads are running, try to
+         * start a new thread with the given command as its first
+         * task.  The call to addWorker atomically checks runState and
+         * workerCount, and so prevents false alarms that would add
+         * threads when it shouldn't, by returning false.
+         *
+         * 2. If a task can be successfully queued, then we still need
+         * to double-check whether we should have added a thread
+         * (because existing ones died since last checking) or that
+         * the pool shut down since entry into this method. So we
+         * recheck state and if necessary roll back the enqueuing if
+         * stopped, or start a new thread if there are none.
+         *
+         * 3. If we cannot queue task, then we try to add a new
+         * thread.  If it fails, we know we are shut down or saturated
+         * and so reject the task.
+         */
+        int c = ctl.get();
+        if (workerCountOf(c) < corePoolSize) {
+            if (addWorker(command, true)) {
+                return;
+            }
+            c = ctl.get();
+        }
+        if (isRunning(c) && workQueue.offer(command)) {
+            int recheck = ctl.get();
+            if (! isRunning(recheck) && remove(command)) {
+                reject(command);
+            } else if (workerCountOf(recheck) == 0) {
+                addWorker(null, false);
+            }
+        }
+        else if (!addWorker(command, false)) {
+            reject(command);
+        }
+    }
+```
+TaskQueue的实现：
+```java
+// 代码位置 org.apache.tomcat.util.threads.TaskQueue#offer
+@Override
+    public boolean offer(Runnable o) {
+      //we can't do any checks
+        if (parent==null) {
+            return super.offer(o);
+        }
+        //we are maxed out on threads, simply queue the object
+        if (parent.getPoolSizeNoLock() == parent.getMaximumPoolSize()) {
+            return super.offer(o);
+        }
+        //we have idle threads, just add it to the queue
+        if (parent.getSubmittedCount() <= parent.getPoolSizeNoLock()) {
+            return super.offer(o);
+        }
+        //if we have less threads than maximum force creation of a new thread
+        // 注意看这里
+        if (parent.getPoolSizeNoLock() < parent.getMaximumPoolSize()) {
+            return false;
+        }
+        //if we reached here, we need to add it to the queue
+        return super.offer(o);
+    }
+```
 
+### 线程上下文加载器
+在 JVM 的实现中有一条隐含的规则，**默认情况下，如果一个类由类加载器 A 加载，那么这个类的依赖类也是由相同的类加载器加载。**
+
+Tomcat 为每个 Web 应用创建一个 WebAppClassLoarder 类加载器，并在启动Web 应用的线程里设置线程上下文加载器，这样 Spring 在启动时就将线程上下文加载器取出来，用来加载 Bean。
+
+**线程上下文加载器是一种类加载器传递机制**，因为这个类加载器保存在线程私有数据里，只要是同一个线程，一旦设置了线程上下文加载器，在线程后续执行过程中就能把这个类加载器取出来用。
+```java
+// 直接取出对应线程的类加载器，取出来用即可
+Thread.currentThread().getContextClassLoader()
+```
+线程上下文加载器不仅仅可以用在 Tomcat 和 Spring 类加载的场景里，核心框架类需要加载具体实现类时都可以用到它，比如我们熟悉的 JDBC 就是通过上下文类加载器来加载不同的数据库驱动的。
+
+## Tomcat热加载与热部署
+在项目开发过程中，经常要改动Java/JSP 文件，但是又不想重新启动Tomcat，有两种方式:热加载和热部署。热部署表示重新部署应⽤，它的执⾏主体是Host。 热加载表示重新加载class，它的执⾏主体是Context。
+
+**思考：Tomcat 是如何用后台线程来实现热加载和热部署的？**
+
+### Tomcat开启后台线程执行周期性任务
+Tomcat 通过开启后台线程ContainerBase.ContainerBackgroundProcessor，使得各个层次的容器组件都有机会完成一些周期性任务。我们在实际工作中，往往也需要执行一些周期性的任务，比如监控程序周期性拉取系统的健康状态，就可以借鉴这种设计。
+
+Tomcat9 是通过 ```ScheduledThreadPoolExecutor``` 来开启后台线程的，它除了具有线程池的功能，还能够执行周期性的任务
+
+## Tomcat调优
+### Tomcat 的关键指标
+Tomcat 的关键指标有**吞吐量、响应时间、错误数、线程池、CPU 以及 JVM 内存。**
+前三个指标是我们最关心的业务指标，Tomcat 作为服务器，就是要能够又快有好地处理请求，因此吞吐量要大、响应时间要短，并且错误数要少。
+后面三个指标是跟系统资源有关的，当某个资源出现瓶颈就会影响前面的业务指标，比如线程池中的线程数量不足会影响吞吐量和响应时间；但是线程数太多会耗费大量 CPU，也会影响吞吐量；当内存不足时会触发频繁地 GC，耗费 CPU，最后也会反映到业务指标上来。
+
+### Tomcat线程池的并发调优
+直接看表格参数即可
+| IO模型     | 描述    | 
+|----------|----------|
+| threadPriority | (int)线程优先级，默认是5 |
+| daemon | （boolean）是否deamon线程，默认为true |
+| namePrefix | （String） 线程前缀 |
+| maxThreads | （int）线程池中的最大线程数，默认是200 |
+| minSpareThreads | （int）最小线程数（线程空闲超过一段时间会被回收），默认是25 |
+| maxldleTime | （int）线程最大的空闲时间，超过这个时间线程就会回收，直到线程数剩下minSpareThreads个，默认值是一分钟 |
+| maxQueueSize | （int）线程池中任务队列的最大长度，默认是Integer.MAX_VALUE |
+| prestartminSpareThreads | （boolean） 是否在线程池启动时就创建minSpareThreads 个线程，默认为false |
