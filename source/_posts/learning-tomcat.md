@@ -299,7 +299,3 @@ Tomcat 的关键指标有**吞吐量、响应时间、错误数、线程池、CP
 | maxQueueSize | (int) 线程池中任务队列的最大长度，默认是Integer.MAX_VALUE |
 | prestartminSpareThreads | (boolean) 是否在线程池启动时就创建minSpareThreads 个线程，默认为false |
 
-| 列1 | 列2 | 列3 |
-| --- | --- | --- |
-| 单元格1 | 单元格2 | 单元格3 |
-| 单元格4 | 单元格5 | 单元格6 |
