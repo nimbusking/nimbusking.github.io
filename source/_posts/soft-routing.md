@@ -173,8 +173,8 @@ MD5值：2EC7F4417E8C233F4F36B52DF6D564CD
 dnspod免费的ssl证书提供商是亚信，自己本地玩无所谓的。
 ###### mkcert（推荐）
 严格意义上来说，这种exsi服务器，不对公网，其实完全自签证书就可以了，不需要搞那么多费神的东西。
-使用github上一个开源工具：[mkcert](https://github.com/FiloSottile/mkcert)
-这里的自签一次是2年3个月的（主要原因是考虑到mac和ios限制），如果你想一次10年，可以使用我这个找到的 ![mkcert_10years](c07c0078/mkcert_10years.zip)
+使用github上一个开源工具：[mkcert地址](https://github.com/FiloSottile/mkcert)
+这里的自签一次是2年3个月的（主要原因是考虑到mac和ios限制），如果你想一次10年，可以使用我这个找到的 [直接右键下载](c07c0078/mkcert_10years.zip)
 
 1. 下载下来使用命令行（管理员权限）执行下面两个命令
 ```shell
