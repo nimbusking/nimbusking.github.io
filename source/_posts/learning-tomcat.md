@@ -287,10 +287,10 @@ Tomcat 的关键指标有**吞吐量、响应时间、错误数、线程池、CP
 
 ### Tomcat线程池的并发调优
 直接看表格参数即可
-| IO模型     | 描述    | 
+| IO模型    | 描述    | 
 |----------|----------|
-| threadPriority | (int)线程优先级，默认是5 |
-| daemon | （boolean）是否deamon线程，默认为true |
+| threadPriority    | (int)线程优先级，默认是5   |
+| daemon| （boolean）是否deamon线程，默认为true |
 | namePrefix | （String） 线程前缀 |
 | maxThreads | （int）线程池中的最大线程数，默认是200 |
 | minSpareThreads | （int）最小线程数（线程空闲超过一段时间会被回收），默认是25 |
