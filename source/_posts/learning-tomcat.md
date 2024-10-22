@@ -287,13 +287,18 @@ Tomcat 的关键指标有**吞吐量、响应时间、错误数、线程池、CP
 
 ### Tomcat线程池的并发调优
 直接看表格参数即可
-| IO模型    | 描述    | 
-|----------|----------|
+| IO模型 | 描述 | 
+| --- | --- |
 | threadPriority | (int)线程优先级，默认是5 |
-| daemon | （boolean）是否deamon线程，默认为true |
-| namePrefix | （String） 线程前缀 |
-| maxThreads | （int）线程池中的最大线程数，默认是200 |
-| minSpareThreads | （int）最小线程数（线程空闲超过一段时间会被回收），默认是25 |
-| maxldleTime | （int）线程最大的空闲时间，超过这个时间线程就会回收，直到线程数剩下minSpareThreads个，默认值是一分钟 |
-| maxQueueSize | （int）线程池中任务队列的最大长度，默认是Integer.MAX_VALUE |
-| prestartminSpareThreads | （boolean） 是否在线程池启动时就创建minSpareThreads 个线程，默认为false |
+| daemon | (boolean) 是否deamon线程，默认为true |
+| namePrefix | (String) 线程前缀 |
+| maxThreads | (int) 线程池中的最大线程数，默认是200 |
+| minSpareThreads | (int) 最小线程数（线程空闲超过一段时间会被回收），默认是25 |
+| maxldleTime | (int) 线程最大的空闲时间，超过这个时间线程就会回收，直到线程数剩下minSpareThreads个，默认值是一分钟 |
+| maxQueueSize | (int) 线程池中任务队列的最大长度，默认是Integer.MAX_VALUE |
+| prestartminSpareThreads | (boolean) 是否在线程池启动时就创建minSpareThreads 个线程，默认为false |
+
+| 列1 | 列2 | 列3 |
+| --- | --- | --- |
+| 单元格1 | 单元格2 | 单元格3 |
+| 单元格4 | 单元格5 | 单元格6 |
