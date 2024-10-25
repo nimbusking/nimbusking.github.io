@@ -1,5 +1,5 @@
 ---
-title: netty学习实录
+title: Netty学习实录
 abbrlink: 65d26b16
 date: 2024-10-22 17:14:26
 tags:
@@ -97,7 +97,7 @@ I/O多路复用底层主要用的Linux 内核函数（select，poll，epoll）�
 
 
 ## Netty使用
-### 一个客户端服务端的Demo
+### 一个聊天室Demo
 #### 服务端
 ```java
 public static void main(String[] args) throws Exception {
@@ -119,27 +119,17 @@ public static void main(String[] args) throws Exception {
 
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            //对workerGroup的SocketChannel设置处理器
-                            ch.pipeline().addLast(new NettyServerHandler());
+                            ChannelPipeline pipeline = ch.pipeline();
+                            pipeline.addLast("decoder", new StringDecoder());
+                            pipeline.addLast("encoder", new StringEncoder());
+                            //对workerGroup的SocketChannel设置处理器，注意这个加入的与编解码器的顺序
+                            pipeline.addLast(new ChatServerHandler());
                         }
                     });
-            System.out.println("netty server start。。");
+            System.out.println("chat server start。。");
             //绑定一个端口并且同步, 生成了一个ChannelFuture异步对象，通过isDone()等方法可以判断异步事件的执行情况
             //启动服务器(并绑定端口)，bind是异步操作，sync方法是等待异步操作执行完毕
             ChannelFuture cf = bootstrap.bind(9000).sync();
-            //给cf注册监听器，监听我们关心的事件
-            /*cf.addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    if (cf.isSuccess()) {
-                        System.out.println("监听端口9000成功");
-                    } else {
-                        System.out.println("监听端口9000失败");
-                    }
-                }
-            });*/
-            //对通道关闭进行监听，closeFuture是异步操作，监听通道关闭
-            // 通过sync方法同步等待通道关闭处理完毕，这里会阻塞等待通道关闭完成
             cf.channel().closeFuture().sync();
         } finally {
             bossGroup.shutdownGracefully();
@@ -148,57 +138,48 @@ public static void main(String[] args) throws Exception {
     }
 ```
 ```java
-/**
- * 自定义Handler需要继承netty规定好的某个HandlerAdapter(规范)
- */
-public class NettyServerHandler extends ChannelInboundHandlerAdapter {
-
-    /**
-     * 读取客户端发送的数据
-     *
-     * @param ctx 上下文对象, 含有通道channel，管道pipeline
-     * @param msg 就是客户端发送的数据
-     * @throws Exception
-     */
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("服务器读取线程 " + Thread.currentThread().getName());
-        //Channel channel = ctx.channel();
-        //ChannelPipeline pipeline = ctx.pipeline(); //本质是一个双向链接, 出站入站
-        //将 msg 转成一个 ByteBuf，类似NIO 的 ByteBuffer
-        ByteBuf buf = (ByteBuf) msg;
-        System.out.println("客户端发送消息是:" + buf.toString(CharsetUtil.UTF_8));
-    }
-
-    /**
-     * 数据读取完毕处理方法
-     *
-     * @param ctx
-     * @throws Exception
-     */
-    @Override
-    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-        ByteBuf buf = Unpooled.copiedBuffer("HelloClient", CharsetUtil.UTF_8);
-        ctx.writeAndFlush(buf);
-    }
-
-    /**
-     * 处理异常, 一般是需要关闭通道
-     *
-     * @param ctx
-     * @param cause
-     * @throws Exception
-     */
+public class ChatServerHandler extends SimpleChannelInboundHandler<String> {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ctx.close();
+        System.out.println("caught exception: " + cause.getMessage());
     }
+
+    private static ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        Channel channel = ctx.channel();
+        channelGroup.writeAndFlush("[client] " + channel.remoteAddress() + " is connected! " + sdf.format(new Date()) + "\r\n");
+        channelGroup.add(channel);
+        System.out.println("server log: [client]" + channel.remoteAddress() + " is connected! \r\n");
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        Channel channel = ctx.channel();
+        channelGroup.writeAndFlush("[client] " + channel.remoteAddress() + " is disconnected!\r\n");
+        System.out.println("server log: [client]" + channel.remoteAddress() + " is disconnected! \r\n");
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
+        Channel channel = ctx.channel();
+        channelGroup.forEach(ch -> {
+            if (ch != channel) {
+                ch.writeAndFlush("[client] " + channel.remoteAddress() + " send msg: " + msg + "\r\n");
+            } else {
+                ch.writeAndFlush("[myself] send msg: " + msg + "\r\n");
+            }
+        });
+    }
+
 }
 ```
 
 #### 客户端
 ```java
-public class NettyClient {
+public class ChatClient {
     public static void main(String[] args) throws Exception {
         //客户端需要一个事件循环组
         EventLoopGroup group = new NioEventLoopGroup();
@@ -212,15 +193,26 @@ public class NettyClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel channel) throws Exception {
+                            ChannelPipeline pipeline = channel.pipeline();
+                            pipeline.addLast(new StringEncoder());
+                            pipeline.addLast(new StringDecoder());
                             //加入处理器
-                            channel.pipeline().addLast(new NettyClientHandler());
+                            pipeline.addLast(new ChatClientHandler());
                         }
                     });
-            System.out.println("netty client start");
+            System.out.println("client client start");
             //启动客户端去连接服务器端
             ChannelFuture channelFuture = bootstrap.connect("127.0.0.1", 9000).sync();
+            Channel channel = channelFuture.channel();
+            System.out.println("client connect success! " + channel.localAddress());
+
+            Scanner scanner = new Scanner(System.in);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                channel.writeAndFlush(line);
+            }
             //对关闭通道进行监听
-            channelFuture.channel().closeFuture().sync();
+//            channel.closeFuture().sync();
         } finally {
             group.shutdownGracefully();
         }
@@ -229,32 +221,16 @@ public class NettyClient {
 ```
 
 ```java
-public class NettyClientHandler extends ChannelInboundHandlerAdapter {
-
-    /**
-     * 当客户端连接服务器完成就会触发该方法
-     *
-     * @param ctx
-     * @throws Exception
-     */
-    @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        ByteBuf buf = Unpooled.copiedBuffer("HelloServer", CharsetUtil.UTF_8);
-        ctx.writeAndFlush(buf);
-    }
-
-    //当通道有读取事件时会触发，即服务端发送数据给客户端
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        ByteBuf buf = (ByteBuf) msg;
-        System.out.println("收到服务端的消息:" + buf.toString(CharsetUtil.UTF_8));
-        System.out.println("服务端的地址： " + ctx.channel().remoteAddress());
-    }
+public class ChatClientHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
-        ctx.close();
+        System.out.println("caught exception...." + cause.getMessage());
+    }
+
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
+        System.out.println(msg.trim());
     }
 }
 ```
@@ -270,3 +246,46 @@ public class NettyClientHandler extends ChannelInboundHandlerAdapter {
 概况起来，netty的工作架构示意图：
 ![netty-reactor工作架构图](65d26b16/netty-reactor工作架构图.png)
 
+### Netty核心功能
+#### 编解码机制
+当你通过Netty发送或者接受一个消息的时候，就将会发生一次数据转换：**入站消息会被解码：从字节转换为另一种格式（比如java对象）；如果是出站消息，它会被编码成字节。**
+Netty提供了一系列实用的编码解码器，他们都实现了**ChannelInboundHadnler**或者**ChannelOutboundHandler**接口。在这些类中，channelRead方法已经被重写了。以入站为例，对于每个从入站Channel读取的消息，这个方法会被调用。随后，它将调用由已知解码器所提供的decode()方法进行解码，并将已经解码的字节转发给ChannelPipeline中的下一个ChannelInboundHandler。
+Netty提供了很多编解码器，比如编解码字符串的StringEncoder和StringDecoder，编解码对象的ObjectEncoder和ObjectDecoder等。
+**注：**不同方向的编解码器是有规律注册（继承了Outbound/Inboundhandler）好的，出站编码，入站解码。
+下方图为Channle工作示意图：
+![netty-channel](65d26b16/netty-channel.png)
+##### ChannelHandler
+ChannelHandler充当了处理入站和出站数据的应用程序逻辑容器。
+例如，实现ChannelInboundHandler接口（或ChannelInboundHandlerAdapter），你就可以接收入站事件和数据，这些数据随后会被你的应用程序的业务逻辑处理。
+当你要给连接的客户端发送响应时，也可以从ChannelInboundHandler冲刷数据。你的业务逻辑通常写在一个或者多个ChannelInboundHandler中。ChannelOutboundHandler原理一样，只不过它是用来处理出站数据的。
+##### ChannelPipeline
+ChannelPipeline提供了ChannelHandler链的容器。
+以客户端应用程序为例，如果事件的运动方向是从服务端到客户端的，那么我们称**这些事件为出站的**，即客户端发送给服务端的数据会通过pipeline中的一系列ChannelOutboundHandler(ChannelOutboundHandler调用是从tail到head方向逐个调用每个handler的逻辑)，并被这些Handler处理；
+**反之则称为入站的**，入站只调用pipeline里的ChannelInboundHandler逻辑(ChannelInboundHandler调用是从head到tail方向逐个调用每个handler的逻辑)。
+
+#### 粘包拆包方案
+TCP是一个流协议，就是没有界限的一长串二进制数据。
+TCP作为传输层协议并不不了解上层业务数据的具体含义，它会根据TCP缓冲区的实际情况进行数据包的划分，所以在业务上认为是一个完整的包，可能会被TCP拆分成多个包进行发送，也有可能把多个小的包封装成一个大的数据包发送，这就是所谓的**TCP粘包和拆包**问题。**面向流的通信是无消息保护边界的。**
+如下图所示，client发了两个数据包D1和D2，但是server端可能会收到如下几种情况的数据：
+![TCP粘包-拆包示意](65d26b16/TCP粘包-拆包示意.png)
+常用的解决方案：
+1) **消息定长度**，传输的数据大小固定长度，例如每段的长度固定为100字节，如果不够空位补空格
+2) 在**数据包尾部添加特殊分隔符**，比如下划线，中划线等，这种方法简单易行，但选择分隔符的时候一定要注意每条数据的内部一定不能出现分隔符。
+3) **发送长度**：发送每条数据的时候，将数据的长度一并发送，比如可以选择每条数据的前4位是数据的长度，应用层处理时可以根据长度来判断每条数据的开始和结束。
+在netty中提供了下面三种解码器来处理：
+- LineBasedFrameDecoder （回车换行分包）
+- DelimiterBasedFrameDecoder （特殊分隔符分包）
+- FixedLengthFrameDecoder （固定长度报文来分包）
+以DelimiterBasedFrameDecoder为例，在IDEA中查看类继承图谱：
+![DelimiterBasedFrameDecoder继承图谱](65d26b16/DelimiterBasedFrameDecoder继承图谱.png)
+**继承了来自一个抽象类：ByteToMessageDecoder**，归纳有两组抽象类：
+- ByteToMessageDecoder/MessageToByteEncoder
+- MessageToMessageDecoder/MessageToMessageEncoder
+这两组抽象类，抽象了关于解码器的众多细节，由这两组抽象类衍生的，netty实现了非常多的解码器组件，如下图所示（4.1.35版本，后续版本的netty将code包单独独立出pom依赖分支，不再柔和在一个包里面了，注意一下）：
+![netty-codec-package](65d26b16/netty-codec-package.png)
+
+#### 心跳检测机制
+IdleStateHandler
+#### 断线重连机制
+
+### Netty核心源码
