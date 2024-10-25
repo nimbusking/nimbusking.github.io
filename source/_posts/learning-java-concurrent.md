@@ -12,6 +12,7 @@ categories: Java系列
 ### 并发三大特性
 并发编程BUG的源头，都归纳为三个问题：**可见性、原子性与有序性**问题
 
+<!-- more -->
 ### JMM相关
 Java虚拟机规范中定义了Java内存模型（Java Memory Model，JMM），用于屏蔽掉各种硬件和操作系统的内存访问差异，以实现让Java程序在各种平台下都能达到一致的并发效果。
 JMM规范了Java虚拟机与计算机内存是如何协同工作的：**规定了一个线程如何和何时可以看到由其他线程修改过后的共享变量的值，以及在必须时如何同步的访问共享变量。**
@@ -173,9 +174,21 @@ Thread.join()
 #### 什么是CAS
 通常指的是这样一种原子操作：针对一个变量，首先比较它的内存值与某个期望值是否相同，如果相同，就给它赋一个新值。
 **CAS 可以看作是它们合并后的整体——一个不可分割的原子操作，并且其原子性是直接在硬件层面得到保障的。**
-
+伪代码如下：
+```
+if (value == expectedValue) {
+	value = newValue;
+}
+```
 **CAS操作天然能够保持内存可见性，硬件底层指令**
-
+#### CAS应用
+在 Java 中，CAS 操作是由 Unsafe 类提供支持的，该类定义了三种针对不同类型变量的 CAS 操作，
+```java
+// sun.misc.Unsafe
+    public final native boolean compareAndSwapObject(Object var1, long var2, Object var4, Object var5);
+    public final native boolean compareAndSwapInt(Object var1, long var2, int var4, int var5);
+    public final native boolean compareAndSwapLong(Object var1, long var2, long var4, long var6);
+```
 #### CAS缺陷
 - **自旋CAS长时间不成功，则会给CPU带来非常大的开销**
 - **只能保证一个共享变量原子操作**
