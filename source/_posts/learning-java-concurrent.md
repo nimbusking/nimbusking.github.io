@@ -619,7 +619,6 @@ public class DebugReentrantLockDemo {
 ```
 时序图如下，不是特别复杂：
 {% mermaid sequenceDiagram %}
-sequenceDiagram
 actor User
 User ->> NonfairSync : lock
 activate NonfairSync
@@ -645,7 +644,7 @@ deactivate NonfairSync
 此时Thread1的ReentrantLock.state=1
 ###### 3. Thread2调用lock方法
 这时候调用compareAndSetState(0, 1)的CAS操作，肯定是返回失败的。走到调用acquire(1)方法
-
+其调用时序如下，里面完成了初始化等待队列的构建、线程的等待，等其它操作：
 
 
 ## 并发编程相关
