@@ -453,6 +453,182 @@ public class LockEliminationTest {
 属于一个局部变量，不可能从该方法中逃逸出去，因此其实这过程是线程安全的，可以将锁消除。
 测试结果：开启锁消除：1903 ms；关闭锁消除：2833 ms
 ### AQS
+#### 什么是AQS
+java.util.concurrent包中的大多数同步器实现都是围绕着共同的基础行为，比如等待队列、条件队列、独占获取、共享获取等，而这些行为的抽象就是基于**AbstractQueuedSynchronizer（简称AQS）**实现的，AQS是一个抽象同步框架，可以用来实现一个依赖状态的同步器。
+JDK中提供的大多数的同步器如Lock, Latch, Barrier等，都是基于AQS框架来实现的：
+- 一般是通过一个内部类Sync继承 AQS
+- 将同步器所有调用都映射到Sync对应的方法
+##### AQS相关特点
+5大特性：
+- 阻塞等待队列
+- 共享/独占
+- 公平/非公平
+- 可重入
+- 允许中断
+
+AQS内部维护的属性 ```volatile int state``` 解释：state表示资源的可用状态。
+**访问该state有三种方式**
+1. getState()
+2. setState()
+3. compareAndSetState()
+
+AQS定义两种资源共享方式：
+1. **Exclusive-独占**：只有一个线程能执行，如ReentrantLock
+2. **Share-共享**：多个线程可以同时执行，如Semaphore/CountDownLatch
+
+AQS定义两种队列（MESA实现）:
+1. **同步等待队列**： 主要用于维护获取锁失败时入队的线程
+2. **条件等待队列**： 调用**await()**的时候会释放锁，然后线程会加入到条件队列，调用**signal()**唤醒的时候会把条件队列中的线程节点移动到同步队列中，等待再次获得锁
+
+AQS 定义了5个队列中节点状态（竞争失败后进行处理的内容，在队列节点Node中实现的）：
+1. **初始化状态**：值为0，，表示当前节点在sync队列中，等待着获取锁。
+2. **CANCELLED**：值为1，表示当前的线程被取消；
+3. **SIGNAL**：值为-1，表示当前节点的后继节点包含的线程需要运行，也就是unpark；
+4. **CONDITION**：值为-2，表示当前节点在等待condition，也就是在condition队列中；
+5. **PROPAGATE**：值为-3，表示当前场景下后续的acquireShared能够得以执行；
+
+不同的自定义同步器竞争共享资源的方式也不同。
+自定义同步器在实现时只需要实现共享资源state的获取与释放方式即可，至于具体线程等待队列的维护（如获取资源失败入队/唤醒出队等），AQS已经在顶层实现好了。
+**自定义同步器实现时主要实现以下几种方法：**
+- isHeldExclusively()：该线程是否正在独占资源。只有用到condition才需要去实现它。
+- tryAcquire(int)：独占方式。尝试获取资源，成功则返回true，失败则返回false。
+- tryRelease(int)：独占方式。尝试释放资源，成功则返回true，失败则返回false。
+- tryAcquireShared(int)：共享方式。尝试获取资源。负数表示失败；0表示成功，但没有剩余可用资源；正数表示成功，且有剩余资源。
+- tryReleaseShared(int)：共享方式。尝试释放资源，如果释放后允许唤醒后续等待结点返回true，否则返回false。
+
+##### 同步等待队列
+AQS当中的同步等待队列也称CLH队列，CLH队列是Craig、Landin、Hagersten三人发明的一种基于双向链表数据结构的队列，是FIFO先进先出线程等待队列。
+Java中的CLH队列是原CLH队列的一个变种，**线程由原自旋机制改为阻塞机制。**
+AQS 依赖CLH同步队列来完成同步状态的管理：
+- 当前线程如果获取同步状态失败时，AQS则会将当前线程已经等待状态等信息构造成一个节点（Node）并将其加入到CLH同步队列，同时会阻塞当前线程
+- 当同步状态释放时，会把首节点唤醒（公平锁），使其再次尝试获取同步状态。
+- 通过signal或signalAll将条件队列中的节点转移到同步队列。（由条件队列转化为同步队列）
+![AQS-同步等待队列](181e5700/AQS-同步等待队列.png)
+
+##### 条件等待队列
+AQS中条件队列是使用单向链表保存的，用nextWaiter来连接：
+- 调用await方法阻塞线程；
+- 当前线程存在于同步队列的头结点，调用await方法进行阻塞（从同步队列转化到条件队列）
+
+#### Condition接口详解
+![Condition接口](181e5700/structure_of_condition.png)
+- 调用**Condition#await**方法会释放当前持有的锁，然后**阻塞当前线程**，同时向Condition队列尾部添加一个节点，所以调用Condition#await方法的时候必须持有锁。
+- 调用**Condition#signal**方法会将Condition队列的首节点移动到阻塞队列尾部，然后唤醒因调用Condition#await方法而阻塞的线程(唤醒之后这个线程就可以去竞争锁了)，所以调用Condition#signal方法的时候必须持有锁，持有锁的线程唤醒被因调用Condition#await方法而阻塞的线程。
+
+**Condition结合ReentrantLock，在阻塞队列中使用的非常多。**
+
+#### ReentrantLock(独占锁)
+ReentrantLock是一种基于AQS框架的应用实现，是JDK中的一种线程并发访问的同步手段，它的功能**类似于synchronized是一种互斥锁，可以保证线程安全。**
+相对于 synchronized， ReentrantLock具备如下特点：
+- 可中断
+- 可以设置超时时间：一定时间内是否能够获取锁
+- 可以设置为公平锁
+- 支持多个条件变量
+- 与 synchronized 一样，都支持可重入
+
+##### synchronized和ReentrantLock的区别
+- synchronized是JVM层次的锁实现，ReentrantLock是JDK层次的锁实现；
+- synchronized的锁状态是无法在代码中直接判断的，但是ReentrantLock可以通过ReentrantLock#isLocked判断；
+- synchronized是非公平锁，ReentrantLock是可以是公平也可以是非公平的；
+- synchronized是不可以被中断的，而ReentrantLock#lockInterruptibly方法是可以被中断的；
+- 在发生异常时synchronized会自动释放锁，而ReentrantLock需要开发者在finally块中显示释放锁；
+- ReentrantLock获取锁的形式有多种：如立即返回是否成功的tryLock(),以及等 待指定时长的获取，更加灵活；
+- synchronized在特定的情况下对于已经在等待的线程是后来的线程先获得锁（cqx队列），而ReentrantLock对于已经在等待的线程是先来的线程先获得锁；
+
+##### 使用场景
+**使用场景特别要注意的**：一定要处理好异常情况，即释放锁的时候不能出现因为异常而导致释放锁失败的情况。
+- **可中断**：线程协作时的一个典型用法，在A线程中调用lockInterruptibly()后，在B线程中调用interrupt()时会影响A线程中的后续执行逻辑，直接抛出异常。
+- **超时失败**：tryLock中传入时间参数
+- **公平锁**：默认是非公平的，创建的时候传入ture标志的时候创建的就是公平锁。默认非公平的原因是效率高。
+
+##### 相关源码实现
+1. ReentrantLock加锁解锁的逻辑
+2. 公平和非公平，可重入锁的实现
+3. 线程竞争锁失败入队阻塞逻辑和获取锁的线程释放锁唤醒阻塞线程竞争锁的逻辑实现（设计的精髓：并发场景下入队和出队操作）。
+
+一段debug代码：
+很简单，就是3个线程对一个total变量进行累加操作，中间通过ReentrantLock来进行独占
+```java
+@Slf4j
+public class DebugReentrantLockDemo {
+
+    private static int total = 0;
+    private static final Lock lock = new ReentrantLock();
+
+    public static void main(String[] args) throws InterruptedException {
+
+        for (int i = 0; i < 3; i++) {
+            Thread thread = new Thread(() -> {
+                // 加锁 下面一行设置断点
+                // 在idea中将断点模式设置为thread（下同），方便对指定线程执行操作
+                lock.lock();
+                try {
+                    // 临界区代码，下面一行设置断点
+                    for (int j = 0; j < 10000; j++) {
+                        total++;
+                    }
+                } finally {
+                    // 解锁
+                    lock.unlock();
+                }
+            });
+            thread.start();
+        }
+
+        Thread.sleep(2000);
+        log.info("summary result is:[{}]", total);
+    }
+}
+```
+其中在IDEA中设置Thread模式断点如下图所示（在断点上鼠标右键）：
+![IDEAThread断点模式](181e5700/IDEAThread断点模式.png)
+结合这个调试程序单独拆解里面的步骤：
+###### 1. 初始化ReentrantLock对象
+这里需要结合ReentrantLock的相关代码结构才好看后面的流程
+首先关注一下ReentrantLock跟本程序调用相关的结构：
+![ReentrantLock结构1](181e5700/ReentrantLock结构1.png)
+这里面：
+- Sync内置抽象类继承了AbstractQueuedSynchronizer，是ReentrantLock锁的同步控制基础（核心结构）。分为公平和非公平版本（内部类NonfairSync和FairSync）。使用 AQS 状态来表示锁定的保持次数。
+- 看看AbstractQueuedSynchronizer：这里面定义了所有基于AQS实现的锁机制的公共方法类，跟这个debug程序相关的，需要知道：
+	- AbstractQueuedSynchronizer静态初始化了几个内部变量，用于后续CAS同步锁，其中有个属性：**volatile int state用于标记同步状态的，默认初始化为0**。
+	- 定义了一个静态内部类：```java.util.concurrent.locks.AbstractQueuedSynchronizer.Node```，这个类定义了等待队列节点，参考CLH，并扩展为双向指针链表（独占模式下是，共享模式退化成单链表结构）。具体直接可以看该类的文档注释。
+	- Node结构中有几个重要的属性结构，为后续等待队列的结构变动，线程的等待/唤醒服务：
+		- volatile int waitStatus：节点的等待状态，有5种值，在默认的独占模式（EXCLUSIVE）下，值用只用到了1种，即-1（SIGNAL指示后继线程需要取消停放），加上默认的0，只有2种。
+		- volatile Node prev：双向链表前驱节点
+		- volatile Node next：双向链表后继节点
+		- volatile Thread thread：当前等待线程
+	- AbstractQueuedSynchronizer父类：AbstractOwnableSynchronizer内持有一个对象```transient Thread exclusiveOwnerThread```，用于在独占模式下标记同步的当前线程。
+	- 其它方法结构，后续时序图中碰到再单独解释
+- NonfairSync内部类继承Sync并实现了lock方法，是非公平锁的同步对象
+- ReentrantLock默认构造函数实现的是：NonfairSync
+
+###### 2. 调用ReentrantLock.lock()
+时序图如下：
+```mermaid
+sequenceDiagram
+actor User
+User ->> NonfairSync : lock
+activate NonfairSync
+NonfairSync ->> AbstractQueuedSynchronizer : CAS对AQS抽象类的stateOffset操作compareAndSetState(0,1)
+activate AbstractQueuedSynchronizer
+AbstractQueuedSynchronizer -->> NonfairSync : #32; 
+deactivate AbstractQueuedSynchronizer
+alt 判断上述compareAndSetState(0, 1)结果
+NonfairSync ->> Thread : 调用currentThread()设置exclusiveOwnerThread=currentThread
+activate Thread
+Thread -->> NonfairSync : #32; 
+deactivate Thread
+else 
+NonfairSync ->> AbstractQueuedSynchronizer : 独占模式尝试获取锁acquire(1)
+activate AbstractQueuedSynchronizer
+AbstractQueuedSynchronizer -->> NonfairSync : #32; 
+deactivate AbstractQueuedSynchronizer
+end
+deactivate NonfairSync
+
+```
+
+
 
 ## 并发编程相关
 
