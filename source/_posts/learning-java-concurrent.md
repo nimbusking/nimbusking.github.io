@@ -644,7 +644,183 @@ deactivate NonfairSync
 此时Thread1的ReentrantLock.state=1
 ###### 3. Thread2调用lock方法
 这时候调用compareAndSetState(0, 1)的CAS操作，肯定是返回失败的。走到调用acquire(1)方法
-其调用时序如下，里面完成了初始化等待队列的构建、线程的等待，等其它操作：
+```java
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#acquire
+public final void acquire(int arg) {
+	// 这一行调用了三个方法：tryAcquire(arg)-尝试获取锁
+	// addWaiter(Node.EXCLUSIVE) - 首次调用构建双向队列
+	// acquireQueued(Node) - 入队列
+        if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+        	// 调用复位中断标记位
+            selfInterrupt();
+    }
+```
+```java
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#addWaiter
+private Node addWaiter(Node mode) {
+        Node node = new Node(Thread.currentThread(), mode);
+        // Try the fast path of enq; backup to full enq on failure
+        Node pred = tail;
+        if (pred != null) {
+        	// 首次调用为假，后续再次调用时本质就是尾插法
+            node.prev = pred;
+            if (compareAndSetTail(pred, node)) {
+                pred.next = node;
+                return node;
+            }
+        }
+        // 入队列
+        enq(node);
+        return node;
+    }
+```
+
+```java
+private Node enq(final Node node) {
+        for (;;) {
+            Node t = tail;
+            if (t == null) { // Must initialize
+            	// 首次调用先初始化表head节点
+                if (compareAndSetHead(new Node()))
+                    tail = head;
+            } else {
+            	// 再次调用会调用尾插法入队列
+                node.prev = t;
+                if (compareAndSetTail(t, node)) {
+                    t.next = node;
+                    return t;
+                }
+            }
+        }
+    }
+```
+
+```java
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#acquireQueued
+final boolean acquireQueued(final Node node, int arg) {
+        boolean failed = true;
+        try {
+            boolean interrupted = false;
+            for (;;) { // 注意这里有个自旋操作，这个是后续阻塞队列种的中断线程重新获取锁的关键
+            	// 本例子Thread2第一次进入这里时，获取的p是head节点
+            	// 自旋后Thread2第二次进入，同样为false
+                final Node p = node.predecessor(); // 获取当前节点的前驱节点
+            	// Thread2第一次执行判断： p == head为真，tryAcquire(arg)再次获取锁为假
+                if (p == head && tryAcquire(arg)) {
+                	// 新唤起的线程获取锁成功之后，要清除当前队列的head节点，并更新当前node为head节点。
+                    setHead(node);
+                    p.next = null; // help GC
+                    failed = false;
+                    return interrupted; 
+                }
+                // Thread2第一次执行下面判断条件，shouldParkAfterFailedAcquire返回false
+                // Thread2第二次执行，shouldParkAfterFailedAcquire为true，开始执行parkAndCheckInterrupt()，挂起成功返回true
+                if (shouldParkAfterFailedAcquire(p, node) && parkAndCheckInterrupt())
+                    interrupted = true;
+            }
+        } finally {
+            if (failed)
+                cancelAcquire(node);
+        }
+    }
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#shouldParkAfterFailedAcquire
+private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
+        int ws = pred.waitStatus;
+        // Thread2首次进入时：ws=0
+        if (ws == Node.SIGNAL)
+            return true;
+        if (ws > 0) {
+            do {
+                node.prev = pred = pred.prev;
+            } while (pred.waitStatus > 0);
+            pred.next = node;
+        } else {
+        	// Thread2首次进入时：通过CAS将waitStatus=-1
+            compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
+        }
+        return false;
+    }
+
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#parkAndCheckInterrupt
+private final boolean parkAndCheckInterrupt() {
+		// Thread2 进入这里执行后，Thread2线程状态WAIT，开始阻塞
+		// park里面会有识别中断标志位，以便后续唤醒操作
+        LockSupport.park(this);
+        // 清除中断，为了后续自旋加锁逻辑
+        // 后续需要恢复，在acquire方法里面的：selfInterrupt()
+        return Thread.interrupted();
+    }
+```
+
+```java
+// java.util.concurrent.locks.ReentrantLock.Sync#nonfairTryAcquire
+final boolean nonfairTryAcquire(int acquires) {
+            final Thread current = Thread.currentThread();
+            // 获取当前state状态
+            int c = getState();
+            if (c == 0) {
+            	// 如果是0，表示可以获取锁
+                if (compareAndSetState(0, acquires)) {
+                    setExclusiveOwnerThread(current);
+                    return true;
+                }
+            }
+            else if (current == getExclusiveOwnerThread()) {
+            	// 比较当前线程是不是锁持有线程，用来标记可重入次数
+                int nextc = c + acquires;
+                if (nextc < 0) // overflow
+                    throw new Error("Maximum lock count exceeded");
+                setState(nextc);
+                return true;
+            }
+            return false;
+        }
+```
+###### 4. Thread3调用lock方法
+同第3步一样，上锁失败完了，入队调用park进入阻塞。
+###### 5. Thread1调用unlock方法
+直接调用relase方法
+```java
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#release
+public final boolean release(int arg) {
+        if (tryRelease(arg)) { // tryRelease就是设置state=0和重置exclusiveOwnerThread=null
+            Node h = head;
+            if (h != null && h.waitStatus != 0)
+                unparkSuccessor(h);
+            return true;
+        }
+        return false;
+    }
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#unparkSuccessor
+private void unparkSuccessor(Node node) {
+        
+        int ws = node.waitStatus;
+        if (ws < 0)
+        	// 清除head节点中的等待信号
+            compareAndSetWaitStatus(node, ws, 0);
+
+        Node s = node.next;
+        if (s == null || s.waitStatus > 0) {
+            s = null;
+            for (Node t = tail; t != null && t != node; t = t.prev)
+                if (t.waitStatus <= 0)
+                    s = t;
+        }
+        if (s != null)
+        	// 这里调用unpark唤醒线程，传入的参数是node节点中暂存的thread线程
+            LockSupport.unpark(s.thread);
+    }
+```
+###### 5.1. 唤醒Thread2线程
+上面代码里面注释已经标注
+###### 5.2. Thread2再次尝试获取锁
+###### 5.3. Thread2加锁成功
+###### 5.3. 调整内部链表结构
+
+###### 总结-整体流程
+调用流程大致如下：
+*PS：整整画了我2小时 :(*
+![完整调用流程](181e5700/ReentrantLock执行流程图.png)
 
 
 ## 并发编程相关
