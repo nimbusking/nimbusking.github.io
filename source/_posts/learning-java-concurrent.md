@@ -583,6 +583,7 @@ public class DebugReentrantLockDemo {
 其中在IDEA中设置Thread模式断点如下图所示（在断点上鼠标右键）：
 ![IDEAThread断点模式](181e5700/IDEAThread断点模式.png)
 结合这个调试程序单独拆解里面的步骤：
+3个线程的名字，假设分别叫Thread1、2、3，用于下文标记
 ###### 1. 初始化ReentrantLock对象
 这里需要结合ReentrantLock的相关代码结构才好看后面的流程
 首先关注一下ReentrantLock跟本程序调用相关的结构：
@@ -602,9 +603,22 @@ public class DebugReentrantLockDemo {
 - NonfairSync内部类继承Sync并实现了lock方法，是非公平锁的同步对象
 - ReentrantLock默认构造函数实现的是：NonfairSync
 
-###### 2. 调用ReentrantLock.lock()
-时序图如下：
-```mermaid
+###### 2.1 Thread1调用ReentrantLock.lock()
+对应代码：
+```java
+    /**
+     * Performs lock.  Try immediate barge, backing up to normal
+     * acquire on failure.
+     */
+    final void lock() {
+        if (compareAndSetState(0, 1))
+            setExclusiveOwnerThread(Thread.currentThread());
+        else
+            acquire(1);
+    }
+```
+时序图如下，不是特别复杂：
+{% mermaid sequenceDiagram %}
 sequenceDiagram
 actor User
 User ->> NonfairSync : lock
@@ -625,8 +639,12 @@ AbstractQueuedSynchronizer -->> NonfairSync : #32;
 deactivate AbstractQueuedSynchronizer
 end
 deactivate NonfairSync
+{% endmermaid %}
 
-```
+###### 2.2 Thread1获取到锁
+此时Thread1的ReentrantLock.state=1
+###### 3. Thread2调用lock方法
+这时候调用compareAndSetState(0, 1)的CAS操作，肯定是返回失败的。走到调用acquire(1)方法
 
 
 
