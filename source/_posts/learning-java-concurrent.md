@@ -820,8 +820,439 @@ private void unparkSuccessor(Node node) {
 ###### 总结-整体流程
 调用流程大致如下：
 *PS：整整画了我2小时 :(*
-![完整调用流程](181e5700/ReentrantLock执行流程图.png)
+![完整调用流程](181e5700/ReentrantLock执行流程图.jpg)
 
+#### Semaphore
+**Semaphore，俗称信号量，它是操作系统中PV操作的原语在java的实现**，它也是基于AbstractQueuedSynchronizer实现的。
+Semaphore的功能非常强大：
+大小为1的信号量就类似于互斥锁，通过同时只能有一个线程获取信号量实现；
+大小为n（n>0）的信号量可以实现限流的功能，它可以实现只能有n个线程同时获取信号量。
+![Semaphore示意图](181e5700/Semaphore示意图.jpg)
+
+##### 常用用法
+```java
+public void acquire() throws InterruptedException // 表示阻塞并获取许可
+public boolean tryAcquire() // 在没有许可的情况下会立即返回 false，要获取许可的线程不会阻塞
+public void release() // 释放许可
+public int availablePermits() // 返回此信号量中当前可用的许可证数
+public final int getQueueLength() // 返回正在等待获取许可证的线程数。
+public final boolean hasQueuedThreads() // 是否有线程正在等待获取许可证
+protected void reducePermits(int reduction) // 减少 reduction 个许可证
+protected Collection<Thread> getQueuedThreads() // 返回所有等待获取许可证的线程集合
+```
+##### 应用场景
+一个简单的限流示例
+```java
+public class SemaphoreTest2 {
+
+    /**
+     * 实现一个同时只能处理5个请求的限流器
+     */
+    private static Semaphore semaphore = new Semaphore(5);
+    private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * 定义一个线程池
+     */
+    private static ThreadPoolExecutor executor = new ThreadPoolExecutor
+            (10, 50, 60,
+                    TimeUnit.SECONDS, new LinkedBlockingDeque<>(200));
+
+    /**
+     * 模拟执行方法
+     */
+    public static void exec() {
+        try {
+            //占用1个资源
+            semaphore.acquire(1);
+            //TODO  模拟业务执行
+            System.out.println(Thread.currentThread().getName() + ":" + sdf.format(new Date()) + ":执行exec方法");
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            //释放一个资源
+            semaphore.release(1);
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        for (; ; ) {
+            Thread.sleep(100);
+            // 模拟请求以10个/s的速度
+            executor.execute(() -> exec());
+        }
+    }
+}
+```
+##### 源码分析
+跟ReentrantLock处理队列的方式相同（都是在AQS抽象类里面实现的），区别在于：
+```java
+// java.util.concurrent.Semaphore#acquire(int)
+public void acquire(int permits) throws InterruptedException {
+        if (permits < 0) throw new IllegalArgumentException();
+        sync.acquireSharedInterruptibly(permits);
+    }
+```
+
+```java
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#acquireSharedInterruptibly
+public final void acquireSharedInterruptibly(int arg)
+            throws InterruptedException {
+            // 
+        if (Thread.interrupted())
+            throw new InterruptedException();
+        if (tryAcquireShared(arg) < 0) // 先尝试获取锁，如果返回的是负数，就执行
+            doAcquireSharedInterruptibly(arg);
+    }
+
+// java.util.concurrent.Semaphore.Sync#nonfairTryAcquireShared
+final int nonfairTryAcquireShared(int acquires) {
+            for (;;) {
+            	// 初始化Semaphore的时候，构造器传入的资源数将赋值给state，这里取出来
+                int available = getState();
+                int remaining = available - acquires; // 计算剩余资源数
+                // 大于0，通过CAS交换；反之直接返回负数的结果
+                if (remaining < 0 || compareAndSetState(available, remaining))
+                    return remaining;
+            }
+        }
+```
+共享模式下跟独占模式的队列操作不一样的核心代码：
+```java
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#doAcquireSharedInterruptibly
+private void doAcquireSharedInterruptibly(int arg)
+        throws InterruptedException {
+        // 这里通过addWaiter初始化的Node节点模式是Node.SHARED
+        final Node node = addWaiter(Node.SHARED);
+        boolean failed = true;
+        try {
+            for (;;) {
+                final Node p = node.predecessor();
+                if (p == head) {
+                    int r = tryAcquireShared(arg);
+                    if (r >= 0) {
+                        setHeadAndPropagate(node, r);
+                        p.next = null; // help GC
+                        failed = false;
+                        return;
+                    }
+                }
+                // 获取资源失败之后，这里就开始准备阻塞和进行阻塞两个动作。
+                if (shouldParkAfterFailedAcquire(p, node) &&
+                    parkAndCheckInterrupt())
+                    throw new InterruptedException();
+            }
+        } finally {
+            if (failed)
+                cancelAcquire(node);
+        }
+    }
+```
+释放资源，重新累加state的同时需要唤醒队列线程
+
+
+#### CountDownLatch
+CountDownLatch（闭锁）是一个**同步协助类，允许一个或多个线程等待，直到其他线程完成操作集**。
+CountDownLatch使用给定的计数值（count）初始化。
+await方法会阻塞直到当前的计数值（count）由于countDown方法的调用达到0，count为0之后所有等待的线程都会被释放，并且随后对await方法的调用都会立即返回。
+**这是一个一次性现象：count不会被重置。**
+如果你需要一个**重置count的版本**，那么请**考虑使用CyclicBarrier**。
+![CountDownLatch示意图](181e5700/CountDownLatch示意图.jpg)
+
+##### 应用场景
+CountDownLatch一般用作多线程倒计时计数器，强制它们等待其他一组（CountDownLatch的初始化决定）任务执行完成
+##### 实现原理
+底层基于 AbstractQueuedSynchronizer 实现：
+CountDownLatch 构造函数中**指定的count直接赋给AQS的state**；每次countDown()则都是release(1)减1，最后减到0时unpark阻塞线程；这一步是由最后一个执行countdown方法的线程执行的。
+而调用await()方法时，当前线程就会判断state属性是否为0，如果为0，则继续往下执行，如果不为0，则使当前线程进入等待状态，直到某个线程将state属性置为0，其就会唤醒在await()方法中等待的线程。
+
+##### CountDownLatch与Thread.join的区别
+- CountDownLatch的作用就是**允许一个或多个线程等待**其他线程完成操作，看起来有点类似join() 方法，但其提供了比 join() 更加灵活的API。
+- CountDownLatch**可以手动控制**在n个线程里调用n次countDown()方法使计数器进行减一操作，也可以在一个线程里调用n次执行减一操作。
+- 而 join() 的实现原理是不停检查join线程是否存活，如果**join 线程存活则让当前线程永远等待**。所以两者之间相对来说还是CountDownLatch使用起来较为灵活。
+##### CountDownLatch与CyclicBarrier的区别
+- CountDownLatch的计数器只能使用一次，而**CyclicBarrier的计数器可以使用reset()方法重置**。所以CyclicBarrier能处理更为复杂的业务场景，比如如果计算发生错误，可以重置计数器，并让线程们重新执行一次。
+- CyclicBarrier还提供getNumberWaiting(可以获得CyclicBarrier阻塞的线程数量)、isBroken(用来知道阻塞的线程是否被中断)等方法。
+- CountDownLatch会阻塞主线程，CyclicBarrier不会阻塞主线程，只会阻塞子线程。
+- CountDownLatch和CyclicBarrier都能够实现线程之间的等待，只不过它们侧重点不同:
+	- CountDownLatch一般用于一个或多个线程，等待其他线程执行完任务后，再执行。
+	- CyclicBarrier一般用于一组线程互相等待至某个状态，然后这一组线程再同时执行。
+- CyclicBarrier 还可以提供一个 barrierAction，**合并多线程计算结果**。
+- **CyclicBarrier是通过ReentrantLock的"独占锁"和Conditon来实现一组线程的阻塞唤醒的，而CountDownLatch则是通过AQS的“共享锁”实现**
+
+#### CyclicBarrie
+字面意思回环栅栏，通过它可以实现**让一组线程等待至某个状态（屏障点）之后再全部同时执行**。叫做回环是因为当所有等待线程都被释放以后，**CyclicBarrier可以被重用**。
+原始计数变量存在副本parties属性中，调用重置方法之后会还原该值。
+![CyclicBarrie示意图](181e5700/CyclicBarrie示意图.jpg)
+
+##### 应用场景
+一个合并计算的示例
+```java
+/**
+ * 栅栏与闭锁的关键区别在于，所有的线程必须同时到达栅栏位置，才能继续执行。
+ */
+public class CyclicBarrierTest2 {
+
+    //保存每个学生的平均成绩
+    private ConcurrentHashMap<String, Integer> map = new ConcurrentHashMap<String, Integer>();
+
+    private ExecutorService threadPool = Executors.newFixedThreadPool(3);
+
+    private CyclicBarrier cb = new CyclicBarrier(3, () -> {
+        int result = 0;
+        Set<String> set = map.keySet();
+        for (String s : set) {
+            result += map.get(s);
+        }
+        System.out.println("三人平均成绩为:" + (result / 3) + "分");
+    });
+
+
+    public void count() {
+        for (int i = 0; i < 3; i++) {
+            threadPool.execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    //获取学生平均成绩
+                    int score = (int) (Math.random() * 40 + 60);
+                    map.put(Thread.currentThread().getName(), score);
+                    System.out.println(Thread.currentThread().getName()
+                            + "同学的平均成绩为：" + score);
+                    try {
+                        //执行完运行await(),等待所有学生平均成绩都计算完毕
+                        cb.await();
+                    } catch (InterruptedException | BrokenBarrierException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            });
+        }
+    }
+
+
+    public static void main(String[] args) {
+        CyclicBarrierTest2 cb = new CyclicBarrierTest2();
+        cb.count();
+    }
+}
+```
+一段等待就绪示例：
+```java
+/**
+ * 一个小的“人满发车”场景的demo
+ */
+@Slf4j
+public class CyclicBarrierTest3 {
+
+    public static void main(String[] args) throws InterruptedException {
+
+        AtomicInteger counter = new AtomicInteger(); // 计数标识选手序号
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+                5, 5, 1000, TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(100),
+                (r) -> new Thread(r, "第" + counter.addAndGet(1) + "号 "),
+                new ThreadPoolExecutor.AbortPolicy());
+
+        int cbInitSize = 5;
+        CyclicBarrier cyclicBarrier = new CyclicBarrier(cbInitSize,
+                () -> System.out.println("===========裁判：比赛开始==========="));
+
+        for (int i = 0; i < cbInitSize * 4; i++) {
+            threadPoolExecutor.submit(new Runner(cyclicBarrier));
+        }
+        threadPoolExecutor.shutdown();
+
+    }
+
+    static class Runner extends Thread {
+        private CyclicBarrier cyclicBarrier;
+
+        public Runner(CyclicBarrier cyclicBarrier) {
+            this.cyclicBarrier = cyclicBarrier;
+        }
+
+        @Override
+        public void run() {
+            try {
+                int sleepMills = ThreadLocalRandom.current().nextInt(1000);
+                Thread.sleep(sleepMills);
+                System.out.println(Thread.currentThread().getName() + " 选手已就位, 准备共用时:" + sleepMills + " ms" + ", 准备完成序号:" + cyclicBarrier.getNumberWaiting());
+                cyclicBarrier.await();
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (BrokenBarrierException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+}
+```
+##### 相关源码
+使用了Condition作为条件队列原语：调用Condition.await()进行阻塞，入队操作。 
+这里面会有一个条件队列转同步队列后再唤醒的机制：
+用ReentrantLock锁条件队列阻塞过程，在阻塞过程中，转同步队列后，条件队列释放锁后续同步队列唤醒、拿锁、执行（AQS的for循环自旋）
+核心代码就下面这段
+```java
+private int dowait(boolean timed, long nanos)
+        throws InterruptedException, BrokenBarrierException,
+               TimeoutException {
+        // 注意这里的 ReentrantLock
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            final Generation g = generation;
+
+            if (g.broken)
+                throw new BrokenBarrierException();
+
+            if (Thread.interrupted()) {
+                breakBarrier();
+                throw new InterruptedException();
+            }
+
+            int index = --count;
+            if (index == 0) {  // tripped
+                boolean ranAction = false;
+                try {
+                    final Runnable command = barrierCommand;
+                    if (command != null)
+                        command.run(); // 条件满足后，执行run方法
+                    ranAction = true;
+                    nextGeneration(); // 进入下一个屏障区间，并调用singalAll()唤醒所有线程（有点复杂）
+                    return 0;
+                } finally {
+                    if (!ranAction)
+                        breakBarrier();
+                }
+            }
+
+            // loop until tripped, broken, interrupted, or timed out
+            for (;;) {
+                try {
+                    if (!timed)
+                        trip.await(); // 这个地方会进行阻塞，等后续唤醒后再执行
+                    else if (nanos > 0L)
+                        nanos = trip.awaitNanos(nanos);
+                } catch (InterruptedException ie) {
+                    if (g == generation && ! g.broken) {
+                        breakBarrier();
+                        throw ie;
+                    } else {
+                        // We're about to finish waiting even if we had not
+                        // been interrupted, so this interrupt is deemed to
+                        // "belong" to subsequent execution.
+                        Thread.currentThread().interrupt();
+                    }
+                }
+
+                if (g.broken)
+                    throw new BrokenBarrierException();
+
+                if (g != generation)
+                    return index;
+
+                if (timed && nanos <= 0L) {
+                    breakBarrier();
+                    throw new TimeoutException();
+                }
+            }
+        } finally {
+        	// 注意这里的unlock()
+        	// 当最后一个条件队列计数完成，等待唤醒的时候，
+        	// 当前所在的线程调用unlock，由于再次之前调用signalAll()方法的时候，已经完成了条件队列节点向同步队列节点传输转换的动作。
+        	// 所以这时候调用unlock会唤醒后续节点的线程
+        	// 同样的，后续被唤醒的线程也会走到这里，继续“传递”似的唤醒后续同步队列的节点，如此往复，直到同步队列节点全部被唤醒。
+            lock.unlock();
+        }
+    }
+// java.util.concurrent.CyclicBarrier#nextGeneration
+ private void nextGeneration() {
+        // signal completion of last generation
+        trip.signalAll();
+        // set up next generation
+        count = parties;
+        generation = new Generation();
+    }
+```
+唤醒逻辑中实现了队列转换的逻辑：
+```java
+// java.util.concurrent.locks.AbstractQueuedSynchronizer.ConditionObject#doSignalAll
+/**
+ * Removes and transfers all nodes.
+ * @param first (non-null) the first node on condition queue
+ */
+private void doSignalAll(Node first) {
+    lastWaiter = firstWaiter = null;
+    // 这个地方可以琢磨一下，为什么不用while而是用do-while
+    // 原因在于，如果是首次进入的是，第一次调用transferForSignal，只是做了条件队列节点向同步队列传输的动作
+    // 与此同时会初始化同步队列的结构，但是并不会唤醒。
+    // 此时尾循环的判断就起到作用，为真的时候，会再次进入循环调用transferForSignal入队。
+    // 直到 (first != null) 为假跳出循环
+    do {
+        Node next = first.nextWaiter;
+        first.nextWaiter = null;
+        transferForSignal(first);
+        first = next;
+    } while (first != null);
+}
+// java.util.concurrent.locks.AbstractQueuedSynchronizer#transferForSignal
+final boolean transferForSignal(Node node) {
+		// 核心其实在于NODE节点设计的巧妙，通过不同的状态位，巧妙的在这里转换过去
+        /*
+         * If cannot change waitStatus, the node has been cancelled.
+         */
+        if (!compareAndSetWaitStatus(node, Node.CONDITION, 0))
+            return false;
+
+        /*
+         * Splice onto queue and try to set waitStatus of predecessor to
+         * indicate that thread is (probably) waiting. If cancelled or
+         * attempt to set waitStatus fails, wake up to resync (in which
+         * case the waitStatus can be transiently and harmlessly wrong).
+         */
+        Node p = enq(node);
+        int ws = p.waitStatus;
+        if (ws > 0 || !compareAndSetWaitStatus(p, ws, Node.SIGNAL))
+            LockSupport.unpark(node.thread);
+        return true;
+    }
+```
+
+#### ReentrantReadWriteLock(读写锁)
+现实中有这样一种场景：**对共享资源有读和写的操作，且写操作没有读操作那么频繁（读多写少）**。
+在**没有写操作**的时候，多个线程同时读一个资源没有任何问题，所以应该**允许多个线程同时读取**共享资源（读读可以并发）；
+但是如果**一个线程想去写**这些共享资源，**就不应该允许其他线程对该资源进行读和写操作了**（读写，写读，写写互斥）。
+在读多于写的情况下，读写锁能够提供比排它锁更好的并发性和吞吐量。
+
+针对这种场景，JAVA的并发包提供了读写锁ReentrantReadWriteLock，它内部，维护了一对相关的锁，一个用于只读操作，称为读锁；一个用于写入操作，称为写锁:
+- 线程进入读锁的前提条件:
+	- 没有其他线程的写锁
+	- 没有写请求或者，有写请求但调用线程和持有锁的线程是同一个。
+- 线程进入写锁的前提条件：
+	- 没有其他线程的读锁
+	- 没有其他线程的写锁
+
+##### 读写锁的三个重要特性
+- **公平选择性**：支持非公平（默认）和公平的锁获取方式，吞吐量还是非公平优于公平。
+- **可重入**：读锁和写锁都支持线程重入。以读写线程为例：读线程获取读锁后，能够再次获取读锁。写线程在获取写锁之后能够再次获取写锁，同时也可以获取读锁。
+- **锁降级**：遵循获取写锁、再获取读锁最后释放写锁的次序，写锁能够降级成为读锁。
+##### 相关原理
+![读写锁类结构](181e5700/structure_of_ReentrantReadWriteLock.jpg)
+相比其它锁，共有的两个公平非公平同步结构之外，还多了两个单独实现Lock接口的锁模块。
+
+
+##### 读写锁使用
+一个经典的使用场景就是缓存，读多写少。
+
+##### 锁降级
+**锁降级指的是写锁降级成为读锁。**
+如果当前线程拥有写锁，然后将其释放，最后再获取读锁，这种分段完成的过程不能称之为锁降级。
+锁降级是指把持住（当前拥有的）写锁，再获取到读锁，随后释放（先前拥有的）写锁的过程。锁降级可以帮助我们拿到当前线程修改后的结果而不被其他线程所破坏，防止更新丢失。
 
 ## 并发编程相关
 
