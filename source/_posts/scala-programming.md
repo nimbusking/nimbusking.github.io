@@ -3,7 +3,7 @@ title: Scala编程
 mathjax: false
 tags:
   - Scala Programming
-categories: Scala系列
+updated: 2024-10-28 20:30:21categories: Scala系列
 abbrlink: f73b2f1e
 date: 2018-08-19 18:10:05
 ---

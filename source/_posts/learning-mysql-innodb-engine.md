@@ -5,7 +5,7 @@ date: 2022-07-27 20:31:59
 tags:
     - MySQL
     - InnoDB
-categories: MySQL
+updated: 2024-10-28 20:30:21categories: MySQL
 ---
 
 

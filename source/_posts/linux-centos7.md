@@ -5,7 +5,7 @@ date: 2019-11-25 01:28:43
 tags:
     - CentOS7
     - Linux
-categories: 操作系统
+updated: 2024-10-28 20:30:21categories: 操作系统
 ---
 
 ### 基本命令

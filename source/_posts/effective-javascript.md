@@ -2,7 +2,7 @@
 title: effective-javascript
 mathjax: false
 tags: Effective JavaScript
-categories: JavaScript系列
+updated: 2024-10-28 20:30:21categories: JavaScript系列
 abbrlink: ad5d9134
 date: 2018-11-11 17:11:52
 ---

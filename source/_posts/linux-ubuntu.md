@@ -6,7 +6,7 @@ date: 2019-05-16 02:20:17
 tags:
     - Ubuntu
     - Linux
-categories: 操作系统
+updated: 2024-10-28 20:30:21categories: 操作系统
 ---
 
 ## 背景

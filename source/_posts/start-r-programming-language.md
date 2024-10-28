@@ -5,7 +5,7 @@ tags:
   - R语言
   - RStudio
 abbrlink: a93eddc5
-categories: 统计分析
+updated: 2024-10-28 20:30:21categories: 统计分析
 mathjax: true
 date: 2019-12-27 21:42:17
 ---

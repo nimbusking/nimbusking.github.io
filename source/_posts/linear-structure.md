@@ -3,7 +3,7 @@ title: 线性结构概念相关
 tags:
   - 数据结构
   - 线性结构
-catgories: 算法与数据结构
+updated: 2024-10-28 20:32:31categories: 算法与数据结构
 mathjax: true
 abbrlink: 9848073c
 date: 2018-01-21 12:10:16

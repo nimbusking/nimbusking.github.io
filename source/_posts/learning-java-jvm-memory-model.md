@@ -4,7 +4,7 @@ abbrlink: 6377921b
 date: 2024-10-14 23:29:12
 tags:
     - JVM内存模型
-categories: Java系列
+updated: 2024-10-28 20:30:21categories: Java系列
 ---
 
 

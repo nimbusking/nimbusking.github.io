@@ -9,7 +9,7 @@ tags:
     - OpenWRT
     - LEDE
     - ESXi 6.7
-categories: 软路由
+updated: 2024-10-28 20:30:21categories: 软路由
 ---
 
 ### 需求背景

@@ -5,7 +5,7 @@ date: 2019-08-25 12:07:10
 tags:
     - 软件工程
     - 设计模式
-categories: 设计模式
+updated: 2024-10-28 20:30:21categories: 设计模式
 ---
 
 ## 背景

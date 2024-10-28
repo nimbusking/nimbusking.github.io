@@ -4,7 +4,7 @@ abbrlink: b54134d3
 date: 2024-10-14 23:33:55
 tags:
     - JVM参数
-categories: Java系列
+updated: 2024-10-28 20:30:21categories: Java系列
 ---
 
 参考《深入理解Java虚拟机  第三版》一书中关于启动参数的相关描述表格，并补充了相关日志打印描述参数

@@ -7,7 +7,7 @@ tags:
     - HLG3
     - SLOG3
     - Cine4
-categories: 摄影摄像
+updated: 2024-10-28 20:30:21categories: 摄影摄像
 ---
 
 ## 背景

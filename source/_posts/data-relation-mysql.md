@@ -6,7 +6,7 @@ date: 2019-08-21 21:45:20
 tags:
     - MySQL
     - 关系型数据库
-categories: 数据相关
+updated: 2024-10-28 20:30:21categories: 数据相关
 ---
 
 {% cq %}Good code is its own best documentation. As you’re about to add a comment, ask yourself, “How can I improve the code so that this comment isn’t needed?” 

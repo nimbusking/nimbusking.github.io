@@ -4,7 +4,7 @@ tags:
   - 数据结构
   - 线性结构
   - 数组
-catgories: 算法与数据结构
+updated: 2024-10-28 20:32:20categories: 算法与数据结构
 mathjax: true
 abbrlink: 340249a9
 date: 2018-01-21 17:10:10

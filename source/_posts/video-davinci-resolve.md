@@ -2,7 +2,7 @@
 title: 达芬奇软件学习记录
 abbrlink: 45b9669f
 date: 2024-10-01 09:59:50
-categories: 影视后期
+updated: 2024-10-28 20:30:21categories: 影视后期
 tags:
   - 达芬奇
   - 资源管理

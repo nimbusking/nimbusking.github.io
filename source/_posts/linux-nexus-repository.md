@@ -5,7 +5,7 @@ date: 2021-01-13 23:02:30
 tags:
     - Nexus私服
     - CentOS 7
-categories: 操作系统
+updated: 2024-10-28 20:30:21categories: 操作系统
 ---
 
 ## 背景
