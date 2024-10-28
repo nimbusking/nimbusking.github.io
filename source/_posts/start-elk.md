@@ -10,8 +10,8 @@ tags:
     - Logstash
     - Kibana
     - Esxi 6.7
-updated: 2024-10-28 20:30:21categories: 大数据
-top: false
+updated: 2024-10-28 20:30:21
+categories: 大数据
 ---
 
 ### 背景
