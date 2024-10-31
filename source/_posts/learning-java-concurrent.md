@@ -1184,10 +1184,6 @@ private int dowait(boolean timed, long nanos)
 唤醒逻辑中实现了队列转换的逻辑：
 ```java
 // java.util.concurrent.locks.AbstractQueuedSynchronizer.ConditionObject#doSignalAll
-/**
- * Removes and transfers all nodes.
- * @param first (non-null) the first node on condition queue
- */
 private void doSignalAll(Node first) {
     lastWaiter = firstWaiter = null;
     // 这个地方可以琢磨一下，为什么不用while而是用do-while
