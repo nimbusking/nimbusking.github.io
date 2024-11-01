@@ -1263,6 +1263,22 @@ final boolean transferForSignal(Node node) {
 
 ## 并发编程相关
 ### 阻塞队列相关
+BlockingQueue 继承了 Queue 接口，是队列的一种。Queue 和 BlockingQueue 都是在 Java5 中加入的。阻塞队列（BlockingQueue）是**一个在队列基础上又支持了两个附加操作的队列**，常用解耦。
+两个附加操作:
+- 支持阻塞的插入方法put: 队列满时，队列会阻塞插入元素的线程，直到队列不满。
+- 支持阻塞的移除方法take: 队列空时，获取元素的线程会等待队列变为非空
+
+#### BlockingQueue常用方法示例
+当队列满了无法添加元素，或者是队列空了无法移除元素时：
+1. 抛出异常：add、remove、element
+2. 返回结果但不抛出异常：offer、poll、peek
+3. 阻塞：put、take
+
+| 方法        | 抛出异常           | 返回特定值  | 阻塞  |  阻塞特定时间  |
+| ------------- |:-------------:| -------| -----:| -------|
+| 入队      | add(e) | offer(e) | put(e) | offer(e, time, unit) |
+| 出队      | remove()      |   poll() | take() | poll(time, unit) |
+| 获取队首元素      | element()      |   peek() | 不支持 | 不支持 |
 
 
 ## 设计模式相关
