@@ -170,6 +170,68 @@ wait/notify ：这种方式需要依赖synchronized加锁才行，另外notify�
 #### 管道的输入输出流
 Thread.join()
 
+### ForkJoin工作原理
+传统线程池ThreadPoolExecutor有两个明显的缺点：
+1. 一是无法对大任务进行拆分，对于某个任务只能由单线程执行；
+2. 二是工作线程从队列中获取任务时存在竞争情况。
+这两个缺点都会影响任务的执行效率。
+为了解决传统线程池的缺陷，Java7中引入Fork/Join框架，并在Java8中得到广泛应用。Fork/Join框架的核心是ForkJoinPool类，它是对AbstractExecutorService类的扩展。ForkJoinPool允许其他线程向它提交任务，并根据设定将这些任务拆分为粒度更细的子任务，这些子任务将由ForkJoinPool内部的工作线程来并行执行，并且工作线程之间可以窃取彼此之间的任务。
+**ForkJoinPool最适合计算密集型任务**，而且最好是非阻塞任务。
+ForkJoinPool是ThreadPoolExecutor线程池的一种补充，是对计算密集型场景的加强。
+根据经验和实验，**任务总数、单任务执行耗时以及并行数都会影响到Fork/Join的性能**。
+
+#### ForkJoin使用
+ForkJoinPool 是用于执行 ForkJoinTask 任务的执行池，不再是传统执行池Worker+Queue 的组合式，而是**维护了一个队列数组 WorkQueue（WorkQueue[]）**，这样在提交任务和线程任务的时候大幅度减少碰撞。
+
+##### 4个核心参数
+用于控制线程池的并行数、工作线程的创建、异常处理和模式指定等
+1. int parallelism：指定并行级别（parallelism level）。ForkJoinPool将根据这个设定，决定工作线程的数量。如果未设置的话，将使用Runtime.getRuntime().availableProcessors()来设置并行级别；
+2. ForkJoinWorkerThreadFactory factory：ForkJoinPool在创建线程时，会通过factory来创建。注意，这里需要实现的是ForkJoinWorkerThreadFactory，而不是ThreadFactory。如果你不指定factory，那么将由默认的DefaultForkJoinWorkerThreadFactory负责线程的创建工作；
+3. UncaughtExceptionHandler handler：指定异常处理器，当任务在运行中出错时，将由设定的处理器处理；
+4. boolean asyncMode：设置队列的工作模式：asyncMode ? FIFO_QUEUE :LIFO_QUEUE。**当asyncMode为true时，将使用先进先出队列，而为false时则使用后进先出的模式**。
+
+##### 按照不同的提交任务
+| 类型        | 返回值           | 方法  |
+| ------------- |:-------------:|:-----:|
+|  提交异步执行      | void | execute(ForkJoinTask<?> task) execute(Runnable task) |
+| 等待并获取结果      | T      |   invoke(ForkJoinTask<T> task) |
+| 提交执行获取Future结果      | ForkJoinTask<T>      |   submit(ForkJoinTask<T> task)等一共4个 |
+- execute类型的方法在提交任务后，不会返回结果。ForkJoinPool不仅允许提交ForkJoinTask类型任务，还允许提交Runnable任务
+- invoke方法接受ForkJoinTask类型的任务，并在任务执行结束后，返回泛型结果。如果提交的任务是null，将抛出空指针异常。
+- submit方法支持三种类型的任务提交：ForkJoinTask类型、Callable类型和Runnable类型。在提交任务后，将返回ForkJoinTask类型的结果。如果提交的任务是null，将抛出空指针异常，并且当任务不能按计划执行的话，将抛出任务拒绝异常。
+
+#### ForkJoinTask
+**ForkJoinTask是ForkJoinPool的核心之一，它是任务的实际载体，定义了任务执行时的具体逻辑和拆分逻辑。**
+ForkJoinTask继承了Future接口，所以也可以将其看作是轻量级的Future。
+##### 核心方法
+- **fork()提交任务**：fork()方法用于向当前任务所运行的线程池中提交任务。如果当前线程是ForkJoinWorkerThread类型，将会放入该线程的工作队列，否则放入common线程池的工作队列中。
+- **join()获取任务执行结果**：join()方法用于获取任务的执行结果。调用join()时，将阻塞当前线程直到对应的子任务完成运行并返回结果。
+##### 使用
+通常情况下我们不需要直接继承ForkJoinTask类，而只需要继承它的子类，Fork/Join框架提供了以下三个子类：
+- **RecursiveAction**：用于递归执行但不需要返回结果的任务。
+- **RecursiveTask** ：用于递归执行需要返回结果的任务。
+- **CountedCompleter<T>** ：在任务完成执行后会触发执行一个自定义的钩子函数
+
+#### ForkJoin内部实现
+- ForkJoinPool 内部有多个工作队列，当我们通过 ForkJoinPool 的 invoke() 或者submit() 方法提交任务时，ForkJoinPool 根据一定的路由规则把任务提交到一个工作队列中，如果任务在执行过程中会创建出子任务，那么子任务会提交到工作线程对应的工作队列中。
+- ForkJoinPool 的每个工作线程都维护着一个工作队列（WorkQueue），这是一个双端队列（Deque），里面存放的对象是任务（ForkJoinTask）。
+- 每个工作线程在运行中产生新的任务（通常是因为调用了 fork()）时，会放入工作队列的top，并且工作线程在处理自己的工作队列时，使用的是 LIFO 方式，也就是说每次从top取出任务来执行。
+- 每个工作线程在处理自己的工作队列同时，会尝试窃取一个任务，窃取的任务位于其他线程的工作队列的base，也就是说工作线程在窃取其他工作线程的任务时，使用的是FIFO 方式。
+- 在遇到 join() 时，如果需要 join 的任务尚未完成，则会先处理其他任务，并等待其完成。
+- 在既没有自己的任务，也没有可以窃取的任务时，进入休眠 。
+
+#### 工作窃取
+ForkJoinPool与ThreadPoolExecutor有个很大的不同之处在于，ForkJoinPool存在引入了工作窃取设计，它是其性能保证的关键之一。**工作窃取，就是允许空闲线程从繁忙线程的双端队列中窃取任务。**
+默认情况下，工作线程从它自己的双端队列的头部获取任务。但是，当自己的任务为空时，线程会从其他繁忙线程双端队列的尾部中获取任务。这种方法，最大限度地减少了线程竞争任务的可能性。
+ForkJoinPool的大部分操作都发生在工作窃取队列（work-stealing queues ） 中，该队列由**内部类WorkQueue实现**。它是Deques的特殊形式，但仅支持三种操作方式：push、pop和poll（也称为窃取）。在ForkJoinPool中，队列的读取有着严格的约束，push和pop仅能从其所属线程调用，而poll则可以从其他线程调用。
+![工作窃取工作流程示意图](181e5700/工作窃取工作流程示意图.jpg)
+- 工作窃取算法的优点是充分利用线程进行并行计算，并**减少了**线程间的竞争;
+- 工作窃取算法缺点是在**某些情况下还是存在竞争**，比如双端队列里只有一个任务时。并且消耗了更多的系统资源，比如创建多个线程和多个双端队列。
+
+#### ForkJoinPool执行流程
+![forkjoinpool工作流程示意图](181e5700/forkjoinpool工作流程示意图.jpg)
+
+
 
 ## 线程安全相关(原子与有序问题)
 ### CAS原子性
@@ -1303,6 +1365,9 @@ put 方法插入元素时，如果队列没有满，那就和普通的插入一�
 
 ![阻塞队列一览](181e5700/阻塞队列一览.jpg)
 https://www.processon.com/view/link/6724421b7f2523247300baf9?cid=6724363c61fdee7d75fa9b4f
+
+
+
 
 ## 设计模式相关
 
