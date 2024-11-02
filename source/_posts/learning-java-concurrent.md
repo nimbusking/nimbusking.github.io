@@ -10,11 +10,16 @@ categories: Java系列
 top: true
 ---
 
+## 前言
+罗列java并发体系中的点点滴滴
+整体并发体系可以参考下图知识图谱所示，未来一些边边角角持续更新中
+<!-- more -->
+![Java并发知识体系](181e5700/Java并发知识体系.jpg)
+
 ## 理论相关
 ### 并发三大特性
 并发编程BUG的源头，都归纳为三个问题：**可见性、原子性与有序性**问题
 
-<!-- more -->
 ### JMM相关
 Java虚拟机规范中定义了Java内存模型（Java Memory Model，JMM），用于屏蔽掉各种硬件和操作系统的内存访问差异，以实现让Java程序在各种平台下都能达到一致的并发效果。
 JMM规范了Java虚拟机与计算机内存是如何协同工作的：**规定了一个线程如何和何时可以看到由其他线程修改过后的共享变量的值，以及在必须时如何同步的访问共享变量。**
@@ -1367,8 +1372,313 @@ put 方法插入元素时，如果队列没有满，那就和普通的插入一�
 https://www.processon.com/view/link/6724421b7f2523247300baf9?cid=6724363c61fdee7d75fa9b4f
 
 
+### Future相关
+Future就是对于具体的Runnable或者Callable任务的执行结果进行取消、查询是否完成、获取结果。必要时可以通过get方法获取执行结果，该方法会阻塞直到任务返回结果。
+Future相关的几个核心方法：
+- boolean cancel (boolean mayInterruptIfRunning) 取消任务的执行。参数指定是否立即中断任务执行，或者等等任务结束
+- boolean isCancelled () 任务是否已经取消，任务正常完成前将其取消，则返回true
+- boolean isDone () 任务是否已经完成。需要注意的是如果任务正常终止、异常或取消，都将返回true
+- V get () throws InterruptedException, ExecutionException 等待任务执行结束，然后获得V类型的结果。InterruptedException 线程被中断异常，ExecutionException任务执行异常，如果任务被取消，还会抛出CancellationException
+- V get (long timeout, TimeUnit unit) throws InterruptedException,ExecutionException, TimeoutException 同上面的get功能一样，多了设置超时时间。参数timeout指定超时时间，uint指定时间的单位，在枚举类TimeUnit中有相关的定义。如果计算超时，将抛出TimeoutException
+
+#### Future使用注意事项
+- 当 for 循环批量获取 Future 的结果时容易 block，get 方法调用时应使用 timeout限制
+- Future 的生命周期不能后退。一旦完成了任务，它就永久停在了“已完成”的状态，不能从头再来
+
+#### Future的局限性
+从本质上说，Future表示一个异步计算的结果。**它提供了isDone()来检测计算是否已经完成，并且在计算结束后，可以通过get()方法来获取计算结果。**
+在异步计算中，Future确实是个非常优秀的接口。但是，它的本身也确实存在着许多限制：
+- **并发执行多任务**：Future只提供了get()方法来获取结果，并且是阻塞的。所以，除了等待你别无他法；
+- **无法对多个任务进行链式调用**：如果你希望在计算任务完成后执行特定动作，比如发邮件，但Future却没有提供这样的能力；
+- **无法组合多个任务**：如果你运行了10个任务，并期望在它们全部执行结束后执行特定动作，那么在Future中这是无能为力的；
+- **没有异常处理**：Future接口中没有关于异常处理的方法；
+
+
+#### CompletionService
+Callable+Future 可以实现多个task并行执行，但是如果遇到前面的task执行较慢时需要阻塞等待前面的task执行完后面task才能取得结果。**而CompletionService的主要功能就是一边生成任务,一边获取任务的返回值。**让两件事分开执行,任务之间不会互相阻塞，可以实现先执行完的先取结果，不再依赖任务顺序了。
+##### 原理
+内部通过阻塞队列+FutureTask：**实现了任务先完成可优先获取到**，即结果按照完成先后顺序排序，先进先出的阻塞队列，用于保存已经执行完成的Future，通过调用它的take方法或poll方法可以获取到一个已经执行完成的Future，进而通过调用Future接口实现类的get方法获取最终的结果
+##### 应用场景
+- **当需要批量提交异步任务的时候建议你使用CompletionService**：CompletionService将线程池Executor和阻塞队列BlockingQueue的功能融合在了一起，能够让批量异步任务的管理更简单。
+- **CompletionService能够让异步任务的执行结果有序化**：先执行完的先进入阻塞队列，利用这个特性，你可以轻松实现后续处理的有序性，避免无谓的等待，同时还可以快速实现诸如Forking Cluster这样的需求。
+- **线程池隔离**：CompletionService支持自己创建线程池，这种隔离性能避免几个特别耗时的任务拖垮整个应用的风险。
+
+#### CompletableFuture
+CompletableFuture是Future接口的扩展和增强。CompletableFuture实现了Future接口，并在此基础上进行了丰富地扩展，完美地弥补了Future上述的种种问题。更为重要的是，**CompletableFuture实现了对任务的编排能力**。
+借助这项能力，我们**可以轻松地组织不同任务的运行顺序、规则以及方式**。从某种程度上说，这项能力是它的核心能力。而在以往，虽然通过CountDownLatch等工具类也可以实现任务的编排，但需要复杂的逻辑处理，不仅耗费精力且难以维护。
+##### 应用场景
+###### 描述依赖关系
+1. thenApply() 把前面异步任务的结果，交给后面的Function
+2. thenCompose()用来连接两个有依赖关系的任务，结果由第二个任务返回
+###### 描述and聚合关系
+1. thenCombine:任务合并，有返回值
+2. thenAccepetBoth:两个任务执行完成后，将结果交给thenAccepetBoth消耗，无返回值。
+3. runAfterBoth:两个任务都执行完成后，执行下一步操作（Runnable）。
+###### 描述or聚合关系
+1. applyToEither:两个任务谁执行的快，就使用那一个结果，有返回值。
+2. acceptEither: 两个任务谁执行的快，就消耗那一个结果，无返回值。
+3. runAfterEither: 任意一个任务执行完成，进行下一步操作(Runnable)。
+###### 并行执行
+CompletableFuture类自己也提供了anyOf()和allOf()用于支持多个CompletableFuture并行执行
+
+### Disruptor原理剖析
+Disruptor是英国外汇交易公司LMAX开发的一个高性能队列，研发的初衷是解决内存队列的延迟问题（在性能测试中发现竟然与I/O操作处于同样的数量级）。
+#### juc并发类存在的问题
+- juc下的队列**大部分采用加ReentrantLock锁**方式保证线程安全。在稳定性要求特别高的系统中，为了防止生产者速度过快，导致内存溢出，只能选择有界队列。
+- 加锁的方式通常会严重影响性能。线程会因为竞争不到锁而被挂起，等待其他线程释放锁而唤醒，这个过程存在很大的开销，而且存在死锁的隐患。
+- 有界队列通常采用数组实现。但是采用数组实现又会引发另外一个问题false sharing(伪共享)。
+
+#### Disruptor的设计方案
+Disruptor通过以下设计来解决队列速度慢的问题：
+- **环形数组结构**：为了避免垃圾回收，采用数组而非链表。同时，数组对处理器的缓存机制更加友好（空间局
+部性原理）。
+- **元素位置定位：** 数组长度2^n，通过位运算，加快定位的速度。下标采取递增的形式。不用担心index溢出的问题。index是long类型，即使100万QPS的处理速度，也需要30万年才能用完。
+- **无锁设计：** 每个生产者或者消费者线程，会先申请可以操作的元素在数组中的位置，申请到之后，直接在该位置写入或者读取数据。
+- **利用缓存行填充解决了伪共享的问题**
+- **实现了基于事件驱动的生产者消费者模型（观察者模式）**：消费者时刻关注着队列里有没有消息，一旦有新消息产生，消费者线程就会立刻把它消费
+
+##### RingBuffer数据结构
+使用RingBuffer来作为队列的数据结构，RingBuffer就是一个可自定义大小的环形数组。除数组外还有一个序列号(sequence)，用以指向下一个可用的元素，供生产者与消费者使用。
+原理如下图所示：
+![RingBuffer结构示意图](181e5700/RingBuffer结构示意图.jpg)
+其中：
+- **Disruptor要求设置数组长度为2的n次幂。**在知道索引(index)下标的情况下，存与取数组上的元素时间复杂度只有O(1)，而这个index我们可以通过序列号与数组的长度取模来计算得出，index=sequence % entries.length。也可以用位运算来计算效率更高，此时array.length必须是2的幂次方，**index=sequece&(entries.length-1)**
+- 当所有位置都放满了，再放下一个时，就会把0号位置覆盖掉
+
+当出现数据覆盖的时候，Disruptor会执行一个策略，Disruptor提供了多种策略：
+- **BlockingWaitStrategy策略，常见且默认的等待策略**，当这个队列里满了，**不执行覆盖，而是阻塞等待**。使用ReentrantLock+Condition实现阻塞，最节省cpu，但高并发场景下性能最差。适合CPU资源紧缺，吞吐量和延迟并不重要的场景
+- **SleepingWaitStrategy策略，会在循环中不断等待数据**。先进行自旋等待如果不成功，则使用Thread.yield()让出CPU,并最终使用LockSupport.parkNanos(1L)进行线程休眠，以确保不占用太多的CPU资源。因此这个策略会产生比较高的平均延时。**典型的应用场景就是异步日志**。
+- **YieldingWaitStrategy策略，这个策略用于低延时的场合**。消费者线程会不断循环监控缓冲区变化，在循环内部使用Thread.yield()让出CPU给别的线程执行时间。如果需要一个高性能的系统，并且对延时比较有严格的要求，可以考虑这种策略。个高性能的系统，并且对延时比较有严格的要求，可以考虑这种策略。
+- **BusySpinWaitStrategy策略: 采用死循环，消费者线程会尽最大努力监控缓冲区的变化**。对延时非常苛刻的场景使用，cpu核数必须大于消费者线程数量。推荐在线程绑定到固定的CPU的场景下使用
+
+##### 使用代码示例
+参考：https://github.com/nimbusking/CoreJavaSample/tree/main/src/main/java/cc/nimbusk/corejava/concurent/disruptor
 
 
 ## 设计模式相关
+### 终止线程的设计模式
+*思考：在一个线程 T1 中如何正确安全的终止线程 T2？*
+**错误思路1：使用线程对象的 stop() 方法停止线程**
+stop 方法会真正杀死线程，如果这时线程锁住了共享资源，那么当它被杀死后就再也没有机会释放锁， 其它线程将永远无法获取锁 。
+**错误思路2：使用 System.exit(int) 方法停止线程**
+目的仅是停止一个线程，但这种做法会让整个程序都停止正确思路：利用Java线程的中断机制
 
-## JDK8下的JUC包相关
+### Two-phase Termination（两阶段终止）模式
+**优雅的终止线程**
+**将终止过程分成两个阶段**：其中第一个阶段主要是线程 T1 向线程 T2发送终止指令，而第二阶段则是线程 T2响应终止指令。
+Java 线程进入终止状态的**前提是线程进入 RUNNABLE 状态**，而利用java线程中断机制的**interrupt() 方法**，可以让线程从休眠状态转换到RUNNABLE 状态。
+RUNNABLE 状态转换到终止状态，优雅的方式是让 Java 线程自己执行完 run() 方法，所以一般我们采用的方法是设置一个标志位，然后线程会在合适的时机检查这个标志位，如果发现符合终止条件，则自动退出run() 方法。
+#### 需要注意的点
+- 一个是仅检查终止标志位是不够的，因为线程的状态可能处于休眠态；
+- 另一个是仅检查线程的中断状态也是不够的，因为我们依赖的第三方类库很可能没有正确处理中断异常，例如第三方类库在捕获到 Thread.sleep() 方法抛出的中断异常后，没有重新设置线程的中断状态，那么就会导致线程不能够正常终止。所以我们**可以自定义线程的终止标志位用于终止线程**。
+#### 使用场景
+1. 安全地终止线程，比如释放该释放的资源
+2. 要确保终止处理逻辑在线程结束之前一定会执行时，可使用该方法
+
+#### 使用示例
+```java
+public class MonitorProxy2 {
+    boolean started = false;
+    //采集线程
+    Thread rptThread;
+
+    //线程终止标志位
+    volatile boolean terminated = false;
+
+    //启动采集功能
+    synchronized void start() {
+        //不允许同时启动多个采集线程
+        if (started) {
+            return;
+        }
+        started = true;
+        rptThread = new Thread(() -> {
+
+            while (!Thread.currentThread().isInterrupted() && !terminated) {
+                //省略采集、回传实现
+                report();
+                //每隔两秒钟采集、回传一次数据
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    // 重新设置线程中断状态，
+                    // 如果这里不采用第二个标志位terminated的话，这里一定要手动还原中断标志位，否则会挑不出循环
+                    // 因为Thread.sleep方法调用后，会清除中断标志位，清除后isInterrupted方法调用永远返回false
+                    //Thread.currentThread().interrupt();
+                }
+            }
+            //执行到此处说明线程马上终止
+            started = false;
+        });
+        rptThread.start();
+    }
+
+    private void report() {
+        System.out.println("采集数据");
+    }
+
+    //终止采集功能
+    synchronized void stop() {
+        //设置中断标志位
+        terminated = true;
+        rptThread.interrupt();
+    }
+
+
+    public static void main(String[] args) {
+        MonitorProxy2 monitor = new MonitorProxy2();
+        monitor.start();
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        monitor.stop();
+    }
+
+}
+```
+
+### 避免共享的设计模式
+Immutability模式，Copy-on-Write模式，Thread-Specific Storage模式**本质上都是为了避免共享**。
+- 使用时需要注意Immutability模式的属性的不可变性
+- Copy-on-Write模式需要注意拷贝的性能问题
+- Thread-Specific Storage模式需要注意异步执行问题。
+#### Immutability模式
+“多个线程同时读写同一共享变量存在并发问题”，这里的必要条件之一是读写，**如果只有读，而没有写，是没有并发问题的**。解决并发问题，其实最简单的办法就是让共享变量只有读操作，而没有写操作。
+所谓不变性，简单来讲，就是对象一旦被创建之后，状态就不再发生变化。换句话说，就是变量一旦被赋值，就不允许修改了（没有写操作）；没有修改操作，也就是保持了不变性。
+
+##### 如何实现
+将一个类所有的属性都设置成 final 的，并且只允许存在只读方法，那么这个类基本上就具备不可变性了。更严格的做法是这个类本身也是 final 的，也就是不允许继承。
+
+#### Copy-on-Write模式
+Java 里 String 在实现 replace() 方法的时候，并没有更改原字符串里面 value[]数组的内容，而是创建了一个新字符串，这种方法在解决不可变对象的修改问题时经常用到。它本质上是一种 Copy-on-Write 方法。所谓 Copy-on-Write，经常被缩写为 *COW* 或者 *CoW*，顾名思义就是**写时复制**。
+不可变对象的写操作往往都是使用 Copy-on-Write 方法解决的，当然 Copy-on-Write 的应用领域并不局限于 Immutability 模式。
+**Copy-on-Write 缺点就是消耗内存**，每次修改都需要复制一个新的对象出来，好在随着自动垃圾回收（GC）算法的成熟以及硬件的发展，这种内存消耗已经渐渐可以接受了。所以在实际工作中，如果写操作非常少（读多写少的场景），可以尝试使用 Copy-on-Write。
+
+##### 应用场景
+在Java中，**CopyOnWriteArrayList** 和 **CopyOnWriteArraySet** 这两个 Copy-on-Write容器，它们背后的设计思想就是 Copy-on-Write；通过 Copy-on-Write 这两个容器实现的读操作是无锁的，由于无锁，所以将读操作的性能发挥到了极致。
+```java
+// java.util.concurrent.CopyOnWriteArrayList#add(int, E)
+public void add(int index, E element) {
+        // 这段CopyOnWriteArrayList中心中的代码，就是用了一个ReentrantLock独占锁
+        final ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            Object[] elements = getArray();
+            int len = elements.length;
+            if (index > len || index < 0)
+                throw new IndexOutOfBoundsException("Index: "+index+
+                                                    ", Size: "+len);
+            Object[] newElements;
+            int numMoved = len - index;
+            if (numMoved == 0)
+                newElements = Arrays.copyOf(elements, len + 1);
+            else {
+                // 扩容
+                newElements = new Object[len + 1];
+                // 拷贝
+                System.arraycopy(elements, 0, newElements, 0, index);
+                System.arraycopy(elements, index, newElements, index + 1,
+                                 numMoved);
+            }
+            // 新增
+            newElements[index] = element;
+            setArray(newElements);
+        } finally {
+            lock.unlock();
+        }
+    }
+```
+Copy-on-Write 在操作系统领域也有广泛的应用。类 Unix 的操作系统中创建进程的 API是 fork()，传统的 fork() 函数会创建父进程的一个完整副本，例如父进程的地址空间现在用到了 1G 的内存，那么 fork() 子进程的时候要复制父进程整个进程的地址空间（占有 1G 内存）给子进程，这个过程是很耗时的。
+而**Linux 中fork() 子进程的时候，并不复制整个进程的地址空间**，而是让父子进程共享同一个地址空间；只用在父进程或者子进程需要写入的时候才会复制地址空间，从而使父子进程拥有各自的地址空间。
+Copy-on-Write 最大的应用领域还是在函数式编程领域。函数式编程的基础是不可变性（Immutability），所以函数式编程里面所有的修改操作都需要 Copy-on-Write 来解决。
+像一些RPC框架还有服务注册中心（*例如阿里的nacos*），也会利用Copy-on-Write设计思想维护服务路由表。路由表是典型的读多写少，而且路由表对数据的一致性要求并不高，一个服务提供方从上线到反馈到客户端的路由表里，即便有 5 秒钟延迟，很多时候也都是能接受的。
+
+### Thread-Specific Storage 模式
+Thread-Specific Storage（线程本地存储） 模式是一种即使只有一个入口，也会在内部为每个线程分配特有的存储空间的模式。在 Java 标准类库中，**ThreadLocal 类实现了该模式**。
+**线程本地存储模式本质上是一种避免共享的方案**，由于没有共享，所以自然也就没有并发问题。如果你需要在并发场景中使用一个线程不安全的工具类，最简单的方案就是避免共享。
+避免共享有两种方案，**一种方案是将这个工具类作为局部变量使用，另外一种方案就是线程本地存储模式**。
+这两种方案，局部变量方案的缺点是在高并发场景下会频繁创建对象，而线程本地存储方案，每个线程只需要创建一个工具类的实例，**所以不存在频繁创建对象**的问题。
+
+### 多线程版本的if模式
+Guarded Suspension模式和Balking模式属于多线程版本的if模式
+- Guarded Suspension模式需要注意性能。
+- Balking模式需要注意竞态问题。上面的MonitorProxy2代码里的start变量就是这种模式的写法。
+#### Guarded Suspension模式
+Guarded Suspension 模式是**通过让线程等待来保护实例的安全性**，即**守护-挂起模式**。在多线程开发中，常常为了提高应用程序的并发性，会将一个任务分解为多个子任务交给多个线程并行执行，而多个线程之间相互协作时，*仍然会存在一个线程需要等待另外的线程完成后继续下一步操作*。而Guarded Suspension模式可以帮助我们解决上述的等待问题。
+
+Guarded Suspension 模式允许多个线程对实例资源进行访问，但是实例资源需要对资源的分配做出管理。
+
+Guarded Suspension 模式也常被称作 Guarded Wait 模式、Spin Lock 模式（因为使用了 while 循环去等待），它还有一个更形象的非官方名字：**多线程版本的 if**。
+
+##### 实现场景
+- 有一个结果需要从一个线程传递到另一个线程，让他们**关联同一个 GuardedObject**
+- 如果有结果不断从一个线程到另一个线程那么**可以使用消息队列**
+- JDK 中，join 的实现、Future 的实现，采用的就是此模式
+- 因为要等待另一方的结果，因此归类到**同步模式**
+- 等待唤醒机制的规范实现。此模式依赖于Java线程的阻塞唤醒机制：
+    - sychronized + wait/notify/notifyAll
+    - reentrantLock + Condition(await/singal/singalAll)
+    - cas+park/unpark
+    
+##### 应用场景
+- 多线程环境下多个线程访问相同实例资源，从实例资源中获得资源并处理；
+- 实例资源需要管理自身拥有的资源，并对请求线程的请求作出允许与否的判断；
+
+#### Balking模式
+Balking是“退缩不前”的意思。**如果现在不适合执行这个操作，或者没必要执行这个操作，就停止处理，直接返回。**当流程的执行顺序依赖于某个共享变量的场景，可以归纳为多线程if模式。Balking 模式常用于一个线程发现另一个线程已经做了某一件相同的事，那么本线程就无需再做了，直接结束返回。
+**Balking模式和Guarded Suspension模式一样，存在守护条件，如果守护条件不满足，则中断处理**；这与Guarded Suspension模式不同，Guarded Suspension模式在守护条件不满足的时候会一直等待至可以运行。
+
+##### 实现场景
+- 锁机制 （synchronized reentrantLock）
+- CAS
+- 对于共享变量不要求原子性的场景，可以使用volatile
+
+##### 应用场景
+- sychronized轻量级锁膨胀逻辑， 只需要一个线程膨胀获取monitor对象
+- DCL单例实现
+- 服务组件的初始化
+
+### 多线程分工模式
+Thread-Per-Message 模式、Worker Thread 模式和生产者 - 消费者模式属于多线程分工模式。
+- Thread-Per-Message 模式需要注意线程的创建，销毁以及是否会导致OOM。
+- Worker Thread 模式需要注意死锁问题，提交的任务之间不要有依赖性。
+- 生产者 - 消费者模式可以直接使用线程池来实现
+#### Thread-Per-Message 模式
+Thread-Per-Message 模式就是为每个任务分配一个独立的线程，这是一种最简单的分工方法。
+##### 应用场景
+Thread-Per-Message 模式的**一个最经典的应用场景是网络编程里服务端的实现**，服务端为每个客户端请求创建一个独立的线程，当线程处理完请求后，自动销毁，这是一种最简单的并发处理网络请求的方法。
+
+Thread-Per-Message 模式作为一种最简单的分工方案，Java 中使用会存在性能缺陷。**在Java 中的线程是一个重量级的对象，创建成本很高**，一方面创建线程比较耗时，另一方面线程占用的内存也比较大。所以为每个请求创建一个新的线程并不适合高并发场景。为了解决这个缺点，Java 并发包里提供了线程池等工具类。
+#### Worker Thread模式
+要想有效避免线程的频繁创建、销毁以及 OOM 问题，就不得不提 Java 领域使用最多的Worker Thread 模式
+##### 应用场景
+Worker Thread 模式能避免线程频繁创建、销毁的问题，而且能够限制线程的最大数量。**Java 语言里可以直接使用线程池来实现** Worker Thread 模式，线程池是一个非常基础和优秀的工具类，甚至有些大厂的编码规范都不允许用 new Thread() 来创建线程，必须使用线程池。
+
+#### 生产者 - 消费者模式
+生产者 - 消费者模式的核心是：**一个任务队列，生产者线程生产任务，并将任务添加到任务队列中，而消费者线程从任务队列中获取任务并执行**。
+![生产者消费者模式](181e5700/生产者消费者模式.jpg)
+##### 模式优点
+1. **支持异步处理**
+例子：用户注册后，需要发注册邮件和注册短信。传统的做法有两种 1.串行的方式；2.并行方式，如下图所示：
+![传统模式](181e5700/2024-11-02_160057.jpg)
+引入消息队列后：
+![引入消息队列后](181e5700/2024-11-02_160137.jpg)
+
+
+2. **解耦**
+场景：用户下单后，订单系统需要通知库存系统扣减库存。
+![解耦](181e5700/2024-11-02_160219.jpg)
+
+3. **可以消除生产者生产与消费者消费之间速度差异（削峰填谷）**
+例如：
+![速度差异的处理](181e5700/2024-11-02_160251.jpg)
+
+##### 过饱问题解决方案
+在实际生产项目中会有些极端的情况，导致生产者/消费者模式可能出现过饱的问题。**单位时间内，生产者生产的速度大于消费者消费的速度，导致任务不断堆积到阻塞队列中，队列堆满只是时间问题**。
+通常处理的方案：
+- 消费者机器扩容，增加消费能力
+- 适当的增加队列容量，提升冗余能力
+- 生产者限流：降低生产者速度
