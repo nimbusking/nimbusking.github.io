@@ -22,7 +22,7 @@ categories: MySQL
 
 #### InnoDB架构图
 补充一张5.7下面的架构图
-![InnoDB Structure](109c2b6b/InnoDB Structure.jpg)
+![InnoDB Structure](109c2b6b/InnoDBStructure.jpg)
 
 ### InnoDB记录存储结构
 
