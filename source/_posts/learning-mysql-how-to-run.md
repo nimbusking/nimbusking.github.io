@@ -712,8 +712,7 @@ select * from single_table where key1='abc' and key2 > 1000;
 ###### 关于MRR优化
 
 MySQL中使用了一种名为Disk-Sweep Multi-Range Read(MRR, 多范围读取)的优化措施，来减少上述场景中的随机I/O开销。更多细节，请参考MySQL官方文档相关说明：
-
-[Multi-Range Read Optimization]: https://dev.mysql.com/doc/refman/5.7/en/mrr-optimization.html
+[Multi-Range Read Optimization](https://dev.mysql.com/doc/refman/5.7/en/mrr-optimization.html)
 
 ##### 索引合并
 
