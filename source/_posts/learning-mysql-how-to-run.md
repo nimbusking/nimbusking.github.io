@@ -147,7 +147,7 @@ PS：你可能问为什么要这样做？*有说法是说跟概率学中的泊�
 页类型的分类：
 | 类型名称        | 十六进制           | 描述  |
 | ------------- |:-------------:|:-------------:|
-|  FIL_PAGE_TYPE_ALLOCATED      |0x0000 | 最新分配，还未使用 |
+|  FIL_PAGE_TYPE_ALLOCATED      | 0x0000 | 最新分配，还未使用 |
 | FIL_PAGE_UNDO_LOG      | 0x0002      |   undo日志页 |
 | FIL_PAGE_INODE     | 0x0003      |   存储段信息 |
 | FIL_PAGE_IBUF_FREE_LIST      | 0x0004      |   Change Buffer空闲列表 |
