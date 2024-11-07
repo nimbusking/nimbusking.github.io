@@ -25,7 +25,11 @@ categories: 站点
 ### 我的目前的方案
 - markdown源文章、相关配置文件，托管在 **Github**
 - Hexo自动编译&部署相关，托管在 **~~TravisCI~~** **GitHub Actions**
-- 站点、站点https证书等部署相关，托管在 **Netlify**
+- ~~站点、站点https证书等部署相关，托管在 **Netlify**~~
+- 【2024.11】更新，去除Netlify方案
+  - 直接使用github pages自己的部署方案
+  - 同时设置github pages自定义域名强制启用https
+  - DNSPOD域名解析直接指向github
 #### 这个方案目前的优点
 - 编译环境不再依赖你的本地环境，你只需要关注你的文章。即便是换了电脑，你只需要把你的文章，从github上clone下来即可。
 - 站点不需要你关系细节，什么HTTPS、什么证书等等
@@ -56,6 +60,7 @@ npm install hexo-algolia --save
 - config.yml 博客的主体配置文件
 
 ##### 已经更新托管到Github Actions了
+直接站内搜github actions即可，参考最新的部署脚本
 ##### ~~travis部署脚本~~
 ~~在这里贴一下，细节看我另外一篇文章~~
 
