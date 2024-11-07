@@ -12,12 +12,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: 检查分支
-      uses: actions/checkout@v4
+      uses: actions/checkout@v2
       with:
         ref: master
 
     - name: 安装 Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v2
       with:
         node-version: "20.x"
 
@@ -42,7 +42,6 @@ jobs:
     - name: 安装依赖
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        npm cache clean --force
         npm install hexo-theme-next --save
         npm install hexo-deployer-git --save
         npm install hexo-generator-searchdb --save
