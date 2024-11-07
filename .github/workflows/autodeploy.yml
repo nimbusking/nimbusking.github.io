@@ -42,6 +42,7 @@ jobs:
     - name: 安装依赖
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
+        rm -r node_modules
         npm install hexo-theme-next --save
         npm install hexo-deployer-git --save
         npm install hexo-generator-searchdb --save
