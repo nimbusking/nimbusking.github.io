@@ -7,7 +7,8 @@ tags:
     - NIO
     - IO多路复用
     - 网络通信
-updated: 2024-10-28 20:30:21categories: 网络编程
+updated: 2024-10-28 20:30:21
+categories: 网络编程
 ---
 
 ## 前言
@@ -72,7 +73,7 @@ public class NioSelectorServer {
 - NIO 的 Buffer 和 channel 都是既可以读也可以写
 
 对应通讯示意图如下图所示：
-![JDK-NIO通信模型](65d26b16/JDK-NIO通信模型.jpg)
+![JDK-NIO通信模型](post/65d26b16/JDK-NIO通信模型.jpg)
 NIO底层在JDK1.4版本是用linux的内核函数select()或poll()来实现，selector每次都会轮询所有的sockchannel看下哪个channel有读写事件，有的话就处理，没有就继续遍历。
 **JDK1.5开始引入了epoll基于事件响应机制来优化NIO。**
 
@@ -84,7 +85,7 @@ socketChannel.register() //将channel注册到多路复用器上
 selector.select() //阻塞等待需要处理的事件发生
 ```
 从Hotspot与Linux内核函数级别来理解下，大体对应主要工作流程如下：
-![底层流程](65d26b16/底层流程.jpg)
+![底层流程](post/65d26b16/底层流程.jpg)
 
 
 **总结：**NIO整个调用流程就是Java调用了操作系统的内核函数来创建Socket，获取到Socket的文件描述符，再创建一个Selector对象，对应操作系统的Epoll描述符。
@@ -93,7 +94,7 @@ selector.select() //阻塞等待需要处理的事件发生
 
 ## Linux下的epoll函数
 I/O多路复用底层主要用的Linux 内核函数（select，poll，epoll）来实现，windows不支持epoll实现，windows底层是基于winsock2的select函数实现的(不开源)
-![linux-pool-epoll比较](65d26b16/linux-pool-epoll.png)
+![linux-pool-epoll比较](post/65d26b16/linux-pool-epoll.png)
 
 
 ## Netty使用
@@ -238,13 +239,13 @@ public class ChatClientHandler extends SimpleChannelInboundHandler<String> {
 ### Netty线程模型
 这里穿插一下关于响应式编程中（Doug Lea）提到的关于主从Reactor模型的含义：
 **其实完全可以看作一种多级缓存的概念，增加了一道缓冲，以免造成单一线程池压力【对比上文中的nio程序】**
-![multi_reactors](65d26b16/mutil_reactors.png)
+![multi_reactors](post/65d26b16/mutil_reactors.png)
 
 看上面的例子中的服务端实现，new了两个netty的```NioEventLoopGroup```，就是这种思想。
 **当然，延申出来可以做成“一主多从”，即多个从Reactor模型**
 
 概况起来，netty的工作架构示意图：
-![netty-reactor工作架构图](65d26b16/netty-reactor工作架构图.png)
+![netty-reactor工作架构图](post/65d26b16/netty-reactor工作架构图.png)
 
 ### Netty核心功能
 #### 编解码机制
@@ -253,7 +254,7 @@ Netty提供了一系列实用的编码解码器，他们都实现了**ChannelInb
 Netty提供了很多编解码器，比如编解码字符串的StringEncoder和StringDecoder，编解码对象的ObjectEncoder和ObjectDecoder等。
 **注：**不同方向的编解码器是有规律注册（继承了Outbound/Inboundhandler）好的，出站编码，入站解码。
 下方图为Channle工作示意图：
-![netty-channel](65d26b16/netty-channel.png)
+![netty-channel](post/65d26b16/netty-channel.png)
 ##### ChannelHandler
 ChannelHandler充当了处理入站和出站数据的应用程序逻辑容器。
 例如，实现ChannelInboundHandler接口（或ChannelInboundHandlerAdapter），你就可以接收入站事件和数据，这些数据随后会被你的应用程序的业务逻辑处理。
@@ -267,7 +268,7 @@ ChannelPipeline提供了ChannelHandler链的容器。
 TCP是一个流协议，就是没有界限的一长串二进制数据。
 TCP作为传输层协议并不不了解上层业务数据的具体含义，它会根据TCP缓冲区的实际情况进行数据包的划分，所以在业务上认为是一个完整的包，可能会被TCP拆分成多个包进行发送，也有可能把多个小的包封装成一个大的数据包发送，这就是所谓的**TCP粘包和拆包**问题。**面向流的通信是无消息保护边界的。**
 如下图所示，client发了两个数据包D1和D2，但是server端可能会收到如下几种情况的数据：
-![TCP粘包-拆包示意](65d26b16/TCP粘包-拆包示意.png)
+![TCP粘包-拆包示意](post/65d26b16/TCP粘包-拆包示意.png)
 常用的解决方案：
 1) **消息定长度**，传输的数据大小固定长度，例如每段的长度固定为100字节，如果不够空位补空格
 2) 在**数据包尾部添加特殊分隔符**，比如下划线，中划线等，这种方法简单易行，但选择分隔符的时候一定要注意每条数据的内部一定不能出现分隔符。
@@ -277,12 +278,12 @@ TCP作为传输层协议并不不了解上层业务数据的具体含义，它�
 - DelimiterBasedFrameDecoder （特殊分隔符分包）
 - FixedLengthFrameDecoder （固定长度报文来分包）
 以DelimiterBasedFrameDecoder为例，在IDEA中查看类继承图谱：
-![DelimiterBasedFrameDecoder继承图谱](65d26b16/DelimiterBasedFrameDecoder继承图谱.png)
+![DelimiterBasedFrameDecoder继承图谱](post/65d26b16/DelimiterBasedFrameDecoder继承图谱.png)
 **继承了来自一个抽象类：ByteToMessageDecoder**，归纳有两组抽象类：
 - ByteToMessageDecoder/MessageToByteEncoder
 - MessageToMessageDecoder/MessageToMessageEncoder
 这两组抽象类，抽象了关于解码器的众多细节，由这两组抽象类衍生的，netty实现了非常多的解码器组件，如下图所示（4.1.35版本，后续版本的netty将code包单独独立出pom依赖分支，不再柔和在一个包里面了，注意一下）：
-![netty-codec-package](65d26b16/netty-codec-package.png)
+![netty-codec-package](post/65d26b16/netty-codec-package.png)
 
 #### 心跳检测机制
 IdleStateHandler

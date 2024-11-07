@@ -7,7 +7,8 @@ tags:
     - MCN
     - 商业合同
     - 互联网B面
-updated: 2024-10-28 20:30:21categories: B站
+updated: 2024-10-28 20:30:21
+categories: B站
 ---
 
 ### 概要
@@ -45,9 +46,9 @@ A multi-channel network (MCN) is an organization that works with video platforms
 先上截图：
 ![xmind截图](e3d04027/mcn_xmind.jpg)
 文稿基于半佛老师视频截图，加上部分个人格式上的整理而出，添加了一些剪切画，如：数字序号等
-[文稿全图](e3d04027/MCN避坑指南.jpg)
-[XMind附件下载](e3d04027/MCN闭坑指南.xmind)
-[Mindmanager版本下载](e3d04027/MCN闭坑指南.mmap)
+[文稿全图](post/e3d04027/MCN避坑指南.jpg)
+[XMind附件下载](post/e3d04027/MCN闭坑指南.xmind)
+[Mindmanager版本下载](post/e3d04027/MCN闭坑指南.mmap)
 Mindmanager在线预览图
 
 

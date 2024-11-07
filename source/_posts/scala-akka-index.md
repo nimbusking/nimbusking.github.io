@@ -4,7 +4,8 @@ mathjax: false
 tags:
   - Scala
   - Akka
-updated: 2024-10-28 20:30:21categories: Scala系列
+updated: 2024-10-28 20:30:21
+categories: Scala系列
 abbrlink: b709cacd
 date: 2018-08-17 00:06:18
 ---
@@ -37,7 +38,7 @@ date: 2018-08-17 00:06:18
 书中写的很有意思：如果读者早已熟稔Scala 的Future，Play 的Promise或是Java8的CompletableFuture，那么可以跳过本章。如果曾经使用过Guava 或Spring 的ListenableFuture，可能需要了解本章所介绍API的不同之处。如果从来没有使用过monadic风格的Future，那就需要花点时间学习一下本章了。
 对于我来说，还真是一个都不懂。。。
 #### 响应式系统设计
-源自一个响应式宣言（Reactive Manifesto /ˌmanəˈfestō/，有些地方翻译为反应时宣言，一个意思。），原文在这里[the-reactive-manifesto-2.0](b709cacd/the-reactive-manifesto-2.0.pdf) ，这里面提到了四个准则：
+源自一个响应式宣言（Reactive Manifesto /ˌmanəˈfestō/，有些地方翻译为反应时宣言，一个意思。），原文在这里[the-reactive-manifesto-2.0](post/b709cacd/the-reactive-manifesto-2.0.pdf) ，这里面提到了四个准则：
 ##### 灵敏性
 应用程序应该尽可能快地对请求做出响应。
 ##### 伸缩性
@@ -168,7 +169,7 @@ future.onComplete(username =>
 **注意：**从线程的角度来看，代码首先会调用方法，然后进入该方法内部，接着几乎立即返回一个Future/CompletableFuture。返回的这个结果只是一个占位符，真正的值在未来某个时刻最终会返回到这个占位符内。
 需要理解的是：**该方法会立即返回，而数据库调用及结果的生成是在另一个线程上执行的。ExecutionContext 表示了执行这些操作的线程，我们将在本书后面的章节中对此进行介绍。（在Akka 中，可以看到ActorSystem 中有一个dispatcher，就是ExecutionContext 的一种实现。）**
 方法返回Future之后，我们只得到了一个承诺，表示真正的值最终会返回到Future中。我们并不希望发起调用的线程等待返回结果，而是希望其在真正的结果返回后再执行特定的操作（打印到控制台）。**在一个事件驱动的系统中，需要做的就是描述某个事件发生时需要执行的代码。**在Actor中，描述接收到某个消息时进行的操作。同样地，在Future中，我们描述Future 的值真正可用时进行的操作。在Java 8中，使用thenRun来注册事件成功完成时需要执行的代码；而在Scala中，使用onComplete。
-![non-blocking-IO](b709cacd/non-blocking-IO.jpg)
+![non-blocking-IO](post/b709cacd/non-blocking-IO.jpg)
 **打印语句并不会运行在进行事件注册的线程上。它会运行在另一个线程上，该线程信息由ExecutionContext 维护。Future 永远是通过Execution Context来创建的，因此我们可以选择在哪里运行Future 中真正需要执行的代码。**
 
 在书中提到了，如果你对Java8的Lambda表达式不是很清楚，可以参考oracle官方的教程，来学习一下：[Java SE 8: Lambda Quick Start](https://www.oracle.com/webfolder/technetwork/tutorials/obe/java/Lambda-QuickStart/index.html)
@@ -355,7 +356,7 @@ val futureOfList: Future[List[String]] = Future.sequence(listOfFutures)
 
 ##### Future速查表
 **注：** 在书中提到的本小节涉及的一些Future操作
-![Future操作对应表](b709cacd/future_collection_scala_java.png)
+![Future操作对应表](post/b709cacd/future_collection_scala_java.png)
 
 ### 第三章 传递消息
 了解不同的消息模式，也就是在不同Actor 之间传递消息的不同方法。
@@ -370,7 +371,7 @@ val futureOfList: Future[List[String]] = Future.sequence(listOfFutures)
 Ask模式会生成一个Future，表示Actor返回的响应。ActorSystem外部的普通对象与Actor进行通信时经常会使用这种模式。
 **实际运作模式**
 在调用ask 向Actor 发起请求时，Akka 实际上会在Actor 系统中创建一个临时Actor。接收请求的Actor 在返回响应时使用的sender()引用就是这个临时Actor。当一个Actor接收到ask 请求发来的消息并返回响应时，这个临时Actor 会使用返回的响应来完成Future。如下图所示：
-![Ask模式](b709cacd/ask_communication.png)
+![Ask模式](post/b709cacd/ask_communication.png)
 Ask模式要求定义一个超时参数，如果对方没有在超时参数限定的时间内返回这个ask的响应，那么Future就会返回失败。在Java中可以使用akka.util.Timeout来定义：
 ```java
 static import akka.pattern.Patterns.ask;
@@ -391,19 +392,19 @@ val future = actorRef ? "message"
 
 ##### Tell
 Tell是最简单的消息模式，不过要花上一些时间才能够学会这种模式的最佳实践。这也是为什么我们先介绍ask，再介绍tell的原因。Tell 通常被看做是一种“fire and forget”消息传递机制，无需指定发送者。不过通过一些巧妙的方法，也可以使用tell来完成“request/reply”风格的消息传递。如下图所示：
-![Tell模式](b709cacd/tell_communication.png)
+![Tell模式](post/b709cacd/tell_communication.png)
 **Tell是ActorRef/ActorSelection 类的一个方法。它也可以接受一个响应地址作为参数，接收消息的Actor 中的sender()其实就是这个响应地址。** 在Scala 中，默认情况下，sender会被隐式定义为发送消息的Actor。如果没有sender（如在Actor 外部发起请求），那么响应地址不会默认设置为任何邮箱（叫做DeadLetters）。
 
 **使用Tell处理响应**
 由于在返回消息时可以访问到指向发送者的引用，所以要对某条消息做出响应是很容易的。不过，*在处理响应的时候，我们需要知道Actor收到的是哪一条消息的响应。* 如果我们在Actor中存储一些状态，记录Actor 希望收到响应的消息，那么就能够高效地向Actor发送请求，解决前面提到的ask模式的问题。
 
 **我们可以在Actor中将一些上下文信息存储在一个map中，将map的key 放在消息中一起发送。然后，当有着相同key的消息返回时，就可以恢复上下文，完成消息的处理了。**
-![Actor中传递Map参数](b709cacd/actor_with_map_parameters.png)
+![Actor中传递Map参数](post/b709cacd/actor_with_map_parameters.png)
 
 ##### Forward
 Tell在语义上是用于将一条消息发送至另一个Actor，并将响应地址设置为当前的Actor。而Forward 和邮件转发非常类似：**初始发送者保持不变，只不过新增了一个收件人。**
 在使用tell时，我们指定了一个响应地址，或是将响应地址隐式设为发送消息的Actor。而使用forward传递消息时，响应地址就是原始消息的发送者，如下图所示：
-![Forword模式](b709cacd/actor_forword.png)
+![Forword模式](post/b709cacd/actor_forword.png)
 有时候我们需要将接受到的消息传递给另一个Actor来处理，**而最终的处理结果需要传回给初始发起请求的一方**。此时forward是很有用的。
 **处理过程：** 处理中间步骤的Actor转发接收到的消息，或是发送一条新消息，但是仍然会将初始发送者与新消息一起发送。
 
@@ -493,7 +494,7 @@ override def supervisorStrategy = {
 - postRestart()：默认情况下会调用preStart()。
 
 在Actor生命周期中个事件的发生顺序如下图所示：
-[Actor生命周期调用](b709cacd/actor_lifecycle.png)
+[Actor生命周期调用](post/b709cacd/actor_lifecycle.png)
 **注意**
 要注意的是preRestart和postRestart只在重启的时候才会被调用。它们默认调用了preStart和postStop，但是调用它们的时候就不再直接调用preStart和postStop了。这样我们就能够决定，到底是只在Actor启动或停止的时候调用一次preStart和postStop，还是每次重启一个Actor的时候就调用preStart和postStop。
 

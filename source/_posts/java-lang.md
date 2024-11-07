@@ -6,7 +6,8 @@ tags:
     - java.lang
     - rt.jar
     - jdk8
-updated: 2024-10-28 20:30:21categories: Java源码系列
+updated: 2024-10-28 20:30:21
+categories: Java源码系列
 ---
 
 
@@ -44,7 +45,7 @@ Appendable append(CharSequence csq, int start, int end) throws IOException;
 Appendable append(char c) throws IOException;
 ```
 ###### 继承图谱
-![hierachy_appendable](56093694/hierachy_appendable.jpg)
+![hierachy_appendable](post/56093694/hierachy_appendable.jpg)
 
 
 ##### AutoCloseable

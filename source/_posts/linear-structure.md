@@ -3,7 +3,8 @@ title: 线性结构概念相关
 tags:
   - 数据结构
   - 线性结构
-updated: 2024-10-28 20:32:31categories: 算法与数据结构
+updated: 2024-10-28 20:32:31
+categories: 算法与数据结构
 mathjax: true
 abbrlink: 9848073c
 date: 2018-01-21 12:10:16
@@ -24,7 +25,7 @@ date: 2018-01-21 12:10:16
 #### 线性表
 **基本定义：**具有相同类型的有限多个数据元素组成的一个有序序列。
 线性表存储结构事例
-![线性表存储结构事例](linear-strcture-storage-sample.jpg)
+![线性表存储结构事例](post/9848073c/linear-strcture-storage-sample.jpg)
 
 ##### 线性表顺序存储
 **基本定义：**用一组地址连续的存储单元一次存储线性表的数据元素。常见的便是一维数组类型

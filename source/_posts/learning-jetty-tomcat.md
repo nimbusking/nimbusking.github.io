@@ -5,7 +5,8 @@ date: 2021-08-16 18:45:25
 tags:
     - Tomcat
     - Servlet
-updated: 2024-10-28 20:30:21categories: Java系列
+updated: 2024-10-28 20:30:21
+categories: Java系列
 ---
 
 # 背景
@@ -20,13 +21,13 @@ Tomcat是一个业界非常优秀的web容器框架，学习里面核心的实�
 ## 极客时间-深入拆解Tomcat
 **注：** 这个课程中使用的是Tomcat 9.x的版本，其它版本的源码可能略有不同
 整体的架构示意图如下：
-![Tomcat整体架构示意图](8a72db17/TomcatInfrastructure.jpg)
+![Tomcat整体架构示意图](post/8a72db17/TomcatInfrastructure.jpg)
 从图上你可以看到，最顶层是 Server，这里的 Server 指的就是一个 Tomcat 实例。一个 Server 中有一个或者多个 Service，一个 Service 中有多个连接器和一个容器。连接器与容器之间通过标准的 ServletRequest 和 ServletResponse 通信。
 ### 连接器（connector）
 EndPoint 负责提供字节流给 Processor，Processor 负责提供 Tomcat Request 对象给 Adapter，Adapter 负责提供 ServletRequest 对象给容器。
 由于 I/O 模型和应用层协议可以自由组合，比如 NIO + HTTP 或者 NIO2 + AJP。Tomcat 的设计者将网络通信和应用层协议解析放在一起考虑，设计了一个叫 ProtocolHandler 的接口来封装这两种变化点。
 整体工作示意图，如下：
-![连接器架构示意图](8a72db17/TomcatConnectorAndContainer.jpg)
+![连接器架构示意图](post/8a72db17/TomcatConnectorAndContainer.jpg)
 #### ProtocolHandler 组件
 连接器用 ProtocolHandler 来处理网络连接和应用层协议，包含了 2 个重要部件：EndPoint 和 Processor
 ##### EndPoint
@@ -35,10 +36,10 @@ EndPoint 是通信端点，即通信监听的接口，是具体的 Socket 接收
 如果说 EndPoint 是用来实现 TCP/IP 协议的，那么 Processor 用来实现 HTTP 协议，Processor 接收来自 EndPoint 的 Socket，读取字节流解析成 Tomcat Request 和 Response 对象，并通过 Adapter 将其提交到容器处理，Processor 是对应用层协议的抽象。
 #### Adapter 组件
 ProtocolHandler 接口负责解析请求并生成 Tomcat Request 类。但是这个 Request 对象不是标准的 ServletRequest，也就意味着，**不能用 Tomcat Request 作为参数来调用容器**。Tomcat 设计者的解决方案是引入 CoyoteAdapter，这是适配器模式的经典运用，连接器调用 CoyoteAdapter 的 Sevice 方法，传入的是 Tomcat Request 对象，CoyoteAdapter 负责将 Tomcat Request 转成 ServletRequest，再调用容器的 Service 方法。
-![连接器内部示意图](8a72db17/ConnectorInnerDetail.jpg)
+![连接器内部示意图](post/8a72db17/ConnectorInnerDetail.jpg)
 ### 容器（container）
 容器的整体架构如下：
-![Tomcat容器](8a72db17/Containerinfrastructure.jpg)
+![Tomcat容器](post/8a72db17/Containerinfrastructure.jpg)
 从图可以明显的看出相对应的层次结构
 #### 层次结构
 Tomcat 设计了 4 种容器，分别是 Engine、Host、Context 和 Wrapper。这 4 种容器不是平行关系，而是父子关系。
@@ -50,7 +51,7 @@ Tomcat 是用 Mapper 组件来完成确定请求是由哪个 Wrapper 容器里�
 **工作原理是** ：Mapper 组件里保存了 Web 应用的配置信息，其实就是容器组件与访问路径的映射关系，比如 Host 容器里配置的域名、Context 容器里的 Web 应用路径，以及 Wrapper 容器里 Servlet 映射的路径，你可以想象这些配置信息就是一个 **多层次的 Map**。
 #### 工作示例
 **注：** 在课程中说到了一个具体的示例，还是说的比较清楚。
-![Tomcat请求示例一则](8a72db17/TomcatRequestMappingSample.jpg)
+![Tomcat请求示例一则](post/8a72db17/TomcatRequestMappingSample.jpg)
 假如有用户访问一个 URL，比如图中的http://user.shopping.com:8080/order/buy，Tomcat 如何将这个 URL 定位到一个 Servlet 呢？
 - 首先，根据协议和端口号选定 Service 和 Engine。
 - 然后，根据域名选定 Host。
@@ -79,27 +80,27 @@ Pipeline 中有 addValve 方法。Pipeline 中维护了 Valve 链表，Valve 可
 **注：** 由上面看来就是一种完整的责任链设计模式的实现
 至此，看清楚了每一个容器都有一个 Pipeline 对象，只要触发这个 Pipeline 的第一个 Valve，这个容器里 Pipeline 中的 Valve 就都会被调用到。**但是，不同容器的 Pipeline 是怎么链式触发的呢，比如 Engine 中 Pipeline 需要调用下层容器 Host 中的 Pipeline。**
 这是因为 Pipeline 中还有个 ```getBasic``` 方法。这个 ```BasicValve``` 处于 Valve 链表的末端，它是 Pipeline 中必不可少的一个 Valve，负责调用下层容器的 Pipeline 里的第一个 Valve。如下图所示：
-![请求Servlet寻址过程中不同容器的Pipeline-Valve调用过程示例](8a72db17/PipelineVavleWithChainOfResponsibility.jpg)
+![请求Servlet寻址过程中不同容器的Pipeline-Valve调用过程示例](post/8a72db17/PipelineVavleWithChainOfResponsibility.jpg)
 
 还有一个问题：**Valve 和 Filter 有什么区别吗？**
 - Valve 是 Tomcat 的私有机制，与 Tomcat 的基础架构 /API 是紧耦合的。Servlet API 是公有的标准，所有的 Web 容器包括 Jetty 都支持 Filter 机制。
 - Valve 工作在 Web 容器级别，拦截所有应用的请求；而 Servlet Filter 工作在应用级别，只能拦截某个 Web 应用的所有请求。如果想做整个 Web 容器的拦截器，必须通过 Valve 来实现。
 
 ### 生命周期
-![调用静态流程图](8a72db17/TomcatModuleDependency.jpg)
+![调用静态流程图](post/8a72db17/TomcatModuleDependency.jpg)
 上面这张图描述了组件之间的静态关系，如果想让一个系统能够对外提供服务，我们需要创建、组装并启动这些组件；在服务停止的时候，我们还需要释放资源，销毁这些组件，因此这是一个动态的过程。也就是说，Tomcat 需要动态地管理这些组件的生命周期。
 我们把不变点抽象出来成为一个接口，这个接口跟生命周期有关，叫作 LifeCycle。LifeCycle 接口里应该定义这么几个方法：init()、start()、stop() 和 destroy()，每个具体的组件去实现这些方法。
 在父组件的 init() 方法里需要创建子组件并调用子组件的 init() 方法。同样，在父组件的 start() 方法里也需要调用子组件的 start() 方法，因此调用者可以无差别的调用各组件的 init() 方法和 start() 方法，这就是 **组合模式**的使用，并且只要调用最顶层组件，也就是 Server 组件的 init() 和 start() 方法，整个 Tomcat 就被启动起来了。
 LifeCycle接口定义：
-![LifeCycle接口定义类图](8a72db17/LifeCycleInterfaceDefinition.jpg)
+![LifeCycle接口定义类图](post/8a72db17/LifeCycleInterfaceDefinition.jpg)
 ### LifeCycle 事件
 果将来需要增加新的逻辑，直接修改 start() 方法？这样会违反开闭原则，那如何解决这个问题呢？开闭原则说的是为了扩展系统的功能，你不能直接修改系统中已有的类，但是你可以定义新的类。
 组件的 init() 和 start() 调用是由它的父组件的状态变化触发的，上层组件的初始化会触发子组件的初始化，上层组件的启动会触发子组件的启动，因此我们把组件的生命周期定义成**一个个状态**，把状态的转变看作是一个事件。而事件是有监听器的，在监听器里可以实现一些逻辑，并且监听器也可以方便的添加和删除，这就是典型的**观察者模式。**
 具体来说就是在 LifeCycle 接口里加入两个方法：添加监听器和删除监听器。除此之外，我们还需要定义一个 Enum 来表示组件有哪些状态，以及处在什么状态会触发什么样的事件。因此 LifeCycle 接口和 LifeCycleState 就定义成了下面这样。
-![LifeCycle接口带状态观察模式](8a72db17/LifeCycleInterfaceDefinitionWithStateEnumeration.jpg)
+![LifeCycle接口带状态观察模式](post/8a72db17/LifeCycleInterfaceDefinitionWithStateEnumeration.jpg)
 ### 重用性：LifeCycleBase 抽象基类
 回到 LifeCycle 接口，Tomcat 定义一个基类 ```LifeCycleBase``` 来实现 LifeCycle 接口，把一些公共的逻辑放到基类中去，比如生命状态的转变与维护、生命事件的触发以及监听器的添加和删除等，而子类就负责实现自己的初始化、启动和停止等方法。为了避免跟基类中的方法同名，我们把具体子类的实现方法改个名字，在后面加上 Internal，叫 initInternal()、startInternal() 等。我们再来看引入了基类 ```LifeCycleBase``` 后的类图：
-![LifeCycle接口抽象继承模板设计模式](8a72db17/LifeCycleInterfaceDefinitionWithBaseClass.jpg)
+![LifeCycle接口抽象继承模板设计模式](post/8a72db17/LifeCycleInterfaceDefinitionWithBaseClass.jpg)
 其中LifeCycleBase 的 init() 方法实现，核心代码如下：
 ```java
 @Override
@@ -126,7 +127,7 @@ public final synchronized void init() throws LifecycleException {
 
 ### Tomcat启动剖析
 我们可以通过 Tomcat 的 /bin 目录下的脚本 startup.sh 来启动 Tomcat，那你是否知道我们执行了这个脚本后发生了什么呢？来看看下面一张图：
-![Tomcat启动流程](8a72db17/TomcatStartUpProcedure.jpg)
+![Tomcat启动流程](post/8a72db17/TomcatStartUpProcedure.jpg)
 - Tomcat 本质上是一个 Java 程序，因此 startup.sh 脚本会启动一个 JVM 来运行 Tomcat 的启动类 Bootstrap。
 - Bootstrap 的主要任务是初始化 Tomcat 的类加载器（自己实现的类加载器，在官方发行版的Tomcat/bin目录下），并且创建 Catalina。
 - Catalina 是一个启动类，它通过解析 server.xml、创建相应的组件，并调用 Server 的 start 方法。
@@ -311,7 +312,7 @@ final class StandardEngineValve extends ValveBase {
 这本书基于8.5.x介绍的，里面包含很多高级特性，值得阅读
 ### tomcat介绍
 Tomcat运行目录介绍：
-![Tomcat目录说明](8a72db17/tomcat_config_path.png)
+![Tomcat目录说明](post/8a72db17/tomcat_config_path.png)
 #### 8.5之后的一些新特性
 ### Tomcat 整体架构
 **注：** 这个章节介绍了，Tomcat整体的架构设计，分别列出了几个核心组件以及相关核心设计
@@ -327,4 +328,4 @@ Tomcat定义了Pipeline（管道）和Valve（阈）两个接口。*前者用于
 #### Bootstrap & Catalina
 #### Tomcat启动
 Tomcat应用启动该过程非常标准化，统一按照生命周期管理接口Lifecycle的定义进行启动，首先通过调用init方法进行组件的逐级初始化，然后在调用start方法进行启动。
-![应用服务器启动](8a72db17/tomcat_start_sequence.png)
+![应用服务器启动](post/8a72db17/tomcat_start_sequence.png)

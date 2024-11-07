@@ -5,7 +5,8 @@ tags:
   - 高性能JavaScript
   - High Performance JavaScript
   - JavaScript
-updated: 2024-10-28 20:30:21categories: JavaScript系列
+updated: 2024-10-28 20:30:21
+categories: JavaScript系列
 abbrlink: 88143aa7
 date: 2018-08-11 20:26:38
 ---
@@ -93,7 +94,7 @@ function add(num1, num2) {
 }
 ```
 scope作用域链
-![函数addscope作用域链](88143aa7/scope.jpg)
+![函数addscope作用域链](post/88143aa7/scope.jpg)
 ###### 标识符解析的性能
 如果某个垮作用域的值在函数中被引用一次已上，那么就把它存到局部变量里。可行的方法是：将全局变量的引用存储在一个局部变量中，然后使用这个局部变量代替全局变量。
 ###### 改变作用域链
@@ -126,7 +127,7 @@ alert(book.toString()); // "[Object, Object]"
 ```
 book对象中并没有定义toString方法，但是alert的时候并没有报错，原因toString方法是继承原型而来。
 实例和原型的关系，如下图所示：
-![实例和原型的关系](88143aa7/extendsprototype.jpg)
+![实例和原型的关系](post/88143aa7/extendsprototype.jpg)
 可以用**hasOwnProperty()**方法来判断对象中是否包含特定的实例成员。
 要确定对象是否包含特定的属性，可以使用**in**操作符。
 ###### 原型链
@@ -149,7 +150,7 @@ book1.sayTitle(); // High Performance JavaScript
 alert(book1.toString()); // "[Object, Object]"
 ```
 上述俩实例共享原型链，如下图所示：
-![共享原型链](88143aa7/shareprototypelinked.jpg)
+![共享原型链](post/88143aa7/shareprototypelinked.jpg)
 但是，对象在原型链中存在的位置越深，搜索的速度就会越慢。也就是说，搜索实例成员比从字面量或局部变量中读取的数据代价更高。因而也会影响性能消耗。
 ###### 嵌套成员
 由于对象成员可能包含其他成员，例如：window.location.href，对象成员嵌套的越深，读取速度就会越慢。

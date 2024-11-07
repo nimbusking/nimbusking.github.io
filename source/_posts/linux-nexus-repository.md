@@ -5,7 +5,8 @@ date: 2021-01-13 23:02:30
 tags:
     - Nexus私服
     - CentOS 7
-updated: 2024-10-28 20:30:21categories: 操作系统
+updated: 2024-10-28 20:30:21
+categories: 操作系统
 ---
 
 ## 背景
@@ -54,7 +55,7 @@ tcp        0      0 0.0.0.0:8081            0.0.0.0:*               LISTEN      
 
 启动nexus之后，在浏览器访问http://ip:8081端口，ip就是你服务器的ip，访问之后，单击页面右上角的Sign in
 初次登录会提示一个获取admin用户的默认密码路径，如下图所示：
-![admin初始密码](f3b827b0/03c5869d4ef5c4b3ee329ea106999903.png)
+![admin初始密码](post/f3b827b0/03c5869d4ef5c4b3ee329ea106999903.png)
 
 按指定的路径，cat即可，获取到初始化admin用户密码之后就可以登录了，登录后会提示重置admin用户密码。
 在Configure Anonymous Access时，按需选择，如果允许匿名访问私服，则可以允许，反之选择disable。
@@ -118,7 +119,7 @@ nexus - nofile 65536
 
 修改之后，重新进入运行用户，如：nexus，并重启nexus私服
 
-### 项目中配置好私服访问地址后报未授权错误（Not authorized） 
+### 项目中配置好私服访问地址后报未授权错误（Not authorized）
 具体报错如下：
 Could not transfer artifact org.apache.curator:curator-recipes:pom:2.11.0 from/to nexus
 (http://192.168.198.128:8081/repository/maven-public/): Not authorized

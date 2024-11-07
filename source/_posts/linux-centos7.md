@@ -5,7 +5,8 @@ date: 2019-11-25 01:28:43
 tags:
     - CentOS7
     - Linux
-updated: 2024-10-28 20:30:21categories: 操作系统
+updated: 2024-10-28 20:30:21
+categories: 操作系统
 ---
 
 ### 基本命令
@@ -52,7 +53,7 @@ vi /etc/sysconfig/network-scripts/ifcfg-ens192
 ```
 
 如同下图所示，将**BOOTPROTO**改为static(静态路由)，在结尾添加指定的静态IP、子网掩码、默认网关以及DNS信息。
-![设置IP地址](ca10a347/config_ipv4.jpg)
+![设置IP地址](post/ca10a347/config_ipv4.jpg)
 
 #### 修改更新源
 ```shell
@@ -75,7 +76,7 @@ yum -y update
 1. 到MySQL官网下载指定的MySQL Yum存储库，[MySQL Yum存储库下载地址](https://dev.mysql.com/downloads/repo/yum/)
 下载你指定的需要的版本，Linux 8对应CentOS 8，Linux 7对应CentOS 7
 **注：**官网下载需要登录一个已有的oracle官网帐号
-![MySQL Yum存储库](ca10a347/download_mysql_yum_resouces__or_centos7.jpg)
+![MySQL Yum存储库](post/ca10a347/download_mysql_yum_resouces__or_centos7.jpg)
 2. 选择并下载适用于你所需要的平台发行包。将下载的rpm包上传到你的centos服务器中
 3. cd到rpm包所在目录，使用以下命令来安装下载的发行包，替换*platform-and-version-specific-package-name*为下再的rpm包的名称：
 ```shell
@@ -90,7 +91,7 @@ yum repolist all | grep mysql
 ```
 
 可以看到如下图所示的内容：
-![yum repolist all](ca10a347/after_config_mysql_yum_install.jpg)
+![yum repolist all](post/ca10a347/after_config_mysql_yum_install.jpg)
 这是修改后的效果，修改之前**mysql80-community/x86_64**这项状态是**enable**的。
 通过如下命令，修改需要安装的版本信息：
 注：如果提示yum-config-manager不存在，看上文小结中，直接安装**yum-utils**即可
@@ -126,9 +127,9 @@ mysql -u root -p
 ```
 
 出现**Enter password**，输入密码。由于刚安装，没有设置密码，直接回车 Enter 进入
-![连接MySQL](ca10a347/ConnectToMySQLThroughCommand.jpg)
+![连接MySQL](post/ca10a347/ConnectToMySQLThroughCommand.jpg)
 输入命令**show databases;**查看默认安装的数据库
-![查看安装的数据库Schemal](ca10a347/ShowDatabases.jpg)
+![查看安装的数据库Schemal](post/ca10a347/ShowDatabases.jpg)
 ###### 设置root密码
 依次通过以下命令修改root用户名密码：
 ```sql
@@ -183,7 +184,7 @@ firewall-cmd --query-port=3306/tcp
 ```
 
 再次回到工具中，测试连接，连接成功 :)
-![工具远程测试连接](ca10a347/ConnetMySQLSuccesfully.jpg)
+![工具远程测试连接](post/ca10a347/ConnetMySQLSuccesfully.jpg)
 至此就真的结束啦....
 
 #### Redis单机安装

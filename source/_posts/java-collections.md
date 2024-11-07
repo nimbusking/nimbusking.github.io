@@ -3,7 +3,8 @@ title: Java集合框架
 mathjax: false
 tags:
   - Java集合
-updated: 2024-10-28 20:30:21categories: Java源码系列
+updated: 2024-10-28 20:30:21
+categories: Java源码系列
 abbrlink: 9753a2e
 date: 2018-03-14 08:25:11
 ---
@@ -50,7 +51,7 @@ Java集合框架包含如下内容：
 - java.util.concurrent.ConcurrentNavigableMap
 #### 集合实现
 集合接口实现类的典型命名方式是*<实现方式><接口名>*[Implementation-style~~InterFace]。下述表中汇总了这些通用实现类：
-![集合类基本实现汇总](9753a2e/CollectionGenerationPurposeImplementationsTable.jpg)
+![集合类基本实现汇总](post/9753a2e/CollectionGenerationPurposeImplementationsTable.jpg)
 在这些集合接口中，通常情况下的实现支持所有可选择的方法并且它们包含的元素并不是严格限制的。这些接口是非同步的[unsynchronized]，但是类```Collections```包含很多称之为同步包装器[synchronization wrappers]的静态方法，这些方法可以将许多不同步的集合类同步化。所有的实现均拥有快速失败迭代器[fail-fast iterators]，其直接检测到非法的同步修改并且快速失败和清除（而不是超过预先的行为）
 #### 并发集合类
 当应用超过一个线程操作集合类时必须谨慎编程。简单的说就是并发编程。Java平台包含支持并发编程的扩展。集合类经常被使用，各种友好的并发接口和实现均包含在集合类的相应的API中。这些类型经常被使用在并发编程中超过了之前讨论的同步包装器。

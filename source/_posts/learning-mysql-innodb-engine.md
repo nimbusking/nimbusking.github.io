@@ -5,7 +5,8 @@ date: 2022-07-27 20:31:59
 tags:
     - MySQL
     - InnoDB
-updated: 2024-10-28 20:30:21categories: MySQL
+updated: 2024-10-28 20:30:21
+categories: MySQL
 ---
 
 
@@ -25,7 +26,7 @@ updated: 2024-10-28 20:30:21categories: MySQL
 
 InnoDB的表空间（tablespace）由段（segment）、区（extent）、页（page）组成
 
-![InnoDB逻辑存储结构](ff43c837/InnoDB逻辑存储结构.jpg)
+![InnoDB逻辑存储结构](post/ff43c837/InnoDB逻辑存储结构.jpg)
 
 
 
