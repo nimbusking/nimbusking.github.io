@@ -10,12 +10,60 @@ categories: Spring
 ---
 
 ## Spring概述
-
+<!-- more -->
 ## Spring IOC
 
 ### SpringBean生命周期
 大体分为5个大的步骤，如下图所示：
 ![SpringBean生命周期](f5eb228d/SpringBean生命周期.jpg)
+
+#### Bean加载过程
+{% plantuml %}
+    !theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class AbstractAutowireCapableBeanFactory
+class AbstractBeanFactory
+interface AliasRegistry << interface >>
+interface AutowireCapableBeanFactory << interface >>
+interface BeanDefinitionRegistry << interface >>
+interface BeanFactory << interface >>
+interface ConfigurableBeanFactory << interface >>
+interface ConfigurableListableBeanFactory << interface >>
+class DefaultListableBeanFactory
+class DefaultSingletonBeanRegistry
+class FactoryBeanRegistrySupport
+interface HierarchicalBeanFactory << interface >>
+interface ListableBeanFactory << interface >>
+interface Serializable << interface >>
+class SimpleAliasRegistry
+interface SingletonBeanRegistry << interface >>
+annotation SuppressWarnings << annotation >>
+
+AbstractAutowireCapableBeanFactory  -[#000082,plain]-^  AbstractBeanFactory                
+AbstractAutowireCapableBeanFactory  -[#008200,dashed]-^  AutowireCapableBeanFactory         
+AbstractBeanFactory                 -[#008200,dashed]-^  ConfigurableBeanFactory            
+AbstractBeanFactory                 -[#000082,plain]-^  FactoryBeanRegistrySupport         
+AutowireCapableBeanFactory          -[#008200,plain]-^  BeanFactory                        
+BeanDefinitionRegistry              -[#008200,plain]-^  AliasRegistry                      
+ConfigurableBeanFactory             -[#008200,plain]-^  HierarchicalBeanFactory            
+ConfigurableBeanFactory             -[#008200,plain]-^  SingletonBeanRegistry              
+ConfigurableListableBeanFactory     -[#008200,plain]-^  AutowireCapableBeanFactory         
+ConfigurableListableBeanFactory     -[#008200,plain]-^  ConfigurableBeanFactory            
+ConfigurableListableBeanFactory     -[#008200,plain]-^  ListableBeanFactory                
+DefaultListableBeanFactory          -[#000082,plain]-^  AbstractAutowireCapableBeanFactory 
+DefaultListableBeanFactory          -[#008200,dashed]-^  BeanDefinitionRegistry             
+DefaultListableBeanFactory          -[#008200,dashed]-^  ConfigurableListableBeanFactory    
+DefaultListableBeanFactory          -[#008200,dashed]-^  Serializable                       
+DefaultListableBeanFactory          -[#999900,dotted]-  SuppressWarnings                   
+DefaultSingletonBeanRegistry        -[#000082,plain]-^  SimpleAliasRegistry                
+DefaultSingletonBeanRegistry        -[#008200,dashed]-^  SingletonBeanRegistry              
+FactoryBeanRegistrySupport          -[#000082,plain]-^  DefaultSingletonBeanRegistry       
+HierarchicalBeanFactory             -[#008200,plain]-^  BeanFactory                        
+ListableBeanFactory                 -[#008200,plain]-^  BeanFactory                        
+SimpleAliasRegistry                 -[#008200,dashed]-^  AliasRegistry  
+{% endplantuml %}
 
 
 ### 一些杂项问题
