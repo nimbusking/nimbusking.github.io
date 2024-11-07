@@ -22,42 +22,37 @@ jobs:
         node-version: "20.x"
         cache: npm
 
-    - name: 处理问题
-      if: github.event.name == 'repository_dispatch'
-      run: |
-        npm install hexo-algolia@latest
+    # - name: 安装 Hexo
+    #   run: |
+    #     export TZ='Asia/Shanghai'
+    #     npm install hexo@latest --save
 
-    - name: 安装 Hexo
-      run: |
-        export TZ='Asia/Shanghai'
-        npm install hexo@latest --save
-
-    # - name: 缓存 Hexo
-    #   id: cache
-    #   uses: actions/cache@v4
-    #   env:
-    #     cache-name: cache-node-modules
-    #   with:
-    #     path: node_modules
-    #     key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-    #     restore-keys: |
-    #         ${{ runner.os }}-build-${{ env.cache-name }}-
-    #         ${{ runner.os }}-build-
-    #         ${{ runner.os }}-
+    - name: 缓存 Hexo
+      id: cache
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
     - name: 安装依赖
-      # if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        npm install hexo-theme-next@latest --save
-        npm install hexo-deployer-git@latest --save
-        npm install hexo-generator-searchdb@latest --save
-        npm install hexo-generator-feed@latest --save
-        npm install hexo-wordcount@latest --save
-        npm install hexo-abbrlink@latest --save
-        npm install lozad@latest --save
-        npm uninstall hexo-generator-index --save
-        npm install hexo-generator-index-pin-top@latest --save
-        npm install --save
+        # npm install hexo-theme-next@latest --save
+        # npm install hexo-deployer-git@latest --save
+        # npm install hexo-generator-searchdb@latest --save
+        # npm install hexo-generator-feed@latest --save
+        # npm install hexo-wordcount@latest --save
+        # npm install hexo-abbrlink@latest --save
+        # npm install lozad@latest --save
+        # npm uninstall hexo-generator-index --save
+        # npm install hexo-generator-index-pin-top@latest --save
+        npm ci
 
     - name: 处理相关变量
       run: |
