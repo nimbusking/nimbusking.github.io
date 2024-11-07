@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前言本书发行较早，研究讨论的范畴也停留在html4时代，不排除当中有些规则现如今已经不适用，但是依然有参考意义。故而看一遍，记录一下。争对原生的老的JavaScript语法，平时较少使用的，本篇不作记录。具体可参考本书中的相关章节作参考。 读书笔记第一章 加载和执行脚本位置推荐将所有的script标签尽可能放到body标签的底部，以尽可能减少对整个页面下载的影响 12345678910111213">
+<meta property="og:type" content="article">
+<meta property="og:title" content="高性能JavaScript读书笔记">
+<meta property="og:url" content="https://nimbusk.cc/post/88143aa7.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="前言本书发行较早，研究讨论的范畴也停留在html4时代，不排除当中有些规则现如今已经不适用，但是依然有参考意义。故而看一遍，记录一下。争对原生的老的JavaScript语法，平时较少使用的，本篇不作记录。具体可参考本书中的相关章节作参考。 读书笔记第一章 加载和执行脚本位置推荐将所有的script标签尽可能放到body标签的底部，以尽可能减少对整个页面下载的影响 12345678910111213">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/88143aa7/scope.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/88143aa7/extendsprototype.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/88143aa7/shareprototypelinked.jpg">
+<meta property="article:published_time" content="2018-08-11T20:26:38.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="高性能JavaScript">
+<meta property="article:tag" content="High Performance JavaScript">
+<meta property="article:tag" content="JavaScript">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/88143aa7/scope.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/88143aa7.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/88143aa7.html","path":"post/88143aa7.html","title":"高性能JavaScript读书笔记"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>高性能JavaScript读书笔记 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0"><span class="nav-number">2.</span> <span class="nav-text">读书笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E7%AB%A0-%E5%8A%A0%E8%BD%BD%E5%92%8C%E6%89%A7%E8%A1%8C"><span class="nav-number">2.1.</span> <span class="nav-text">第一章 加载和执行</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%84%9A%E6%9C%AC%E4%BD%8D%E7%BD%AE"><span class="nav-number">2.1.1.</span> <span class="nav-text">脚本位置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%84%E7%BB%87%E8%84%9A%E6%9C%AC"><span class="nav-number">2.1.2.</span> <span class="nav-text">组织脚本</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%97%A0%E9%98%BB%E5%A1%9E%E7%9A%84%E8%84%9A%E6%9C%AC"><span class="nav-number">2.1.3.</span> <span class="nav-text">无阻塞的脚本</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%BB%B6%E8%BF%9F%E7%9A%84%E8%84%9A%E6%9C%AC"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">延迟的脚本</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E8%84%9A%E6%9C%AC%E5%85%83%E7%B4%A0"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">动态脚本元素</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8E%A8%E8%8D%90%E6%97%A0%E9%98%BB%E5%A1%9E%E7%9A%84%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.1.3.3.</span> <span class="nav-text">推荐无阻塞的模式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E7%AB%A0-%E6%95%B0%E6%8D%AE%E5%AD%98%E5%8F%96"><span class="nav-number">2.2.</span> <span class="nav-text">第二章 数据存取</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%AE%A1%E7%90%86%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">2.2.1.</span> <span class="nav-text">管理作用域</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE%E5%92%8C%E6%A0%87%E8%AF%86%E7%AC%A6%E8%A7%A3%E6%9E%90"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">作用域链和标识符解析</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%A0%87%E8%AF%86%E7%AC%A6%E8%A7%A3%E6%9E%90%E7%9A%84%E6%80%A7%E8%83%BD"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">标识符解析的性能</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%94%B9%E5%8F%98%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE"><span class="nav-number">2.2.1.3.</span> <span class="nav-text">改变作用域链</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">2.2.1.4.</span> <span class="nav-text">动态作用域</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%97%AD%E5%8C%85%E3%80%81%E4%BD%9C%E7%94%A8%E5%9F%9F%E5%92%8C%E5%86%85%E5%AD%98"><span class="nav-number">2.2.1.5.</span> <span class="nav-text">闭包、作用域和内存</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E6%88%90%E5%91%98"><span class="nav-number">2.2.2.</span> <span class="nav-text">对象成员</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8E%9F%E5%9E%8B"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">原型</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8E%9F%E5%9E%8B%E9%93%BE"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">原型链</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%B5%8C%E5%A5%97%E6%88%90%E5%91%98"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">嵌套成员</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E5%AF%B9%E8%B1%A1%E6%88%90%E5%91%98%E5%80%BC"><span class="nav-number">2.2.2.4.</span> <span class="nav-text">缓存对象成员值</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93"><span class="nav-number">2.2.3.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DOM%E7%BC%96%E7%A8%8B"><span class="nav-number">2.3.</span> <span class="nav-text">DOM编程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#DOM%E8%AE%BF%E9%97%AE%E4%B8%8E%E4%BF%AE%E6%94%B9"><span class="nav-number">2.3.1.</span> <span class="nav-text">DOM访问与修改</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#innerHtml%E5%AF%B9%E6%AF%94DOM%E6%96%B9%E6%B3%95"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">innerHtml对比DOM方法</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%8A%82%E7%82%B9%E5%85%8B%E9%9A%86"><span class="nav-number">2.3.1.2.</span> <span class="nav-text">节点克隆</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#HTML%E9%9B%86%E5%90%88%EF%BC%88HTML-Collections%EF%BC%89"><span class="nav-number">2.3.1.3.</span> <span class="nav-text">HTML集合（HTML Collections）</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%81%8D%E5%8E%86DOM"><span class="nav-number">2.3.2.</span> <span class="nav-text">遍历DOM</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96DOM%E5%85%83%E7%B4%A0"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">获取DOM元素</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%87%8D%E7%BB%98%E5%92%8C%E9%87%8D%E6%8E%92"><span class="nav-number">2.3.2.2.</span> <span class="nav-text">重绘和重排</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%B8%B2%E6%9F%93%E6%A0%91%E5%8F%98%E5%8C%96%E7%9A%84%E6%8E%92%E9%98%9F%E4%B8%8E%E5%88%B7%E6%96%B0"><span class="nav-number">2.3.2.3.</span> <span class="nav-text">渲染树变化的排队与刷新</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E5%8C%96%E9%87%8D%E7%BB%98%E5%92%8C%E9%87%8D%E6%8E%92"><span class="nav-number">2.3.2.4.</span> <span class="nav-text">最小化重绘和重排</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E4%BF%AE%E6%94%B9DOM"><span class="nav-number">2.3.2.5.</span> <span class="nav-text">批量修改DOM</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E5%B8%83%E5%B1%80%E4%BF%A1%E6%81%AF"><span class="nav-number">2.3.2.6.</span> <span class="nav-text">缓存布局信息</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%AE%A9%E5%85%83%E7%B4%A0%E8%84%B1%E7%A6%BB%E5%8A%A8%E7%94%BB%E6%B5%81"><span class="nav-number">2.3.2.7.</span> <span class="nav-text">让元素脱离动画流</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#IE%E5%92%8C-hover"><span class="nav-number">2.3.2.8.</span> <span class="nav-text">IE和:hover</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BA%8B%E4%BB%B6%E5%A7%94%E6%89%98"><span class="nav-number">2.3.3.</span> <span class="nav-text">事件委托</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B0%8F%E7%BB%93-1"><span class="nav-number">2.3.4.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E7%AB%A0-%E7%AE%97%E6%B3%95%E5%92%8C%E6%B5%81%E7%A8%8B%E6%8E%A7%E5%88%B6"><span class="nav-number">2.4.</span> <span class="nav-text">第四章 算法和流程控制</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E6%80%A7%E8%83%BD"><span class="nav-number">2.4.1.</span> <span class="nav-text">循环性能</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%9C%80%E5%B0%8F%E5%8C%96%E5%B1%9E%E6%80%A7%E6%9F%A5%E6%89%BE%EF%BC%9A"><span class="nav-number">2.4.1.1.</span> <span class="nav-text">最小化属性查找：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%87%8F%E5%B0%91%E8%BF%AD%E4%BB%A3%E6%AC%A1%E6%95%B0%EF%BC%9A%E2%80%9C%E8%BE%BE%E5%A4%AB%E8%AE%BE%E5%A4%87%EF%BC%88Duff%E2%80%99s-Device%EF%BC%89%E2%80%9D"><span class="nav-number">2.4.1.2.</span> <span class="nav-text">减少迭代次数：“达夫设备（Duff’s Device）”</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E5%87%BD%E6%95%B0%E7%9A%84%E8%BF%AD%E4%BB%A3"><span class="nav-number">2.4.1.3.</span> <span class="nav-text">基于函数的迭代</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#if-else%E5%AF%B9%E6%AF%94switch"><span class="nav-number">2.4.1.4.</span> <span class="nav-text">if-else对比switch</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BC%98%E5%8C%96if-else"><span class="nav-number">2.4.1.5.</span> <span class="nav-text">优化if-else</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%9F%A5%E6%89%BE%E8%A1%A8%EF%BC%88Lookup-Tables%EF%BC%89"><span class="nav-number">2.4.1.6.</span> <span class="nav-text">查找表（Lookup Tables）</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%92%E5%BD%92"><span class="nav-number">2.4.2.</span> <span class="nav-text">递归</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E6%A0%88%E9%99%90%E5%88%B6"><span class="nav-number">2.4.2.1.</span> <span class="nav-text">调用栈限制</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%80%92%E5%BD%92%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.4.2.2.</span> <span class="nav-text">递归模式</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%BF%AD%E4%BB%A3"><span class="nav-number">2.4.2.3.</span> <span class="nav-text">迭代</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E8%B7%B5%E5%9C%BA%E6%99%AF"><span class="nav-number">3.</span> <span class="nav-text">实践场景</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/88143aa7.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="高性能JavaScript读书笔记 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          高性能JavaScript读书笔记
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-08-11 20:26:38" itemprop="dateCreated datePublished" datetime="2018-08-11T20:26:38+00:00">2018-08-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/JavaScript%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">JavaScript系列</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本书发行较早，研究讨论的范畴也停留在html4时代，不排除当中有些规则<strong>现如今已经不适用</strong>，但是依然有参考意义。故而看一遍，记录一下。<br>争对原生的老的JavaScript语法，平时较少使用的，本篇不作记录。具体可参考本书中的相关章节作参考。</p>
+<h3 id="读书笔记"><a href="#读书笔记" class="headerlink" title="读书笔记"></a>读书笔记</h3><h4 id="第一章-加载和执行"><a href="#第一章-加载和执行" class="headerlink" title="第一章 加载和执行"></a>第一章 加载和执行</h4><h5 id="脚本位置"><a href="#脚本位置" class="headerlink" title="脚本位置"></a>脚本位置</h5><p>推荐将所有的script标签尽可能放到body标签的底部，以尽可能减少对整个页面下载的影响</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Script Sample<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span> <span class="attr">type</span>=<span class="string">&quot;text/css&quot;</span> <span class="attr">href</span>=<span class="string">&quot;style.css&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>Hello World!<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- Example of recommended script positioning --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;file1.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;file2.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;file3.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="组织脚本"><a href="#组织脚本" class="headerlink" title="组织脚本"></a>组织脚本</h5><p>可以把多个文件合并成一个，只需要引用一个script标签，就可以减少性能消耗</p>
+<span id="more"></span>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>Script Sample<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">link</span> <span class="attr">rel</span>=<span class="string">&quot;stylesheet&quot;</span> <span class="attr">type</span>=<span class="string">&quot;text/css&quot;</span> <span class="attr">href</span>=<span class="string">&quot;style.css&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">p</span>&gt;</span>Hello World!<span class="tag">&lt;/<span class="name">p</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">&lt;!-- Example of recommended script positioning --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;file1.js&amp;file2.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span> <span class="attr">src</span>=<span class="string">&quot;http://yui.yahoopis.com/combo?2.7.0/build/yahoo-min.js&amp;2.7.0/build/event/event-min.js&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="无阻塞的脚本"><a href="#无阻塞的脚本" class="headerlink" title="无阻塞的脚本"></a>无阻塞的脚本</h5><p>在页面加载完成之后才加载JavaScript代码</p>
+<h6 id="延迟的脚本"><a href="#延迟的脚本" class="headerlink" title="延迟的脚本"></a>延迟的脚本</h6><ul>
+<li>defer属性指明本元素所含的脚本不会修改DOM，因此代码能安全地延迟执行。</li>
+<li>任何带有defer属性的script元素在DOM完成之前都不会执行，无论是内嵌或外链脚本都是如此。</li>
+<li>带有defer属性的script元素实在windows.onload事件处理器执行前被调用</li>
+</ul>
+<h6 id="动态脚本元素"><a href="#动态脚本元素" class="headerlink" title="动态脚本元素"></a>动态脚本元素</h6><p>利用标准的DOM方法创建一个新的script元素</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> script = <span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&quot;script&quot;</span>);</span><br><span class="line">script.<span class="property">type</span> = <span class="string">&quot;text/javascript&quot;</span>;</span><br><span class="line">script.<span class="property">src</span> = <span class="string">&quot;file1.js&quot;</span>;</span><br><span class="line"><span class="variable language_">document</span>.<span class="title function_">getElementByTagName</span>(<span class="string">&quot;head&quot;</span>)[<span class="number">0</span>].<span class="title function_">appendChild</span>(script);</span><br></pre></td></tr></table></figure>
+<h6 id="推荐无阻塞的模式"><a href="#推荐无阻塞的模式" class="headerlink" title="推荐无阻塞的模式"></a>推荐无阻塞的模式</h6><p>向页面中添加大量JavaScript的推荐做法只需两步：</p>
+<ul>
+<li>先添加动态加载所需的代码</li>
+<li>然后加载初始化页面所需的剩下的代码</li>
+</ul>
+<p>老的一些框架：</p>
+<ul>
+<li>YUI3的方式：由页面中少量的代码来加载丰富的功能组件。**（雅虎团队于2014年停止更新）</li>
+<li>LazyLoad类库：还是要建议尽量减少文件数，每次加载依然是一个独立的HTTP请求</li>
+<li>LABjs</li>
+</ul>
+<p>模块化框架</p>
+<ul>
+<li>sea.js：CMD规范</li>
+<li>requre.js：AMD规范</li>
+</ul>
+<h4 id="第二章-数据存取"><a href="#第二章-数据存取" class="headerlink" title="第二章 数据存取"></a>第二章 数据存取</h4><h5 id="管理作用域"><a href="#管理作用域" class="headerlink" title="管理作用域"></a>管理作用域</h5><p>作用域概念是理解JavaScript的关键所在，不仅仅从性能角度，还包括从功能的角度。 作用域对JavaScript有许多影响，从确定哪些变量可以被函数访问，到确定this的赋值。JavaScript作用域同样关系到性能，要理解速度和作用域的关系，首先要正确地理解作用域的工作原理。</p>
+<h6 id="作用域链和标识符解析"><a href="#作用域链和标识符解析" class="headerlink" title="作用域链和标识符解析"></a>作用域链和标识符解析</h6><p>每一个JavaScript函数都表示为一个对象，更确切地说，是Function对象的一个实例。Function对象同其他对象一样，拥有可以编程访问的属性， 和一系列不能通过代码访问而仅供JavaScript引擎存取的内部属性。其中一个内部属性是[[Scope]]。内部属性[[Scope]]包含了 一个函数被创建的作用域中对象的集合。这个集合被称为函数的作用域链。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">add</span>(<span class="params">num1, num2</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> sum = num1 + num2;</span><br><span class="line">    <span class="keyword">return</span> sum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>scope作用域链<br><img data-src="88143aa7/scope.jpg" alt="函数addscope作用域链"></p>
+<h6 id="标识符解析的性能"><a href="#标识符解析的性能" class="headerlink" title="标识符解析的性能"></a>标识符解析的性能</h6><p>如果某个垮作用域的值在函数中被引用一次已上，那么就把它存到局部变量里。可行的方法是：将全局变量的引用存储在一个局部变量中，然后使用这个局部变量代替全局变量。</p>
+<h6 id="改变作用域链"><a href="#改变作用域链" class="headerlink" title="改变作用域链"></a>改变作用域链</h6><p>with语句和try-catch语句可以临时改变执行环境的作用域链。<br>注：with语句不推荐使用；try-catch语句慎用，catch子句中最好委托专门函数处理异常情况。</p>
+<h6 id="动态作用域"><a href="#动态作用域" class="headerlink" title="动态作用域"></a>动态作用域</h6><p>无论是with语句还是try-catch语句的catch子句，或是包含eval()的函数，都是被认为动态作用域。动态作用域只存在于代码执行过程中，因此无法查看代码结构而查看出来具体的执行结果。<br>在确实有必要时才推荐使用动态作用域。</p>
+<h6 id="闭包、作用域和内存"><a href="#闭包、作用域和内存" class="headerlink" title="闭包、作用域和内存"></a>闭包、作用域和内存</h6><p>使用闭包可能会导致性能问题。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> id = <span class="string">&quot;xdi9592&quot;</span>;</span><br><span class="line">    <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;save-btn&quot;</span>).<span class="property">onclick</span> = <span class="keyword">function</span>(<span class="params">event</span>) &#123;</span><br><span class="line">        <span class="title function_">saveDocument</span>(id);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意上述代码中用到两个标识符，id和saveDocument，它们的位置在作用域链第一个对象之后。<strong>这就是使用闭包最需要关注的性能点：在频繁访问跨作用域的标识符时，每次访问都会带来性能损失。</strong></p>
+<h5 id="对象成员"><a href="#对象成员" class="headerlink" title="对象成员"></a>对象成员</h5><h6 id="原型"><a href="#原型" class="headerlink" title="原型"></a>原型</h6><p>JavaScript中的对象是基于原型（Prototype）的。原型是其它对象的基础，它的定义并实现了一个新建的对象所必须包含的成员列表<br>示例：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> book = &#123;</span><br><span class="line">    <span class="attr">title</span>: <span class="string">&quot;High Performance JavaScript&quot;</span>,</span><br><span class="line">    <span class="attr">publisher</span>: <span class="string">&quot;Yahoo! Press&quot;</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="title function_">alert</span>(book.<span class="title function_">toString</span>()); <span class="comment">// &quot;[Object, Object]&quot;</span></span><br></pre></td></tr></table></figure>
+<p>book对象中并没有定义toString方法，但是alert的时候并没有报错，原因toString方法是继承原型而来。<br>实例和原型的关系，如下图所示：<br><img data-src="88143aa7/extendsprototype.jpg" alt="实例和原型的关系"><br>可以用<strong>hasOwnProperty()**方法来判断对象中是否包含特定的实例成员。<br>要确定对象是否包含特定的属性，可以使用</strong>in**操作符。</p>
+<h6 id="原型链"><a href="#原型链" class="headerlink" title="原型链"></a>原型链</h6><p>可以定义并使用构造函数来创建另一种类型的原型。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">Book</span>(<span class="params">title, publisher</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">title</span> = title;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">publisher</span> = publisher;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="title class_">Book</span>.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">sayTitle</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="title function_">alert</span>(<span class="variable language_">this</span>.<span class="property">title</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> book1 = <span class="keyword">new</span> <span class="title class_">Book</span>(<span class="string">&quot;High Performance JavaScript&quot;</span>, <span class="string">&quot;Yahoo! Press&quot;</span>);</span><br><span class="line"><span class="keyword">var</span> book2 = <span class="keyword">new</span> <span class="title class_">Book</span>(<span class="string">&quot;JavaScript: The Good Parts&quot;</span>, <span class="string">&quot;Yahoo! Press&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="title function_">alert</span>(book1 <span class="keyword">instanceof</span> <span class="title class_">Book</span>); <span class="comment">// true</span></span><br><span class="line"><span class="title function_">alert</span>(book1 <span class="keyword">instanceof</span> <span class="title class_">Object</span>); <span class="comment">// true</span></span><br><span class="line"></span><br><span class="line">book1.<span class="title function_">sayTitle</span>(); <span class="comment">// High Performance JavaScript</span></span><br><span class="line"><span class="title function_">alert</span>(book1.<span class="title function_">toString</span>()); <span class="comment">// &quot;[Object, Object]&quot;</span></span><br></pre></td></tr></table></figure>
+<p>上述俩实例共享原型链，如下图所示：<br><img data-src="88143aa7/shareprototypelinked.jpg" alt="共享原型链"><br>但是，对象在原型链中存在的位置越深，搜索的速度就会越慢。也就是说，搜索实例成员比从字面量或局部变量中读取的数据代价更高。因而也会影响性能消耗。</p>
+<h6 id="嵌套成员"><a href="#嵌套成员" class="headerlink" title="嵌套成员"></a>嵌套成员</h6><p>由于对象成员可能包含其他成员，例如：window.location.href，对象成员嵌套的越深，读取速度就会越慢。</p>
+<h6 id="缓存对象成员值"><a href="#缓存对象成员值" class="headerlink" title="缓存对象成员值"></a>缓存对象成员值</h6><p>应当注意，只在必要时使用对象成员。例如：在同一个函数中没有必要多次读取同一个对象成员。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">hasEitherClass</span>(<span class="params">element, className1, className2</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> element.<span class="property">className</span> == className1 || element.<span class="property">className</span> == className2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>已上代码中，elment.className被读取了两次。此时就可以将该元素的值保存在一个临时变量中，以减少查找的开销。</p>
+<h5 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h5><p>在JavaScript中，数据存储的位置会对代码整体性能产生重大的影响。数据存储共有4种方式：字面量、变量、数组项、对象成员。它们有着各自的性能特点。</p>
+<ul>
+<li>访问字面量和局部变量的速度最快，相反，访问数组元素和对象成员相对较慢。</li>
+<li>由于局部变量存在于作用域链的起始位置，因此出问局部变量比访问跨作用域变量更快。变量在作用域链中的位置越深，访问所需时间就越长。由于全局变量总处在作用域链的最末端，因此访问速度也是最慢的。</li>
+<li>避免使用with语句，因为它会改变执行环境作用域链。同样，try-catch语句中的catch子句也有同样的影响，因此也要小心使用。</li>
+<li>嵌套的对象成员会明显影响性能，尽量少用。</li>
+<li>属性或方挂在原型链中的位置越深，访问它的速度也越慢。</li>
+<li>通常来说，你可以通过吧常用的对象成员、数组元素、跨域变量保存在局部变量中来改善JavaScript性能，因为局部变量访问速度更快。</li>
+</ul>
+<h4 id="DOM编程"><a href="#DOM编程" class="headerlink" title="DOM编程"></a>DOM编程</h4><h5 id="DOM访问与修改"><a href="#DOM访问与修改" class="headerlink" title="DOM访问与修改"></a>DOM访问与修改</h5><h6 id="innerHtml对比DOM方法"><a href="#innerHtml对比DOM方法" class="headerlink" title="innerHtml对比DOM方法"></a>innerHtml对比DOM方法</h6><p>在一个对性能有着苛刻要求的操作中更新一大段HTML，推荐使用innerHTML，因为它在绝大部分浏览器中都运行的更快。</p>
+<h6 id="节点克隆"><a href="#节点克隆" class="headerlink" title="节点克隆"></a>节点克隆</h6><p>使用DOM方法更新页面内容的另一个途径就是克隆已有元素，而不是创建新元素-换句话说，就是使用element.cloneNode()(element表示已有节点)替代document.createElement()。</p>
+<h6 id="HTML集合（HTML-Collections）"><a href="#HTML集合（HTML-Collections）" class="headerlink" title="HTML集合（HTML Collections）"></a>HTML集合（HTML Collections）</h6><p>HTML集合是包含了DOM节点引用的类型数组对象。以下方法的返回值就是一个集合：</p>
+<ul>
+<li>document.getElementByName()</li>
+<li>document.getElementByClassName()</li>
+<li>document.getElementByTagName()</li>
+<li>document.images 页面中所有img元素</li>
+<li>document.links 所有a元素</li>
+<li>document.forms 所有表单元素</li>
+<li>document.forms[0].elements 页面中第一个表单的所有字段</li>
+</ul>
+<p>上述方法返回的HTML集合一直与文档保持着连接，每次你需要最新的信息时，都会重复执行查询的过程！<br>例如，一个意外的死循环<br>注：本实例个人编写，非书中示例，代码注释行为书中事例。补了一个JQuery选择器选择结果，JQuery选择器返回的不是HTML集合，而是JQuery封装的对象</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!DOCTYPE <span class="keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>测试一段JS<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span>  <span class="attr">src</span>=<span class="string">&quot;https://code.jquery.com/jquery-2.2.4.min.js&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">integrity</span>=<span class="string">&quot;sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">crossorigin</span>=<span class="string">&quot;anonymous&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">&quot;text/javascript&quot;</span>&gt;</span><span class="language-javascript"></span></span><br><span class="line"><span class="language-javascript">        <span class="variable language_">window</span>.<span class="property">onload</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">var</span> alldivs = <span class="variable language_">document</span>.<span class="title function_">getElementsByTagName</span>(<span class="string">&#x27;div&#x27;</span>);</span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">var</span> alldivsByJquery = $(<span class="string">&quot;div&quot;</span>);</span></span><br><span class="line"><span class="language-javascript">            <span class="comment">// for (var i = 0; i &lt; alldivs.length; i++) &#123;</span></span></span><br><span class="line"><span class="language-javascript">            <span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++) &#123;</span></span><br><span class="line"><span class="language-javascript">                <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;JavaScript length = &quot;</span> + alldivs.<span class="property">length</span>);</span></span><br><span class="line"><span class="language-javascript">                <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;JQuery length = &quot;</span> + alldivsByJquery.<span class="property">length</span>);</span></span><br><span class="line"><span class="language-javascript">                <span class="variable language_">document</span>.<span class="property">body</span>.<span class="title function_">appendChild</span>(<span class="variable language_">document</span>.<span class="title function_">createElement</span>(<span class="string">&#x27;div&#x27;</span>));</span></span><br><span class="line"><span class="language-javascript">            &#125;</span></span><br><span class="line"><span class="language-javascript">        &#125;</span></span><br><span class="line"><span class="language-javascript">        </span></span><br><span class="line"><span class="language-javascript">    </span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span>Hello World<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>输出：<br>JavaScript length = 1<br>test.html:14 JQuery length = 1<br>test.html:13 JavaScript length = 2<br>test.html:14 JQuery length = 1<br>test.html:13 JavaScript length = 3<br>test.html:14 JQuery length = 1<br>test.html:13 JavaScript length = 4<br>test.html:14 JQuery length = 1<br>test.html:13 JavaScript length = 5<br>test.html:14 JQuery length = 1<br>test.html:13 JavaScript length = 6<br>test.html:14 JQuery length = 1<br>test.html:13 JavaScript length = 7<br>test.html:14 JQuery length = 1<br>test.html:13 JavaScript length = 8<br>test.html:14 JQuery length = 1<br>test.html:13 JavaScript length = 9<br>test.html:14 JQuery length = 1<br>test.html:13 JavaScript length = 10<br>test.html:14 JQuery length = 1<br>上述死循环示例的解决方案：<strong>将获取的HTML集合的长度存在临时变量中即可。</strong><br>同样，<strong>多次集合元素时使用局部变量</strong></p>
+<h5 id="遍历DOM"><a href="#遍历DOM" class="headerlink" title="遍历DOM"></a>遍历DOM</h5><p>DOM API提供了多种方法来读取文档结构中的特定部分。当你需要从多种方案中选择时，最后为特定的操作选择最高效的API。</p>
+<h6 id="获取DOM元素"><a href="#获取DOM元素" class="headerlink" title="获取DOM元素"></a>获取DOM元素</h6><p>通常你需要从某一个DOM元素开始，操作周围的元素，或者递归查找所有子节点。你可以使用childNodes得到元素集合，或者使用nextSibling来获取每个相邻元素。</p>
+<h6 id="重绘和重排"><a href="#重绘和重排" class="headerlink" title="重绘和重排"></a>重绘和重排</h6><p>当页面布局和几何属性改变时就需要“重排”。下述情况中会发生重排：</p>
+<ul>
+<li>添加或删除可见的DOM元素</li>
+<li>元素位置改变</li>
+<li>元素尺寸改变（包括：外边距、内边距、边框厚度、宽度、高度等属性改变）、</li>
+<li>内容改变，例如：文本改变或图片被另一个不同尺寸的图片替代。</li>
+<li>页面渲染器初始化。</li>
+<li>浏览器窗口尺寸改变</li>
+</ul>
+<h6 id="渲染树变化的排队与刷新"><a href="#渲染树变化的排队与刷新" class="headerlink" title="渲染树变化的排队与刷新"></a>渲染树变化的排队与刷新</h6><p>由于每次重排都会产生计算消耗，大多数浏览器通过队列化修改并批量执行来优化重排过程。获取布局信息的操作会导致队列刷新，比如以下方法：</p>
+<ul>
+<li>offsetTop，offsetLeft，OffsetWidth，offsetHeight</li>
+<li>scrollTop，scrollLeft，scrollWidth，scrollHeight</li>
+<li>clientTop，clientLeft，clientWidth，clientHeight</li>
+<li>getComputedStyle()</li>
+</ul>
+<p>在修改样式的过程中，最好避免使用上面列出的属性。它们都会属性渲染队列，即使你是在获取最近未发生改变的或者与最新改变无关的布局信息。</p>
+<h6 id="最小化重绘和重排"><a href="#最小化重绘和重排" class="headerlink" title="最小化重绘和重排"></a>最小化重绘和重排</h6><p>重绘和重排可能代价非常昂贵，因此一个好的提高程序响应速度的策略就是减少此类操作的发生。为了减少发生次数，<strong>应该合并多次对DOM和样式的修改，然后一次处理掉</strong>。</p>
+<h6 id="批量修改DOM"><a href="#批量修改DOM" class="headerlink" title="批量修改DOM"></a>批量修改DOM</h6><p>当你需要对DOM元素进行一系列操作时，可以通过以下步骤来减少重绘和重排次数：</p>
+<ul>
+<li>使元素脱离文档流。</li>
+<li>对其应用多重改变。</li>
+<li>把元素带回文档中。</li>
+</ul>
+<p>有三种基本方法可以使DOM脱离文档：</p>
+<ul>
+<li>隐藏元素，应用修改，重新显示。</li>
+<li>使用文档片段（document fragment）在当前DOM之外构建一个子树，再把它拷贝到文档。</li>
+<li>将原始元素拷贝到一个脱离文档的节点中，修改副本，完成后再替换原始元素。</li>
+</ul>
+<p>文档片段：<br>注：JQuery内部append方法就是文档碎片插入的方式</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> fragment = <span class="variable language_">document</span>.<span class="title function_">createDocumentFragment</span>();</span><br><span class="line"><span class="title function_">appendDataToElement</span>(fragment, data);</span><br><span class="line"><span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&quot;mylist&quot;</span>).<span class="title function_">appendChild</span>(fragment);</span><br></pre></td></tr></table></figure>
+<p>节点备份：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> old = <span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&#x27;mylist&#x27;</span>);</span><br><span class="line"><span class="keyword">var</span> clone = old.<span class="title function_">cloneNode</span>(<span class="literal">true</span>);</span><br><span class="line"><span class="title function_">appendDataToElement</span>(clone, data);</span><br><span class="line">old.<span class="property">parentNode</span>.<span class="title function_">replaceChild</span>(clone, old);</span><br></pre></td></tr></table></figure>
+<h6 id="缓存布局信息"><a href="#缓存布局信息" class="headerlink" title="缓存布局信息"></a>缓存布局信息</h6><p>一段低效的代码</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">myElement.<span class="property">style</span>.<span class="property">left</span> = <span class="number">1</span> + myElement.<span class="property">offsetLeft</span> + <span class="string">&#x27;px&#x27;</span>;</span><br><span class="line">myElement.<span class="property">style</span>.<span class="property">top</span> = <span class="number">1</span> + myElement.<span class="property">offsetTop</span> + <span class="string">&#x27;px&#x27;</span>;</span><br><span class="line"><span class="keyword">if</span> (myElement.<span class="property">offsetLeft</span> &gt;= <span class="number">500</span>) &#123;</span><br><span class="line">    <span class="title function_">stopAnimation</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>方法低效的原因：元素每次移动时都会查询偏移量，导致浏览器属性渲染队列而不利于优化。<br>改进的方案是：<strong>获取一次起始位置的值，然后将其赋值给一个变量</strong></p>
+<h6 id="让元素脱离动画流"><a href="#让元素脱离动画流" class="headerlink" title="让元素脱离动画流"></a>让元素脱离动画流</h6><p>展开/折叠的方式来显示和隐藏部分页面是一种常见的交互模式。但是当页面顶部的一个动画推移页面整个余下的部分时，会导致一次代价昂贵的大规模重排。当这个渲染树中需要重新计算的节点越多，情况就会越糟糕。<br>使用以下步骤可以避免页面中大部分重排：</p>
+<ul>
+<li>使用绝对位置定位页面上的动画元素，将其脱离文档流。</li>
+<li>让元素动起来。当它扩大时，会临时覆盖部分页面。但这只是页面一个小区域的重绘过程，不会产生重排并重绘页面的大部分内容。</li>
+<li>当动画结束时恢复定位，从而只会下移一次文档的其它元素。</li>
+</ul>
+<h6 id="IE和-hover"><a href="#IE和-hover" class="headerlink" title="IE和:hover"></a>IE和:hover</h6><p>当元素很多时，应避免使用这种效果，比如很大的表格或者很长的列表。</p>
+<h5 id="事件委托"><a href="#事件委托" class="headerlink" title="事件委托"></a>事件委托</h5><p>当页面中存在大量元素，而且每一个都要一次或多次绑定事件处理器（比如onclick）时，这种情况可能会影响性能。每绑定一个事件处理器都是有代价的，它约么是加重了页面负担（更多的标签或JavaScript代码），要么是增加了运行期的执行时间。<br><strong>一个简单而优雅的处理DOM事件的技术是事件委托</strong><br>例如，在一组id=’menu’的ul列表，下有若干li标签，其中一些li标签中是链接a标签，此时要点击a标签之后，Ajax动态请求数据，填充其余。<br>此时可以使用事件委托，而无需针对每一个a标签绑定事件</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable language_">document</span>.<span class="title function_">getElementById</span>(<span class="string">&#x27;menu&#x27;</span>).<span class="property">onclick</span> = <span class="keyword">function</span>(<span class="params">e</span>) &#123;</span><br><span class="line">    <span class="comment">// 浏览器 taget</span></span><br><span class="line">    e = e || <span class="variable language_">window</span>.<span class="property">event</span>;</span><br><span class="line">    <span class="keyword">var</span> target = e.<span class="property">target</span> || e.<span class="property">srcElement</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> pageid, hrefparts;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 只关心hrefs，非链接点击则退出</span></span><br><span class="line">    <span class="keyword">if</span> (target.<span class="property">nodeName</span> != <span class="string">&#x27;A&#x27;</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 从链接中找出页面ID</span></span><br><span class="line">    hrefparts = target.<span class="property">href</span>.<span class="title function_">split</span>(<span class="string">&#x27;/&#x27;</span>);</span><br><span class="line">    pageid = hrefparts[hrefparts.<span class="property">length</span> - <span class="number">1</span>];</span><br><span class="line">    pageid = pageid.<span class="title function_">replace</span>(<span class="string">&#x27;.html&#x27;</span>, <span class="string">&#x27;&#x27;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 更新页面</span></span><br><span class="line">    <span class="title function_">ajaxRequest</span>(<span class="string">&#x27;xhr.php?page=&#x27;</span> + id, updatePageContents);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 浏览器组织默认行为并取消冒泡</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">typeof</span> e.<span class="property">preventDefault</span> === <span class="string">&#x27;function&#x27;</span>) &#123;</span><br><span class="line">        e.<span class="title function_">preventDefault</span>();</span><br><span class="line">        e.<span class="title function_">stopPropagation</span>();</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        e.<span class="property">returnValue</span> = <span class="literal">false</span>;</span><br><span class="line">        e.<span class="property">cancelBubble</span> = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="小结-1"><a href="#小结-1" class="headerlink" title="小结"></a>小结</h5><p>访问和操作DOM是现代Web应用的重要部分。但每次穿越连接ECMAScript和DOM两个岛屿之间的桥梁，都会被收取 “过桥费”。为了减少DOM编程带来的性能损失， 请记住以下几点：</p>
+<ul>
+<li>最小化DOM访问次数，尽可能在JavaScript端处理。</li>
+<li>如果需要多次访问某个DOM节点，请使用局部变量存储色的引用。</li>
+<li>小心处理HTML集合，因为它实时连系着底层文档。把集合的长度缓存到一个变量中，并在选代中使用它。 如果需要经常操作集合， 建议把它拷贝到一个数组中。</li>
+<li>如果可能的话，使用速度更快的APl，比如querySelectorAll()和firstElementChild</li>
+<li>要留意重绘和重排s批量修改样式时, “离线” 操作DOM树，使用缓存，并减少访 问布局信息的次数。</li>
+<li>动画中使用绝对定位，使用拖放代理。</li>
+<li>使用事件委托来减少事件处理器的数量。</li>
+</ul>
+<h4 id="第四章-算法和流程控制"><a href="#第四章-算法和流程控制" class="headerlink" title="第四章 算法和流程控制"></a>第四章 算法和流程控制</h4><h5 id="循环性能"><a href="#循环性能" class="headerlink" title="循环性能"></a>循环性能</h5><p>for-in循环要比其它几种明显要慢。除非明确需要迭代一个属性数量未知的对象，否则应该避免使用for-in循环。<br>注意：<strong>不要使用for-in来遍历数组成员</strong></p>
+<h6 id="最小化属性查找："><a href="#最小化属性查找：" class="headerlink" title="最小化属性查找："></a>最小化属性查找：</h6><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>, len = items.<span class="property">length</span>; i &lt; len; i++) &#123;</span><br><span class="line">    <span class="title function_">process</span>(items[i]);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> j = <span class="number">0</span>, count = items.<span class="property">length</span>;</span><br><span class="line"><span class="keyword">while</span> (j &lt; count) &#123;</span><br><span class="line">    <span class="title function_">process</span>(items[j++]);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> k = <span class="number">0</span>, num = items.<span class="property">length</span>;</span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="title function_">process</span>(items[k++]);</span><br><span class="line">&#125; <span class="keyword">while</span> (k &lt; num);</span><br></pre></td></tr></table></figure>
+<p>也可以倒序循环，例如:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = items.<span class="property">length</span>; i--; ) &#123;</span><br><span class="line">    process[items[i]];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中，控制条件与true值比较时，任何非零数会自动转换为true，而零值等同于false；</p>
+<h6 id="减少迭代次数：“达夫设备（Duff’s-Device）”"><a href="#减少迭代次数：“达夫设备（Duff’s-Device）”" class="headerlink" title="减少迭代次数：“达夫设备（Duff’s Device）”"></a>减少迭代次数：“达夫设备（Duff’s Device）”</h6><p>典型实现：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// credit: Jeff Greeberg</span></span><br><span class="line"><span class="keyword">var</span> iterations = <span class="title class_">Math</span>.<span class="title function_">floor</span>(items.<span class="property">length</span> / <span class="number">8</span>),</span><br><span class="line">    startAt    = items.<span class="property">length</span> % <span class="number">8</span>,</span><br><span class="line">    i          = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="keyword">switch</span> (startAt) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="number">0</span>: process[items[i++]];</span><br><span class="line">        <span class="keyword">case</span> <span class="number">7</span>: process[items[i++]];</span><br><span class="line">        <span class="keyword">case</span> <span class="number">6</span>: process[items[i++]];</span><br><span class="line">        <span class="keyword">case</span> <span class="number">5</span>: process[items[i++]];</span><br><span class="line">        <span class="keyword">case</span> <span class="number">4</span>: process[items[i++]];</span><br><span class="line">        <span class="keyword">case</span> <span class="number">3</span>: process[items[i++]];</span><br><span class="line">        <span class="keyword">case</span> <span class="number">2</span>: process[items[i++]];</span><br><span class="line">        <span class="keyword">case</span> <span class="number">1</span>: process[items[i++]];</span><br><span class="line">    &#125;</span><br><span class="line">    startAt = <span class="number">0</span>;</span><br><span class="line">&#125; <span class="keyword">while</span> (--iterations);</span><br></pre></td></tr></table></figure>
+<p>Duff’s Device背后基本原理：每次循环中最多可调用8次process()。循环的迭代次数为总数除以8.由于不是所有数字都能被8整除，变量startAt用来存放余数，表示第一次循环中应调用多少次process()。如果是12次，那么第一次循环会调用process()4次，第二次循环调用process()8次，用两次循环替代了12次循环。<br>改进版本：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// credit: Jeff Greeberg</span></span><br><span class="line"><span class="keyword">var</span> i = items.<span class="property">length</span> % <span class="number">8</span>;</span><br><span class="line"><span class="keyword">while</span> (i) &#123;</span><br><span class="line">    <span class="title function_">process</span>(items[i--]);</span><br><span class="line">&#125;</span><br><span class="line">i = <span class="title class_">Math</span>.<span class="title function_">floor</span>(items.<span class="property">length</span> / <span class="number">8</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> (i) &#123;</span><br><span class="line">    <span class="title function_">process</span>(items[i--]);</span><br><span class="line">    <span class="title function_">process</span>(items[i--]);</span><br><span class="line">    <span class="title function_">process</span>(items[i--]);</span><br><span class="line">    <span class="title function_">process</span>(items[i--]);</span><br><span class="line">    <span class="title function_">process</span>(items[i--]);</span><br><span class="line">    <span class="title function_">process</span>(items[i--]);</span><br><span class="line">    <span class="title function_">process</span>(items[i--]);</span><br><span class="line">    <span class="title function_">process</span>(items[i--]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>是否使用Duff’s Device</strong>，取决于整体的迭代次数，如果迭代次数小于1000，很难看到性能提升。如果迭代次数超过1000，那么Duff’s Device的执行效率将明显提升。</p>
+<h6 id="基于函数的迭代"><a href="#基于函数的迭代" class="headerlink" title="基于函数的迭代"></a>基于函数的迭代</h6><p>forEach()函数。在运行速度要求严格是，基于函数的迭代不是合适的选择。</p>
+<h6 id="if-else对比switch"><a href="#if-else对比switch" class="headerlink" title="if-else对比switch"></a>if-else对比switch</h6><p>使用if-else还是switch，最流行的方法是基于测试条件的数量来判断：条件数量越大，越倾向于使用switch而不是if-else.</p>
+<h6 id="优化if-else"><a href="#优化if-else" class="headerlink" title="优化if-else"></a>优化if-else</h6><p>确保最可能出现的条件放在首位</p>
+<h6 id="查找表（Lookup-Tables）"><a href="#查找表（Lookup-Tables）" class="headerlink" title="查找表（Lookup Tables）"></a>查找表（Lookup Tables）</h6><p>JavaScript中可以使用数组和普通对象来构建查找表，通过查找表访问数据比用if-else或switch快得多，特别是在条件语句数量很大的时候。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="title function_">swith</span>(<span class="params">value</span>) &#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">0</span>: <span class="keyword">return</span> result0;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>: <span class="keyword">return</span> result1;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">2</span>: <span class="keyword">return</span> result2;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">3</span>: <span class="keyword">return</span> result3;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">4</span>: <span class="keyword">return</span> result4;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">5</span>: <span class="keyword">return</span> result5;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">6</span>: <span class="keyword">return</span> result6;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">7</span>: <span class="keyword">return</span> result7;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">8</span>: <span class="keyword">return</span> result8;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">9</span>: <span class="keyword">return</span> result9;</span><br><span class="line">    <span class="attr">default</span>:</span><br><span class="line">        <span class="keyword">return</span> retsult10;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>swith表达式代码所占的空间可能与他的重要性不成比例。整个结构可以使用一个数组作为查找表来替代：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将返回值集合存入数组</span></span><br><span class="line"><span class="keyword">var</span> results = [result0, result1, result2, result3, result4, result5, result6, result7, result8, result9, result10];</span><br><span class="line"><span class="comment">// 返回当前结果</span></span><br><span class="line"><span class="keyword">return</span> result[value];</span><br></pre></td></tr></table></figure>
+<p>当单个键和单个值之间存在逻辑映射时（正如前面的例子），查找表的优势就能体现出来。switch语句更适合于每个键都需要对应一个独特的动作或一系列动作的场合。</p>
+<h5 id="递归"><a href="#递归" class="headerlink" title="递归"></a>递归</h5><p>递归函数潜在的问题是：终止条件不明确或缺少终止条件导致函数长时间运行，并使得用户界面处于假死状态。可能还会遇到浏览器的“调用栈大小限制”(Call sstack size limites)</p>
+<h6 id="调用栈限制"><a href="#调用栈限制" class="headerlink" title="调用栈限制"></a>调用栈限制</h6><p>JavaScript引擎支持的递归数量与JavaScript调用栈大小直接相关。</p>
+<h6 id="递归模式"><a href="#递归模式" class="headerlink" title="递归模式"></a>递归模式</h6><p>当遇到调用栈大小限制时，第一步应该先检查代码中的递归实例。一般，直接递归模式出现的错误很容易定位（递归边界问题）。另一种，“隐伏模式”，即包含两个函数相互调用，形成一个无限循环。<br>因此，如果不是终止条件问题，那么就可能是算法中包含了太多层低估，为了能在浏览器中安全地工作，建议改用<strong>迭代</strong>、<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Memoization">Memoization</a>、或者结合两者使用。</p>
+<h6 id="迭代"><a href="#迭代" class="headerlink" title="迭代"></a>迭代</h6><h3 id="实践场景"><a href="#实践场景" class="headerlink" title="实践场景"></a>实践场景</h3>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/88143aa7.html" title="高性能JavaScript读书笔记">https://nimbusk.cc/post/88143aa7.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E9%AB%98%E6%80%A7%E8%83%BDJavaScript/" rel="tag"># 高性能JavaScript</a>
+              <a href="/tags/High-Performance-JavaScript/" rel="tag"># High Performance JavaScript</a>
+              <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/84ea90f7.html" rel="prev" title="JavaScript系列">
+                  <i class="fa fa-angle-left"></i> JavaScript系列
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/178a5861.html" rel="next" title="Hexo建站">
+                  Hexo建站 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"1dc78370ac0f7b460c090a39d76ee04e"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

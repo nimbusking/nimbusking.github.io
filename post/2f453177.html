@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前言 Tomcat的设计思路，整体架构，设计精髓 Tomcat的线程模型详解及其调优 Tomcat的类加载机制和热加载部署的实现原理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Tomcat学习实录">
+<meta property="og:url" content="https://nimbusk.cc/post/2f453177.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="前言 Tomcat的设计思路，整体架构，设计精髓 Tomcat的线程模型详解及其调优 Tomcat的类加载机制和热加载部署的实现原理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/2f453177/Tomcat%E8%AF%B7%E6%B1%82%E8%B0%83%E7%94%A8%E9%93%BE.png">
+<meta property="og:image" content="https://nimbusk.cc/post/2f453177/Tomcat%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%9E%8B.png">
+<meta property="og:image" content="https://nimbusk.cc/post/2f453177/Service%E7%BB%84%E4%BB%B6%E6%9E%B6%E6%9E%84%E7%A4%BA%E6%84%8F%E5%9B%BE.png">
+<meta property="og:image" content="https://nimbusk.cc/post/2f453177/ProtocalHandler%E6%9E%B6%E6%9E%84%E7%A4%BA%E6%84%8F%E5%9B%BE.png">
+<meta property="og:image" content="https://nimbusk.cc/post/2f453177/linux%E7%BA%BF%E7%A8%8B%E9%98%BB%E5%A1%9E%E7%A4%BA%E6%84%8F%E5%9B%BE.png">
+<meta property="og:image" content="https://nimbusk.cc/post/2f453177/IO%E8%B0%83%E7%94%A8%E7%94%A8%E6%88%B7%E6%80%81%E5%92%8C%E5%86%85%E6%A0%B8%E6%80%81%E6%95%B0%E6%8D%AE%E4%BA%A4%E6%8D%A2%E7%A4%BA%E6%84%8F%E5%9B%BE.png">
+<meta property="og:image" content="https://nimbusk.cc/post/2f453177/%E5%90%8C%E6%AD%A5%E9%98%BB%E5%A1%9EIO%E6%A8%A1%E5%9E%8B%E5%88%86%E7%B1%BB.png">
+<meta property="og:image" content="https://nimbusk.cc/post/2f453177/%E5%90%84%E7%A7%8DIO%E6%A8%A1%E5%9E%8B%E8%A1%8C%E4%B8%BA%E5%B7%AE%E5%BC%82.png">
+<meta property="article:published_time" content="2024-10-21T09:51:37.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="Tomcat">
+<meta property="article:tag" content="Servlet">
+<meta property="article:tag" content="Catalina">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/2f453177/Tomcat%E8%AF%B7%E6%B1%82%E8%B0%83%E7%94%A8%E9%93%BE.png">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/2f453177.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/2f453177.html","path":"post/2f453177.html","title":"Tomcat学习实录"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Tomcat学习实录 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tomcat%E6%9E%B6%E6%9E%84%E7%9B%B8%E5%85%B3"><span class="nav-number">2.</span> <span class="nav-text">Tomcat架构相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Tomcat%E6%A0%B8%E5%BF%83%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.</span> <span class="nav-text">Tomcat核心组件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Server%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.1.</span> <span class="nav-text">Server组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Service%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.2.</span> <span class="nav-text">Service组件</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BF%99%E4%B9%88%E8%AE%BE%E8%AE%A1%EF%BC%9F"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">为什么这么设计？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Connector%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.3.</span> <span class="nav-text">Connector组件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ProtocalHandle%E7%BB%84%E4%BB%B6"><span class="nav-number">2.1.4.</span> <span class="nav-text">ProtocalHandle组件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tomcat%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B%E7%9B%B8%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">Tomcat线程模型相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BB%E9%A2%98%E8%A6%81%E7%82%B9"><span class="nav-number">3.1.</span> <span class="nav-text">主题要点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E9%98%BB%E5%A1%9E%E5%94%A4%E9%86%92"><span class="nav-number">3.2.</span> <span class="nav-text">关于阻塞唤醒</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IO%E6%A8%A1%E5%9E%8B%E4%B8%8B%E7%9A%84%E5%BC%82%E6%AD%A5-%E5%90%8C%E6%AD%A5%EF%BC%8C%E9%98%BB%E5%A1%9E-%E9%9D%9E%E9%98%BB%E5%A1%9E%E9%97%AE%E9%A2%98"><span class="nav-number">3.3.</span> <span class="nav-text">IO模型下的异步&#x2F;同步，阻塞&#x2F;非阻塞问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Socket-Read%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8%E8%BF%87%E7%A8%8B"><span class="nav-number">3.3.1.</span> <span class="nav-text">Socket Read系统调用过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Unix-Linux-%E4%B8%8B%E7%9A%845%E7%A7%8DIO%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.4.</span> <span class="nav-text">Unix(Linux)下的5种IO模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tomcat%E5%AE%9E%E7%8E%B0%E7%9A%84IO%E6%A8%A1%E5%9E%8B"><span class="nav-number">3.5.</span> <span class="nav-text">Tomcat实现的IO模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tomcat%E5%AF%B9%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E6%89%A9%E5%B1%95"><span class="nav-number">3.6.</span> <span class="nav-text">Tomcat对线程池的扩展</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E4%B8%8A%E4%B8%8B%E6%96%87%E5%8A%A0%E8%BD%BD%E5%99%A8"><span class="nav-number">3.7.</span> <span class="nav-text">线程上下文加载器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tomcat%E7%83%AD%E5%8A%A0%E8%BD%BD%E4%B8%8E%E7%83%AD%E9%83%A8%E7%BD%B2"><span class="nav-number">4.</span> <span class="nav-text">Tomcat热加载与热部署</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Tomcat%E5%BC%80%E5%90%AF%E5%90%8E%E5%8F%B0%E7%BA%BF%E7%A8%8B%E6%89%A7%E8%A1%8C%E5%91%A8%E6%9C%9F%E6%80%A7%E4%BB%BB%E5%8A%A1"><span class="nav-number">4.1.</span> <span class="nav-text">Tomcat开启后台线程执行周期性任务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tomcat%E8%B0%83%E4%BC%98"><span class="nav-number">5.</span> <span class="nav-text">Tomcat调优</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Tomcat-%E7%9A%84%E5%85%B3%E9%94%AE%E6%8C%87%E6%A0%87"><span class="nav-number">5.1.</span> <span class="nav-text">Tomcat 的关键指标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tomcat%E7%BA%BF%E7%A8%8B%E6%B1%A0%E7%9A%84%E5%B9%B6%E5%8F%91%E8%B0%83%E4%BC%98"><span class="nav-number">5.2.</span> <span class="nav-text">Tomcat线程池的并发调优</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/2f453177.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Tomcat学习实录 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Tomcat学习实录
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-10-21 09:51:37" itemprop="dateCreated datePublished" datetime="2024-10-21T09:51:37+00:00">2024-10-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Java系列</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>Tomcat的设计思路，整体架构，设计精髓</li>
+<li>Tomcat的线程模型详解及其调优</li>
+<li>Tomcat的类加载机制和热加载部署的实现原理</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="Tomcat架构相关"><a href="#Tomcat架构相关" class="headerlink" title="Tomcat架构相关"></a>Tomcat架构相关</h2><p><strong>Tomcat核心： Http服务器+Servlet容器</strong><br><img data-src="2f453177/Tomcat%E8%AF%B7%E6%B1%82%E8%B0%83%E7%94%A8%E9%93%BE.png" alt="Tomcat请求调用链"><br>Tomcat架构模型<br><img data-src="2f453177/Tomcat%E6%9E%B6%E6%9E%84%E6%A8%A1%E5%9E%8B.png" alt="Tomcat架构模型"></p>
+<p><strong>Tomcat 要实现 2 个核心功能：</strong></p>
+<ul>
+<li>处理 Socket 连接，负责网络字节流与 Request 和 Response 对象的转化。</li>
+<li>加载和管理 Servlet，以及具体处理 Request 请求。<br>因此 Tomcat 设计了两个核心组件连接器（Connector）和容器（Container）来分别做这两件事情。连接器负责对外交流，容器负责内部处理。</li>
+</ul>
+<h3 id="Tomcat核心组件"><a href="#Tomcat核心组件" class="headerlink" title="Tomcat核心组件"></a>Tomcat核心组件</h3><h4 id="Server组件"><a href="#Server组件" class="headerlink" title="Server组件"></a>Server组件</h4><p>指的就是整个 Tomcat 服务器，包含多组服务（Service），负责管理和启动各个Service，同时监听 8005 端口发过来的 shutdown 命令，用于关闭整个容器 。</p>
+<h4 id="Service组件"><a href="#Service组件" class="headerlink" title="Service组件"></a>Service组件</h4><p>每个 Service 组件都包含了若干用于接收客户端消息的 Connector 组件和处理请求的Engine 组件。 Service 组件还包含了若干 Executor 组件，每个 Executor 都是一个线程池，它可以为 Service 内所有组件提供线程池执行任务。<br><img data-src="2f453177/Service%E7%BB%84%E4%BB%B6%E6%9E%B6%E6%9E%84%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="Service组件架构示意图"></p>
+<h5 id="为什么这么设计？"><a href="#为什么这么设计？" class="headerlink" title="为什么这么设计？"></a>为什么这么设计？</h5><p>Tomcat 为了实现支持多种 I/O 模型和应用层协议，一个容器可能对接多个连接器，就好比一个房间有多个门，<strong>但是单独的连接器或者容器都不能对外提供服务，需要把它们组装起来才能工作，组装后这个整体叫作 Service 组件。</strong><br>Service 本身没有做什么重要的事情，只是在连接器和容器外面多包了一层，把它们组装在一起。Tomcat 内可能有多个Service，这样的设计也是出于灵活性的考虑。<strong>通过在 Tomcat 中配置多个 Service，可以实现通过不同的端口号来访问同一台机器上部署的不同应用。</strong></p>
+<h4 id="Connector组件"><a href="#Connector组件" class="headerlink" title="Connector组件"></a>Connector组件</h4><p>连接器对 Servlet 容器屏蔽了不同的应用层协议及 I/O 模型，无论是 HTTP 还是AJP，在容器中获取到的都是一个标准的 ServletRequest 对象。连接器需要实现的功能：</p>
+<ul>
+<li>监听网络端口。</li>
+<li>接受网络连接请求。</li>
+<li>读取请求网络字节流。</li>
+<li>根据具体应用层协议（HTTP/AJP）解析字节流，生成统一的 Tomcat Request对象。</li>
+<li>将 Tomcat Request 对象转成标准的 ServletRequest。</li>
+<li>调用 Servlet 容器，得到 ServletResponse。</li>
+<li>将 ServletResponse 转成 Tomcat Response 对象。</li>
+<li>将 Tomcat Response 转成网络字节流。</li>
+<li>将响应字节流写回给浏览器。</li>
+</ul>
+<p><strong>连接器需要完成 3 个$\color{red}{高内聚}$的功能：</strong></p>
+<ul>
+<li>网络通信。</li>
+<li>应用层协议解析。</li>
+<li>Tomcat Request/Response 与 ServletRequest/ServletResponse 的转化。</li>
+</ul>
+<p><strong>分别对应的三个功能来实现这3个功能：</strong></p>
+<ul>
+<li>EndPoint 负责提供字节流给 Processor；</li>
+<li>Processor 负责提供 Tomcat Request 对象给 Adapter；</li>
+<li>Adapter 负责提供 ServletRequest 对象给容器。</li>
+</ul>
+<h4 id="ProtocalHandle组件"><a href="#ProtocalHandle组件" class="headerlink" title="ProtocalHandle组件"></a>ProtocalHandle组件</h4><p><img data-src="2f453177/ProtocalHandler%E6%9E%B6%E6%9E%84%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="ProtocalHandler架构示意图"></p>
+<h2 id="Tomcat线程模型相关"><a href="#Tomcat线程模型相关" class="headerlink" title="Tomcat线程模型相关"></a>Tomcat线程模型相关</h2><h3 id="主题要点"><a href="#主题要点" class="headerlink" title="主题要点"></a>主题要点</h3><ul>
+<li>理解IO模型的本质：是为了解决什么问题，为什么会有不同的IO模型设计，重点理解IO模型中的IO多路复用和异步IO</li>
+<li>主从Reactor多线程模型在Tomcat中的实现</li>
+</ul>
+<h3 id="关于阻塞唤醒"><a href="#关于阻塞唤醒" class="headerlink" title="关于阻塞唤醒"></a>关于阻塞唤醒</h3><p><img data-src="2f453177/linux%E7%BA%BF%E7%A8%8B%E9%98%BB%E5%A1%9E%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="linux线程阻塞示意图"><br>阻塞的本质就是将进程的task_struct移出运行队列，添加到等待队列，并且将进程的状态的置为TASK_UNINTERRUPTIBLE或者TASK_INTERRUPTIBLE，重新触发一次 CPU调度让出 CPU</p>
+<h3 id="IO模型下的异步-同步，阻塞-非阻塞问题"><a href="#IO模型下的异步-同步，阻塞-非阻塞问题" class="headerlink" title="IO模型下的异步/同步，阻塞/非阻塞问题"></a>IO模型下的异步/同步，阻塞/非阻塞问题</h3><p><strong>I/O 模型是为了解决内存和外部设备速度差异的问题。<br>我们平时说的阻塞或非阻塞是指应用程序在发起 I/O 操作时，是立即返回还是等待。<br>而同步和异步，是指应用程序在与内核通信时，数据从内核空间到应用空间的拷贝，是由内核主动发起还是由应用程序来触发。</strong><br>如果是需要应用程序主动再次发起，那就是同步；反之，由内核空间自己将数据拷贝到用户进程缓冲区，那就是异步；</p>
+<h4 id="Socket-Read系统调用过程"><a href="#Socket-Read系统调用过程" class="headerlink" title="Socket Read系统调用过程"></a>Socket Read系统调用过程</h4><p>通过一个例子来理解，以Linux操作系统为例，一次socket read 系统调用的过程：</p>
+<ul>
+<li>首先 CPU 在用户态执行应用程序的代码，访问进程虚拟地址空间的用户空间；</li>
+<li>read 系统调用时 CPU 从用户态切换到内核态，执行内核代码，内核检测到Socket 上的数据未就绪时，将进程的task_struct结构体从运行队列中移到等待队列，并触发一次 CPU 调度，这时进程会让出 CPU；</li>
+<li>当网卡数据到达时，内核将数据从内核空间拷贝到用户空间的 Buffer，接着将进程的task_struct结构体重新移到运行队列，这样进程就有机会重新获得 CPU 时间片，系统调用返回，CPU 又从内核态切换到用户态，访问用户空间的数据。</li>
+</ul>
+<p><strong>总结</strong>：<br>当用户线程发起 I/O 调用后，网络数据读取操作会经历两个步骤：</p>
+<ol>
+<li><strong>用户线程等待内核将数据从网卡拷贝到内核空间。（数据准备阶段）</strong></li>
+<li><strong>内核将数据从内核空间拷贝到用户空间（应用进程的缓冲区）。</strong></li>
+</ol>
+<p><strong>各种 I/O 模型的区别就是：它们实现这两个步骤的方式是不一样的。也就是对这两个步骤的优化过程</strong><br><img data-src="2f453177/IO%E8%B0%83%E7%94%A8%E7%94%A8%E6%88%B7%E6%80%81%E5%92%8C%E5%86%85%E6%A0%B8%E6%80%81%E6%95%B0%E6%8D%AE%E4%BA%A4%E6%8D%A2%E7%A4%BA%E6%84%8F%E5%9B%BE.png" alt="IO调用用户态和内核态数据交换示意图"></p>
+<h3 id="Unix-Linux-下的5种IO模型"><a href="#Unix-Linux-下的5种IO模型" class="headerlink" title="Unix(Linux)下的5种IO模型"></a>Unix(Linux)下的5种IO模型</h3><p>Linux 系统下的 I/O 模型有 5 种：</p>
+<ol>
+<li>同步阻塞I/O（bloking I/O）</li>
+<li>同步非阻塞I/O（non-blocking I/O）</li>
+<li>I/O多路复用（multiplexing I/O）</li>
+<li>信号驱动式I/O（signal-driven I/O）(<em>不常用</em>)</li>
+<li>异步I/O（asynchronous I/O）</li>
+</ol>
+<p><img data-src="2f453177/%E5%90%8C%E6%AD%A5%E9%98%BB%E5%A1%9EIO%E6%A8%A1%E5%9E%8B%E5%88%86%E7%B1%BB.png" alt="同步阻塞IO模型分类"><br>各种IO模型行为的差异对比示意图：<br><img data-src="2f453177/%E5%90%84%E7%A7%8DIO%E6%A8%A1%E5%9E%8B%E8%A1%8C%E4%B8%BA%E5%B7%AE%E5%BC%82.png" alt="各种IO模型行为差异"></p>
+<p>一个非常简单的在Java中实现的BIO：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BioServer</span> &#123;</span><br><span class="line">	<span class="comment">// 数据准备和数据读取阶段两步阻塞</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">ExecutorService</span> <span class="variable">executorService</span> <span class="operator">=</span> Executors.newCachedThreadPool();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 启动服务，绑定8080端口</span></span><br><span class="line">            <span class="type">ServerSocket</span> <span class="variable">serverSocket</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ServerSocket</span>();</span><br><span class="line">            serverSocket.bind(<span class="keyword">new</span> <span class="title class_">InetSocketAddress</span>(<span class="number">8080</span>));</span><br><span class="line">            System.out.println(<span class="string">&quot;开启服务&quot;</span>);</span><br><span class="line"></span><br><span class="line">            <span class="keyword">while</span> (<span class="literal">true</span>)&#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;等待客户端建立连接&quot;</span>);</span><br><span class="line">                <span class="comment">// 监听8080端口，获取客户端连接</span></span><br><span class="line">                <span class="type">Socket</span> <span class="variable">socket</span> <span class="operator">=</span> serverSocket.accept(); <span class="comment">//阻塞</span></span><br><span class="line">                System.out.println(<span class="string">&quot;建立连接：&quot;</span>+socket);</span><br><span class="line">                <span class="comment">// 用线程池，模拟多连接场景，否则会一直阻塞（BIO的缺点）</span></span><br><span class="line">                executorService.submit(()-&gt;&#123;</span><br><span class="line">                    <span class="comment">//TODO 业务处理</span></span><br><span class="line">                    <span class="keyword">try</span> &#123;</span><br><span class="line">                        handler(socket);</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                        e.printStackTrace();</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;);</span><br><span class="line"></span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="comment">//TODO 资源回收</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">handler</span><span class="params">(Socket socket)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>)&#123;</span><br><span class="line">            <span class="type">byte</span>[] bytes = <span class="keyword">new</span> <span class="title class_">byte</span>[<span class="number">1024</span>];</span><br><span class="line">            System.out.println(<span class="string">&quot;等待读取数据&quot;</span>);</span><br><span class="line">            <span class="type">int</span> <span class="variable">read</span> <span class="operator">=</span> socket.getInputStream().read(bytes); <span class="comment">// 阻塞</span></span><br><span class="line">            <span class="keyword">if</span>(read !=-<span class="number">1</span>) &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;读取客户端发送的数据：&quot;</span> +</span><br><span class="line">                        <span class="keyword">new</span> <span class="title class_">String</span>(bytes, <span class="number">0</span>, read));</span><br><span class="line">            &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="Tomcat实现的IO模型"><a href="#Tomcat实现的IO模型" class="headerlink" title="Tomcat实现的IO模型"></a>Tomcat实现的IO模型</h3><table>
+<thead>
+<tr>
+<th>IO模型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BIO（JIoEndpoint）</td>
+<td>同步阻塞式IO，即Tomcat使用传统的java.io进行操作。该模式下每个请求都会创建一个线程，对性能开销大，不适合高并发场景。优点是稳定，适合连接数目小且固定架构。</td>
+</tr>
+<tr>
+<td>NIO（NioEndpoint）</td>
+<td>同步非阻塞式IO，jdk1.4 之后实现的新IO。该模式基于多路复用选择器监测连接状态再同步通知线程处理，从而达到非阻塞的目的。比传统BIO能更好的支持并发性能。Tomcat 8.0之后默认采用该模式。NIO方式适用于连接数目多且连接比较短（轻操作） 的架构， 比如聊天服务器， 弹幕系统， 服务器间通讯，编程比较复杂</td>
+</tr>
+<tr>
+<td>AIO (Nio2Endpoint)</td>
+<td>异步非阻塞式IO，jdk1.7后之支持 。与nio不同在于不需要多路复用选择器，而是请求处理线程执行完成进行回调通知，继续执行后续操作。Tomcat 8之后支持。一般适用于连接数较多且连接时间较长的应用</td>
+</tr>
+<tr>
+<td>APR（AprEndpoint）</td>
+<td>全称是 Apache Portable Runtime/Apache可移植运行库)，是ApacheHTTP服务器的支持库。AprEndpoint 是通过 JNI 调用 APR 本地库而实现非阻塞 I/O 的。使用需要编译安装APR 库</td>
+</tr>
+</tbody></table>
+<p>注意： Linux 内核没有很完善地支持异步 I/O 模型，因此 JVM 并没有采用原生的 Linux 异步 I/O，而是在应用层面通过 epoll 模拟了异步 I/O 模型。因此在 Linux 平台上，JavaNIO 和 Java NIO.2 底层都是通过 epoll 来实现的，但是 Java NIO 更加简单高效。</p>
+<h3 id="Tomcat对线程池的扩展"><a href="#Tomcat对线程池的扩展" class="headerlink" title="Tomcat对线程池的扩展"></a>Tomcat对线程池的扩展</h3><p>Tomcat的线程池管理线程的时候，首次遇到投放失败的时候，会有一个重新向阻塞队列里面投放的过程。<br>由于自己定义了一个TaskQueue（继承LinkedBlockingQueue）,这里面对offer方法重写了就遇到了一个很有意思的问题：<br>对于原生的Java线程池定义的阻塞队列，当前线程池核心队列满的同时小于最大线程的时候，<strong>是不会创建非核心线程的，是直接往队列里面丢</strong>。<br>而在tomcat重新的offer方法里面，<strong>这种情况会直接返回false，让其放入队列失败，进而直接去创建非核心线程去了。</strong><br>贴上两段代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//// 代码位置：org.apache.tomcat.util.threads.ThreadPoolExecutor#executeInternal</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Executes the given task sometime in the future.  The task</span></span><br><span class="line"><span class="comment">     * may execute in a new thread or in an existing pooled thread.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * If the task cannot be submitted for execution, either because this</span></span><br><span class="line"><span class="comment">     * executor has been shutdown or because its capacity has been reached,</span></span><br><span class="line"><span class="comment">     * the task is handled by the current &#123;<span class="doctag">@link</span> RejectedExecutionHandler&#125;.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> command the task to execute</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> RejectedExecutionException at discretion of</span></span><br><span class="line"><span class="comment">     *         &#123;<span class="doctag">@code</span> RejectedExecutionHandler&#125;, if the task</span></span><br><span class="line"><span class="comment">     *         cannot be accepted for execution</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@throws</span> NullPointerException if &#123;<span class="doctag">@code</span> command&#125; is null</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">executeInternal</span><span class="params">(Runnable command)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (command == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">/*</span></span><br><span class="line"><span class="comment">         * Proceed in 3 steps:</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * 1. If fewer than corePoolSize threads are running, try to</span></span><br><span class="line"><span class="comment">         * start a new thread with the given command as its first</span></span><br><span class="line"><span class="comment">         * task.  The call to addWorker atomically checks runState and</span></span><br><span class="line"><span class="comment">         * workerCount, and so prevents false alarms that would add</span></span><br><span class="line"><span class="comment">         * threads when it shouldn&#x27;t, by returning false.</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * 2. If a task can be successfully queued, then we still need</span></span><br><span class="line"><span class="comment">         * to double-check whether we should have added a thread</span></span><br><span class="line"><span class="comment">         * (because existing ones died since last checking) or that</span></span><br><span class="line"><span class="comment">         * the pool shut down since entry into this method. So we</span></span><br><span class="line"><span class="comment">         * recheck state and if necessary roll back the enqueuing if</span></span><br><span class="line"><span class="comment">         * stopped, or start a new thread if there are none.</span></span><br><span class="line"><span class="comment">         *</span></span><br><span class="line"><span class="comment">         * 3. If we cannot queue task, then we try to add a new</span></span><br><span class="line"><span class="comment">         * thread.  If it fails, we know we are shut down or saturated</span></span><br><span class="line"><span class="comment">         * and so reject the task.</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">c</span> <span class="operator">=</span> ctl.get();</span><br><span class="line">        <span class="keyword">if</span> (workerCountOf(c) &lt; corePoolSize) &#123;</span><br><span class="line">            <span class="keyword">if</span> (addWorker(command, <span class="literal">true</span>)) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            c = ctl.get();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) &#123;</span><br><span class="line">            <span class="type">int</span> <span class="variable">recheck</span> <span class="operator">=</span> ctl.get();</span><br><span class="line">            <span class="keyword">if</span> (! isRunning(recheck) &amp;&amp; remove(command)) &#123;</span><br><span class="line">                reject(command);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (workerCountOf(recheck) == <span class="number">0</span>) &#123;</span><br><span class="line">                addWorker(<span class="literal">null</span>, <span class="literal">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!addWorker(command, <span class="literal">false</span>)) &#123;</span><br><span class="line">            reject(command);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>TaskQueue的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码位置 org.apache.tomcat.util.threads.TaskQueue#offer</span></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">offer</span><span class="params">(Runnable o)</span> &#123;</span><br><span class="line">      <span class="comment">//we can&#x27;t do any checks</span></span><br><span class="line">        <span class="keyword">if</span> (parent==<span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">super</span>.offer(o);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//we are maxed out on threads, simply queue the object</span></span><br><span class="line">        <span class="keyword">if</span> (parent.getPoolSizeNoLock() == parent.getMaximumPoolSize()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">super</span>.offer(o);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//we have idle threads, just add it to the queue</span></span><br><span class="line">        <span class="keyword">if</span> (parent.getSubmittedCount() &lt;= parent.getPoolSizeNoLock()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="built_in">super</span>.offer(o);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//if we have less threads than maximum force creation of a new thread</span></span><br><span class="line">        <span class="comment">// 注意看这里</span></span><br><span class="line">        <span class="keyword">if</span> (parent.getPoolSizeNoLock() &lt; parent.getMaximumPoolSize()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">//if we reached here, we need to add it to the queue</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">super</span>.offer(o);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="线程上下文加载器"><a href="#线程上下文加载器" class="headerlink" title="线程上下文加载器"></a>线程上下文加载器</h3><p>在 JVM 的实现中有一条隐含的规则，<strong>默认情况下，如果一个类由类加载器 A 加载，那么这个类的依赖类也是由相同的类加载器加载。</strong></p>
+<p>Tomcat 为每个 Web 应用创建一个 WebAppClassLoarder 类加载器，并在启动Web 应用的线程里设置线程上下文加载器，这样 Spring 在启动时就将线程上下文加载器取出来，用来加载 Bean。</p>
+<p><strong>线程上下文加载器是一种类加载器传递机制</strong>，因为这个类加载器保存在线程私有数据里，只要是同一个线程，一旦设置了线程上下文加载器，在线程后续执行过程中就能把这个类加载器取出来用。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 直接取出对应线程的类加载器，取出来用即可</span></span><br><span class="line">Thread.currentThread().getContextClassLoader()</span><br></pre></td></tr></table></figure>
+<p>线程上下文加载器不仅仅可以用在 Tomcat 和 Spring 类加载的场景里，核心框架类需要加载具体实现类时都可以用到它，比如我们熟悉的 JDBC 就是通过上下文类加载器来加载不同的数据库驱动的。</p>
+<h2 id="Tomcat热加载与热部署"><a href="#Tomcat热加载与热部署" class="headerlink" title="Tomcat热加载与热部署"></a>Tomcat热加载与热部署</h2><p>在项目开发过程中，经常要改动Java/JSP 文件，但是又不想重新启动Tomcat，有两种方式:热加载和热部署。热部署表示重新部署应⽤，它的执⾏主体是Host。 热加载表示重新加载class，它的执⾏主体是Context。</p>
+<p><strong>思考：Tomcat 是如何用后台线程来实现热加载和热部署的？</strong></p>
+<h3 id="Tomcat开启后台线程执行周期性任务"><a href="#Tomcat开启后台线程执行周期性任务" class="headerlink" title="Tomcat开启后台线程执行周期性任务"></a>Tomcat开启后台线程执行周期性任务</h3><p>Tomcat 通过开启后台线程ContainerBase.ContainerBackgroundProcessor，使得各个层次的容器组件都有机会完成一些周期性任务。我们在实际工作中，往往也需要执行一些周期性的任务，比如监控程序周期性拉取系统的健康状态，就可以借鉴这种设计。</p>
+<p>Tomcat9 是通过 <code>ScheduledThreadPoolExecutor</code> 来开启后台线程的，它除了具有线程池的功能，还能够执行周期性的任务</p>
+<h2 id="Tomcat调优"><a href="#Tomcat调优" class="headerlink" title="Tomcat调优"></a>Tomcat调优</h2><h3 id="Tomcat-的关键指标"><a href="#Tomcat-的关键指标" class="headerlink" title="Tomcat 的关键指标"></a>Tomcat 的关键指标</h3><p>Tomcat 的关键指标有<strong>吞吐量、响应时间、错误数、线程池、CPU 以及 JVM 内存。</strong><br>前三个指标是我们最关心的业务指标，Tomcat 作为服务器，就是要能够又快有好地处理请求，因此吞吐量要大、响应时间要短，并且错误数要少。<br>后面三个指标是跟系统资源有关的，当某个资源出现瓶颈就会影响前面的业务指标，比如线程池中的线程数量不足会影响吞吐量和响应时间；但是线程数太多会耗费大量 CPU，也会影响吞吐量；当内存不足时会触发频繁地 GC，耗费 CPU，最后也会反映到业务指标上来。</p>
+<h3 id="Tomcat线程池的并发调优"><a href="#Tomcat线程池的并发调优" class="headerlink" title="Tomcat线程池的并发调优"></a>Tomcat线程池的并发调优</h3><p>直接看表格参数即可</p>
+<table>
+<thead>
+<tr>
+<th>IO模型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>threadPriority</td>
+<td>(int)线程优先级，默认是5</td>
+</tr>
+<tr>
+<td>daemon</td>
+<td>(boolean) 是否deamon线程，默认为true</td>
+</tr>
+<tr>
+<td>namePrefix</td>
+<td>(String) 线程前缀</td>
+</tr>
+<tr>
+<td>maxThreads</td>
+<td>(int) 线程池中的最大线程数，默认是200</td>
+</tr>
+<tr>
+<td>minSpareThreads</td>
+<td>(int) 最小线程数（线程空闲超过一段时间会被回收），默认是25</td>
+</tr>
+<tr>
+<td>maxldleTime</td>
+<td>(int) 线程最大的空闲时间，超过这个时间线程就会回收，直到线程数剩下minSpareThreads个，默认值是一分钟</td>
+</tr>
+<tr>
+<td>maxQueueSize</td>
+<td>(int) 线程池中任务队列的最大长度，默认是Integer.MAX_VALUE</td>
+</tr>
+<tr>
+<td>prestartminSpareThreads</td>
+<td>(boolean) 是否在线程池启动时就创建minSpareThreads 个线程，默认为false</td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/2f453177.html" title="Tomcat学习实录">https://nimbusk.cc/post/2f453177.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Tomcat/" rel="tag"># Tomcat</a>
+              <a href="/tags/Servlet/" rel="tag"># Servlet</a>
+              <a href="/tags/Catalina/" rel="tag"># Catalina</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/7410cfeb.html" rel="prev" title="JVM类加载过程">
+                  <i class="fa fa-angle-left"></i> JVM类加载过程
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/65d26b16.html" rel="next" title="Netty学习实录">
+                  Netty学习实录 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"ed8e462f0fbd6d0cb83f9937fbab4585"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

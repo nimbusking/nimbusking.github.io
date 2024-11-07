@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前言废话少说，从头学Java之第一篇。按日常使用优先级分级阅读，为了防止篇幅过于太长，其中值得详细探讨的，会单独独立po新文出来。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java-lang包学习">
+<meta property="og:url" content="https://nimbusk.cc/post/56093694.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="前言废话少说，从头学Java之第一篇。按日常使用优先级分级阅读，为了防止篇幅过于太长，其中值得详细探讨的，会单独独立po新文出来。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/56093694/hierachy_appendable.jpg">
+<meta property="article:published_time" content="2022-05-15T23:17:42.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="java.lang">
+<meta property="article:tag" content="rt.jar">
+<meta property="article:tag" content="jdk8">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/56093694/hierachy_appendable.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/56093694.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/56093694.html","path":"post/56093694.html","title":"java-lang包学习"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>java-lang包学习 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lang%E5%8C%85%E5%9F%BA%E6%9C%AC%E6%A6%82%E8%A7%88"><span class="nav-number">2.</span> <span class="nav-text">lang包基本概览</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#lang%E5%8C%85%E4%B8%8B%E4%B8%80%E4%BA%9B%E7%B1%BB"><span class="nav-number">2.1.</span> <span class="nav-text">lang包下一些类</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8E%A5%E5%8F%A3-Interface-%E7%9B%B8%E5%85%B3"><span class="nav-number">2.1.1.</span> <span class="nav-text">接口(Interface)相关</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Appendable"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">Appendable</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%BB%A7%E6%89%BF%E5%9B%BE%E8%B0%B1"><span class="nav-number">2.1.1.1.1.</span> <span class="nav-text">继承图谱</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AutoCloseable"><span class="nav-number">2.1.1.2.</span> <span class="nav-text">AutoCloseable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CharSequence"><span class="nav-number">2.1.1.3.</span> <span class="nav-text">CharSequence</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Cloneable"><span class="nav-number">2.1.1.4.</span> <span class="nav-text">Cloneable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Comparable"><span class="nav-number">2.1.1.5.</span> <span class="nav-text">Comparable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Iterable"><span class="nav-number">2.1.1.6.</span> <span class="nav-text">Iterable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Readable"><span class="nav-number">2.1.1.7.</span> <span class="nav-text">Readable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Runnable"><span class="nav-number">2.1.1.8.</span> <span class="nav-text">Runnable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Thread-UncaughtExceptionHandler"><span class="nav-number">2.1.1.9.</span> <span class="nav-text">Thread.UncaughtExceptionHandler</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B1%BB-Class-%E7%9B%B8%E5%85%B3"><span class="nav-number">2.1.2.</span> <span class="nav-text">类(Class)相关</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Boolean"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">Boolean</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Byte"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">Byte</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Character"><span class="nav-number">2.1.2.3.</span> <span class="nav-text">Character</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Class-amp-amp-ClassLoader-amp-amp-ClassValue"><span class="nav-number">2.1.2.4.</span> <span class="nav-text">Class &amp;&amp; ClassLoader &amp;&amp; ClassValue</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Compiler"><span class="nav-number">2.1.2.5.</span> <span class="nav-text">Compiler</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Double"><span class="nav-number">2.1.2.6.</span> <span class="nav-text">Double</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Enum-lt-E-extends-Enum-gt"><span class="nav-number">2.1.2.7.</span> <span class="nav-text">Enum&lt;E extends Enum&gt;</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Float"><span class="nav-number">2.1.2.8.</span> <span class="nav-text">Float</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#InheritableThreadLocal"><span class="nav-number">2.1.2.9.</span> <span class="nav-text">InheritableThreadLocal</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Integer"><span class="nav-number">2.1.2.10.</span> <span class="nav-text">Integer</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Long"><span class="nav-number">2.1.2.11.</span> <span class="nav-text">Long</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Math"><span class="nav-number">2.1.2.12.</span> <span class="nav-text">Math</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Number"><span class="nav-number">2.1.2.13.</span> <span class="nav-text">Number</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Object"><span class="nav-number">2.1.2.14.</span> <span class="nav-text">Object</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Package"><span class="nav-number">2.1.2.15.</span> <span class="nav-text">Package</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Process"><span class="nav-number">2.1.2.16.</span> <span class="nav-text">Process</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ProcessBuilder"><span class="nav-number">2.1.2.17.</span> <span class="nav-text">ProcessBuilder</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ProcessBuilder-Redirect"><span class="nav-number">2.1.2.18.</span> <span class="nav-text">ProcessBuilder.Redirect</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Runtime"><span class="nav-number">2.1.2.19.</span> <span class="nav-text">Runtime</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#RuntimePermission"><span class="nav-number">2.1.2.20.</span> <span class="nav-text">RuntimePermission</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SecurityManager"><span class="nav-number">2.1.2.21.</span> <span class="nav-text">SecurityManager</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Short"><span class="nav-number">2.1.2.22.</span> <span class="nav-text">Short</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#StackTraceElement"><span class="nav-number">2.1.2.23.</span> <span class="nav-text">StackTraceElement</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#StrictMath"><span class="nav-number">2.1.2.24.</span> <span class="nav-text">StrictMath</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#String"><span class="nav-number">2.1.2.25.</span> <span class="nav-text">String</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#StringBuffer"><span class="nav-number">2.1.2.26.</span> <span class="nav-text">StringBuffer</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#StringBuilder"><span class="nav-number">2.1.2.27.</span> <span class="nav-text">StringBuilder</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#System"><span class="nav-number">2.1.2.28.</span> <span class="nav-text">System</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Thread"><span class="nav-number">2.1.2.29.</span> <span class="nav-text">Thread</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ThreadGroup"><span class="nav-number">2.1.2.30.</span> <span class="nav-text">ThreadGroup</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ThreadLocal"><span class="nav-number">2.1.2.31.</span> <span class="nav-text">ThreadLocal</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Throwable"><span class="nav-number">2.1.2.32.</span> <span class="nav-text">Throwable</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Void"><span class="nav-number">2.1.2.33.</span> <span class="nav-text">Void</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%9A%E4%B8%BE-Enum-%E7%9B%B8%E5%85%B3"><span class="nav-number">2.1.3.</span> <span class="nav-text">枚举(Enum)相关</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Character-UnicodeScript"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">Character.UnicodeScript</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ProcessBuilder-Redirect-Type"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">ProcessBuilder.Redirect.Type</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Thread-State"><span class="nav-number">2.1.3.3.</span> <span class="nav-text">Thread.State</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8-Exception-%E7%9B%B8%E5%85%B3"><span class="nav-number">2.1.4.</span> <span class="nav-text">异常(Exception)相关</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#ArithmeticException"><span class="nav-number">2.1.4.1.</span> <span class="nav-text">ArithmeticException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ArrayIndexOutOfBoundsException"><span class="nav-number">2.1.4.2.</span> <span class="nav-text">ArrayIndexOutOfBoundsException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ArrayStoreException"><span class="nav-number">2.1.4.3.</span> <span class="nav-text">ArrayStoreException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ClassCastException"><span class="nav-number">2.1.4.4.</span> <span class="nav-text">ClassCastException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ClassNotFoundException"><span class="nav-number">2.1.4.5.</span> <span class="nav-text">ClassNotFoundException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CloneNotSupportedException"><span class="nav-number">2.1.4.6.</span> <span class="nav-text">CloneNotSupportedException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#EnumConstantNotPresentException"><span class="nav-number">2.1.4.7.</span> <span class="nav-text">EnumConstantNotPresentException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Exception"><span class="nav-number">2.1.4.8.</span> <span class="nav-text">Exception</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IllegalAccessException"><span class="nav-number">2.1.4.9.</span> <span class="nav-text">IllegalAccessException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IllegalArgumentException"><span class="nav-number">2.1.4.10.</span> <span class="nav-text">IllegalArgumentException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IllegalMonitorStateException"><span class="nav-number">2.1.4.11.</span> <span class="nav-text">IllegalMonitorStateException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IllegalStateException"><span class="nav-number">2.1.4.12.</span> <span class="nav-text">IllegalStateException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IllegalThreadStateException"><span class="nav-number">2.1.4.13.</span> <span class="nav-text">IllegalThreadStateException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IndexOutOfBoundsException"><span class="nav-number">2.1.4.14.</span> <span class="nav-text">IndexOutOfBoundsException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#InstantiationException"><span class="nav-number">2.1.4.15.</span> <span class="nav-text">InstantiationException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#InterruptedException"><span class="nav-number">2.1.4.16.</span> <span class="nav-text">InterruptedException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NegativeArraySizeException"><span class="nav-number">2.1.4.17.</span> <span class="nav-text">NegativeArraySizeException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NoSuchFieldException"><span class="nav-number">2.1.4.18.</span> <span class="nav-text">NoSuchFieldException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NoSuchMethodException"><span class="nav-number">2.1.4.19.</span> <span class="nav-text">NoSuchMethodException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NullPointerException"><span class="nav-number">2.1.4.20.</span> <span class="nav-text">NullPointerException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NumberFormatException"><span class="nav-number">2.1.4.21.</span> <span class="nav-text">NumberFormatException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ReflectiveOperationException"><span class="nav-number">2.1.4.22.</span> <span class="nav-text">ReflectiveOperationException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#RuntimeException"><span class="nav-number">2.1.4.23.</span> <span class="nav-text">RuntimeException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SecurityException"><span class="nav-number">2.1.4.24.</span> <span class="nav-text">SecurityException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#StringIndexOutOfBoundsException"><span class="nav-number">2.1.4.25.</span> <span class="nav-text">StringIndexOutOfBoundsException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#TypeNotPresentException"><span class="nav-number">2.1.4.26.</span> <span class="nav-text">TypeNotPresentException</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#UnsupportedOperationException"><span class="nav-number">2.1.4.27.</span> <span class="nav-text">UnsupportedOperationException</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%94%99%E8%AF%AF-Error-%E7%9B%B8%E5%85%B3"><span class="nav-number">2.1.5.</span> <span class="nav-text">错误(Error)相关</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#AbstractMethodError"><span class="nav-number">2.1.5.1.</span> <span class="nav-text">AbstractMethodError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#AssertionError"><span class="nav-number">2.1.5.2.</span> <span class="nav-text">AssertionError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#BootstrapMethodError"><span class="nav-number">2.1.5.3.</span> <span class="nav-text">BootstrapMethodError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ClassCircularityError"><span class="nav-number">2.1.5.4.</span> <span class="nav-text">ClassCircularityError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ClassFormatError"><span class="nav-number">2.1.5.5.</span> <span class="nav-text">ClassFormatError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Error"><span class="nav-number">2.1.5.6.</span> <span class="nav-text">Error</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ExceptionInInitializerError"><span class="nav-number">2.1.5.7.</span> <span class="nav-text">ExceptionInInitializerError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IllegalAccessError"><span class="nav-number">2.1.5.8.</span> <span class="nav-text">IllegalAccessError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IncompatibleClassChangeError"><span class="nav-number">2.1.5.9.</span> <span class="nav-text">IncompatibleClassChangeError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#InstantiationError"><span class="nav-number">2.1.5.10.</span> <span class="nav-text">InstantiationError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#InternalError"><span class="nav-number">2.1.5.11.</span> <span class="nav-text">InternalError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#LinkageError"><span class="nav-number">2.1.5.12.</span> <span class="nav-text">LinkageError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NoClassDefFoundError"><span class="nav-number">2.1.5.13.</span> <span class="nav-text">NoClassDefFoundError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NoSuchFieldError"><span class="nav-number">2.1.5.14.</span> <span class="nav-text">NoSuchFieldError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NoSuchMethodError"><span class="nav-number">2.1.5.15.</span> <span class="nav-text">NoSuchMethodError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#OutOfMemoryError"><span class="nav-number">2.1.5.16.</span> <span class="nav-text">OutOfMemoryError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#StackOverflowError"><span class="nav-number">2.1.5.17.</span> <span class="nav-text">StackOverflowError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ThreadDeath"><span class="nav-number">2.1.5.18.</span> <span class="nav-text">ThreadDeath</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#UnknownError"><span class="nav-number">2.1.5.19.</span> <span class="nav-text">UnknownError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#UnsatisfiedLinkError"><span class="nav-number">2.1.5.20.</span> <span class="nav-text">UnsatisfiedLinkError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#UnsupportedClassVersionError"><span class="nav-number">2.1.5.21.</span> <span class="nav-text">UnsupportedClassVersionError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#VerifyError"><span class="nav-number">2.1.5.22.</span> <span class="nav-text">VerifyError</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#VirtualMachineError"><span class="nav-number">2.1.5.23.</span> <span class="nav-text">VirtualMachineError</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%A8%E8%A7%A3-Annotation-%E7%9B%B8%E5%85%B3"><span class="nav-number">2.1.6.</span> <span class="nav-text">注解(Annotation)相关</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Deprecated"><span class="nav-number">2.1.6.1.</span> <span class="nav-text">Deprecated</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#FunctionalInterface"><span class="nav-number">2.1.6.2.</span> <span class="nav-text">FunctionalInterface</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Override"><span class="nav-number">2.1.6.3.</span> <span class="nav-text">Override</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SafeVarargs"><span class="nav-number">2.1.6.4.</span> <span class="nav-text">SafeVarargs</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SuppressWarnings"><span class="nav-number">2.1.6.5.</span> <span class="nav-text">SuppressWarnings</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java-lang-annotation"><span class="nav-number">2.2.</span> <span class="nav-text">java.lang.annotation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java-lang-instrument"><span class="nav-number">2.3.</span> <span class="nav-text">java.lang.instrument</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java-lang-invoke"><span class="nav-number">2.4.</span> <span class="nav-text">java.lang.invoke</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java-lang-management"><span class="nav-number">2.5.</span> <span class="nav-text">java.lang.management</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java-lang-ref"><span class="nav-number">2.6.</span> <span class="nav-text">java.lang.ref</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java-lang-reflect"><span class="nav-number">2.7.</span> <span class="nav-text">java.lang.reflect</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E7%BB%8F%E9%AA%8C"><span class="nav-number">3.</span> <span class="nav-text">一些经验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/56093694.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="java-lang包学习 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          java-lang包学习
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-05-15 23:17:42" itemprop="dateCreated datePublished" datetime="2022-05-15T23:17:42+00:00">2022-05-15</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Java%E6%BA%90%E7%A0%81%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">Java源码系列</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>废话少说，从头学Java之第一篇。<br>按日常使用优先级分级阅读，为了防止篇幅过于太长，其中值得详细探讨的，会单独独立po新文出来。</p>
+<span id="more"></span>
+
+<h2 id="lang包基本概览"><a href="#lang包基本概览" class="headerlink" title="lang包基本概览"></a>lang包基本概览</h2><p>doc api中是这样描述的：</p>
+<blockquote>
+<p>Provides classes that are fundamental to the design of the Java programming language.</p>
+</blockquote>
+<p>对于Java语言来说，不可或缺的(be fundamental to)，可见这个包是多么的重要！<br>这个包下面有几大块内容：</p>
+<ul>
+<li>Object类：“万恶之源” </li>
+<li>基本类型的包装器</li>
+<li>常用数学运算工具类：Math</li>
+<li>字符串操作相关类：String等</li>
+<li>“系统操作”相关类：ClassLoader等</li>
+<li>异常/错误相关定义：Exception、Error等</li>
+</ul>
+<p>从上面的大概的几块内容来看，确实是日常Java语言中，无处不在的。</p>
+<h3 id="lang包下一些类"><a href="#lang包下一些类" class="headerlink" title="lang包下一些类"></a>lang包下一些类</h3><h4 id="接口-Interface-相关"><a href="#接口-Interface-相关" class="headerlink" title="接口(Interface)相关"></a>接口(Interface)相关</h4><h5 id="Appendable"><a href="#Appendable" class="headerlink" title="Appendable"></a>Appendable</h5><p>一个附加字符串定义的接口，提供了三个操作方法，异常抛出的是IOException：<br>这些定义方法中，没有明确任何关于线程安全的定义，需要有各个子类实现类中具体实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Appendable <span class="title function_">append</span><span class="params">(CharSequence csq)</span> <span class="keyword">throws</span> IOException;</span><br><span class="line">Appendable <span class="title function_">append</span><span class="params">(CharSequence csq, <span class="type">int</span> start, <span class="type">int</span> end)</span> <span class="keyword">throws</span> IOException;</span><br><span class="line">Appendable <span class="title function_">append</span><span class="params">(<span class="type">char</span> c)</span> <span class="keyword">throws</span> IOException;</span><br></pre></td></tr></table></figure>
+<h6 id="继承图谱"><a href="#继承图谱" class="headerlink" title="继承图谱"></a>继承图谱</h6><p><img data-src="56093694/hierachy_appendable.jpg" alt="hierachy_appendable"></p>
+<h5 id="AutoCloseable"><a href="#AutoCloseable" class="headerlink" title="AutoCloseable"></a>AutoCloseable</h5><p>一个在JDK1.7中引入的特性，从源码文档中可以看出：一个在关闭之前可能持有资源（例如文件或套接字句柄）的对象。 AutoCloseable对象的close() 方法在退出资源规范标头中已为其声明对象的 try-with-resources 块时自动调用。<br>你要实现自动关闭，则需要配合try-with-resources语法定义，才会生效。</p>
+<h5 id="CharSequence"><a href="#CharSequence" class="headerlink" title="CharSequence"></a>CharSequence</h5><p>提供了一个可读的char值序列，注意一个点：这个接口没有细化 equals 和 hashCode 方法的一般契约。 因此，比较实现 CharSequence 的两个对象的结果通常是未定义的。 每个对象都可以由不同的类实现，并且不能保证每个类都能够测试其实例与其他类的实例是否相等。 <strong>因此，将任意 CharSequence 实例用作集合中的元素或映射中的键是不合适的。</strong></p>
+<p>在JDK1.8中引入了两个stream操作:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">default</span> IntStream <span class="title function_">chars</span><span class="params">()</span>; <span class="comment">// zero-extending</span></span><br><span class="line"><span class="keyword">default</span> IntStream <span class="title function_">codePoints</span><span class="params">()</span>; <span class="comment">// Any surrogate pairs encountered</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="Cloneable"><a href="#Cloneable" class="headerlink" title="Cloneable"></a>Cloneable</h5><p>Object.clone时的标记接口：在未实现 Cloneable 接口的实例上调用 Object 的 clone 方法会导致抛出异常 CloneNotSupportedException。</p>
+<p>关联子类众多，无处不在。</p>
+<h5 id="Comparable"><a href="#Comparable" class="headerlink" title="Comparable"></a>Comparable<T></h5><p>该接口对实现它的每个类的对象进行了总排序。这种排序称为类的自然排序，类的 compareTo 方法称为其自然比较方法。<br>实现此接口的对象列表（和数组）可以由 Collections.sort（和 Arrays.sort）自动排序。实现此接口的对象可以用作排序映射中的键或排序集中的元素，而无需指定比较器。</p>
+<h5 id="Iterable"><a href="#Iterable" class="headerlink" title="Iterable"></a>Iterable<T></h5><p>1.5 只提供关于迭代器定义实现。</p>
+<h5 id="Readable"><a href="#Readable" class="headerlink" title="Readable"></a>Readable</h5><p>1.5 提供的一个字符串读取的read方法的定义，将字符读取到字符缓冲区。其直接实现的子类有两个：</p>
+<ul>
+<li>抽象类：Reader</li>
+<li>抽象类：CharBuffer nio包下的字符缓冲操作类，细节在nio章节详述<br>可以见得，与其子类相关字符操作的，均会涉及该方法重写相关。</li>
+</ul>
+<h5 id="Runnable"><a href="#Runnable" class="headerlink" title="Runnable"></a>Runnable</h5><p>1.0 开始，元组级别的接口定义，干嘛的不用多说，接触过java，谁还不知道这个interface呢？<br>在1.8里面，有点点不一样。类上加了一个注解： <code>@FunctionalInterface</code> 该注解在lang的子包: annoation中。<br>主要特性，在doc中也有详细阐述，我们需要知道的是：</p>
+<ul>
+<li>从定义上，这是一个信息性注解类型(informative annotation type)，就是定义声明了一种在JLS中定义的功能性的接口实现。</li>
+<li>从功能上，这种被赋予该注解的功能性的接口，其对应示例可以通过 <strong>lambda 表达式、方法引用或构造函数引用来创建。</strong> 这个特性，在1.8中引入lambda支持之后，日常开发过程中真是无处不再。</li>
+<li>元组增强的，我们平时经常能碰到的就Runnable这个被增强过，另一个是在JUC中的Callable接口，还有一个通常跟JWT相关的玩意儿，就不说了；剩下的，跟Core Java相关的，都是围绕1.8引入的lambda, stream息息相关</li>
+</ul>
+<h5 id="Thread-UncaughtExceptionHandler"><a href="#Thread-UncaughtExceptionHandler" class="headerlink" title="Thread.UncaughtExceptionHandler"></a>Thread.UncaughtExceptionHandler</h5><p>一个线程由于未捕获的异常而突然终止时调用的处理程序接口。<br>这也是一个功能性接口，是Thread内部的一个扩展interface，一般业务侧系统开发，不会直接实现重写这个，除非做底层中间件开发相关的。</p>
+<h4 id="类-Class-相关"><a href="#类-Class-相关" class="headerlink" title="类(Class)相关"></a>类(Class)相关</h4><ul>
+<li>关于包装器类，需要通用知道的：<ul>
+<li>每个包装器（除了Boolean，true,false太特殊，在JVM中有特定表示）都有一个SIZE，用二进制补码的方式表明这个包装器类允许的最大长度(byte)</li>
+<li>数值型的包装器，往往都有一个内联的Cache类，用于缓存，在与基本类型转换的时候要注意，<strong>特殊场景的越界可能会发生</strong><h5 id="Boolean"><a href="#Boolean" class="headerlink" title="Boolean"></a>Boolean</h5>基本类型boolean包装器类，提供了一些与String互转的操作方法。<br>关于转换和逻辑运算的方法，就不过多阐述。<br>源码实现中，有个小点值得提一下：<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">hashCode</span><span class="params">(<span class="type">boolean</span> value)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> value ? <span class="number">1231</span> : <span class="number">1237</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+Boolean的hashCode返回了是俩数字，而不是其它的。理论，<strong>任意（足够大）的素数即可</strong><br>为啥？这里要涉及到一个知识点，哈希碰撞：<br>细节参阅维基百科的介绍：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Hash_collision">hash collision</a></li>
+</ul>
+</li>
+</ul>
+<h5 id="Byte"><a href="#Byte" class="headerlink" title="Byte"></a>Byte</h5><p>基本类型byte包装器类，提两个操作：</p>
+<ul>
+<li>从String转为byte方法：public static byte parseByte(String s, int radix)</li>
+<li>对String进行decode成Byte包装器：public static Byte decode(String nm) throws NumberFormatException<br>这俩操作，都跟Integer包装器类息息相关，底层都调用了Integer包装器类中的相关方法进行运算，这里不过多展开。细节看Integer包装器的介绍。</li>
+</ul>
+<h5 id="Character"><a href="#Character" class="headerlink" title="Character"></a>Character</h5><p>基本类型char的包装器，大量包含Unicode操作相关，平时直接遇到的场景可能不会很多。<br>值得一提的是，这里面有个of方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> CharacterData <span class="title function_">of</span><span class="params">(<span class="type">int</span> ch)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (ch &gt;&gt;&gt; <span class="number">8</span> == <span class="number">0</span>) &#123;     <span class="comment">// fast-path</span></span><br><span class="line">            <span class="keyword">return</span> CharacterDataLatin1.instance;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">switch</span>(ch &gt;&gt;&gt; <span class="number">16</span>) &#123;  <span class="comment">//plane 00-16</span></span><br><span class="line">            <span class="keyword">case</span>(<span class="number">0</span>):</span><br><span class="line">                <span class="keyword">return</span> CharacterData00.instance;</span><br><span class="line">            <span class="keyword">case</span>(<span class="number">1</span>):</span><br><span class="line">                <span class="keyword">return</span> CharacterData01.instance;</span><br><span class="line">            <span class="keyword">case</span>(<span class="number">2</span>):</span><br><span class="line">                <span class="keyword">return</span> CharacterData02.instance;</span><br><span class="line">            <span class="keyword">case</span>(<span class="number">14</span>):</span><br><span class="line">                <span class="keyword">return</span> CharacterData0E.instance;</span><br><span class="line">            <span class="keyword">case</span>(<span class="number">15</span>):   <span class="comment">// Private Use</span></span><br><span class="line">            <span class="keyword">case</span>(<span class="number">16</span>):   <span class="comment">// Private Use</span></span><br><span class="line">                <span class="keyword">return</span> CharacterDataPrivateUse.instance;</span><br><span class="line">            <span class="keyword">default</span>:</span><br><span class="line">                <span class="keyword">return</span> CharacterDataUndefined.instance;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>性能可能不是最好的一种快速路由查找的方式，但是却是可能最常用的。 <code>.instance</code> 对实例的处理，私有化默认构造器的方式，都是值得我们平时编写工具类的时候所可以借鉴的。<br>关于Unicode以及对应BMP(Basic Multilingual Plane)参考下面的链接：</p>
+<ul>
+<li>Unicode: <a target="_blank" rel="noopener" href="https://home.unicode.org/">https://home.unicode.org/</a></li>
+<li>BMP: <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Plane_(Unicode)">https://en.wikipedia.org/wiki/Plane_(Unicode)</a></li>
+</ul>
+<h5 id="Class-amp-amp-ClassLoader-amp-amp-ClassValue"><a href="#Class-amp-amp-ClassLoader-amp-amp-ClassValue" class="headerlink" title="Class &amp;&amp; ClassLoader &amp;&amp; ClassValue"></a>Class<T> &amp;&amp; ClassLoader &amp;&amp; ClassValue<T></h5><p>这三个作为一个整体，单独研究研究。<br>细节参考下面的传送门：</p>
+<a href="/post/5df77236.html" title="java-lang包学习之Class类相关">java-lang包学习之Class类相关</a>
+
+<h5 id="Compiler"><a href="#Compiler" class="headerlink" title="Compiler"></a>Compiler</h5><h5 id="Double"><a href="#Double" class="headerlink" title="Double"></a>Double</h5><h5 id="Enum-lt-E-extends-Enum-gt"><a href="#Enum-lt-E-extends-Enum-gt" class="headerlink" title="Enum&lt;E extends Enum&gt;"></a>Enum&lt;E extends Enum<E>&gt;</h5><h5 id="Float"><a href="#Float" class="headerlink" title="Float"></a>Float</h5><h5 id="InheritableThreadLocal"><a href="#InheritableThreadLocal" class="headerlink" title="InheritableThreadLocal"></a>InheritableThreadLocal<T></h5><h5 id="Integer"><a href="#Integer" class="headerlink" title="Integer"></a>Integer</h5><h5 id="Long"><a href="#Long" class="headerlink" title="Long"></a>Long</h5><h5 id="Math"><a href="#Math" class="headerlink" title="Math"></a>Math</h5><h5 id="Number"><a href="#Number" class="headerlink" title="Number"></a>Number</h5><h5 id="Object"><a href="#Object" class="headerlink" title="Object"></a>Object</h5><h5 id="Package"><a href="#Package" class="headerlink" title="Package"></a>Package</h5><h5 id="Process"><a href="#Process" class="headerlink" title="Process"></a>Process</h5><h5 id="ProcessBuilder"><a href="#ProcessBuilder" class="headerlink" title="ProcessBuilder"></a>ProcessBuilder</h5><h5 id="ProcessBuilder-Redirect"><a href="#ProcessBuilder-Redirect" class="headerlink" title="ProcessBuilder.Redirect"></a>ProcessBuilder.Redirect</h5><h5 id="Runtime"><a href="#Runtime" class="headerlink" title="Runtime"></a>Runtime</h5><h5 id="RuntimePermission"><a href="#RuntimePermission" class="headerlink" title="RuntimePermission"></a>RuntimePermission</h5><h5 id="SecurityManager"><a href="#SecurityManager" class="headerlink" title="SecurityManager"></a>SecurityManager</h5><h5 id="Short"><a href="#Short" class="headerlink" title="Short"></a>Short</h5><h5 id="StackTraceElement"><a href="#StackTraceElement" class="headerlink" title="StackTraceElement"></a>StackTraceElement</h5><h5 id="StrictMath"><a href="#StrictMath" class="headerlink" title="StrictMath"></a>StrictMath</h5><h5 id="String"><a href="#String" class="headerlink" title="String"></a>String</h5><h5 id="StringBuffer"><a href="#StringBuffer" class="headerlink" title="StringBuffer"></a>StringBuffer</h5><h5 id="StringBuilder"><a href="#StringBuilder" class="headerlink" title="StringBuilder"></a>StringBuilder</h5><h5 id="System"><a href="#System" class="headerlink" title="System"></a>System</h5><h5 id="Thread"><a href="#Thread" class="headerlink" title="Thread"></a>Thread</h5><h5 id="ThreadGroup"><a href="#ThreadGroup" class="headerlink" title="ThreadGroup"></a>ThreadGroup</h5><h5 id="ThreadLocal"><a href="#ThreadLocal" class="headerlink" title="ThreadLocal"></a>ThreadLocal<T></h5><h5 id="Throwable"><a href="#Throwable" class="headerlink" title="Throwable"></a>Throwable</h5><h5 id="Void"><a href="#Void" class="headerlink" title="Void"></a>Void</h5><h4 id="枚举-Enum-相关"><a href="#枚举-Enum-相关" class="headerlink" title="枚举(Enum)相关"></a>枚举(Enum)相关</h4><h5 id="Character-UnicodeScript"><a href="#Character-UnicodeScript" class="headerlink" title="Character.UnicodeScript"></a>Character.UnicodeScript</h5><h5 id="ProcessBuilder-Redirect-Type"><a href="#ProcessBuilder-Redirect-Type" class="headerlink" title="ProcessBuilder.Redirect.Type"></a>ProcessBuilder.Redirect.Type</h5><h5 id="Thread-State"><a href="#Thread-State" class="headerlink" title="Thread.State"></a>Thread.State</h5><h4 id="异常-Exception-相关"><a href="#异常-Exception-相关" class="headerlink" title="异常(Exception)相关"></a>异常(Exception)相关</h4><h5 id="ArithmeticException"><a href="#ArithmeticException" class="headerlink" title="ArithmeticException"></a>ArithmeticException</h5><h5 id="ArrayIndexOutOfBoundsException"><a href="#ArrayIndexOutOfBoundsException" class="headerlink" title="ArrayIndexOutOfBoundsException"></a>ArrayIndexOutOfBoundsException</h5><h5 id="ArrayStoreException"><a href="#ArrayStoreException" class="headerlink" title="ArrayStoreException"></a>ArrayStoreException</h5><h5 id="ClassCastException"><a href="#ClassCastException" class="headerlink" title="ClassCastException"></a>ClassCastException</h5><h5 id="ClassNotFoundException"><a href="#ClassNotFoundException" class="headerlink" title="ClassNotFoundException"></a>ClassNotFoundException</h5><h5 id="CloneNotSupportedException"><a href="#CloneNotSupportedException" class="headerlink" title="CloneNotSupportedException"></a>CloneNotSupportedException</h5><h5 id="EnumConstantNotPresentException"><a href="#EnumConstantNotPresentException" class="headerlink" title="EnumConstantNotPresentException"></a>EnumConstantNotPresentException</h5><h5 id="Exception"><a href="#Exception" class="headerlink" title="Exception"></a>Exception</h5><h5 id="IllegalAccessException"><a href="#IllegalAccessException" class="headerlink" title="IllegalAccessException"></a>IllegalAccessException</h5><h5 id="IllegalArgumentException"><a href="#IllegalArgumentException" class="headerlink" title="IllegalArgumentException"></a>IllegalArgumentException</h5><h5 id="IllegalMonitorStateException"><a href="#IllegalMonitorStateException" class="headerlink" title="IllegalMonitorStateException"></a>IllegalMonitorStateException</h5><h5 id="IllegalStateException"><a href="#IllegalStateException" class="headerlink" title="IllegalStateException"></a>IllegalStateException</h5><h5 id="IllegalThreadStateException"><a href="#IllegalThreadStateException" class="headerlink" title="IllegalThreadStateException"></a>IllegalThreadStateException</h5><h5 id="IndexOutOfBoundsException"><a href="#IndexOutOfBoundsException" class="headerlink" title="IndexOutOfBoundsException"></a>IndexOutOfBoundsException</h5><h5 id="InstantiationException"><a href="#InstantiationException" class="headerlink" title="InstantiationException"></a>InstantiationException</h5><h5 id="InterruptedException"><a href="#InterruptedException" class="headerlink" title="InterruptedException"></a>InterruptedException</h5><h5 id="NegativeArraySizeException"><a href="#NegativeArraySizeException" class="headerlink" title="NegativeArraySizeException"></a>NegativeArraySizeException</h5><h5 id="NoSuchFieldException"><a href="#NoSuchFieldException" class="headerlink" title="NoSuchFieldException"></a>NoSuchFieldException</h5><h5 id="NoSuchMethodException"><a href="#NoSuchMethodException" class="headerlink" title="NoSuchMethodException"></a>NoSuchMethodException</h5><h5 id="NullPointerException"><a href="#NullPointerException" class="headerlink" title="NullPointerException"></a>NullPointerException</h5><h5 id="NumberFormatException"><a href="#NumberFormatException" class="headerlink" title="NumberFormatException"></a>NumberFormatException</h5><h5 id="ReflectiveOperationException"><a href="#ReflectiveOperationException" class="headerlink" title="ReflectiveOperationException"></a>ReflectiveOperationException</h5><h5 id="RuntimeException"><a href="#RuntimeException" class="headerlink" title="RuntimeException"></a>RuntimeException</h5><h5 id="SecurityException"><a href="#SecurityException" class="headerlink" title="SecurityException"></a>SecurityException</h5><h5 id="StringIndexOutOfBoundsException"><a href="#StringIndexOutOfBoundsException" class="headerlink" title="StringIndexOutOfBoundsException"></a>StringIndexOutOfBoundsException</h5><h5 id="TypeNotPresentException"><a href="#TypeNotPresentException" class="headerlink" title="TypeNotPresentException"></a>TypeNotPresentException</h5><h5 id="UnsupportedOperationException"><a href="#UnsupportedOperationException" class="headerlink" title="UnsupportedOperationException"></a>UnsupportedOperationException</h5><h4 id="错误-Error-相关"><a href="#错误-Error-相关" class="headerlink" title="错误(Error)相关"></a>错误(Error)相关</h4><h5 id="AbstractMethodError"><a href="#AbstractMethodError" class="headerlink" title="AbstractMethodError"></a>AbstractMethodError</h5><h5 id="AssertionError"><a href="#AssertionError" class="headerlink" title="AssertionError"></a>AssertionError</h5><h5 id="BootstrapMethodError"><a href="#BootstrapMethodError" class="headerlink" title="BootstrapMethodError"></a>BootstrapMethodError</h5><h5 id="ClassCircularityError"><a href="#ClassCircularityError" class="headerlink" title="ClassCircularityError"></a>ClassCircularityError</h5><h5 id="ClassFormatError"><a href="#ClassFormatError" class="headerlink" title="ClassFormatError"></a>ClassFormatError</h5><h5 id="Error"><a href="#Error" class="headerlink" title="Error"></a>Error</h5><h5 id="ExceptionInInitializerError"><a href="#ExceptionInInitializerError" class="headerlink" title="ExceptionInInitializerError"></a>ExceptionInInitializerError</h5><h5 id="IllegalAccessError"><a href="#IllegalAccessError" class="headerlink" title="IllegalAccessError"></a>IllegalAccessError</h5><h5 id="IncompatibleClassChangeError"><a href="#IncompatibleClassChangeError" class="headerlink" title="IncompatibleClassChangeError"></a>IncompatibleClassChangeError</h5><h5 id="InstantiationError"><a href="#InstantiationError" class="headerlink" title="InstantiationError"></a>InstantiationError</h5><h5 id="InternalError"><a href="#InternalError" class="headerlink" title="InternalError"></a>InternalError</h5><h5 id="LinkageError"><a href="#LinkageError" class="headerlink" title="LinkageError"></a>LinkageError</h5><h5 id="NoClassDefFoundError"><a href="#NoClassDefFoundError" class="headerlink" title="NoClassDefFoundError"></a>NoClassDefFoundError</h5><h5 id="NoSuchFieldError"><a href="#NoSuchFieldError" class="headerlink" title="NoSuchFieldError"></a>NoSuchFieldError</h5><h5 id="NoSuchMethodError"><a href="#NoSuchMethodError" class="headerlink" title="NoSuchMethodError"></a>NoSuchMethodError</h5><h5 id="OutOfMemoryError"><a href="#OutOfMemoryError" class="headerlink" title="OutOfMemoryError"></a>OutOfMemoryError</h5><h5 id="StackOverflowError"><a href="#StackOverflowError" class="headerlink" title="StackOverflowError"></a>StackOverflowError</h5><h5 id="ThreadDeath"><a href="#ThreadDeath" class="headerlink" title="ThreadDeath"></a>ThreadDeath</h5><h5 id="UnknownError"><a href="#UnknownError" class="headerlink" title="UnknownError"></a>UnknownError</h5><h5 id="UnsatisfiedLinkError"><a href="#UnsatisfiedLinkError" class="headerlink" title="UnsatisfiedLinkError"></a>UnsatisfiedLinkError</h5><h5 id="UnsupportedClassVersionError"><a href="#UnsupportedClassVersionError" class="headerlink" title="UnsupportedClassVersionError"></a>UnsupportedClassVersionError</h5><h5 id="VerifyError"><a href="#VerifyError" class="headerlink" title="VerifyError"></a>VerifyError</h5><h5 id="VirtualMachineError"><a href="#VirtualMachineError" class="headerlink" title="VirtualMachineError"></a>VirtualMachineError</h5><h4 id="注解-Annotation-相关"><a href="#注解-Annotation-相关" class="headerlink" title="注解(Annotation)相关"></a>注解(Annotation)相关</h4><h5 id="Deprecated"><a href="#Deprecated" class="headerlink" title="Deprecated"></a>Deprecated</h5><h5 id="FunctionalInterface"><a href="#FunctionalInterface" class="headerlink" title="FunctionalInterface"></a>FunctionalInterface</h5><h5 id="Override"><a href="#Override" class="headerlink" title="Override"></a>Override</h5><h5 id="SafeVarargs"><a href="#SafeVarargs" class="headerlink" title="SafeVarargs"></a>SafeVarargs</h5><h5 id="SuppressWarnings"><a href="#SuppressWarnings" class="headerlink" title="SuppressWarnings"></a>SuppressWarnings</h5><h3 id="java-lang-annotation"><a href="#java-lang-annotation" class="headerlink" title="java.lang.annotation"></a>java.lang.annotation</h3><h3 id="java-lang-instrument"><a href="#java-lang-instrument" class="headerlink" title="java.lang.instrument"></a>java.lang.instrument</h3><h3 id="java-lang-invoke"><a href="#java-lang-invoke" class="headerlink" title="java.lang.invoke"></a>java.lang.invoke</h3><h3 id="java-lang-management"><a href="#java-lang-management" class="headerlink" title="java.lang.management"></a>java.lang.management</h3><h3 id="java-lang-ref"><a href="#java-lang-ref" class="headerlink" title="java.lang.ref"></a>java.lang.ref</h3><h3 id="java-lang-reflect"><a href="#java-lang-reflect" class="headerlink" title="java.lang.reflect"></a>java.lang.reflect</h3><h2 id="一些经验"><a href="#一些经验" class="headerlink" title="一些经验"></a>一些经验</h2><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/56093694.html" title="java-lang包学习">https://nimbusk.cc/post/56093694.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/java-lang/" rel="tag"># java.lang</a>
+              <a href="/tags/rt-jar/" rel="tag"># rt.jar</a>
+              <a href="/tags/jdk8/" rel="tag"># jdk8</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/b0471e7f.html" rel="prev" title="关于数据迁移">
+                  <i class="fa fa-angle-left"></i> 关于数据迁移
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/5df77236.html" rel="next" title="java-lang包学习之Class类相关">
+                  java-lang包学习之Class类相关 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"59d0047930b4985caf8d332da139c719"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

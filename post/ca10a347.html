@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="基本命令系统更新1yum -y update  安装网络工具1yum install net-tools 找不到yum-config-manager直接安装：yum-utils即可 环境相关配置Java8 从Oracle官网下载相应版本的64位JDK压缩包，通常是tar.gz结尾 通过SFTP工具上传至CentOS后台指定目录下，如：\usr\java 解压目录  1tar -zxvf jdk-8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS7基础操作相关">
+<meta property="og:url" content="https://nimbusk.cc/post/ca10a347.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="基本命令系统更新1yum -y update  安装网络工具1yum install net-tools 找不到yum-config-manager直接安装：yum-utils即可 环境相关配置Java8 从Oracle官网下载相应版本的64位JDK压缩包，通常是tar.gz结尾 通过SFTP工具上传至CentOS后台指定目录下，如：\usr\java 解压目录  1tar -zxvf jdk-8">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/ca10a347/config_ipv4.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/ca10a347/download_mysql_yum_resouces__or_centos7.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/ca10a347/after_config_mysql_yum_install.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/ca10a347/ConnectToMySQLThroughCommand.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/ca10a347/ShowDatabases.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/ca10a347/ConnetMySQLSuccesfully.jpg">
+<meta property="article:published_time" content="2019-11-25T01:28:43.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="CentOS7">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/ca10a347/config_ipv4.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/ca10a347.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/ca10a347.html","path":"post/ca10a347.html","title":"CentOS7基础操作相关"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CentOS7基础操作相关 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4"><span class="nav-number">1.</span> <span class="nav-text">基本命令</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E6%9B%B4%E6%96%B0"><span class="nav-number">1.1.</span> <span class="nav-text">系统更新</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E7%BD%91%E7%BB%9C%E5%B7%A5%E5%85%B7"><span class="nav-number">1.2.</span> <span class="nav-text">安装网络工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%89%BE%E4%B8%8D%E5%88%B0yum-config-manager"><span class="nav-number">1.3.</span> <span class="nav-text">找不到yum-config-manager</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E7%9B%B8%E5%85%B3"><span class="nav-number">2.</span> <span class="nav-text">环境相关</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEJava8"><span class="nav-number">2.1.</span> <span class="nav-text">配置Java8</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9IP%E5%9C%B0%E5%9D%80"><span class="nav-number">2.2.</span> <span class="nav-text">修改IP地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E6%9B%B4%E6%96%B0%E6%BA%90"><span class="nav-number">2.3.</span> <span class="nav-text">修改更新源</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%9C%8D%E5%8A%A1%E7%9B%B8%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">基础服务相关</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MySQL%E5%AE%89%E8%A3%85"><span class="nav-number">3.1.</span> <span class="nav-text">MySQL安装</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0MySQL-YUM%E5%AD%98%E5%82%A8%E5%BA%93"><span class="nav-number">3.1.1.</span> <span class="nav-text">添加MySQL YUM存储库</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E9%9C%80%E8%A6%81%E5%AE%89%E8%A3%85%E7%9A%84%E5%8F%91%E5%B8%83%E7%89%88%E6%9C%AC"><span class="nav-number">3.1.2.</span> <span class="nav-text">选择需要安装的发布版本</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%89%E8%A3%85MySQL"><span class="nav-number">3.1.3.</span> <span class="nav-text">安装MySQL</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8MySQL%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">3.1.4.</span> <span class="nav-text">启动MySQL服务器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEMySQL%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0"><span class="nav-number">3.1.5.</span> <span class="nav-text">配置MySQL相关参数</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%9C%AC%E5%9C%B0%E8%BF%9E%E6%8E%A5MySQL%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="nav-number">3.1.5.1.</span> <span class="nav-text">本地连接MySQL数据库</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AEroot%E5%AF%86%E7%A0%81"><span class="nav-number">3.1.5.2.</span> <span class="nav-text">设置root密码</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95"><span class="nav-number">3.1.5.3.</span> <span class="nav-text">设置远程登录</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%AB%98%E7%89%88%E6%9C%AC5-7-%E6%9B%B4%E6%94%B9root%E5%AF%86%E7%A0%81"><span class="nav-number">3.1.5.4.</span> <span class="nav-text">高版本5.7+更改root密码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Redis%E5%8D%95%E6%9C%BA%E5%AE%89%E8%A3%85"><span class="nav-number">3.2.</span> <span class="nav-text">Redis单机安装</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%86%E5%A4%87"><span class="nav-number">3.2.1.</span> <span class="nav-text">准备</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDredis%E5%8C%85"><span class="nav-number">3.2.1.1.</span> <span class="nav-text">下载redis包</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%A7%A3%E5%8E%8B"><span class="nav-number">3.2.1.2.</span> <span class="nav-text">解压</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BC%96%E8%AF%91"><span class="nav-number">3.2.2.</span> <span class="nav-text">编译</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%AE%89%E8%A3%85GCC"><span class="nav-number">3.2.2.1.</span> <span class="nav-text">安装GCC</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85"><span class="nav-number">3.2.2.2.</span> <span class="nav-text">编译安装</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E7%AD%89"><span class="nav-number">3.2.2.3.</span> <span class="nav-text">设置环境变量等</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8"><span class="nav-number">3.2.3.</span> <span class="nav-text">启动</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E7%9B%B4%E6%8E%A5%E5%90%AF%E5%8A%A8"><span class="nav-number">3.2.3.1.</span> <span class="nav-text">直接启动</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%90%8E%E5%8F%B0%E8%BF%9B%E7%A8%8B%E6%96%B9%E5%BC%8F%E8%BF%90%E8%A1%8C"><span class="nav-number">3.2.3.2.</span> <span class="nav-text">后台进程方式运行</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redis%E4%BC%AA%E9%9B%86%E7%BE%A4%E5%AE%89%E8%A3%85"><span class="nav-number">3.3.</span> <span class="nav-text">redis伪集群安装</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.3.1.</span> <span class="nav-text">准备配置文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E9%9B%86%E7%BE%A4"><span class="nav-number">3.3.2.</span> <span class="nav-text">启动集群</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E9%9B%86%E7%BE%A4%E4%BF%A1%E6%81%AF"><span class="nav-number">3.3.3.</span> <span class="nav-text">查看集群信息</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E8%8A%82%E7%82%B9%E4%BF%A1%E6%81%AF"><span class="nav-number">3.3.4.</span> <span class="nav-text">查看节点信息</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%81%87%E5%88%B0redis-cli%E9%9B%86%E7%BE%A4%E5%8A%A0%E8%BD%BD%E5%A4%B1%E8%B4%A5"><span class="nav-number">3.3.5.</span> <span class="nav-text">遇到redis-cli集群加载失败</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#zookeeper%E5%AE%89%E8%A3%85"><span class="nav-number">3.4.</span> <span class="nav-text">zookeeper安装</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDzk"><span class="nav-number">3.4.1.</span> <span class="nav-text">下载zk</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">3.4.2.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEservice%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8"><span class="nav-number">3.4.3.</span> <span class="nav-text">配置service开机启动</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kafka%E4%BC%AA%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2"><span class="nav-number">3.5.</span> <span class="nav-text">kafka伪集群部署</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%86%E5%A4%87-1"><span class="nav-number">3.5.1.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E9%9B%86%E7%BE%A4"><span class="nav-number">3.5.2.</span> <span class="nav-text">配置集群</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEKAFKA-HOME"><span class="nav-number">3.5.2.1.</span> <span class="nav-text">配置KAFKA_HOME</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEKAFKA%E9%9B%86%E7%BE%A4%E6%96%87%E4%BB%B6"><span class="nav-number">3.5.2.2.</span> <span class="nav-text">配置KAFKA集群文件</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%8E%E5%8F%B0%E5%90%AF%E5%8A%A8"><span class="nav-number">3.5.3.</span> <span class="nav-text">后台启动</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95"><span class="nav-number">3.5.4.</span> <span class="nav-text">测试</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AAtopic"><span class="nav-number">3.5.4.1.</span> <span class="nav-text">创建一个topic</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%94%9F%E4%BA%A7%E8%80%85-amp-%E6%B6%88%E8%B4%B9%E8%80%85"><span class="nav-number">3.5.4.2.</span> <span class="nav-text">创建生产者&amp;消费者</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E6%8C%87%E5%AE%9Aconsumer-properties%E6%96%87%E4%BB%B6%E5%88%9B%E5%BB%BAtopic"><span class="nav-number">3.5.4.3.</span> <span class="nav-text">通过指定consumer.properties文件创建topic</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E5%8F%82%E8%80%83"><span class="nav-number">4.</span> <span class="nav-text">引用参考</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/ca10a347.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CentOS7基础操作相关 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS7基础操作相关
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-11-25 01:28:43" itemprop="dateCreated datePublished" datetime="2019-11-25T01:28:43+00:00">2019-11-25</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">操作系统</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="基本命令"><a href="#基本命令" class="headerlink" title="基本命令"></a>基本命令</h3><h4 id="系统更新"><a href="#系统更新" class="headerlink" title="系统更新"></a>系统更新</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y update</span><br></pre></td></tr></table></figure>
+
+<h4 id="安装网络工具"><a href="#安装网络工具" class="headerlink" title="安装网络工具"></a>安装网络工具</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install net-tools</span><br></pre></td></tr></table></figure>
+<h4 id="找不到yum-config-manager"><a href="#找不到yum-config-manager" class="headerlink" title="找不到yum-config-manager"></a>找不到yum-config-manager</h4><p>直接安装：yum-utils即可</p>
+<h3 id="环境相关"><a href="#环境相关" class="headerlink" title="环境相关"></a>环境相关</h3><h4 id="配置Java8"><a href="#配置Java8" class="headerlink" title="配置Java8"></a>配置Java8</h4><ol>
+<li>从Oracle官网下载相应版本的64位JDK压缩包，通常是<strong>tar.gz</strong>结尾</li>
+<li>通过SFTP工具上传至CentOS后台指定目录下，如：<strong>\usr\java</strong></li>
+<li>解压目录</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf jdk-8u211-linux-x64.tar.gz </span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<ol start="4">
+<li>配置环境变量：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">示例解压在/usr/java/jdk1.8.0_211目录下</span></span><br><span class="line">vi /etc/profile</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">结尾添加</span></span><br><span class="line">export JAVA_HOME=/usr/java/jdk1.8.0_211</span><br><span class="line">export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar</span><br><span class="line">export PATH=$PATH:$JAVA_HOME/bin</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">保存退出后</span></span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<h4 id="修改IP地址"><a href="#修改IP地址" class="headerlink" title="修改IP地址"></a>修改IP地址</h4><p>直接修改<strong>ifcfg-ens**</strong>相关文件即可，表示通配，实际值需要在实际环境中观察。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/sysconfig/network-scripts/ifcfg-ens192</span><br></pre></td></tr></table></figure>
+
+<p>如同下图所示，将<strong>BOOTPROTO</strong>改为static(静态路由)，在结尾添加指定的静态IP、子网掩码、默认网关以及DNS信息。<br><img data-src="ca10a347/config_ipv4.jpg" alt="设置IP地址"></p>
+<h4 id="修改更新源"><a href="#修改更新源" class="headerlink" title="修改更新源"></a>修改更新源</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">备份原有系统源</span></span><br><span class="line">mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">拉取阿里云repo</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment"># 如果发现wget找不到，那是没有安装wget，此时repo已经重名吧了，再次通过yum安装失败的，只需要反过来在将backup文件重命名为原来的repo即可</span></span></span><br><span class="line">wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">运行yum makecache生成缓存</span></span><br><span class="line">yum makecache</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">更新</span></span><br><span class="line">yum -y update</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="基础服务相关"><a href="#基础服务相关" class="headerlink" title="基础服务相关"></a>基础服务相关</h3><h4 id="MySQL安装"><a href="#MySQL安装" class="headerlink" title="MySQL安装"></a>MySQL安装</h4><h5 id="添加MySQL-YUM存储库"><a href="#添加MySQL-YUM存储库" class="headerlink" title="添加MySQL YUM存储库"></a>添加MySQL YUM存储库</h5><p>将MySQL Yum存储库添加到系统的存储库列表中。这是一次性操作，可以通过安装MySQL提供的RPM来执行。跟着下面步骤：</p>
+<ol>
+<li>到MySQL官网下载指定的MySQL Yum存储库，<a target="_blank" rel="noopener" href="https://dev.mysql.com/downloads/repo/yum/">MySQL Yum存储库下载地址</a><br>下载你指定的需要的版本，Linux 8对应CentOS 8，Linux 7对应CentOS 7</li>
+</ol>
+<p><strong>注：</strong>官网下载需要登录一个已有的oracle官网帐号<br><img data-src="ca10a347/download_mysql_yum_resouces__or_centos7.jpg" alt="MySQL Yum存储库"><br>2. 选择并下载适用于你所需要的平台发行包。将下载的rpm包上传到你的centos服务器中<br>3. cd到rpm包所在目录，使用以下命令来安装下载的发行包，替换<em>platform-and-version-specific-package-name</em>为下再的rpm包的名称：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum localinstall platform-and-version-specific-package-name.rpm</span><br></pre></td></tr></table></figure>
+
+<h5 id="选择需要安装的发布版本"><a href="#选择需要安装的发布版本" class="headerlink" title="选择需要安装的发布版本"></a>选择需要安装的发布版本</h5><p>如果你需要直接安装最新版本的MySQL，可以直接略过本步骤，直接通过yum一次性安装。相反，如果你要安装指定版本，则需要手工配置安装版本。<br>通过命令，来查看当前安装库中mysql的版本：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum repolist all | grep mysql</span><br></pre></td></tr></table></figure>
+
+<p>可以看到如下图所示的内容：<br><img data-src="ca10a347/after_config_mysql_yum_install.jpg" alt="yum repolist all"><br>这是修改后的效果，修改之前<strong>mysql80-community/x86_64</strong>这项状态是<strong>enable</strong>的。<br>通过如下命令，修改需要安装的版本信息：<br>注：如果提示yum-config-manager不存在，看上文小结中，直接安装<strong>yum-utils</strong>即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">关闭MySQL 8</span></span><br><span class="line">sudo yum-config-manager --disable mysql80-community</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">关闭MySQL 5.7，如果之前看到的是已经关闭的状态，这步则不用关闭</span></span><br><span class="line">sudo yum-config-manager --disable mysql57-community</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启用MySQL 5.6</span></span><br><span class="line">sudo yum-config-manager --enable mysql56-community</span><br></pre></td></tr></table></figure>
+
+<h5 id="安装MySQL"><a href="#安装MySQL" class="headerlink" title="安装MySQL"></a>安装MySQL</h5><p>通过以下命令安装MySQL:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo yum install mysql-community-server</span><br></pre></td></tr></table></figure>
+
+<p>在这个过程中，这将安装MySQL server（mysql-community-server）的包以及运行服务器所需组件的包，包括client（mysql-community-client）的包，客户端和服务器的常见错误消息和字符集（mysql-community-common）以及共享客户端库（mysql-community-libs） 。</p>
+<h5 id="启动MySQL服务器"><a href="#启动MySQL服务器" class="headerlink" title="启动MySQL服务器"></a>启动MySQL服务器</h5><p>通过以下命令启动MySQL服务器：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service mysqld start</span><br></pre></td></tr></table></figure>
+
+<p>与之相对应的，停止(stop)，重启(restart)，直接修改后面的参数即可</p>
+<h5 id="配置MySQL相关参数"><a href="#配置MySQL相关参数" class="headerlink" title="配置MySQL相关参数"></a>配置MySQL相关参数</h5><h6 id="本地连接MySQL数据库"><a href="#本地连接MySQL数据库" class="headerlink" title="本地连接MySQL数据库"></a>本地连接MySQL数据库</h6><p>通过以下命令连接MySQL</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql -u root -p</span><br></pre></td></tr></table></figure>
+
+<p>出现<strong>Enter password</strong>，输入密码。由于刚安装，没有设置密码，直接回车 Enter 进入<br><img data-src="ca10a347/ConnectToMySQLThroughCommand.jpg" alt="连接MySQL"><br>输入命令**show databases;**查看默认安装的数据库<br><img data-src="ca10a347/ShowDatabases.jpg" alt="查看安装的数据库Schemal"></p>
+<h6 id="设置root密码"><a href="#设置root密码" class="headerlink" title="设置root密码"></a>设置root密码</h6><p>依次通过以下命令修改root用户名密码：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span>use mysql;</span><br><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">update</span> <span class="keyword">user</span> <span class="keyword">set</span> password<span class="operator">=</span>password(<span class="string">&#x27;your password&#x27;</span>) <span class="keyword">where</span> <span class="keyword">user</span><span class="operator">=</span><span class="string">&#x27;root&#x27;</span>;</span><br><span class="line">mysql<span class="operator">&gt;</span>flush privileges;</span><br></pre></td></tr></table></figure>
+
+<p><strong>your password</strong>为你需要设置的密码<br>输入<strong>quit</strong>命令退出当前登录，用新的密码重新连接 mysql。</p>
+<h6 id="设置远程登录"><a href="#设置远程登录" class="headerlink" title="设置远程登录"></a>设置远程登录</h6><p>mysql默认只能本机登录，通过以下命令，设置允许远程登录：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span><span class="keyword">GRANT</span> <span class="keyword">ALL</span> PRIVILEGES <span class="keyword">ON</span> <span class="operator">*</span>.<span class="operator">*</span> <span class="keyword">TO</span> <span class="string">&#x27;your username&#x27;</span>@<span class="string">&#x27;%&#x27;</span> IDENTIFIED <span class="keyword">BY</span> <span class="string">&#x27;your password&#x27;</span> <span class="keyword">WITH</span> <span class="keyword">GRANT</span> OPTION;</span><br></pre></td></tr></table></figure>
+
+<p><strong>your username</strong>和<strong>your password</strong>改成 mysql 数据库的用户和密码</p>
+<h6 id="高版本5-7-更改root密码"><a href="#高版本5-7-更改root密码" class="headerlink" title="高版本5.7+更改root密码"></a>高版本5.7+更改root密码</h6><p>在开启mysql服务之后，简单密码切记仅供本地自我学习使用</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">//获取临时密码</span><br><span class="line">grep &quot;password&quot; /var/log/mysqld.log</span><br><span class="line"></span><br><span class="line">//进入数据库</span><br><span class="line">mysql -u root -p</span><br><span class="line"></span><br><span class="line">//修改密码验证规则</span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash"><span class="built_in">set</span> global validate_password_policy=0;</span></span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash"><span class="built_in">set</span> global validate_password_length=1;</span></span><br><span class="line"></span><br><span class="line">//设置简单密码</span><br><span class="line"><span class="meta prompt_">mysql&gt; </span><span class="language-bash">ALTER USER <span class="string">&#x27;root&#x27;</span>@<span class="string">&#x27;localhost&#x27;</span> IDENTIFIED BY <span class="string">&#x27;123456&#x27;</span>;</span></span><br></pre></td></tr></table></figure>
+
+<p>到此，在 CentOS 7上安装 MySQL 5.6 完成，CentOS 6 也是类似操作。<br>用一个客户端工具连接一下试试，</p>
+<p>猜测一下，可能你会发现通过工具远程并无法连接 :)<br>原因是：CentOS中默认防火墙策略是禁止所有远程访问的，可以通过如下命令来开放端口：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看当前防火墙策略</span></span><br><span class="line">firewall-cmd --list-all</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开放3306端口</span></span><br><span class="line">firewall-cmd --permanent --add-port=3306/tcp</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">重启防火墙</span></span><br><span class="line">service firewalld restart</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment"># 或者</span></span></span><br><span class="line">firewall-cmd --reload</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看防火墙是否开放3306端口，返回<span class="built_in">yes</span>就OK了，当然也可以再次通过list-all来查看</span></span><br><span class="line">firewall-cmd --query-port=3306/tcp</span><br></pre></td></tr></table></figure>
+
+<p>再次回到工具中，测试连接，连接成功 :)<br><img data-src="ca10a347/ConnetMySQLSuccesfully.jpg" alt="工具远程测试连接"><br>至此就真的结束啦….</p>
+<h4 id="Redis单机安装"><a href="#Redis单机安装" class="headerlink" title="Redis单机安装"></a>Redis单机安装</h4><p>安装版本是redis 5.0.7稳定版本</p>
+<h5 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h5><h6 id="下载redis包"><a href="#下载redis包" class="headerlink" title="下载redis包"></a>下载redis包</h6><p>直接运行wget <a target="_blank" rel="noopener" href="http://download.redis.io/releases/redis-5.0.7.tar.gz%E5%8D%B3%E5%8F%AF">http://download.redis.io/releases/redis-5.0.7.tar.gz即可</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost ~]# wget http://download.redis.io/releases/redis-5.0.7.tar.gz</span><br><span class="line">--2020-01-08 20:46:22--  http://download.redis.io/releases/redis-5.0.7.tar.gz</span><br><span class="line">Resolving download.redis.io (download.redis.io)... 109.74.203.151</span><br><span class="line">Connecting to download.redis.io (download.redis.io)|109.74.203.151|:80... connected.</span><br><span class="line">HTTP request sent, awaiting response... 200 OK</span><br><span class="line">Length: 1984203 (1.9M) [application/x-gzip]</span><br><span class="line">Saving to: ‘redis-5.0.7.tar.gz’</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">100%</span><span class="language-bash">[========================================================================================================================================&gt;] 1,984,203    355KB/s   <span class="keyword">in</span> 5.5s</span>   </span><br><span class="line"></span><br><span class="line">2020-01-08 20:46:29 (355 KB/s) - ‘redis-5.0.7.tar.gz’ saved [1984203/1984203]</span><br></pre></td></tr></table></figure>
+
+<h6 id="解压"><a href="#解压" class="headerlink" title="解压"></a>解压</h6><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tar -zxvf redis-5.0.7.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h5 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h5><h6 id="安装GCC"><a href="#安装GCC" class="headerlink" title="安装GCC"></a>安装GCC</h6><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">没啥遇到确认的直接y</span></span><br><span class="line">yum install gcc</span><br></pre></td></tr></table></figure>
+
+<h6 id="编译安装"><a href="#编译安装" class="headerlink" title="编译安装"></a>编译安装</h6><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost redis-5.0.7]# make MALLOC=libc</span><br><span class="line">[root@localhost redis-5.0.7]# cd src &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+
+<h6 id="设置环境变量等"><a href="#设置环境变量等" class="headerlink" title="设置环境变量等"></a>设置环境变量等</h6><p>任意通过redis-service直接启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /usr/local/redis/bin</span><br><span class="line">cp src/redis-server /usr/local/redis/bin</span><br><span class="line">cp src/redis-cli /usr/local/redis/bin</span><br><span class="line">cp src/redis-sentinel /usr/local/redis/bin</span><br><span class="line">cp src/redis-trib.rb /usr/local/redis/bin</span><br><span class="line">cp src/redis-check-aof /usr/local/redis/bin</span><br><span class="line">cp src/redis-check-rdb /usr/local/redis/bin</span><br><span class="line">cp src/redis-benchmark /usr/local/redis/bin</span><br><span class="line">echo &#x27;export PATH=$PATH:/usr/local/redis/bin&#x27; &gt;&gt; .bash_profile</span><br><span class="line">. .bash_profile</span><br></pre></td></tr></table></figure>
+
+<h5 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h5><h6 id="直接启动"><a href="#直接启动" class="headerlink" title="直接启动"></a>直接启动</h6><p>cd到src目录后，直接./redis-server</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost src]# ./redis-server </span><br><span class="line">12725:C 08 Jan 2020 20:53:33.796 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo</span><br><span class="line">12725:C 08 Jan 2020 20:53:33.796 # Redis version=5.0.7, bits=64, commit=00000000, modified=0, pid=12725, just started</span><br><span class="line">12725:C 08 Jan 2020 20:53:33.796 # Warning: no config file specified, using the default config. In order to specify a config file use ./redis-server /path/to/redis.conf</span><br><span class="line">                _._                                                  </span><br><span class="line">           _.-``__ &#x27;&#x27;-._                                             </span><br><span class="line">      _.-``    `.  `_.  &#x27;&#x27;-._           Redis 5.0.7 (00000000/0) 64 bit</span><br><span class="line">  .-`` .-```.  ```\/    _.,_ &#x27;&#x27;-._                                   </span><br><span class="line"> (    &#x27;      ,       .-`  | `,    )     Running in standalone mode</span><br><span class="line"> |`-._`-...-` __...-.``-._|&#x27;` _.-&#x27;|     Port: 6379</span><br><span class="line"> |    `-._   `._    /     _.-&#x27;    |     PID: 12725</span><br><span class="line">  `-._    `-._  `-./  _.-&#x27;    _.-&#x27;                                   </span><br><span class="line"> |`-._`-._    `-.__.-&#x27;    _.-&#x27;_.-&#x27;|                                  </span><br><span class="line"> |    `-._`-._        _.-&#x27;_.-&#x27;    |           http://redis.io        </span><br><span class="line">  `-._    `-._`-.__.-&#x27;_.-&#x27;    _.-&#x27;                                   </span><br><span class="line"> |`-._`-._    `-.__.-&#x27;    _.-&#x27;_.-&#x27;|                                  </span><br><span class="line"> |    `-._`-._        _.-&#x27;_.-&#x27;    |                                  </span><br><span class="line">  `-._    `-._`-.__.-&#x27;_.-&#x27;    _.-&#x27;                                   </span><br><span class="line">      `-._    `-.__.-&#x27;    _.-&#x27;                                       </span><br><span class="line">          `-._        _.-&#x27;                                           </span><br><span class="line">              `-.__.-&#x27;                                               </span><br><span class="line"></span><br><span class="line">12725:M 08 Jan 2020 20:53:33.798 # WARNING: The TCP backlog setting of 511 cannot be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.</span><br><span class="line">12725:M 08 Jan 2020 20:53:33.798 # Server initialized</span><br><span class="line">12725:M 08 Jan 2020 20:53:33.798 # WARNING overcommit_memory is set to 0! Background save may fail under low memory condition. To fix this issue add &#x27;vm.overcommit_memory = 1&#x27; to /etc/sysctl.conf and then reboot or run the command &#x27;sysctl vm.overcommit_memory=1&#x27; for this to take effect.</span><br><span class="line">12725:M 08 Jan 2020 20:53:33.798 # WARNING you have Transparent Huge Pages (THP) support enabled in your kernel. This will create latency and memory usage issues with Redis. To fix this issue run the command &#x27;echo never &gt; /sys/kernel/mm/transparent_hugepage/enabled&#x27; as root, and add it to your /etc/rc.local in order to retain the setting after a reboot. Redis must be restarted after THP is disabled.</span><br><span class="line">12725:M 08 Jan 2020 20:53:33.798 * Ready to accept connections</span><br></pre></td></tr></table></figure>
+
+<p>不方便，原因是这个窗口需要一直运行，ctrl + c直接退出</p>
+<h6 id="后台进程方式运行"><a href="#后台进程方式运行" class="headerlink" title="后台进程方式运行"></a>后台进程方式运行</h6><p>如果你需要外部客户端直接访问的话，修改下面三行配置：<br>/# bind 127.0.0.1<br>protected-mode no<br>/# 后台运行<br>daemonize yes<br>直接运行redis-server</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-server redis.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="redis伪集群安装"><a href="#redis伪集群安装" class="headerlink" title="redis伪集群安装"></a>redis伪集群安装</h4><p>顾名思义，伪集群安装，实际集群应该分布在不同的redis服务器上的，这里个人使用，就在单服务器上实现了</p>
+<h5 id="准备配置文件"><a href="#准备配置文件" class="headerlink" title="准备配置文件"></a>准备配置文件</h5><p>配置文件目录随意，这里我就在redis编译好的路径下配置了<br>单个配置修改如下：</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 监听端口</span></span><br><span class="line"><span class="attr">port</span> <span class="string">7001</span></span><br><span class="line"><span class="comment"># 监听 ip</span></span><br><span class="line"><span class="attr">bind</span> <span class="string">0.0.0.0</span></span><br><span class="line"><span class="comment"># 指定文件存放路径 （ .rdb .aof nodes-xxxx.conf 这样的文件都会在此路径下）</span></span><br><span class="line"><span class="attr">dir</span> <span class="string">/opt/redis-7001</span></span><br><span class="line"><span class="comment"># 启动集群模式 </span></span><br><span class="line"><span class="attr">cluster-enabled</span> <span class="string">yes</span></span><br><span class="line"><span class="comment"># 集群节点配置文件</span></span><br><span class="line"><span class="attr">cluster-config-file</span> <span class="string">nodes-7001.conf</span></span><br><span class="line"><span class="comment"># 后台启动</span></span><br><span class="line"><span class="attr">daemonize</span> <span class="string">yes</span></span><br><span class="line"><span class="comment"># 集群节点超时时间​</span></span><br><span class="line"><span class="attr">cluster-node-timeout</span> <span class="string">5000</span></span><br><span class="line"><span class="comment"># 指定持久化方式，开启 AOF 模式</span></span><br><span class="line"><span class="attr">appendonly</span> <span class="string">yes</span></span><br><span class="line"><span class="comment"># 非保护模式</span></span><br><span class="line"><span class="attr">protected-mode</span> <span class="string">no</span></span><br></pre></td></tr></table></figure>
+
+<p>其余的文件直接copy上述配置好的7001配置文件就好了。创建6个配置文件（redis集群最低6个节点）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mkdir /etc/redis-cluster</span><br><span class="line">cp redis.conf /etc/redis-cluster/redis-7001.conf</span><br><span class="line">cp redis.conf /etc/redis-cluster/redis-7002.conf</span><br><span class="line">cp redis.conf /etc/redis-cluster/redis-7003.conf</span><br><span class="line">cp redis.conf /etc/redis-cluster/redis-7004.conf</span><br><span class="line">cp redis.conf /etc/redis-cluster/redis-7005.conf </span><br><span class="line">cp redis.conf /etc/redis-cluster/redis-7006.conf</span><br><span class="line">mkdir /opt/redis-7001</span><br><span class="line">mkdir /opt/redis-7002</span><br><span class="line">mkdir /opt/redis-7003</span><br><span class="line">mkdir /opt/redis-7004</span><br><span class="line">mkdir /opt/redis-7005</span><br><span class="line">mkdir /opt/redis-7006</span><br></pre></td></tr></table></figure>
+
+<p>copy之后，可以直接通过sed命令替换配置文件中的相关端口信息，如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">以此类推，分别修改，当然你也可以写到一个shell脚本里，一次性全部执行。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">确认修改是否完成，grep <span class="string">&#x27;7001&#x27;</span> nodes-7001.conf，你应该看到有3行</span></span><br><span class="line">sed -i &#x27;s/7001/7002/&#x27; nodes-7002.conf</span><br></pre></td></tr></table></figure>
+
+<h5 id="启动集群"><a href="#启动集群" class="headerlink" title="启动集群"></a>启动集群</h5><p>按单机启动方式启动所有节点，注意配置文件路径就是。<br>启动之后，ps查看redis信息，可以看到如下信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动</span></span><br><span class="line">redis-server /etc/redis-cluster/redis-7001.conf</span><br><span class="line">redis-server /etc/redis-cluster/redis-7002.conf</span><br><span class="line">redis-server /etc/redis-cluster/redis-7003.conf</span><br><span class="line">redis-server /etc/redis-cluster/redis-7004.conf</span><br><span class="line">redis-server /etc/redis-cluster/redis-7005.conf</span><br><span class="line">redis-server /etc/redis-cluster/redis-7006.conf</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动之后</span></span><br><span class="line">[root@localhost redis-5.0.7]# ps -ef | grep redis</span><br><span class="line">root      7635     1  0 10:34 ?        00:00:00 redis-server 192.168.31.49:7001 [cluster]</span><br><span class="line">root      7642     1  0 10:34 ?        00:00:00 redis-server 192.168.31.49:7002 [cluster]</span><br><span class="line">root      7647     1  0 10:34 ?        00:00:00 redis-server 192.168.31.49:7003 [cluster]</span><br><span class="line">root      7652     1  0 10:34 ?        00:00:00 redis-server 192.168.31.49:7004 [cluster]</span><br><span class="line">root      7657     1  0 10:34 ?        00:00:00 redis-server 192.168.31.49:7005 [cluster]</span><br><span class="line">root      7662     1  0 10:34 ?        00:00:00 redis-server 192.168.31.49:7006 [cluster]</span><br></pre></td></tr></table></figure>
+
+<p>说明启动成功了<br>接下来直接通过redis-cli启动集群即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli --cluster create 192.168.31.49:7001 192.168.31.49:7002 192.168.31.49:7003 192.168.31.49:7004 192.168.31.49:7005 192.168.31.49:7006 --cluster-replicas 1</span><br></pre></td></tr></table></figure>
+
+<p>启动完成之后，会看到如下信息：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; Performing <span class="built_in">hash</span> slots allocation on 6 nodes...</span></span><br><span class="line">Master[0] -&gt; Slots 0 - 5460</span><br><span class="line">Master[1] -&gt; Slots 5461 - 10922</span><br><span class="line">Master[2] -&gt; Slots 10923 - 16383</span><br><span class="line">Adding replica 192.168.31.49:7005 to 192.168.31.49:7001</span><br><span class="line">Adding replica 192.168.31.49:7006 to 192.168.31.49:7002</span><br><span class="line">Adding replica 192.168.31.49:7004 to 192.168.31.49:7003</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; Trying to optimize slaves allocation <span class="keyword">for</span> anti-affinity</span></span><br><span class="line">[WARNING] Some slaves are in the same host as their master</span><br><span class="line">M: 4a14d7fad92c4bd5cca5a5a5b620fe63979f6345 192.168.31.49:7001</span><br><span class="line">   slots:[0-5460] (5461 slots) master</span><br><span class="line">M: f31ae790a628511807e7a00182844d67da8a68aa 192.168.31.49:7002</span><br><span class="line">   slots:[5461-10922] (5462 slots) master</span><br><span class="line">M: fbb2295a6c7c27cf031a392f7b4d80ea2a58fc86 192.168.31.49:7003</span><br><span class="line">   slots:[10923-16383] (5461 slots) master</span><br><span class="line">S: 469631e70b417d6f2f32d400cb78a2d948adc22f 192.168.31.49:7004</span><br><span class="line">   replicates f31ae790a628511807e7a00182844d67da8a68aa</span><br><span class="line">S: f6d19acd0462b08f5f3b044d114fff7a215f4a2f 192.168.31.49:7005</span><br><span class="line">   replicates fbb2295a6c7c27cf031a392f7b4d80ea2a58fc86</span><br><span class="line">S: efcf9038cf9251ab8b8e53fca31b604f2bb399e1 192.168.31.49:7006</span><br><span class="line">   replicates 4a14d7fad92c4bd5cca5a5a5b620fe63979f6345</span><br><span class="line">Can I set the above configuration? (type &#x27;yes&#x27; to accept): yes</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; Nodes configuration updated</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; Assign a different config epoch to each node</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; Sending CLUSTER MEET messages to <span class="built_in">join</span> the cluster</span></span><br><span class="line">Waiting for the cluster to join</span><br><span class="line">...</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; Performing Cluster Check (using node 192.168.31.49:7001)</span></span><br><span class="line">M: 4a14d7fad92c4bd5cca5a5a5b620fe63979f6345 192.168.31.49:7001</span><br><span class="line">   slots:[0-5460] (5461 slots) master</span><br><span class="line">   1 additional replica(s)</span><br><span class="line">S: 469631e70b417d6f2f32d400cb78a2d948adc22f 192.168.31.49:7004</span><br><span class="line">   slots: (0 slots) slave</span><br><span class="line">   replicates f31ae790a628511807e7a00182844d67da8a68aa</span><br><span class="line">S: f6d19acd0462b08f5f3b044d114fff7a215f4a2f 192.168.31.49:7005</span><br><span class="line">   slots: (0 slots) slave</span><br><span class="line">   replicates fbb2295a6c7c27cf031a392f7b4d80ea2a58fc86</span><br><span class="line">M: f31ae790a628511807e7a00182844d67da8a68aa 192.168.31.49:7002</span><br><span class="line">   slots:[5461-10922] (5462 slots) master</span><br><span class="line">   1 additional replica(s)</span><br><span class="line">S: efcf9038cf9251ab8b8e53fca31b604f2bb399e1 192.168.31.49:7006</span><br><span class="line">   slots: (0 slots) slave</span><br><span class="line">   replicates 4a14d7fad92c4bd5cca5a5a5b620fe63979f6345</span><br><span class="line">M: fbb2295a6c7c27cf031a392f7b4d80ea2a58fc86 192.168.31.49:7003</span><br><span class="line">   slots:[10923-16383] (5461 slots) master</span><br><span class="line">   1 additional replica(s)</span><br><span class="line">[OK] All nodes agree about slots configuration.</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; Check <span class="keyword">for</span> open slots...</span></span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt;&gt; Check slots coverage...</span></span><br><span class="line">[OK] All 16384 slots covered.</span><br></pre></td></tr></table></figure>
+
+<p>说明启动完成了，所有主从节点信息也显示出来了。</p>
+<h5 id="查看集群信息"><a href="#查看集群信息" class="headerlink" title="查看集群信息"></a>查看集群信息</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">[root@microservice redis-cluster]# redis-cli -c -h 192.168.31.49 -p 7001</span><br><span class="line">192.168.31.49:7001&gt; cluster info</span><br><span class="line">cluster_state:ok</span><br><span class="line">cluster_slots_assigned:16384</span><br><span class="line">cluster_slots_ok:16384</span><br><span class="line">cluster_slots_pfail:0</span><br><span class="line">cluster_slots_fail:0</span><br><span class="line">cluster_known_nodes:6</span><br><span class="line">cluster_size:3</span><br><span class="line">cluster_current_epoch:6</span><br><span class="line">cluster_my_epoch:1</span><br><span class="line">cluster_stats_messages_ping_sent:457</span><br><span class="line">cluster_stats_messages_pong_sent:458</span><br><span class="line">cluster_stats_messages_sent:915</span><br><span class="line">cluster_stats_messages_ping_received:453</span><br><span class="line">cluster_stats_messages_pong_received:457</span><br><span class="line">cluster_stats_messages_meet_received:5</span><br><span class="line">cluster_stats_messages_received:915</span><br></pre></td></tr></table></figure>
+
+<h5 id="查看节点信息"><a href="#查看节点信息" class="headerlink" title="查看节点信息"></a>查看节点信息</h5><h5 id="遇到redis-cli集群加载失败"><a href="#遇到redis-cli集群加载失败" class="headerlink" title="遇到redis-cli集群加载失败"></a>遇到redis-cli集群加载失败</h5><p>这种情况通常遇到上一次redis未正常退出导致的。<br>通过redis-cli –cluster create时，提示下述错误：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Node 192.168.31.49:7001 is not empty. Either the node already knows other nodes (check with CLUSTER NODES) or contains some key in database 0</span><br></pre></td></tr></table></figure>
+
+<p>此时，使用下述命令，直接清空异常redis</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./redis-cli -h ip地址 -p 端口</span><br><span class="line"><span class="meta prompt_">&gt;</span><span class="language-bash">&gt; flushdb</span></span><br></pre></td></tr></table></figure>
+<p>如果在清空之后仍然无效，尝试将当前启动的所有节点重新kill调，重新运行后再执行创建集群命令看看</p>
+<h4 id="zookeeper安装"><a href="#zookeeper安装" class="headerlink" title="zookeeper安装"></a>zookeeper安装</h4><h5 id="下载zk"><a href="#下载zk" class="headerlink" title="下载zk"></a>下载zk</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://mirror.bit.edu.cn/apache/zookeeper/zookeeper-3.6.2/apache-zookeeper-3.6.2-bin.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h5 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h5><p>解压后，cd到conf目录下，copy sample配置文件为zoo.cfg</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost conf]# vim zoo.cfg </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">The number of milliseconds of each tick</span></span><br><span class="line">tickTime=2000</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">The number of ticks that the initial</span> </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">synchronization phase can take</span></span><br><span class="line">initLimit=10</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">The number of ticks that can pass between</span> </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">sending a request and getting an acknowledgement</span></span><br><span class="line">syncLimit=5</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">the directory <span class="built_in">where</span> the snapshot is stored.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">do</span> not use /tmp <span class="keyword">for</span> storage, /tmp here is just</span> </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">example sakes.</span></span><br><span class="line">dataDir=/etc/apache-zookeeper-3.6.2/data</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">the port at <span class="built_in">which</span> the clients will connect</span></span><br><span class="line">clientPort=2181</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">the maximum number of client connections.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">increase this <span class="keyword">if</span> you need to handle more clients</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">maxClientCnxns=60</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># Be sure to read the maintenance section of the</span></span> </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">administrator guide before turning on autopurge.</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># http://zookeeper.apache.org/doc/current/zookeeperAdmin.html#sc_maintenance</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># The number of snapshots to retain in dataDir</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">autopurge.snapRetainCount=3</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Purge task interval <span class="keyword">in</span> hours</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Set to <span class="string">&quot;0&quot;</span> to <span class="built_in">disable</span> auto purge feature</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">autopurge.purgeInterval=1</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment"># Metrics Providers</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="comment"># https://prometheus.io Metrics Exporter</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">metricsProvider.className=org.apache.zookeeper.metrics.prometheus.PrometheusMetricsProvider</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">metricsProvider.httpPort=7000</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">metricsProvider.exportJvmInfo=<span class="literal">true</span></span></span><br></pre></td></tr></table></figure>
+
+<h5 id="配置service开机启动"><a href="#配置service开机启动" class="headerlink" title="配置service开机启动"></a>配置service开机启动</h5><p>cd 到 /etc/init.d/目录下<br>新建名为zookeeper文件，文件内容如下，注意ZK_PATH和JAVA_HOME填写实际路径</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost init.d]# vim zookeeper</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">!/bin/bash</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">chkconfig:2345 20 90</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">description:zookeeper</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">processname:zookeeper</span></span><br><span class="line">ZK_PATH=/etc/apache-zookeeper-3.6.2</span><br><span class="line">export JAVA_HOME=/etc/java/jdk1.8.0_211</span><br><span class="line">case $1 in</span><br><span class="line">         start) sh  $ZK_PATH/bin/zkServer.sh start;;</span><br><span class="line">         stop)  sh  $ZK_PATH/bin/zkServer.sh stop;;</span><br><span class="line">         status) sh  $ZK_PATH/bin/zkServer.sh status;;</span><br><span class="line">         restart) sh $ZK_PATH/bin/zkServer.sh restart;;</span><br><span class="line">         *)  echo &quot;require start|stop|status|restart&quot;  ;;</span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
+
+<p>检查服务：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">添加服务</span></span><br><span class="line">chkconfig --add zookeeper</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">修改执行权限</span></span><br><span class="line">chmod 755 zookeeper</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">先停止服务</span></span><br><span class="line">service zookeeper stop</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">在启动服务</span></span><br><span class="line">service zookeeper start</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查询服务状态</span></span><br><span class="line">service zookeeper status</span><br></pre></td></tr></table></figure>
+
+<h4 id="kafka伪集群部署"><a href="#kafka伪集群部署" class="headerlink" title="kafka伪集群部署"></a>kafka伪集群部署</h4><h5 id="准备-1"><a href="#准备-1" class="headerlink" title="准备"></a>准备</h5><p>通过官网下载kafka二进制客户端</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget https://downloads.apache.org/kafka/2.4.1/kafka_2.11-2.4.1.tgz</span><br></pre></td></tr></table></figure>
+<h5 id="配置集群"><a href="#配置集群" class="headerlink" title="配置集群"></a>配置集群</h5><h6 id="配置KAFKA-HOME"><a href="#配置KAFKA-HOME" class="headerlink" title="配置KAFKA_HOME"></a>配置KAFKA_HOME</h6><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/profile</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">末尾添加，<span class="built_in">export</span> PATH如果有JAVA_HOME，类似在后面添加冒号</span></span><br><span class="line">export KAFKA_HOME=/usr/kafka/kafka_2.11-2.4.1</span><br><span class="line">export PATH=$PATH:$KAFKA_HOME/bin</span><br></pre></td></tr></table></figure>
+
+<h6 id="配置KAFKA集群文件"><a href="#配置KAFKA集群文件" class="headerlink" title="配置KAFKA集群文件"></a>配置KAFKA集群文件</h6><p>直接cd到config目录下，复制三个<strong>server.properties</strong>文件<br>每个文件中的配置修改如下几项：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">broker.id=1</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment"># 填你实际机器IP</span></span></span><br><span class="line">listeners=PLAINTEXT://192.168.**.***:9092</span><br><span class="line">log.dirs=/usr/local/src/kafka_2.11-2.1.0/tmp/kafka-logs1</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment"># 填你zk服务的地址</span></span></span><br><span class="line">zookeeper.connect=192.168.**.***:2182</span><br></pre></td></tr></table></figure>
+
+<h5 id="后台启动"><a href="#后台启动" class="headerlink" title="后台启动"></a>后台启动</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./bin/kafka-server-start.sh -daemon $KAFKA_HOME/config/server1.properties &amp;</span><br><span class="line">./bin/kafka-server-start.sh -daemon $KAFKA_HOME/config/server2.properties &amp;</span><br><span class="line">./bin/kafka-server-start.sh -daemon $KAFKA_HOME/config/server3.properties &amp;</span><br></pre></td></tr></table></figure>
+
+<h5 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h5><h6 id="创建一个topic"><a href="#创建一个topic" class="headerlink" title="创建一个topic"></a>创建一个topic</h6><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建topic，包含一个分区，3个副本</span></span><br><span class="line">./bin/kafka-topics.sh --create --zookeeper 192.168.31.49:2181 --replication-factor 3 --partitions 1 --topic test_topic</span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">WARNING: Due to limitations <span class="keyword">in</span> metric names, topics with a period (<span class="string">&#x27;.&#x27;</span>) or underscore (<span class="string">&#x27;_&#x27;</span>) could collide. To avoid issues it is best to use either, but not both.</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">Created topic test_topic.</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">查看topic</span></span><br><span class="line">./bin/kafka-topics.sh --list --zookeeper 192.168.31.49:2181</span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">test_topic</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="创建生产者-amp-消费者"><a href="#创建生产者-amp-消费者" class="headerlink" title="创建生产者&amp;消费者"></a>创建生产者&amp;消费者</h6><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建生产者</span></span><br><span class="line">./bin/kafka-console-producer.sh --broker-list master:9092,master:9093,master:9094 --topic test_topic</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">创建消费者</span></span><br><span class="line">./bin/kafka-console-consumer.sh --bootstrap-server master:9092,master:9093,master:9094 --from-beginning --topic test_topic</span><br></pre></td></tr></table></figure>
+
+<h6 id="通过指定consumer-properties文件创建topic"><a href="#通过指定consumer-properties文件创建topic" class="headerlink" title="通过指定consumer.properties文件创建topic"></a>通过指定consumer.properties文件创建topic</h6><p>先在config文件夹下copy consumer.properties，假定命名为：cc.nimbusk.consumer.properties</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过kafka-console-consumer.sh指定分组下的topic</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">bin/kafka-console-consumer.sh --new-consumer --bootstrap-server localhost:9092 --topic test_topic --from-beginning --consumer.config config/cc.nimbusk.consumer.properties --delete-consumer-offsets</span></span><br></pre></td></tr></table></figure>
+
+
+
+
+<h3 id="引用参考"><a href="#引用参考" class="headerlink" title="引用参考"></a>引用参考</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://www.cnblogs.com/leffss/p/11996580.html">Redis 5.0.7 讲解，单机、集群模式搭建</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/ca10a347.html" title="CentOS7基础操作相关">https://nimbusk.cc/post/ca10a347.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/CentOS7/" rel="tag"># CentOS7</a>
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/c07c0078.html" rel="prev" title="新手从零软路由系列">
+                  <i class="fa fa-angle-left"></i> 新手从零软路由系列
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/71e5bb42.html" rel="next" title="英语学习相关-词组">
+                  英语学习相关-词组 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"31a8e69f85ecbfa83be5f73a41094973"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="背景在早些时候就有了解ELK的鼎鼎大名，前一段时间也是组件了自己的软路由环境，有充足的硬件&#x2F;软件资源，刚好开始学习一下ELK相关的东西。搭建目的就是通过上手学习ELK相关的东西之外，也通过RouteOS内建的SNMP服务将路由器日志信息输出到ELK进而分析一下。软路由搭建相关，直接查看本站的另一篇文章：新手从零软路由系列 前言本文涉及Linux、ES、NodeJS等等相关技术，篇幅可能较长，需要具">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ELK初探之CentOS7环境搭建">
+<meta property="og:url" content="https://nimbusk.cc/post/39705835.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="背景在早些时候就有了解ELK的鼎鼎大名，前一段时间也是组件了自己的软路由环境，有充足的硬件&#x2F;软件资源，刚好开始学习一下ELK相关的东西。搭建目的就是通过上手学习ELK相关的东西之外，也通过RouteOS内建的SNMP服务将路由器日志信息输出到ELK进而分析一下。软路由搭建相关，直接查看本站的另一篇文章：新手从零软路由系列 前言本文涉及Linux、ES、NodeJS等等相关技术，篇幅可能较长，需要具">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/start_es_successfully.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/elasticsearch-head.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/modify_gruntjs_file.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/modify_app_js.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/cerebro_run_capture.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/kibana_dashborad.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/get_messages_from_standard_input.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/head_overview_after_configuring_system_log.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/config_kibana_index_1.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/config_kibana_index_2.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/39705835/config_kibana_index_3.jpg">
+<meta property="article:published_time" content="2019-12-28T22:41:03.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="ElasticSearch">
+<meta property="article:tag" content="CentOS7">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="ElasticSearch Cluster">
+<meta property="article:tag" content="Logstash">
+<meta property="article:tag" content="Kibana">
+<meta property="article:tag" content="Esxi 6.7">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/39705835/start_es_successfully.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/39705835.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/39705835.html","path":"post/39705835.html","title":"ELK初探之CentOS7环境搭建"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ELK初探之CentOS7环境搭建 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="nav-number">3.</span> <span class="nav-text">相关概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%95%E4%B8%BAELK"><span class="nav-number">3.1.</span> <span class="nav-text">何为ELK</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ElasticSearch%E7%AE%80%E4%BB%8B"><span class="nav-number">3.2.</span> <span class="nav-text">ElasticSearch简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Logstash%E7%AE%80%E4%BB%8B"><span class="nav-number">3.3.</span> <span class="nav-text">Logstash简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Kibana%E7%AE%80%E4%BB%8B"><span class="nav-number">3.4.</span> <span class="nav-text">Kibana简介</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E5%87%86%E5%A4%87"><span class="nav-number">4.</span> <span class="nav-text">搭建准备</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDELK%E7%9B%B8%E5%85%B3%E5%8C%85"><span class="nav-number">4.1.</span> <span class="nav-text">下载ELK相关包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SSH%E5%8F%8AFTP%E5%B7%A5%E5%85%B7"><span class="nav-number">4.2.</span> <span class="nav-text">SSH及FTP工具</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%90%AD%E5%BB%BA%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.</span> <span class="nav-text">搭建步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ElasticSearch%E9%9B%86%E7%BE%A4"><span class="nav-number">5.1.</span> <span class="nav-text">ElasticSearch集群</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#Master%E8%8A%82%E7%82%B9"><span class="nav-number">5.1.1.</span> <span class="nav-text">Master节点</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9Master%E8%8A%82%E7%82%B9%E9%85%8D%E7%BD%AE"><span class="nav-number">5.1.1.1.</span> <span class="nav-text">修改Master节点配置</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8es%E6%9C%8D%E5%8A%A1"><span class="nav-number">5.1.1.2.</span> <span class="nav-text">启动es服务</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B6%E4%BD%99%E4%B8%A4%E4%B8%AA%E4%BB%8E%E8%8A%82%E7%82%B9%E9%85%8D%E7%BD%AE"><span class="nav-number">5.1.2.</span> <span class="nav-text">其余两个从节点配置</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E7%94%A8%E6%88%B7%E7%BB%84%E5%92%8Ces%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">5.1.2.1.</span> <span class="nav-text">配置用户组和es配置文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ElasticSearch-head%E6%8F%92%E4%BB%B6"><span class="nav-number">5.2.</span> <span class="nav-text">ElasticSearch-head插件</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BD%E6%8F%92%E4%BB%B6"><span class="nav-number">5.2.1.</span> <span class="nav-text">下载插件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%86%E5%A4%87nodejs%E7%8E%AF%E5%A2%83"><span class="nav-number">5.2.2.</span> <span class="nav-text">准备nodejs环境</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEnodejs%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="nav-number">5.2.3.</span> <span class="nav-text">配置nodejs环境变量</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%89%E8%A3%85grunt"><span class="nav-number">5.2.4.</span> <span class="nav-text">安装grunt</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9head%E6%8F%92%E4%BB%B6%E6%BA%90%E7%A0%81"><span class="nav-number">5.2.4.1.</span> <span class="nav-text">修改head插件源码</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#head%E6%8F%92%E4%BB%B6npm%E5%AE%89%E8%A3%85"><span class="nav-number">5.2.4.2.</span> <span class="nav-text">head插件npm安装</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#head%E6%8F%92%E4%BB%B6%E5%90%8E%E5%8F%B0%E5%90%AF%E5%8A%A8"><span class="nav-number">5.2.4.3.</span> <span class="nav-text">head插件后台启动</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87cerebro%E8%AE%BF%E9%97%AEElasticSearch%E9%9B%86%E7%BE%A4"><span class="nav-number">5.3.</span> <span class="nav-text">通过cerebro访问ElasticSearch集群</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Kibana"><span class="nav-number">5.4.</span> <span class="nav-text">Kibana</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9kibana%E9%85%8D%E7%BD%AE"><span class="nav-number">5.4.1.</span> <span class="nav-text">修改kibana配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8kibana%E5%B9%B6%E8%AE%BE%E7%BD%AE%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8"><span class="nav-number">5.4.2.</span> <span class="nav-text">启动kibana并设置开机启动</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Logstash"><span class="nav-number">5.5.</span> <span class="nav-text">Logstash</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">5.5.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE"><span class="nav-number">5.5.2.</span> <span class="nav-text">配置</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E6%A0%87%E5%87%86%E8%BE%93%E5%85%A5%E8%BE%93%E5%87%BA%E6%9D%A5%E6%A3%80%E9%AA%8C%E6%98%AF%E5%90%A6%E6%AD%A3%E5%B8%B8"><span class="nav-number">5.5.2.1.</span> <span class="nav-text">通过标准输入输出来检验是否正常</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E6%A0%87%E5%87%86%E8%BE%93%E5%85%A5%E5%90%91es%E5%8F%91%E9%80%81"><span class="nav-number">5.5.2.2.</span> <span class="nav-text">通过标准输入向es发送</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%A4%BA%E4%BE%8B"><span class="nav-number">5.5.2.3.</span> <span class="nav-text">配置一个简单示例</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%B6%E9%9B%86RouterOS%E8%BD%AF%E8%B7%AF%E7%94%B1%E6%97%A5%E5%BF%97"><span class="nav-number">6.</span> <span class="nav-text">收集RouterOS软路由日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E7%94%A8"><span class="nav-number">7.</span> <span class="nav-text">引用</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/39705835.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ELK初探之CentOS7环境搭建 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ELK初探之CentOS7环境搭建
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-12-28 22:41:03" itemprop="dateCreated datePublished" datetime="2019-12-28T22:41:03+00:00">2019-12-28</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/" itemprop="url" rel="index"><span itemprop="name">大数据</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>在早些时候就有了解ELK的鼎鼎大名，前一段时间也是组件了自己的软路由环境，有充足的硬件/软件资源，刚好开始学习一下ELK相关的东西。<br>搭建目的就是通过上手学习ELK相关的东西之外，也通过RouteOS内建的SNMP服务将路由器日志信息输出到ELK进而分析一下。<br>软路由搭建相关，直接查看本站的另一篇文章：<a href="https://nimbusk.cc/post/c07c0078.html">新手从零软路由系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本文涉及Linux、ES、NodeJS等等相关技术，篇幅可能较长，需要具备一定shell基础，一些基本命令相关不过多介绍。<br>全文运行环境版本如下：</p>
+<ul>
+<li>Esxi: 6.7</li>
+<li>虚拟OS: CentOS Linux release 7.7.1908 (Core)<ul>
+<li>内存：4GB</li>
+<li>硬盘：30GB</li>
+</ul>
+</li>
+<li>ElasticSearch: 7.5.0</li>
+<li>Logstash: 7.5.0</li>
+<li>Kibana: 7.5.0</li>
+<li>NodeJS: 4.4.7<span id="more"></span>
+<h3 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h3><h4 id="何为ELK"><a href="#何为ELK" class="headerlink" title="何为ELK"></a>何为ELK</h4><h4 id="ElasticSearch简介"><a href="#ElasticSearch简介" class="headerlink" title="ElasticSearch简介"></a>ElasticSearch简介</h4><h4 id="Logstash简介"><a href="#Logstash简介" class="headerlink" title="Logstash简介"></a>Logstash简介</h4><h4 id="Kibana简介"><a href="#Kibana简介" class="headerlink" title="Kibana简介"></a>Kibana简介</h4><h3 id="搭建准备"><a href="#搭建准备" class="headerlink" title="搭建准备"></a>搭建准备</h3><h4 id="下载ELK相关包"><a href="#下载ELK相关包" class="headerlink" title="下载ELK相关包"></a>下载ELK相关包</h4>直接去官网：<a target="_blank" rel="noopener" href="https://www.elastic.co/">https://www.elastic.co/</a> 下载，注意一点：ELK三个组件的版本必须一直，否则会出现很多意外的问题。<br>本次因为是单机搭建ElasticSearch集群，初始的master节点使用的rpm包的方式直接安装。<h4 id="SSH及FTP工具"><a href="#SSH及FTP工具" class="headerlink" title="SSH及FTP工具"></a>SSH及FTP工具</h4>由于常年个人用的一直是SecureCRT，所以这次搭建也是使用的这个版本。<br>FTP工具不是必须，因为要看你是通过何种方式安装ELK组件的。<h3 id="搭建步骤"><a href="#搭建步骤" class="headerlink" title="搭建步骤"></a>搭建步骤</h3>所有搭建之前，必须在当前的CentOS安装好1.8版本的JDK，并配置好profile环境变量。如不清楚具体安装细节，可参考站内另一篇文章：<a href="https://nimbusk.cc/post/ca10a347.html">CentOS7基础操作相关</a><h4 id="ElasticSearch集群"><a href="#ElasticSearch集群" class="headerlink" title="ElasticSearch集群"></a>ElasticSearch集群</h4><h5 id="Master节点"><a href="#Master节点" class="headerlink" title="Master节点"></a>Master节点</h5>将从官网下载好的rpm包上传的CentOS指定目录下<br>运行如下命令直接安装elasticsearch：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">-i 安装rpm包，-v 可视化显示，-h 显示安装进度</span></span><br><span class="line">npm -ivh elasticsearch-7.5.0-x86_64.rpm</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>通过rpm安装的es，默认配置路径为： /etc/elasticsearch</p>
+<h6 id="修改Master节点配置"><a href="#修改Master节点配置" class="headerlink" title="修改Master节点配置"></a>修改Master节点配置</h6><p>由于7.0+以上的es版本均需要在集群下工作，所以针对老版本而言，需要配置集群模式。<br>具体配置如下：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ======================== Elasticsearch Configuration =========================</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># <span class="doctag">NOTE:</span> Elasticsearch comes with reasonable defaults for most settings.</span></span><br><span class="line"><span class="comment">#       Before you set out to tweak and tune the configuration, make sure you</span></span><br><span class="line"><span class="comment">#       understand what are you trying to accomplish and the consequences.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># The primary way of configuring a node is via this file. This template lists</span></span><br><span class="line"><span class="comment"># the most important settings you may want to configure for a production cluster.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Please consult the documentation for further information on configuration options:</span></span><br><span class="line"><span class="comment"># https://www.elastic.co/guide/en/elasticsearch/reference/index.html</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Cluster -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use a descriptive name for your cluster:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">cluster.name:</span> <span class="string">nimbusk_es</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------------------------------ Node ------------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use a descriptive name for the node:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">nimbusk-master</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Add custom attributes to the node:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#node.attr.rack: r1</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Is master node</span></span><br><span class="line"><span class="attr">node.master:</span> <span class="literal">true</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Allow max numbuer nodes at local machine</span></span><br><span class="line"><span class="attr">node.max_local_storage_nodes:</span> <span class="number">3</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ----------------------------------- Paths ------------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Path to directory where to store the data (separate multiple locations by comma):</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">path.data:</span> <span class="string">/var/lib/elasticsearch</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Path to log files:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">path.logs:</span> <span class="string">/var/log/elasticsearch</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ----------------------------------- Memory -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Lock the memory on startup:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#bootstrap.memory_lock: true</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Make sure that the heap size is set to about half the memory available</span></span><br><span class="line"><span class="comment"># on the system and that the owner of the process is allowed to use this</span></span><br><span class="line"><span class="comment"># limit.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Elasticsearch performs poorly when the system is swapping the memory.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Network -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set the bind address to a specific IP (IPv4 or IPv6):</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="string">你的机器ip</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set a custom port for HTTP:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9200</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the network module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># --------------------------------- Discovery ----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Pass an initial list of hosts to perform discovery when this node is started:</span></span><br><span class="line"><span class="comment"># The default list of hosts is [&quot;127.0.0.1&quot;, &quot;[::1]&quot;]</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#discovery.seed_hosts: [&quot;192.168.31.49&quot;]</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Bootstrap the cluster using an initial set of master-eligible nodes:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">cluster.initial_master_nodes:</span> [<span class="string">&quot;nimbusk-master&quot;</span>]</span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the discovery and cluster formation module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Gateway -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Block initial recovery after a full cluster restart until N nodes are started:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#gateway.recover_after_nodes: 3</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the gateway module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Various -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Require explicit names when deleting indices:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#action.destructive_requires_name: true</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Add additional arguments for head plugin</span></span><br><span class="line"><span class="attr">http.cors.enabled:</span> <span class="literal">true</span></span><br><span class="line"><span class="attr">http.cors.allow-origin:</span> <span class="string">&quot;*&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h6 id="启动es服务"><a href="#启动es服务" class="headerlink" title="启动es服务"></a>启动es服务</h6><p>通过rpm安装的方式，可以直接通过系统服务启动，运行如下命令即可，并且可以设置es服务开机自动启动：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl start elasticsearch</span><br><span class="line">sudo systemctl enable elasticsearch</span><br></pre></td></tr></table></figure>
+<p>看到下图所示started，则表明启动完成：<br><img data-src="39705835/start_es_successfully.jpg" alt="start_es_successfully"><br>启动完成后，可以通过tail查看默认日志路径/var/log/elasticsearch下的日志文件查看启动情况。</p>
+<h5 id="其余两个从节点配置"><a href="#其余两个从节点配置" class="headerlink" title="其余两个从节点配置"></a>其余两个从节点配置</h5><p>上传tar.gz包到指定路径下并解压缩</p>
+<h6 id="配置用户组和es配置文件"><a href="#配置用户组和es配置文件" class="headerlink" title="配置用户组和es配置文件"></a>配置用户组和es配置文件</h6><p>配置用户组的原因是因为，es不可以直接用root用户启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">新增elasticsearch1用户组</span></span><br><span class="line">groupadd elasticsearch1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">新增elasticsearch1用户并分组，结尾-p为设置密码</span></span><br><span class="line">useradd elasticsearch1 -g elasticsearch1 -p 123456</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">权限分配目录到指定用户和组</span></span><br><span class="line">chown -R elasticsearch1:elasticsearch1 /etc/elasticsearch-slave1</span><br></pre></td></tr></table></figure>
+
+<p>slave1的es配置如下<br>特别注意：</p>
+<ul>
+<li>cluster.name 值必须与你master节点配置的值一致</li>
+<li>http.port 值必须与其余节点唯一，我这里是slave1，所以就取值9201，以此类推，后续slave2就配置9202就好了</li>
+<li>discovery.zen.ping.unicast.hosts 中间的IP地址必须填写你的master机器所在地址，我这里都在单机部署，所以地址都是本机ip地址。如果你部署的是不同机器的，就配置实际机器IP地址就好了。</li>
+</ul>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ======================== Elasticsearch Configuration =========================</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># <span class="doctag">NOTE:</span> Elasticsearch comes with reasonable defaults for most settings.</span></span><br><span class="line"><span class="comment">#       Before you set out to tweak and tune the configuration, make sure you</span></span><br><span class="line"><span class="comment">#       understand what are you trying to accomplish and the consequences.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># The primary way of configuring a node is via this file. This template lists</span></span><br><span class="line"><span class="comment"># the most important settings you may want to configure for a production cluster.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Please consult the documentation for further information on configuration options:</span></span><br><span class="line"><span class="comment"># https://www.elastic.co/guide/en/elasticsearch/reference/index.html</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Cluster -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use a descriptive name for your cluster:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">cluster.name:</span> <span class="string">nimbusk_es</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ------------------------------------ Node ------------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use a descriptive name for the node:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">node.name:</span> <span class="string">nimbusk-slave1</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Add custom attributes to the node:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#node.attr.rack: r1</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ----------------------------------- Paths ------------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Path to directory where to store the data (separate multiple locations by comma):</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">path.data:</span> <span class="string">/etc/elasticsearch-slave1/data</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Path to log files:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">path.logs:</span> <span class="string">/etc/elasticsearch-slave1/logs</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ----------------------------------- Memory -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Lock the memory on startup:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#bootstrap.memory_lock: true</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Make sure that the heap size is set to about half the memory available</span></span><br><span class="line"><span class="comment"># on the system and that the owner of the process is allowed to use this</span></span><br><span class="line"><span class="comment"># limit.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Elasticsearch performs poorly when the system is swapping the memory.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Network -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set the bind address to a specific IP (IPv4 or IPv6):</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">network.host:</span> <span class="string">你的机器ip</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set a custom port for HTTP:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="attr">http.port:</span> <span class="number">9201</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the network module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># --------------------------------- Discovery ----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Pass an initial list of hosts to perform discovery when this node is started:</span></span><br><span class="line"><span class="comment"># The default list of hosts is [&quot;127.0.0.1&quot;, &quot;[::1]&quot;]</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#discovery.seed_hosts: [&quot;host1&quot;, &quot;host2&quot;]</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Bootstrap the cluster using an initial set of master-eligible nodes:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#cluster.initial_master_nodes: [&quot;node-1&quot;, &quot;node-2&quot;]</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the discovery and cluster formation module documentation.</span></span><br><span class="line"><span class="comment"># Set your master node ip address</span></span><br><span class="line"><span class="attr">discovery.zen.ping.unicast.hosts:</span> [<span class="string">&quot;mater机器的ip&quot;</span>]</span><br><span class="line"><span class="attr">node.max_local_storage_nodes:</span> <span class="number">3</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Gateway -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Block initial recovery after a full cluster restart until N nodes are started:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#gateway.recover_after_nodes: 3</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># For more information, consult the gateway module documentation.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># ---------------------------------- Various -----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Require explicit names when deleting indices:</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#action.destructive_requires_name: true</span></span><br></pre></td></tr></table></figure>
+
+<p>配置好之后，直接cd到bin目录下，后台启动即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./elasticsearch &amp;</span><br></pre></td></tr></table></figure>
+
+<p>当然你也可以通过配置指定的service服务来实现开机启动等等。这里就从略了。</p>
+<h4 id="ElasticSearch-head插件"><a href="#ElasticSearch-head插件" class="headerlink" title="ElasticSearch-head插件"></a>ElasticSearch-head插件</h4><p>这个插件es辅助可视化管理es集群的工具<br>安装好之后，通过浏览器页面浏览张这个样子：<br><img data-src="39705835/elasticsearch-head.jpg" alt="elasticsearch-head"></p>
+<h5 id="下载插件"><a href="#下载插件" class="headerlink" title="下载插件"></a>下载插件</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果提示找不到wget命令，yum install wget安装一下</span></span><br><span class="line">wget https://github.com/mobz/elasticsearch-head/archive/master.zip</span><br></pre></td></tr></table></figure>
+<h5 id="准备nodejs环境"><a href="#准备nodejs环境" class="headerlink" title="准备nodejs环境"></a>准备nodejs环境</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://npm.taobao.org/mirrors/node/latest-v4.x/node-v4.4.7-linux-x64.tar.gz</span><br><span class="line">tar -zxvf node-v4.4.7-linux-x64.tar.gz</span><br></pre></td></tr></table></figure>
+<h5 id="配置nodejs环境变量"><a href="#配置nodejs环境变量" class="headerlink" title="配置nodejs环境变量"></a>配置nodejs环境变量</h5><p>直接附上自己完整的</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">export JAVA_HOME=/usr/java/jdk1.8.0_211</span><br><span class="line">export NODE_HOME=/usr/node-v4.4.7-linux-x64</span><br><span class="line">export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar</span><br><span class="line">export PATH=$PATH:$JAVA_HOME/bin:$NODE_HOME/bin</span><br><span class="line">export NODE_PATH=$NODE_HOME/lib/node_modules</span><br></pre></td></tr></table></figure>
+<p>添加完成之后，不要忘了刷新一下source，使profile生效</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+<p>通过命令：<code>npm -v</code>可以查看是否配置成功</p>
+<h5 id="安装grunt"><a href="#安装grunt" class="headerlink" title="安装grunt"></a>安装grunt</h5><p>接下来解压下载的master.zip，cd进入下载的elasticsearch-head-master</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">安装grunt-cli</span></span><br><span class="line">npm install -g grunt-cli</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="comment"># 查看grunt版本</span></span></span><br><span class="line">grunt -version</span><br></pre></td></tr></table></figure>
+<h6 id="修改head插件源码"><a href="#修改head插件源码" class="headerlink" title="修改head插件源码"></a>修改head插件源码</h6><ol>
+<li>修改服务器监听地址：Gruntfile.js<br>找到如下位置，新加一行hostname，如下图所示:<br><img data-src="39705835/modify_gruntjs_file.jpg" alt="modify_gruntjs_file"></li>
+<li>修改连接地址：_site/app.js，大概位置在4374行<br><img data-src="39705835/modify_app_js.jpg" alt="modify_app_js"></li>
+</ol>
+<h6 id="head插件npm安装"><a href="#head插件npm安装" class="headerlink" title="head插件npm安装"></a>head插件npm安装</h6><p>直接在当前目录下执行如下命令安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g</span><br></pre></td></tr></table></figure>
+<h6 id="head插件后台启动"><a href="#head插件后台启动" class="headerlink" title="head插件后台启动"></a>head插件后台启动</h6><p>由于这个插件，你肯定经常会浏览，所以肯定需要通过后台运行，在当前目录下执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup grunt server &amp;exit</span><br></pre></td></tr></table></figure>
+
+<p>至此，启动完成之后，就可以通过浏览器，默认9100端口访问，就会得本小节前面的那张es集群图了。</p>
+<h4 id="通过cerebro访问ElasticSearch集群"><a href="#通过cerebro访问ElasticSearch集群" class="headerlink" title="通过cerebro访问ElasticSearch集群"></a>通过cerebro访问ElasticSearch集群</h4><p>cerebro相对上一小节通过nodejs方式访问，就安装步骤而言，简单很多，不需要安装各种组件库。<br>cerebro是一款以来Scala、JS等相关技术编写的，其官方github有详细配置说明：<a target="_blank" rel="noopener" href="https://github.com/lmenezes/cerebro">https://github.com/lmenezes/cerebro</a><br>下载release包，上传到服务器后台之后，可以不用配置conf目录下的配置文件，直接通过登录页面直接连接es集群。<br>运行截图如下：<br><img data-src="39705835/cerebro_run_capture.jpg" alt="cerebro_run_capture"></p>
+<h4 id="Kibana"><a href="#Kibana" class="headerlink" title="Kibana"></a>Kibana</h4><p>通过rpm安装kibana非常简单，安装完成之后，可以通过如下命令寻找kibana服务的配置文件路径：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost _site]# rpm -qc kibana</span><br><span class="line">/etc/kibana/kibana.yml</span><br><span class="line">[root@localhost _site]# </span><br></pre></td></tr></table></figure>
+<h5 id="修改kibana配置"><a href="#修改kibana配置" class="headerlink" title="修改kibana配置"></a>修改kibana配置</h5><p>直接vim过去，修改如下两行即可：</p>
+<ul>
+<li>server.host: “你的机器IP”</li>
+<li>elasticsearch.url: “<a target="_blank" rel="noopener" href="http://es/">http://es</a> master节点的IP:9200”<h5 id="启动kibana并设置开机启动"><a href="#启动kibana并设置开机启动" class="headerlink" title="启动kibana并设置开机启动"></a>启动kibana并设置开机启动</h5>就不需要多说什么了：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> systemctl start kibana</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">sudo</span> chkconfig kibana on</span></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>稍等片刻，通过浏览器，kibana默认端口是5601，直接访问，进去之后，就大致可以看到如下页面了，<br>初始化，进去会让你是否选择一个kibana示例，初始化一些es数据后展示的一个监控大盘，我点了一个，之后就如下图所示：<br><img data-src="39705835/kibana_dashborad.jpg" alt="kibanadashborad"></p>
+<p>嗯，配色还是很好看的！</p>
+<h4 id="Logstash"><a href="#Logstash" class="headerlink" title="Logstash"></a>Logstash</h4><h5 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h5><p>通过rpm包安装同样很简单，直接安装就好了。不过多赘述</p>
+<h5 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h5><h6 id="通过标准输入输出来检验是否正常"><a href="#通过标准输入输出来检验是否正常" class="headerlink" title="通过标准输入输出来检验是否正常"></a>通过标准输入输出来检验是否正常</h6><p>输入下面命令，即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/share/logstash/bin/logstash -e &#x27;input &#123; stdin&#123;&#125; &#125; output &#123; stdout &#123;&#125; &#125;&#x27;</span><br></pre></td></tr></table></figure>
+<p>等待光标等你键入之后，输入：Hello World!，回车<br>有正常json输出之后，说明正常的。</p>
+<h6 id="通过标准输入向es发送"><a href="#通过标准输入向es发送" class="headerlink" title="通过标准输入向es发送"></a>通过标准输入向es发送</h6><p>输入下面命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/share/logstash/bin/logstash -e &#x27;input &#123; stdin&#123;&#125; &#125; output &#123; elasticsearch &#123; hosts =&gt; [&quot;你的es masterip:9200&quot;] index =&gt; &quot;logstash-%&#123;+YYYY.MM.dd&#125;&quot; &#125; &#125;&#x27;</span><br></pre></td></tr></table></figure>
+<p>同样等待光标等你键入之后，输入：Hello World!，回车<br>可能发现并没有json回显，此时通过head检索一下，发现如下图，消息内容为正为你手工输入的，即表明正常发送到es：<br><img data-src="39705835/get_messages_from_standard_input.jpg" alt="标准输入输出"></p>
+<h6 id="配置一个简单示例"><a href="#配置一个简单示例" class="headerlink" title="配置一个简单示例"></a>配置一个简单示例</h6><p>目标：通过监听centos系统日志文件，只要该日志文件中写入信息，就被logstash收集发送到es，最后通过配置kibana检索日志信息。</p>
+<ol>
+<li>配置一个简单的conf文件<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost conf.d]# vim /etc/logstash/conf.d/log-messages.conf</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">文件中写入如下内容，其中esip为你的master节点ip，当然其余的slave节点ip也可以。</span></span><br><span class="line">input&#123;</span><br><span class="line">  file&#123;</span><br><span class="line">    path =&gt; [&quot;/var/log/messages&quot;]</span><br><span class="line">    type =&gt; &quot;system-log&quot;</span><br><span class="line">    start_position =&gt; &quot;beginning&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">filter&#123;</span><br><span class="line"> </span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">output&#123;</span><br><span class="line">  elasticsearch&#123;</span><br><span class="line">    hosts =&gt; [&quot;mater ip:9200&quot;]</span><br><span class="line">    index =&gt; &quot;system-log-%&#123;+YYYY.MM&#125;&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ol>
+<p>通过如下命令可以检查该脚本是否配置正常：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost conf.d]# /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/log-messages.conf -t</span><br></pre></td></tr></table></figure>
+<p>看到输出信息中包含Configuration OK字样，即表明配置成功。</p>
+<p>后台启动这个配置的logstash</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@localhost conf.d]# /usr/share/logstash/bin/logstash -f /etc/logstash/conf.d/log-messages.conf &amp;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>启动后，再去head查看一下，发现多出一列信息<br><img data-src="39705835/head_overview_after_configuring_system_log.jpg" alt="head_overview_after_configuring_system_log"><br>此时表明以及成功收集到系统信息了</li>
+<li>配置一下kibana索引即可通过kibana搜索了<br>打开kibana的Management配置菜单（左侧菜单栏下方的小齿轮），点击 <strong>Index Patterns</strong>创建索引，如下图所示：<br><img data-src="39705835/config_kibana_index_1.jpg" alt="config_kibana_index_1"><br>创建新的索引，按下图配置<br><img data-src="39705835/config_kibana_index_2.jpg" alt="config_kibana_index_2"><br>生效之后，就可以再发现(Discovery)菜单中检索了，如下图所示：<br><img data-src="39705835/config_kibana_index_3.jpg" alt="config_kibana_index_3"></li>
+</ol>
+<p>至此，所有ELK组件搭建完毕，下一步就是进一步搜集我们需要的信息了！</p>
+<h3 id="收集RouterOS软路由日志"><a href="#收集RouterOS软路由日志" class="headerlink" title="收集RouterOS软路由日志"></a>收集RouterOS软路由日志</h3><h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><p>[1] ELK之在CentOS7.5上使用rpm包安装配置ELK7版本.2019.05.30(2019.12). <a target="_blank" rel="noopener" href="https://www.cnblogs.com/minseo/p/10948632.html">https://www.cnblogs.com/minseo/p/10948632.html</a><br>[2] Centos7 之安装Logstash ELK stack 日志管理系统.2016-05-23(2019.12). <a target="_blank" rel="noopener" href="https://www.cnblogs.com/hanyifeng/p/5509985.html">https://www.cnblogs.com/hanyifeng/p/5509985.html</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/39705835.html" title="ELK初探之CentOS7环境搭建">https://nimbusk.cc/post/39705835.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/ElasticSearch/" rel="tag"># ElasticSearch</a>
+              <a href="/tags/CentOS7/" rel="tag"># CentOS7</a>
+              <a href="/tags/ELK/" rel="tag"># ELK</a>
+              <a href="/tags/ElasticSearch-Cluster/" rel="tag"># ElasticSearch Cluster</a>
+              <a href="/tags/Logstash/" rel="tag"># Logstash</a>
+              <a href="/tags/Kibana/" rel="tag"># Kibana</a>
+              <a href="/tags/Esxi-6-7/" rel="tag"># Esxi 6.7</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/a93eddc5.html" rel="prev" title="R语言统计分析实战（RStudio）">
+                  <i class="fa fa-angle-left"></i> R语言统计分析实战（RStudio）
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/6b8bb59.html" rel="next" title="TotalCommander常规使用总结">
+                  TotalCommander常规使用总结 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"4f6b19264d91bd99c8ec51c7b5790089"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

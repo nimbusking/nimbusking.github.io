@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="背景TotalCommander是一个老牌的文件管理器(下文简称：TC)。从Wikipedia首页介绍就能看出，首发版本从1993年开始到现在已经快30年。TC的强大与震撼，确实令每位使用过或者经常使用的用户来说，非常了不起的。个人觉得，在Windows平台下，TC是最强大的文件管理器，没有之一！另外一点，就是这是一款等同于免费的软件。为什么说是等同于呢？实际上，如果你不付费，一种你大可寻找网上D">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TotalCommander常规使用总结">
+<meta property="og:url" content="https://nimbusk.cc/post/6b8bb59.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="背景TotalCommander是一个老牌的文件管理器(下文简称：TC)。从Wikipedia首页介绍就能看出，首发版本从1993年开始到现在已经快30年。TC的强大与震撼，确实令每位使用过或者经常使用的用户来说，非常了不起的。个人觉得，在Windows平台下，TC是最强大的文件管理器，没有之一！另外一点，就是这是一款等同于免费的软件。为什么说是等同于呢？实际上，如果你不付费，一种你大可寻找网上D">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/bookmark1.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/bookmark2.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/color4.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/color1.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/color2.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/color3.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/copy1.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/copy2.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/copy3.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/copy4.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/copy5.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/copy6.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/copy7.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/6b8bb59/copy8.jpg">
+<meta property="article:published_time" content="2020-03-22T20:07:43.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="工具使用">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/6b8bb59/bookmark1.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/6b8bb59.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/6b8bb59.html","path":"post/6b8bb59.html","title":"TotalCommander常规使用总结"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>TotalCommander常规使用总结 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TC%E5%9F%BA%E6%9C%AC%E5%8A%9F%E8%83%BD%E4%BB%8B%E7%BB%8D"><span class="nav-number">3.</span> <span class="nav-text">TC基本功能介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TC%E5%B8%B8%E8%A7%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.</span> <span class="nav-text">TC常规使用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E5%AE%9A%E4%BD%8D"><span class="nav-number">4.1.</span> <span class="nav-text">快速定位</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%84%E5%90%88%E5%AD%90%E8%8F%9C%E5%8D%95"><span class="nav-number">4.1.1.</span> <span class="nav-text">组合子菜单</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%9C%E8%89%B2%E7%AE%A1%E7%90%86"><span class="nav-number">4.2.</span> <span class="nav-text">颜色管理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8C%89%E6%97%B6%E9%97%B4"><span class="nav-number">4.2.1.</span> <span class="nav-text">按时间</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%89%E5%A4%A9%E4%BB%A5%E5%86%85"><span class="nav-number">4.2.1.1.</span> <span class="nav-text">三天以内</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%B8%80%E5%B9%B4%E4%BB%A5%E5%89%8D"><span class="nav-number">4.2.1.2.</span> <span class="nav-text">一年以前</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8C%89%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B"><span class="nav-number">4.2.2.</span> <span class="nav-text">按文件类型</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%96%87%E4%BB%B6%E7%B1%BB%E5%9E%8B%E5%88%86%E7%B1%BB"><span class="nav-number">4.2.2.1.</span> <span class="nav-text">常用文件类型分类</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%8D%E5%88%B6-amp-%E7%A7%BB%E5%8A%A8"><span class="nav-number">4.3.</span> <span class="nav-text">复制 &amp; 移动</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B8%A6%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95%E6%A0%BC%E5%BC%8F%E5%A4%8D%E5%88%B6"><span class="nav-number">4.3.1.</span> <span class="nav-text">带文件目录格式复制</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E6%8F%8F%E8%BF%B0"><span class="nav-number">4.3.1.1.</span> <span class="nav-text">场景描述</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%9C%80%E8%A6%81%E5%80%9F%E5%8A%A9%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="nav-number">4.3.1.2.</span> <span class="nav-text">需要借助的工具</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">4.3.1.3.</span> <span class="nav-text">使用</span></a></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/6b8bb59.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="TotalCommander常规使用总结 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          TotalCommander常规使用总结
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-03-22 20:07:43" itemprop="dateCreated datePublished" datetime="2020-03-22T20:07:43+00:00">2020-03-22</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">工具</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>TotalCommander是一个老牌的文件管理器(下文简称：TC)。从Wikipedia首页介绍<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Total_Commander"></a>就能看出，首发版本从1993年开始到现在已经快30年。<br>TC的强大与震撼，确实令每位使用过或者经常使用的用户来说，非常了不起的。个人觉得，在Windows平台下，TC是最强大的文件管理器，没有之一！<br>另外一点，就是这是一款等同于免费的软件。<br>为什么说是等同于呢？实际上，如果你不付费，一种你大可寻找网上D版的授权认证，另外一种，也就是一个弹框而已，正常功能使用完全不受影响。从其它渠道了解他人对TC软件作者的采访得知，作者的对D版的态度是不反对的，完全看你自己。<strong>这一点精神，着实令我敬佩！</strong><br>也正因为这点，早在很多年前（15-16年之间）就付费购买了授权认证，也从那时候开始，个人对于付费软件的态度就是：<strong>在力所能及的情况下能付费的就付费。</strong><br>这么多年下来了，从早年大学时代玩的D版游戏，到后来工作之后，所有的游戏全部正版化。个人游戏平台涵盖了所有：Steam、Ubisoft、Origin、Epic都付费购买过游戏。<br>从使用的操作系统，Windows Professional(付费购买)、Office 365，从黑苹果、黑群晖，再到白苹果，白群晖。等等等等，太多了，无一例外，很多我也践行了我的承诺：力所能及的情况下。<br>这一点也正是TC软件的作者影响着我。<br>废话不多说~<br>本文主要记录一下日常使用TC过程中的一些经验、技巧相关。</p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><span id="more"></span>
+<h3 id="TC基本功能介绍"><a href="#TC基本功能介绍" class="headerlink" title="TC基本功能介绍"></a>TC基本功能介绍</h3><h3 id="TC常规使用场景"><a href="#TC常规使用场景" class="headerlink" title="TC常规使用场景"></a>TC常规使用场景</h3><h4 id="快速定位"><a href="#快速定位" class="headerlink" title="快速定位"></a>快速定位</h4><p>【快捷键】 Ctrl + D</p>
+<ul>
+<li>打开收藏栏，收藏栏可以收藏本地文件夹 OR 本地文件、远程网站等等。</li>
+<li>打开菜单后，如果是新需要添加的文件夹，直接选择“添加当前文件夹”即可。</li>
+<li>新菜单文件夹弹出时：可以命名菜单名称，<strong>也可以同时命名快捷键</strong><br><img data-src="6b8bb59/bookmark1.jpg" alt="命名收藏名称"><br>添加成功后，如果你有命名快捷键，此后的快速打开快捷键就是：Ctrl + D + [你命名的快捷键]</li>
+</ul>
+<h5 id="组合子菜单"><a href="#组合子菜单" class="headerlink" title="组合子菜单"></a>组合子菜单</h5><p>在配置菜单中，你可以添加子菜单用于管理分类，相当于建立一个“一级目录”，如图所示：<br><img data-src="6b8bb59/bookmark2.jpg" alt="一级收藏菜单"><br>同时也可以命名快捷键，就像上图中，我要跳转到Downloads目录，组合快捷键就是：Ctrl + D + D + S</p>
+<h4 id="颜色管理"><a href="#颜色管理" class="headerlink" title="颜色管理"></a>颜色管理</h4><p>菜单配置路径：配置-&gt;选项-&gt;颜色<br>总体上可以通过组合条件设置，灵活配置各种各样规则，最终标记文件颜色。<br><em>在配置页面可以通过调整匹配顺序，设置匹配优先级，我的优先级是：时间第一，文件扩展名第二</em><br>设置完之后就是这样的<br><img data-src="6b8bb59/color4.jpg" alt="颜色管理配置预览页面"></p>
+<h5 id="按时间"><a href="#按时间" class="headerlink" title="按时间"></a>按时间</h5><p>如下图所示，选择定义，在“定义选择类型”窗口中，选择“高级”选项卡，下面列举了很多场景<br><img data-src="6b8bb59/color1.jpg" alt="按时间配置"></p>
+<h6 id="三天以内"><a href="#三天以内" class="headerlink" title="三天以内"></a>三天以内</h6><p>勾选“不早于”，并选择3天。确定之后，选择红色，即用于标记：<strong>凡是三天以内修改过的，用红色标记</strong></p>
+<h6 id="一年以前"><a href="#一年以前" class="headerlink" title="一年以前"></a>一年以前</h6><p>勾选“早于”，并选择1年。确定之后，选择蓝色，即用于标记：<strong>凡是一年以前修改过的，用蓝色标记</strong></p>
+<h5 id="按文件类型"><a href="#按文件类型" class="headerlink" title="按文件类型"></a>按文件类型</h5><p>如图所示：<br><img data-src="6b8bb59/color2.jpg" alt="按文件类型区分颜色"><br>在指定文件类型输入框中，指定相应的文件类型，并且在确定之后，选择指定的一个颜色。<strong>配置好之后，在后续文件浏览的过程中，就已配置好的颜色区分开来</strong><br>如下图所示，配置好的颜色<br><img data-src="6b8bb59/color3.jpg" alt="区分后预览界面"></p>
+<h6 id="常用文件类型分类"><a href="#常用文件类型分类" class="headerlink" title="常用文件类型分类"></a>常用文件类型分类</h6><p>这里提供Windows下各种文件类型分类，需要使用的直接粘贴即可</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">视频</span></span><br><span class="line">*.ASF;*.AVI;*.MOV;*.MPEG;*.MPG;*.RAM;*.RM;*.WMV;*.MP4;*.MKV;*.SWF;*.TP;*.TS;*.FLV;*.F4V</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">压缩</span></span><br><span class="line">*.ACE;*.ALZ;*.ARJ;*.CAB;*.GZ;*.LZH;*.RAR;*.TAR;*.ZIP;*.7Z;*.ISO;*.EGG</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">图片</span></span><br><span class="line">*.BMP;*.GIF;*.JPEG;*.JPG;*.PNG;*.PSD;*.PSP;*.TIF;*.WMF</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">命令行</span></span><br><span class="line">*.BAT;*.LNK;*.PIF;*.CMD</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">备份</span></span><br><span class="line">*.BAK;*.TMP</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">文档</span></span><br><span class="line">*.CAP;*.DOC;*.DOCX;*.GAL;*.GUL;*.HWP;*.PDF;*.RTF;*.TXT;*.PPT;*.XLS;*.XLSX;*.PPTX</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">编程</span></span><br><span class="line">*.C;*.CPP;*.AS;*.PHP;*.ASP;*.PAS;*.VB;*.CS;*.JSP;*.JS;*.PL;*.H;*.HPP</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">配置文件</span></span><br><span class="line">*.CFG;*.INF;*.INI</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">帮助文件</span></span><br><span class="line">*.CHM;*.HLP</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">系统文件</span></span><br><span class="line">*.DLL;*.SYS</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">可执行文件</span></span><br><span class="line">*.EXE;*.MSI</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">网页</span></span><br><span class="line">*.HTM;*.HTML;*.URL</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">音频</span></span><br><span class="line">*.MID;*.MP2;*.MP3;*.WAV;*.OGG;*.WMA;*.AMR</span><br></pre></td></tr></table></figure>
+
+<h4 id="复制-amp-移动"><a href="#复制-amp-移动" class="headerlink" title="复制 &amp; 移动"></a>复制 &amp; 移动</h4><h5 id="带文件目录格式复制"><a href="#带文件目录格式复制" class="headerlink" title="带文件目录格式复制"></a>带文件目录格式复制</h5><h6 id="场景描述"><a href="#场景描述" class="headerlink" title="场景描述"></a>场景描述</h6><p>日常生活中，随着时间的推移，建多级文件夹分类管理是经常的事情。<br>在某些场景，你可能需要快速筛选这个文件夹下的某一类文件，如：图片。筛选过后，你可能需要copy到其它媒介，如：U盘等中。但是windows资源管理器中的搜索出的结果只能复制文件，而<strong>不能复制文件的路径</strong>，因而复制过后，你的文件分类结构就看不出来了。<br>就像下面这样：<br><img data-src="6b8bb59/copy1.jpg" alt="windows下文件搜索"><br><em>我现在需要复制文件的同时，文件所属的目录结构也要复制下来，怎么办？</em></p>
+<h6 id="需要借助的工具"><a href="#需要借助的工具" class="headerlink" title="需要借助的工具"></a>需要借助的工具</h6><p>TC的一款插件：TreeCopyPlus，官方插件地址（页面搜索）：<a target="_blank" rel="noopener" href="https://www.ghisler.com/plugins.htm">https://www.ghisler.com/plugins.htm</a><br>本文附件下载：<a href="6b8bb59/treecopyplus.zip">TreeCopyPlus 1.051</a><br>下载后，直接用TC打开，会有提示一路回车安装即可</p>
+<h6 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h6><p>假设现在我要查找我本地用户文件夹下内所有的JPG图片，带文件目录结构的方式复制到另外一个目的目录下，如下图所示：<br><img data-src="6b8bb59/copy2.jpg" alt="TC下初始界面"><br>左侧为用户目录，右侧为目标路径<br>快捷键：F5，打开搜索框，在搜索栏位键入匹配符，如下图所示：<br><img data-src="6b8bb59/copy3.jpg" alt="搜索文件"><br>搜索完成之后，点击“输出到列表”<br><img data-src="6b8bb59/copy4.jpg" alt="输出列表"><br>此时刚刚搜索的所有匹配的文件，会把结果输出到左侧列表中。<br>此时点击左侧列表：Ctrl + A全选结果后，点击：文件-&gt;压缩文件菜单（快捷键：ALT + F5）之后，弹出压缩文件窗口，默认选项如下图所示：<br><img data-src="6b8bb59/copy5.jpg" alt="默认压缩文件框"><br><strong>下面需要注意一下最终的选项</strong>，默认操作就如这个菜单名称所示，压缩文件。我们这里是拷贝文件，这里就需要选择使用我们刚刚安装的插件来进行拷贝。<br>选择“需要外部压缩程序”，下拉框中选择“TreeCopyPlus”。如下图所示：<br><img data-src="6b8bb59/copy6.jpg" alt="设置以TreeCopyPlus插件复制"><br>选择完成之后，如果没有其它需求，点击确认即可。<br>稍等片刻，完成之后，看一下目的路径下面的文件结构，是这样的：<br><img data-src="6b8bb59/copy7.jpg" alt="TC中预览目的路径下的文件结构"><br>点进去一看呢？就是这样的：<br><img data-src="6b8bb59/copy8.jpg" alt="Windows文件管理器下预览"></p>
+<p><strong>很完美的解决了是不是！Excellent！</strong></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/6b8bb59.html" title="TotalCommander常规使用总结">https://nimbusk.cc/post/6b8bb59.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/" rel="tag"># 工具使用</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/39705835.html" rel="prev" title="ELK初探之CentOS7环境搭建">
+                  <i class="fa fa-angle-left"></i> ELK初探之CentOS7环境搭建
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/8218752b.html" rel="next" title="finalcutprox教程实录">
+                  finalcutprox教程实录 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"4dd289d675ae29951e5dbfef56a76565"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

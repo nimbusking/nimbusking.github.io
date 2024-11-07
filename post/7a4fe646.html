@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="背景认识AU的历史今年早些时候，入手了《Adobe Audition CC经典教程》这本书，打算系统的补充一下AU相关的知识。认识AU不短，早在自己高二时代（距今11年了），就认识了，那时候还是3.0时代。那时候记得托付兄长在亚马逊（当时还是卓越）上买过教程书籍。但是，由于那时候环境条件有限，没有办法延展开来学习。直到上大学，有了自己个人的笔记本，那时候才算是弄了起来。早在大一的时候，那时候还加入">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Adobe Audition不完整教程">
+<meta property="og:url" content="https://nimbusk.cc/post/7a4fe646.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="背景认识AU的历史今年早些时候，入手了《Adobe Audition CC经典教程》这本书，打算系统的补充一下AU相关的知识。认识AU不短，早在自己高二时代（距今11年了），就认识了，那时候还是3.0时代。那时候记得托付兄长在亚马逊（当时还是卓越）上买过教程书籍。但是，由于那时候环境条件有限，没有办法延展开来学习。直到上大学，有了自己个人的笔记本，那时候才算是弄了起来。早在大一的时候，那时候还加入">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/audition_version.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/resource_control_pannel_add_shortcuts.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/resource_control_pannel_preview_switch.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/resource_control_pannel_enable_preview.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_001346.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_001640.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/transfer_mark.gif">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_002833.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_003156.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/over_past_zero.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_095830.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_103244.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_103840.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/adsorption.gif">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_105540.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_105643.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_110847.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_110904.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_110913.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_111824.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_113013.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/distortion.gif">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_150708.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_151301.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_152834.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_153745.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_153836.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/channel_mixed_before.gif">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/channel_mixed_after.gif">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_161645.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/AutoCapture_2020-05-04_164224.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/muti_compassor_default.gif">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/muti_compassor_radio.gif">
+<meta property="og:image" content="https://nimbusk.cc/post/7a4fe646/1.gif">
+<meta property="article:published_time" content="2020-05-01T22:55:11.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:32:01.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="音频剪辑">
+<meta property="article:tag" content="剪辑工具">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/7a4fe646/audition_version.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/7a4fe646.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/7a4fe646.html","path":"post/7a4fe646.html","title":"Adobe Audition不完整教程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Adobe Audition不完整教程 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%A4%E8%AF%86AU%E7%9A%84%E5%8E%86%E5%8F%B2"><span class="nav-number">1.1.</span> <span class="nav-text">认识AU的历史</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%8E%B0%E5%9C%A8%E8%AE%A4%E8%AF%86%E7%9A%84AU"><span class="nav-number">1.2.</span> <span class="nav-text">现在认识的AU</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">2.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%99%E7%A8%8B%E7%9B%B8%E5%85%B3"><span class="nav-number">3.</span> <span class="nav-text">教程相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Audition%E6%93%8D%E4%BD%9C%E7%8E%AF%E5%A2%83"><span class="nav-number">4.</span> <span class="nav-text">Audition操作环境</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AF%BC%E8%88%AA"><span class="nav-number">4.1.</span> <span class="nav-text">导航</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AA%92%E4%BD%93%E6%B5%8F%E8%A7%88%E5%99%A8%E5%AF%BC%E8%88%AA"><span class="nav-number">4.1.1.</span> <span class="nav-text">媒体浏览器导航</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%A0%87%E8%AE%B0%E5%AF%BC%E8%88%AA"><span class="nav-number">4.1.2.</span> <span class="nav-text">使用标记导航</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E4%BC%A0%E8%BE%93%E5%AF%BC%E8%88%AA"><span class="nav-number">4.1.3.</span> <span class="nav-text">使用传输导航</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%BE%91%E5%9F%BA%E7%A1%80"><span class="nav-number">5.</span> <span class="nav-text">编辑基础</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E4%B8%80%E4%B8%AA%E5%8C%BA%E5%9F%9F%E6%94%B9%E5%8F%98%E5%85%B6%E7%94%B5%E5%B9%B3"><span class="nav-number">5.1.</span> <span class="nav-text">选择一个区域改变其电平</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%AA%E5%88%87%E8%BF%87%E7%A8%8B"><span class="nav-number">6.</span> <span class="nav-text">剪切过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E5%89%AA%E8%B4%B4%E6%9D%BF%E5%BA%94%E7%94%A8"><span class="nav-number">6.1.</span> <span class="nav-text">多剪贴板应用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BB%B6%E9%95%BF%E6%88%96%E7%BC%A9%E7%9F%AD%E9%9F%B3%E4%B9%90%E9%80%89%E5%8F%96"><span class="nav-number">6.2.</span> <span class="nav-text">延长或缩短音乐选取</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E9%BD%90%E5%8A%9F%E8%83%BD"><span class="nav-number">6.2.1.</span> <span class="nav-text">对齐功能</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%B7%E5%90%88%E7%B2%98%E8%B4%B4"><span class="nav-number">6.3.</span> <span class="nav-text">混合粘贴</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%87%8D%E5%A4%8D%E6%B3%A2%E5%BD%A2%E7%9A%84%E4%B8%80%E9%83%A8%E5%88%86%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%BE%AA%E7%8E%AF%E4%B9%90%E6%AE%B5"><span class="nav-number">6.4.</span> <span class="nav-text">重复波形的一部分创建一个循环乐段</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B7%A1%E5%85%A5%E6%B7%A1%E5%87%BA%E6%95%88%E6%9E%9C"><span class="nav-number">6.5.</span> <span class="nav-text">淡入淡出效果</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%A1%E5%8F%B7%E5%A4%84%E7%90%86"><span class="nav-number">7.</span> <span class="nav-text">信号处理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%95%88%E6%9E%9C%E7%BB%84"><span class="nav-number">7.1.</span> <span class="nav-text">使用效果组</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A2%9E%E7%9B%8A%E9%85%8D%E7%BD%AE%EF%BC%88Gain-staging%EF%BC%89%E6%95%88%E6%9E%9C"><span class="nav-number">7.1.1.</span> <span class="nav-text">增益配置（Gain-staging）效果</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%B0%83%E6%95%B4%E6%95%88%E6%9E%9C%E7%9A%84%E5%B9%B2%E5%A3%B0-%E6%B9%BF%E5%A3%B0%E6%B7%B7%E5%90%88"><span class="nav-number">7.1.2.</span> <span class="nav-text">调整效果的干声&#x2F;湿声混合</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8C%AF%E5%B9%85%E4%B8%8E%E5%8E%8B%E9%99%90%E6%95%88%E6%9E%9C"><span class="nav-number">8.</span> <span class="nav-text">振幅与压限效果</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A2%9E%E5%B9%85"><span class="nav-number">8.1.</span> <span class="nav-text">增幅</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A3%B0%E9%81%93%E6%B7%B7%E5%90%88%E5%99%A8"><span class="nav-number">8.1.1.</span> <span class="nav-text">声道混合器</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E9%99%A4%E9%BD%BF%E9%9F%B3%EF%BC%88DeEsser%EF%BC%89"><span class="nav-number">8.2.</span> <span class="nav-text">消除齿音（DeEsser）</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%BD%BF%E9%9F%B3%EF%BC%9F"><span class="nav-number">8.2.1.</span> <span class="nav-text">什么是齿音？</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E6%80%81%E5%A4%84%E7%90%86"><span class="nav-number">8.3.</span> <span class="nav-text">动态处理</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%8B%E9%99%90%E4%B8%8E%E6%89%A9%E5%B1%95%E7%9A%84%E6%A6%82%E5%BF%B5"><span class="nav-number">8.3.1.</span> <span class="nav-text">压限与扩展的概念</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E6%AE%B5%E5%8E%8B%E9%99%90%E5%99%A8"><span class="nav-number">8.4.</span> <span class="nav-text">单段压限器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%B5%E5%AD%90%E7%AE%A1%E5%8E%8B%E9%99%90%E5%99%A8"><span class="nav-number">8.5.</span> <span class="nav-text">电子管压限器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A4%9A%E6%AE%B5%E5%8E%8B%E9%99%90%E5%99%A8"><span class="nav-number">8.6.</span> <span class="nav-text">多段压限器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A1%A5%E5%85%85"><span class="nav-number">9.</span> <span class="nav-text">补充</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E7%94%A8"><span class="nav-number">10.</span> <span class="nav-text">引用</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/7a4fe646.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Adobe Audition不完整教程 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Adobe Audition不完整教程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-01 22:55:11" itemprop="dateCreated datePublished" datetime="2020-05-01T22:55:11+00:00">2020-05-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:32:01" itemprop="dateModified" datetime="2024-10-28T20:32:01+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%BD%B1%E8%A7%86%E5%90%8E%E6%9C%9F/" itemprop="url" rel="index"><span itemprop="name">影视后期</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><h4 id="认识AU的历史"><a href="#认识AU的历史" class="headerlink" title="认识AU的历史"></a>认识AU的历史</h4><p>今年早些时候，入手了《Adobe Audition CC经典教程》这本书，打算系统的补充一下AU相关的知识。<br>认识AU不短，早在自己高二时代（距今11年了），就认识了，那时候还是3.0时代。那时候记得托付兄长在亚马逊（当时还是卓越）上买过教程书籍。<br>但是，由于那时候环境条件有限，没有办法延展开来学习。<br>直到上大学，有了自己个人的笔记本，那时候才算是弄了起来。<br>早在大一的时候，那时候还加入了学生会，哈哈哈。记得非常清楚，大一的迎新晚会，我是作为后台的音效师角色，负责整场晚会的前期音频、音效素材的收集，晚会现场后台音频的播放控制相关。也算是得益于早年很早接触AU相关后的一次实战吧。</p>
+<span id="more"></span>
+<h4 id="现在认识的AU"><a href="#现在认识的AU" class="headerlink" title="现在认识的AU"></a>现在认识的AU</h4><p>工作这么多年了，现在日常生活中，着实对VLOG感兴趣，也入手了MAC，也有FinalCutPro这样优秀的视频剪辑工具有过了解。Windows平台的嘛，自然Adobe全家桶（Emm，我买不起正版，所以~你懂得）。<br>其中一个AU，也想重新拾起来，再系统的看看处理的细节相关，特别是一些特效啊，一些控制曲线啊什么的，都巩固一下吧。以前确实没有系统的学。<br>总体上，也算是多丰富一下个人的技能吧，也相信在日后自己做VLOG的时候，多少会用到一点。</p>
+<p>正文开始~</p>
+<h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><p>受各平台硬件环境因素相关，本文中处理相关时效均为个人WindowsPC工作环境下所得，详细环境如下：</p>
+<ul>
+<li>Au版本：Adobe Audition CC 2020(内部版本：13.0.0.519)<br><img data-src="7a4fe646/audition_version.jpg" alt="Audition版本号"></li>
+<li>Windows 10 Professional（版本：10.0.18363.778）</li>
+<li>CPU：Intel i9-9900ks</li>
+<li>内存：32GB</li>
+</ul>
+<h3 id="教程相关"><a href="#教程相关" class="headerlink" title="教程相关"></a>教程相关</h3><p>本章主要记录《Adobe Audition CC经典教程》这本书中记录的相关知识点，供后续自己查阅所用。<br>文中部分片段，是个人心得体会的，会加一个“注：”标记。</p>
+<h3 id="Audition操作环境"><a href="#Audition操作环境" class="headerlink" title="Audition操作环境"></a>Audition操作环境</h3><h4 id="导航"><a href="#导航" class="headerlink" title="导航"></a>导航</h4><h5 id="媒体浏览器导航"><a href="#媒体浏览器导航" class="headerlink" title="媒体浏览器导航"></a>媒体浏览器导航</h5><ul>
+<li>在选中“媒体浏览器”面板之后，可以通过按<strong>英文的重音符号“`”快速最大化或者最小化窗口</strong>，以方便查看详细的媒体资源信息。</li>
+<li>可以通过添加快捷键，快速打开资源文件夹：<br><img data-src="7a4fe646/resource_control_pannel_add_shortcuts.jpg" alt="在媒体浏览器中添加文件夹快捷键"></li>
+<li>“预览传输”可以快速预览资源文件<br>“媒体浏览器”面板右侧下拉菜单中，有这个选项。复选之后在下方的面板有个小喇叭，单击开启后，每次点“媒体浏览器”中的音频资源后，会自动播放，从而达到快速浏览的目的。如下图所示：<br><img data-src="7a4fe646/resource_control_pannel_preview_switch.jpg" alt="预览传输开关"><br>下拉菜单中还有其它几个选项</li>
+</ul>
+<p><em>循环播放</em>，就是预览的时候要不要循环播放。<br><em>自动播放</em>，预览的时候是否自动播放<br><img data-src="7a4fe646/resource_control_pannel_enable_preview.jpg" alt="启用后的预览传输状态"></p>
+<h5 id="使用标记导航"><a href="#使用标记导航" class="headerlink" title="使用标记导航"></a>使用标记导航</h5><p>位置：“窗口-&gt;标记”面板<br>通过选取指定音轨/指定范围时间下添加标记。达到快速导航的目的<br><img data-src="7a4fe646/AutoCapture_2020-05-04_001346.jpg" alt="标记面板"></p>
+<h5 id="使用传输导航"><a href="#使用传输导航" class="headerlink" title="使用传输导航"></a>使用传输导航</h5><p>位置：“窗口-&gt;传输”面板<br>与标记同时使用，配合传输的快捷键，可以快速切换标记点。<br><img data-src="7a4fe646/AutoCapture_2020-05-04_001640.jpg" alt="传输面板"><br><img data-src="7a4fe646/transfer_mark.gif" alt="传输快速切换标记"><br>快捷键：ALT + 左右方向键（Windows平台）</p>
+<h3 id="编辑基础"><a href="#编辑基础" class="headerlink" title="编辑基础"></a>编辑基础</h3><p>使用Audition可以轻松地对音频文件进行剪切、复制、修饰、淡化以及其它操作。也可以放大音频文件进行精细化处理，与此同时还可以从顶部的总览窗口看到音频文件的全貌。</p>
+<h4 id="选择一个区域改变其电平"><a href="#选择一个区域改变其电平" class="headerlink" title="选择一个区域改变其电平"></a>选择一个区域改变其电平</h4><p>先来看一个demo截图：<br><img data-src="7a4fe646/AutoCapture_2020-05-04_002833.jpg" alt="示例demo截图"><br>从上面截图中红色方框圈起来的这部分音频，明显音量要弱一点（音量大小，直观的可以从波形的宽幅体现）<br>此时我们鼠标左键选中这部分音频后，就像下图所示：<br><img data-src="7a4fe646/AutoCapture_2020-05-04_003156.jpg" alt="选择音频片段"><br>注意图中，多出来一个小Tip窗口，这个窗口叫：<strong>平视显示器（HUD）</strong>，可以通过视图菜单下的“显示HUD”或者快捷键：${label primary@Shift + U%}，来控制这个显示器的显示与否<br><strong>紧接着，可以通过在HUB窗口中的旋钮或者音量波形，旋动来改变音量大小</strong></p>
+<h3 id="剪切过程"><a href="#剪切过程" class="headerlink" title="剪切过程"></a>剪切过程</h3><p>在定义一段波形的时候，如果截取的边界其电平值不是0，则在播放时可能引起卡塔声。如下图所示。<br><img data-src="7a4fe646/over_past_zero.jpg" alt="过零场景"><br>如果边界恰好穿过零点，即波形的电平值由正到负或者由负到正的位置。这种情况下没有明显的电平变化，所以不会有明显的咔嗒声。就像这样：<br><img data-src="7a4fe646/AutoCapture_2020-05-04_095830.jpg" alt="不过零场景"><br><strong>在AU中，“编辑-&gt;过零”菜单，可以让AU自动选择优化区域边界</strong></p>
+<h4 id="多剪贴板应用"><a href="#多剪贴板应用" class="headerlink" title="多剪贴板应用"></a>多剪贴板应用</h4><p>在AU中可以通过设置当前剪贴板，来实现同时剪贴多段文件的应用。<br><img data-src="7a4fe646/AutoCapture_2020-05-04_103244.jpg" alt="多剪贴板菜单"></p>
+<h4 id="延长或缩短音乐选取"><a href="#延长或缩短音乐选取" class="headerlink" title="延长或缩短音乐选取"></a>延长或缩短音乐选取</h4><h5 id="对齐功能"><a href="#对齐功能" class="headerlink" title="对齐功能"></a>对齐功能</h5><p>在菜单“编辑-&gt;对齐”下，有几个选项，这个对齐的主要功能是：<em>使得在选择相邻标记间的音频时，标记具有模拟“磁场”的吸附功能，把靠近标记的选区边界直接吸附到标记处</em>。<br>菜单如下所示：<br><img data-src="7a4fe646/AutoCapture_2020-05-04_103840.jpg" alt="对齐菜单"><br>默认情况下都是开启的，至少得：开启对齐功能和“对齐到标记”这两项，才会出现吸附的效果。具体演示如下图所示：<br><img data-src="7a4fe646/adsorption.gif" alt="吸附效果演示"></p>
+<h4 id="混合粘贴"><a href="#混合粘贴" class="headerlink" title="混合粘贴"></a>混合粘贴</h4><p>有时候我们需要在当前音轨粘贴外部的音频文件，此时就要用到混合粘贴的场景。<br>在复制好一段音频之后，回到待处理的音频界面，通过打开菜单：“编辑&gt;混合粘贴”（快捷键：Ctrl+Shift+V）,打开混合粘贴对话框。<br><img data-src="7a4fe646/AutoCapture_2020-05-04_105540.jpg" alt="混合粘贴对话框"><br><strong>注意</strong>，在这张图中，是要从标记02处插入复制的音频片段。<br>在混合粘贴对话框中：</p>
+<ul>
+<li>音量区域，可以设置针对剪贴板中的音频和现有的音频音量选项</li>
+<li>粘贴类型，则是针对当前剪贴板中的音频片段不同的处理选项<ul>
+<li>插入就是在当前选择处插入</li>
+<li>重叠（混合）：在当前选择处，以相同的剪贴板长度混合覆盖当前音频（注：你可以理解为多轨混缩）。</li>
+<li>覆盖：就是以相同的长度替换原有音频</li>
+<li>调制：使复制的音频改变现有的音频的波形，同时还将两个文件混合。（注：老实讲，还不知道这个有什么用，盲猜可能在一些高级的音频效果中可能会用到）</li>
+</ul>
+</li>
+</ul>
+<p><img data-src="7a4fe646/AutoCapture_2020-05-04_105643.jpg" alt="插入后的音频图"><br><img data-src="7a4fe646/AutoCapture_2020-05-04_110847.jpg" alt="重叠（混合）后的音频图"><br><img data-src="7a4fe646/AutoCapture_2020-05-04_110904.jpg" alt="覆盖后的音频图"><br><img data-src="7a4fe646/AutoCapture_2020-05-04_110913.jpg" alt="调制后的音频图"><br>从上面几个操作后的音频图来看，覆盖跟调制很像，但是实际调制的过程比覆盖要跟复杂一点。“调和”过了，而不是单单的覆盖。<br>在教程中，同样提到了：<br>调整复制音频与现有音频的混合，是为了避免失真。如果视图将两个音频都以100%或者最大音量混合，必须将每一个音频音量降低至少50%来避免失真，否则混合后的电平将超出可用的最大限值。</p>
+<h4 id="重复波形的一部分创建一个循环乐段"><a href="#重复波形的一部分创建一个循环乐段" class="headerlink" title="重复波形的一部分创建一个循环乐段"></a>重复波形的一部分创建一个循环乐段</h4><p>许多时候，很多音乐元素都是重复的。循环乐段是一段自身不断重复的乐曲，如鼓节奏等等。<br>在选取创建循环乐段前，为了方便听取，可以打开传输面板中的“循环播放”按钮，快捷键：Ctrl+L（Loop）<br><img data-src="7a4fe646/AutoCapture_2020-05-04_111824.jpg" alt="传输面板中的循环播放按钮"><br>开启后，你就可以选取你想要循环的片段。<br>选取好之后，你可以通过：</p>
+<ul>
+<li>“编辑&gt;复制到新文件”，快捷键：Ctrl+Alt+C(Shift + Option + C)，来将选区的片段复制到新的编辑器中</li>
+<li>“编辑&gt;另存为”，直接将选区片段另存为文件</li>
+<li>也可以通过“文件&gt;将选区保存为”，可以立刻将选区保存在独立文件到本地磁盘上</li>
+</ul>
+<h4 id="淡入淡出效果"><a href="#淡入淡出效果" class="headerlink" title="淡入淡出效果"></a>淡入淡出效果</h4><p>在主编辑区的左右上角，分别有一个小三角的图片，这俩图标分别控制音频的淡入淡出效果。如下图所示：<br><img data-src="7a4fe646/AutoCapture_2020-05-04_113013.jpg" alt="淡入操作按钮"><br>通过拖动改按钮可以改变当前音频的淡入，淡出实现。</p>
+<h3 id="信号处理"><a href="#信号处理" class="headerlink" title="信号处理"></a>信号处理</h3><p>在信号处理器中，可以有很多种方法使得音频更为“平滑”：音道均衡，动态调整，添加环绕或者特殊效果等。<br>注：这一章内容中，具体探索多种效果器的实践。是个重点。更多的可能是需要积累不同效果的直观的感受吧，从理论上可能，如果不寻找一些专业资料，可能是搞不懂具体的效果实际能带来感受是什么。最直接的，还是感受。</p>
+<h4 id="使用效果组"><a href="#使用效果组" class="headerlink" title="使用效果组"></a>使用效果组</h4><p>效果组允许创建一个效果链，可以加载多达16种效果。</p>
+<h5 id="增益配置（Gain-staging）效果"><a href="#增益配置（Gain-staging）效果" class="headerlink" title="增益配置（Gain-staging）效果"></a>增益配置（Gain-staging）效果</h5><p>有时候，串联多个效果会导致某种程度的频率“叠加”，可能使得电平值超过允许限值。例如，强化中频的滤波器可能使得电平超出可用的范围而导致失真。<br>如下图所示，就是打开了“参数均衡器效果”，并配置了图中，标记为3的小方块，拖动到顶端之后，也就是中频增益拉到最大后导致的输出失真。<br>失真的一个直观表现是：在效果组的“输出”仪表的红色过载指示灯会一直闪亮。<br><img data-src="7a4fe646/distortion.gif" alt="配置参数均衡器后的失真场景"><br>解决方法：</p>
+<ul>
+<li>调整主动增益的范围</li>
+<li>降低“输入”电平，直到波形的极大值不再触发红色失真指示灯。</li>
+</ul>
+<h5 id="调整效果的干声-湿声混合"><a href="#调整效果的干声-湿声混合" class="headerlink" title="调整效果的干声/湿声混合"></a>调整效果的干声/湿声混合</h5><p>未经处理的信号为“干声”，添加效果的信号为“湿声”。相对于单纯的“干声”信号或者“湿声”信号，跟多的时候是两者的混合。<br>上一个小节中提到的两种处理失真信号的方法，这里也可以通过调整干/湿声信号的比重来减弱效果的输出。如下图所示：<br><img data-src="7a4fe646/AutoCapture_2020-05-04_150708.jpg" alt="效果组中的混合控制条"></p>
+<h3 id="振幅与压限效果"><a href="#振幅与压限效果" class="headerlink" title="振幅与压限效果"></a>振幅与压限效果</h3><p>振幅与压限效果可以改变电平或调整动态。</p>
+<h4 id="增幅"><a href="#增幅" class="headerlink" title="增幅"></a>增幅</h4><p>“增幅”使声音更响亮或更柔和。要通过增加振幅的方式使音频声音变得更大，那么需要选择一个<strong>较低放大率</strong>，低到是的文件保持不失真。<br>“增幅”菜单：效果组中的“振幅与压限&gt;增幅”，如下图所示：<br><img data-src="7a4fe646/AutoCapture_2020-05-04_151301.jpg" alt="增幅调制窗口"><br>其中“链接滑块”勾选与否，表示是否需要同时改变左右声道的增益，如果不勾选则可以针对左右声道单独调整，反之则是同时变动。</p>
+<h5 id="声道混合器"><a href="#声道混合器" class="headerlink" title="声道混合器"></a>声道混合器</h5><p>“声道混合器”调整左声道与右声道信号在左右声道的播放量。可用于立体声到单声道的转换，以及对调左右声道的信号。<br>“声道混合器”菜单：“振幅与压限&gt;声道混合器”<br><img data-src="7a4fe646/AutoCapture_2020-05-04_152834.jpg" alt="配置左声道输出为0，转变为右单声道"><br>在配置中的一个预设：所有声道50%，这是一个将立体声声道转化为单声道的操作。如下图所示：<br><img data-src="7a4fe646/AutoCapture_2020-05-04_153745.jpg" alt="立体声转单声道"><br>注：在课程中的这个demo：Drum+Bass+Arp110.wav中，很难听出有什么具体实质性的变化。但是可以从下面两个细节观察一下</p>
+<ul>
+<li>先观察一下原始音频<br><img data-src="7a4fe646/AutoCapture_2020-05-04_153836.jpg" alt="立体声音频"><br>左右声道是不同的</li>
+<li>当我们通过声道混合器设置所有都50%之后，看一下效果组中“输出”电平，变得一致了，这点也能很明显看出来变成单声道了。看下面两段GIF，设置前后的变化就能看出<br><img data-src="7a4fe646/channel_mixed_before.gif" alt="转换前"><br><img data-src="7a4fe646/channel_mixed_after.gif" alt="转换后"><br>从转换后的“输入”与“输出”两个电平也能直接看出来变化</li>
+</ul>
+<h4 id="消除齿音（DeEsser）"><a href="#消除齿音（DeEsser）" class="headerlink" title="消除齿音（DeEsser）"></a>消除齿音（DeEsser）</h4><p>消除齿音由三个步骤构成：确定齿音存在的频率，定义范围，然后设定一个阈值，如果齿音超过了阈值，则会自动降低其增益到指定的范围内。使得齿音变得不那么冲突</p>
+<h5 id="什么是齿音？"><a href="#什么是齿音？" class="headerlink" title="什么是齿音？"></a>什么是齿音？</h5><p>在英语中，例如: “s”, “z”, “ch”, “j” 和 “sh”这些发音<sup>[1]</sup>，汉语拼音中，例如：zhi、chi、hi、zi、ci、iquo这些发音。这些发音多半会经过舌尖在上门牙和下门牙之间。这些音频的介于2-10kHz不等，取决于个人语音程度。<br>而在一段音频中，频繁出现这类音，尤其是在使用耳塞或者耳机时，会干扰经过调制的令人愉悦的音频，进而影响整个收听的感受。<br>那么消除齿音，就是通过某种方法，动态的去解析并最大化消除<strong>过度出现的齿音</strong></p>
+<p>“消除齿音” 菜单：“振幅与压限&gt;消除齿音”<br>如下图所示：在这段音频的播放过程中，发现最高峰值达到了-10db（10kHz）左右。这个就表明了，这段音频中，齿音还是很高的。<br><img data-src="7a4fe646/AutoCapture_2020-05-04_161645.jpg" alt="峰值齿音效果"><br>在这个过程中，可以通过降低“阈值”、改变“带宽”后，微调“中置频率”来达到“消除齿音”的效果<br>注：在实际操作的时候，可能是由于提供的范例并不能完整体现消除齿音后，有多少效果。老实说：我并没有听出来有多少变化。</p>
+<h4 id="动态处理"><a href="#动态处理" class="headerlink" title="动态处理"></a>动态处理</h4><p>对于一个标准的放大器，其输入与输出之间的关系是线性的。如果增益是1，则输出信号与输入信号相同。如果增益为2，则输出信号的电平是输入信号电平的两倍，无论输入信号电平是多大。<br><strong>动态处理</strong>效果就是改变输入输出的线性关系。</p>
+<h5 id="压限与扩展的概念"><a href="#压限与扩展的概念" class="headerlink" title="压限与扩展的概念"></a>压限与扩展的概念</h5><p>当输入信号的大幅增加转换为输出信号的小幅增加时，这种变化称为“压限”<br>当输入信号的小幅增加转换为输出信号的大幅增加时，这种变为称为“扩展”。<br>两种模式可以同时存在，可以在一个电平区间内扩展信号，在另一个电平区间内压缩信号。<br>压限器使人们主观上感觉声音更加突出；扩展器用的倒不是很普遍，主要用于放大令人厌恶的低电平信号（如嘶嘶声），进一步降低其电平值。</p>
+<p>示例中的一个设置，主要是突出音频中的鼓声听起来，更加有力量，如下图所示：<br><img data-src="7a4fe646/AutoCapture_2020-05-04_164224.jpg" alt="动态处理过程"><br>注：这个处理过程，很复杂，现在也就是听个响，大概知道是怎么回事。具体能搞出什么花样，得慢慢实践。</p>
+<h4 id="单段压限器"><a href="#单段压限器" class="headerlink" title="单段压限器"></a>单段压限器</h4><p>“单段压限器”是一个用于动态区域压缩的“经典”压限器，可用于了解压限器的工作流程。<br>压限器改变输出信号与输入信号之间的关系。两个最重要的参数是“阈值”（电平高于此值压限器开始工作）和“比例”（用于设置输出信号变化与输入信号变化的关系）。例如：比例为4:1时，4dB的输入增幅产生1dB的输出增幅。<br>“单段压限器”菜单：“振幅与压限&gt;单频段压限器”<br>注：太菜，没啥好电平的，找一段音频素材，完了挨个预设效果体验一哈便是。但是有一个效果，表示还真体验到一个场景，预设中的“画外音”，很明显录旁白的时候，如果需要用到BGM，是可以这么做的。</p>
+<h4 id="电子管压限器"><a href="#电子管压限器" class="headerlink" title="电子管压限器"></a>电子管压限器</h4><p>跟单段类似</p>
+<h4 id="多段压限器"><a href="#多段压限器" class="headerlink" title="多段压限器"></a>多段压限器</h4><p>“多段压限器”是对单段的一个扩充，将频谱分为四段，每一段都有自己的压限器。因此，可以实现对不同的部分进行不同程度的压缩，例如对低频部分视角较多的压缩，而对中频上半段仅施加适量的压缩。<br>注：整体配置比较复杂，但是，每段的限制器都提供了S（独奏）的按钮。可以在实践的时候，通过改变预设完了只独奏一段，来体会不同预设之间的差距。<br>如下面两端GIF所示：一个是默认预设（图中显示成自定义了），另外一种是广播的预设。<br><img data-src="7a4fe646/muti_compassor_default.gif" alt="多段压限器示例_默认预设"><br><img data-src="7a4fe646/muti_compassor_radio.gif" alt="多段压限器示例_广播预设"><br>都同时只独奏了低音段的压限器，<strong>很明显能感觉到，广播预设在低音这块的增益要比默认强，最明显的感觉就是在广播预设下的低音区，输出要更底，更沉</strong><br>具体的，必须上手去体验一把就能感受到了</p>
+<h3 id="补充"><a href="#补充" class="headerlink" title="补充"></a>补充</h3><p><img data-src="7a4fe646/1.gif" alt="测试GIF"></p>
+<h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><p>[1] De-essing:[EB/OL]. 2020. <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/De-essing">https://en.wikipedia.org/wiki/De-essing</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/7a4fe646.html" title="Adobe Audition不完整教程">https://nimbusk.cc/post/7a4fe646.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E9%9F%B3%E9%A2%91%E5%89%AA%E8%BE%91/" rel="tag"># 音频剪辑</a>
+              <a href="/tags/%E5%89%AA%E8%BE%91%E5%B7%A5%E5%85%B7/" rel="tag"># 剪辑工具</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/667d5e1a.html" rel="prev" title="B站-半佛仙人-谁才是手机圈里最扫的钢铁直男">
+                  <i class="fa fa-angle-left"></i> B站-半佛仙人-谁才是手机圈里最扫的钢铁直男
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/f890a94d.html" rel="next" title="VLOG观摩学习">
+                  VLOG观摩学习 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"057ce530521d580e103b403c5302f6d1"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

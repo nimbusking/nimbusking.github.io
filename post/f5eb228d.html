@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Spring概述Spring IOCSpringBean生命周期大体分为5个大的步骤，如下图所示： 一些杂项问题构造器注入和Setter注入构造器注入：通过构造器的参数注入相关依赖对象Setter注入：通过 Setter 方法注入依赖对象，也可以理解为字段注入对于两种注入方式的看法：  构造器注入可以避免一些尴尬的问题，比如说状态不确定性地被修改，在初始化该对象时才会注入依赖对象，一定程度上保证了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="细磕Spring点滴">
+<meta property="og:url" content="https://nimbusk.cc/post/f5eb228d.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="Spring概述Spring IOCSpringBean生命周期大体分为5个大的步骤，如下图所示： 一些杂项问题构造器注入和Setter注入构造器注入：通过构造器的参数注入相关依赖对象Setter注入：通过 Setter 方法注入依赖对象，也可以理解为字段注入对于两种注入方式的看法：  构造器注入可以避免一些尴尬的问题，比如说状态不确定性地被修改，在初始化该对象时才会注入依赖对象，一定程度上保证了">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/f5eb228d/SpringBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.jpg">
+<meta property="article:published_time" content="2024-11-07T08:33:54.000Z">
+<meta property="article:modified_time" content="2024-11-07T08:33:54.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="Spring全家桶">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/f5eb228d/SpringBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/f5eb228d.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/f5eb228d.html","path":"post/f5eb228d.html","title":"细磕Spring点滴"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>细磕Spring点滴 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">Spring概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-IOC"><span class="nav-number">2.</span> <span class="nav-text">Spring IOC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SpringBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="nav-number">2.1.</span> <span class="nav-text">SpringBean生命周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E4%BA%9B%E6%9D%82%E9%A1%B9%E9%97%AE%E9%A2%98"><span class="nav-number">2.2.</span> <span class="nav-text">一些杂项问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%84%E9%80%A0%E5%99%A8%E6%B3%A8%E5%85%A5%E5%92%8CSetter%E6%B3%A8%E5%85%A5"><span class="nav-number">2.2.1.</span> <span class="nav-text">构造器注入和Setter注入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Spring%E5%86%85%E5%BB%BA%E7%9A%84Bean%E4%BD%9C%E7%94%A8%E5%9F%9F"><span class="nav-number">2.2.2.</span> <span class="nav-text">Spring内建的Bean作用域</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#BeanPostProcessor%E4%B8%8EBeanFactoryPostProcessor%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.2.3.</span> <span class="nav-text">BeanPostProcessor与BeanFactoryPostProcessor的区别</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%9F%BA%E4%BA%8E-Extensible-XML-authoring-%E6%89%A9%E5%B1%95-Spring-XML-%E5%85%83%E7%B4%A0"><span class="nav-number">2.2.4.</span> <span class="nav-text">如何基于 Extensible XML authoring 扩展 Spring XML 元素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AE%80%E8%BF%B0-Spring-%E4%BA%8B%E4%BB%B6%E6%9C%BA%E5%88%B6%E5%8E%9F%E7%90%86"><span class="nav-number">2.2.5.</span> <span class="nav-text">简述 Spring 事件机制原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#EventListener%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.2.6.</span> <span class="nav-text">@EventListener的工作原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Spring-%E6%8F%90%E4%BE%9B%E7%9A%84%E6%B3%A8%E8%A7%A3"><span class="nav-number">2.2.7.</span> <span class="nav-text">Spring 提供的注解</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringMVC"><span class="nav-number">3.</span> <span class="nav-text">SpringMVC</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringBoot"><span class="nav-number">4.</span> <span class="nav-text">SpringBoot</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SpringCloud"><span class="nav-number">5.</span> <span class="nav-text">SpringCloud</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring%E5%85%B6%E5%AE%83%E7%9B%B8%E5%85%B3"><span class="nav-number">6.</span> <span class="nav-text">Spring其它相关</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/f5eb228d.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="细磕Spring点滴 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          细磕Spring点滴
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2024-11-07 08:33:54" itemprop="dateCreated datePublished" datetime="2024-11-07T08:33:54+00:00">2024-11-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Spring/" itemprop="url" rel="index"><span itemprop="name">Spring</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="Spring概述"><a href="#Spring概述" class="headerlink" title="Spring概述"></a>Spring概述</h2><h2 id="Spring-IOC"><a href="#Spring-IOC" class="headerlink" title="Spring IOC"></a>Spring IOC</h2><h3 id="SpringBean生命周期"><a href="#SpringBean生命周期" class="headerlink" title="SpringBean生命周期"></a>SpringBean生命周期</h3><p>大体分为5个大的步骤，如下图所示：<br><img data-src="f5eb228d/SpringBean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.jpg" alt="SpringBean生命周期"></p>
+<h3 id="一些杂项问题"><a href="#一些杂项问题" class="headerlink" title="一些杂项问题"></a>一些杂项问题</h3><h4 id="构造器注入和Setter注入"><a href="#构造器注入和Setter注入" class="headerlink" title="构造器注入和Setter注入"></a>构造器注入和Setter注入</h4><p><strong>构造器注入</strong>：通过构造器的参数注入相关依赖对象<br><strong>Setter注入</strong>：通过 Setter 方法注入依赖对象，也可以理解为字段注入<br>对于两种注入方式的看法：</p>
+<ul>
+<li><strong>构造器注入可以避免一些尴尬的问题</strong>，比如说状态不确定性地被修改，在初始化该对象时才会注入依赖对象，一定程度上保证了 Bean 初始化后就是不变的对象，这样对于我们的程序和维护性都会带来更多的便利；</li>
+<li><strong>构造器注入不允许出现循环依赖</strong>，因为它要求被注入的对象都是成熟态，保证能够实例化，而 <strong>Setter 注入或字段注入没有这样的要求</strong>；</li>
+<li><strong>构造器注入可以保证依赖的对象能够有序的被注入</strong>，而 Setter注入或字段注入底层是通过反射机制进行注入，无法完全保证注入的顺序；</li>
+<li><strong>如果构造器注入出现比较多的依赖</strong>导致代码不够优雅，我们应该<strong>考虑自身代码的设计是否存在问题</strong>，是否需要重构代码结构。</li>
+</ul>
+<p>除了上面的注入方式外，Spring 还提供了接口回调注入，通过实现 Aware 接口（例如 BeanNameAware、ApplicationContextAware）可以注入相关对象，Spring 在初始化这类 Bean 时会调用其 setXxx 方法注入对象，例如注入 beanName、ApplicationContext等。</p>
+<h4 id="Spring内建的Bean作用域"><a href="#Spring内建的Bean作用域" class="headerlink" title="Spring内建的Bean作用域"></a>Spring内建的Bean作用域</h4><table>
+<thead>
+<tr>
+<th>来源</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>singleton</td>
+<td align="center">默认 Spring Bean 作用域，一个 BeanFactory 有且仅有一个实例</td>
+</tr>
+<tr>
+<td>prototype</td>
+<td align="center">原型作用域，每次依赖查找和依赖注入生成新 Bean 对象</td>
+</tr>
+<tr>
+<td>request</td>
+<td align="center">将 Spring Bean 存储在 ServletRequest 上下文中</td>
+</tr>
+<tr>
+<td>session</td>
+<td align="center">将 Spring Bean 存储在 HttpSession 中</td>
+</tr>
+<tr>
+<td>application</td>
+<td align="center">将 Spring Bean 存储在 ServletContext 中</td>
+</tr>
+</tbody></table>
+<h4 id="BeanPostProcessor与BeanFactoryPostProcessor的区别"><a href="#BeanPostProcessor与BeanFactoryPostProcessor的区别" class="headerlink" title="BeanPostProcessor与BeanFactoryPostProcessor的区别"></a>BeanPostProcessor与BeanFactoryPostProcessor的区别</h4><ul>
+<li>BeanPostProcessor 提供 Spring Bean <strong>初始化前和初始化后的生命周期回调</strong>，允许对关心的 Bean 进行扩展，甚至是替换，其相关子类也提供 Spring Bean 生命周期中其他阶段的回调。</li>
+<li>BeanFactoryPostProcessor 提供 Spring <strong>BeanFactory（底层 IoC 容器）的生命周期的回调</strong>，用于扩展 BeanFactory（实际为 ConfigurableListableBeanFactory），BeanFactoryPostProcessor 必须由 Spring ApplicationContext 执行，BeanFactory 无法与其直接交互。</li>
+</ul>
+<h4 id="如何基于-Extensible-XML-authoring-扩展-Spring-XML-元素"><a href="#如何基于-Extensible-XML-authoring-扩展-Spring-XML-元素" class="headerlink" title="如何基于 Extensible XML authoring 扩展 Spring XML 元素"></a>如何基于 Extensible XML authoring 扩展 Spring XML 元素</h4><p>对Spring XML扩展</p>
+<ol>
+<li><strong>编写 XML Schema 文件（XSD 文件）</strong>：定义 XML 结构</li>
+<li><strong>自定义 NamespaceHandler 实现</strong>：定义命名空间的处理器</li>
+<li><strong>自定义 BeanDefinitionParser 实现</strong>：绑定命名空间下不同的 XML 元素与其对应的解析器</li>
+<li><strong>注册 XML 扩展（META-INF/spring.handlers 文件）</strong>：命名空间与命名空间处理器的映射</li>
+<li><strong>编写 Spring Schema 资源映射文件（META-INF/spring.schemas 文件）</strong>：XML Schema 文件通常定义为网络的形式，在无网的情况下无法访问，所以一般在本地的也有一个 XSD 文件，可通过编写 spring.schemas 文件，将网络形式的 XSD 文件与本地的 XSD 文件进行映射，这样会优先从本地获取对应的 XSD 文件<br>Mybatis 对 Spring 的集成项目中的 <code>&lt;mybatis:scan /&gt; </code>标签就是这样实现的，可以参考：NamespaceHandler、MapperScannerBeanDefinitionParser、XSD 等文件</li>
+</ol>
+<h4 id="简述-Spring-事件机制原理"><a href="#简述-Spring-事件机制原理" class="headerlink" title="简述 Spring 事件机制原理"></a>简述 Spring 事件机制原理</h4><p>一个典型的观察者模式的应用<br>在Spring中实现，首先主要有以下几个角色：</p>
+<ul>
+<li><strong>Spring 事件</strong> - org.springframework.context.ApplicationEvent，实现了 java.util.EventListener 接口</li>
+<li><strong>Spring 事件监听器</strong> - org.springframework.context.ApplicationListener，实现了 java.util.EventObject 类</li>
+<li><strong>Spring 事件发布器</strong> - org.springframework.context.ApplicationEventPublisher</li>
+<li><strong>Spring 事件广播器</strong> - org.springframework.context.event.ApplicationEventMulticaster<br>Spring有4个内建的事件：</li>
+<li>ContextRefreshedEvent：Spring 应用上下文就绪事件</li>
+<li>ContextStartedEvent：Spring 应用上下文启动事件</li>
+<li>ContextStoppedEvent：Spring 应用上下文停止事件</li>
+<li>ContextClosedEvent：Spring 应用上下文关闭事件</li>
+</ul>
+<p>Spring 应用上下文就是一个 ApplicationEventPublisher 事件发布器，其内部有一个 ApplicationEventMulticaster 事件广播器（被观察者），里面保存了所有的 ApplicationListener 事件监听器（观察者）。<br>Spring 应用上下文发布一个事件后会通过 ApplicationEventMulticaster 事件广播器进行广播，能够处理该事件类型的 ApplicationListener 事件监听器则进行处理。</p>
+<h4 id="EventListener的工作原理"><a href="#EventListener的工作原理" class="headerlink" title="@EventListener的工作原理"></a>@EventListener的工作原理</h4><p><strong>@EventListener 用于标注在方法上面，该方法则可以用来处理 Spring 的相关事件。</strong><br>Spring 内部有一个处理器 EventListenerMethodProcessor，它实现了 SmartInitializingSingleton 接口，在所有的 Bean（不是抽象、单例模式、不是懒加载方式）初始化后，Spring 会再次遍历所有初始化好的单例 Bean 对象时会执行该处理器对该 Bean 进行处理。在 EventListenerMethodProcessor 中会对标注了 @EventListener 注解的方法进行解析，如果符合条件则生成一个 ApplicationListener 事件监听器并注册。</p>
+<h4 id="Spring-提供的注解"><a href="#Spring-提供的注解" class="headerlink" title="Spring 提供的注解"></a>Spring 提供的注解</h4><p>大致分为5类：</p>
+<ol>
+<li><p>Spring 模式注解</p>
+<table>
+<thead>
+<tr>
+<th>Spring 注解</th>
+<th align="center">场景说明</th>
+<th align="center">起始版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@Repository</td>
+<td align="center">数据仓储模式注解</td>
+<td align="center">2.0</td>
+</tr>
+<tr>
+<td>@Component</td>
+<td align="center">通用组件模式注解</td>
+<td align="center">2.5</td>
+</tr>
+<tr>
+<td>@Service</td>
+<td align="center">服务模式注解</td>
+<td align="center">2.5</td>
+</tr>
+<tr>
+<td>@Controller</td>
+<td align="center">Web 控制器模式注解</td>
+<td align="center">2.5</td>
+</tr>
+<tr>
+<td>@Configuration</td>
+<td align="center">配置类模式注解</td>
+<td align="center">3.0</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>装配注解</p>
+<table>
+<thead>
+<tr>
+<th>Spring 注解</th>
+<th align="center">场景说明</th>
+<th align="center">起始版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@ImportResource</td>
+<td align="center">替换 XML 元素 <import></td>
+<td align="center">2.5</td>
+</tr>
+<tr>
+<td>@Import</td>
+<td align="center">导入 Configuration 类</td>
+<td align="center">2.5</td>
+</tr>
+<tr>
+<td>@ComponentScan</td>
+<td align="center">扫描指定 package 下标注 Spring 模式注解的类</td>
+<td align="center">3.1</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>依赖注入注解</p>
+<table>
+<thead>
+<tr>
+<th>Spring 注解</th>
+<th align="center">场景说明</th>
+<th align="center">起始版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@Autowired</td>
+<td align="center">Bean 依赖注入，支持多中依赖查找方式</td>
+<td align="center">2.5</td>
+</tr>
+<tr>
+<td>@Qualifier</td>
+<td align="center">细粒度的 @Autowired 依赖查找</td>
+<td align="center">2.5</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>@Enable 模块驱动</p>
+<table>
+<thead>
+<tr>
+<th>Spring 注解</th>
+<th align="center">场景说明</th>
+<th align="center">起始版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@EnableWebMvc</td>
+<td align="center">启动整个 Web MVC 模块</td>
+<td align="center">3.1</td>
+</tr>
+<tr>
+<td>@EnableTransactionManagement</td>
+<td align="center">启动整个事务管理模块</td>
+<td align="center">3.1</td>
+</tr>
+<tr>
+<td>@EnableCaching</td>
+<td align="center">启动整个缓存模块</td>
+<td align="center">3.1</td>
+</tr>
+<tr>
+<td>@EnableAsync</td>
+<td align="center">启动整个异步处理模块</td>
+<td align="center">3.1</td>
+</tr>
+</tbody></table>
+</li>
+</ol>
+<p>@Enable 模块驱动是以 @Enable 为前缀的注解驱动编程模型。所谓“模块”是指具备相同领域的功能组件集合，组合所形成一个独立的单元。比如 Web MVC 模块、AspectJ 代理模块、Caching（缓存）模块、JMX（Java 管理扩展）模块、Async（异步处理）模块等。<br><strong>这类注解底层原理就是通过 @Import 注解导入相关类（Configuration Class、 ImportSelector 接口实现、ImportBeanDefinitionRegistrar 接口实现），来实现引入某个模块或功能。</strong></p>
+<ol start="5">
+<li>条件注解<table>
+<thead>
+<tr>
+<th>Spring 注解</th>
+<th align="center">场景说明</th>
+<th align="center">起始版本</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@Conditional</td>
+<td align="center">条件限定，引入某个 Bean</td>
+<td align="center">4.0</td>
+</tr>
+<tr>
+<td>@Profile</td>
+<td align="center">从 Spring 4.0 开始，@Profile 基于 @Conditional 实现，限定 Bean 的 Spring 应用环境</td>
+<td align="center">4.0</td>
+</tr>
+</tbody></table>
+</li>
+</ol>
+<h2 id="SpringMVC"><a href="#SpringMVC" class="headerlink" title="SpringMVC"></a>SpringMVC</h2><h2 id="SpringBoot"><a href="#SpringBoot" class="headerlink" title="SpringBoot"></a>SpringBoot</h2><h2 id="SpringCloud"><a href="#SpringCloud" class="headerlink" title="SpringCloud"></a>SpringCloud</h2><h2 id="Spring其它相关"><a href="#Spring其它相关" class="headerlink" title="Spring其它相关"></a>Spring其它相关</h2>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/f5eb228d.html" title="细磕Spring点滴">https://nimbusk.cc/post/f5eb228d.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Spring%E5%85%A8%E5%AE%B6%E6%A1%B6/" rel="tag"># Spring全家桶</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/4a0d265b.html" rel="prev" title="Java8函数式编程原理剖析">
+                  <i class="fa fa-angle-left"></i> Java8函数式编程原理剖析
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"3025f26342a354fb687d9fd833ad4dee"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

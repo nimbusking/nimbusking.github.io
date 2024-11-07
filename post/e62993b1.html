@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="更新由于TravisCI不论公有开始私有仓库开启收费模式了，故而我选择放弃。本博客相关全部交付GitHub Actions自行托管编译了，相关教程请站内搜索GitHub Actions即可">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hexo与TravisCI持续集成">
+<meta property="og:url" content="https://nimbusk.cc/post/e62993b1.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="更新由于TravisCI不论公有开始私有仓库开启收费模式了，故而我选择放弃。本博客相关全部交付GitHub Actions自行托管编译了，相关教程请站内搜索GitHub Actions即可">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/e62993b1/bg2017121901.png">
+<meta property="og:image" content="https://nimbusk.cc/post/e62993b1/AutoCapture_2021-02-22_170448.png">
+<meta property="og:image" content="https://nimbusk.cc/post/e62993b1/AutoCapture_2021-02-22_154729.png">
+<meta property="og:image" content="https://nimbusk.cc/post/e62993b1/AutoCapture_2021-02-22_002857.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/e62993b1/AutoCapture_2021-02-22_154127.png">
+<meta property="og:image" content="https://nimbusk.cc/post/e62993b1/AutoCapture_2021-02-22_154416.png">
+<meta property="article:published_time" content="2021-02-21T22:18:07.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="站点">
+<meta property="article:tag" content="Hexo">
+<meta property="article:tag" content="TravisCI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/e62993b1/bg2017121901.png">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/e62993b1.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/e62993b1.html","path":"post/e62993b1.html","title":"Hexo与TravisCI持续集成"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Hexo与TravisCI持续集成 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0"><span class="nav-number">1.</span> <span class="nav-text">更新</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%BA%E5%95%A5%E6%88%91%E9%80%89%E6%8B%A9%E4%BA%86TravisCI"><span class="nav-number">2.1.</span> <span class="nav-text">为啥我选择了TravisCI</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">3.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E9%A1%BB%E7%9F%A5"><span class="nav-number">4.</span> <span class="nav-text">前置须知</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8ETravisCI"><span class="nav-number">4.1.</span> <span class="nav-text">关于TravisCI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E6%88%91%E7%9A%84%E7%AB%99%E7%82%B9%E7%BB%93%E6%9E%84"><span class="nav-number">4.2.</span> <span class="nav-text">关于我的站点结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E4%BA%8EHexo%E4%B8%8ETravisCI%E9%9B%86%E6%88%90"><span class="nav-number">4.3.</span> <span class="nav-text">关于Hexo与TravisCI集成</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B3%A8%E6%84%8F"><span class="nav-number">4.3.1.</span> <span class="nav-text">注意</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%92%E6%9B%B2"><span class="nav-number">4.3.2.</span> <span class="nav-text">插曲</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">5.</span> <span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%86%E6%88%90%E6%AD%A5%E9%AA%A4"><span class="nav-number">6.</span> <span class="nav-text">集成步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E4%B8%80%E4%B8%AA%E7%A9%BA%E9%A1%B9%E7%9B%AE"><span class="nav-number">6.1.</span> <span class="nav-text">初始化一个空项目</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8B%B7%E8%B4%9D%E6%BA%90%E6%96%87%E4%BB%B6"><span class="nav-number">6.2.</span> <span class="nav-text">拷贝源文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E4%B8%AD%E7%9A%84%E6%95%8F%E6%84%9F%E4%BF%A1%E6%81%AF"><span class="nav-number">6.3.</span> <span class="nav-text">修改配置文件中的敏感信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8A%E4%BC%A0%E6%BA%90%E6%96%87%E4%BB%B6%E5%88%B0master%E5%88%86%E6%94%AF"><span class="nav-number">6.4.</span> <span class="nav-text">上传源文件到master分支</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90GitHub-Token"><span class="nav-number">6.5.</span> <span class="nav-text">生成GitHub Token</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AETravisCI%E8%B4%A6%E5%8F%B7"><span class="nav-number">6.6.</span> <span class="nav-text">配置TravisCI账号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE-travis-yml%E6%96%87%E4%BB%B6"><span class="nav-number">6.7.</span> <span class="nav-text">配置.travis.yml文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E7%82%B9%E4%B8%8D%E4%B8%80%E6%A0%B7%E7%9A%84%E4%BF%AE%E6%94%B9"><span class="nav-number">6.8.</span> <span class="nav-text">一点不一样的修改</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E6%83%85%E5%86%B5"><span class="nav-number">6.9.</span> <span class="nav-text">异常情况</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%81%87%E5%88%B0Could-not-authorize-build-request%E9%94%99%E8%AF%AF"><span class="nav-number">6.9.1.</span> <span class="nav-text">遇到Could not authorize build request错误</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">7.</span> <span class="nav-text">结语</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%84%E4%BB%B6"><span class="nav-number">8.</span> <span class="nav-text">附件</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/e62993b1.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Hexo与TravisCI持续集成 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Hexo与TravisCI持续集成
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-02-21 22:18:07" itemprop="dateCreated datePublished" datetime="2021-02-21T22:18:07+00:00">2021-02-21</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%AB%99%E7%82%B9/" itemprop="url" rel="index"><span itemprop="name">站点</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="更新"><a href="#更新" class="headerlink" title="更新"></a>更新</h2><p>由于TravisCI不论公有开始私有仓库开启收费模式了，故而我选择放弃。<br>本博客相关全部交付<strong>GitHub Actions</strong>自行托管编译了，相关教程请站内搜索GitHub Actions即可</p>
+<span id="more"></span>
+
+<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>Hexo个人博客满打满算也算是建站有2~3年了，原先自己的写作的方式是：</p>
+<ul>
+<li>有多平台协作的软件：例如为知笔记、iOS自带的备忘录、OneNote等等，这些多平台协作的软件，供自己日常写稿子所需。</li>
+<li>一个平台编译发布：家中的Windows台式机</li>
+<li>整个Hexo工程目录丢在OneDrive中同步</li>
+</ul>
+<p>这样的模式，存在几个问题：</p>
+<ul>
+<li>协作协作并不方便，其实根本没有做到随时随地编写发布到博客网站的可能</li>
+<li>一个平台编译：多平台编译其实可以，但是存在问题的是，也是之前碰到过的一种情况。<br>我在自己办公windows的备机上也搭建了Hexo环境，也能编译。也登录了同步OneDrive账号，同步了Hexo工程目录。也能编译，也能发布。但是由于某天，不知道什么鬼原因，两台电脑同步出了问题，导致OneDrive自己给所有文件通通重命名了，所有文件名称中加入了计算机名称，这个让我抓狂的。<br>后来就是全部删了，重新hexo init，重新搞了一遍。</li>
+<li>跨平台可能未必行：在windows编译的，跑到Mac或者Linux环境下编译，能不能搞定，这个还没试过。不过也能可想而知，会出奇怪的问题。</li>
+</ul>
+<h3 id="为啥我选择了TravisCI"><a href="#为啥我选择了TravisCI" class="headerlink" title="为啥我选择了TravisCI"></a>为啥我选择了TravisCI</h3><p>也正是因为上述主要的三个问题，导致了，必须得更新同步方式。原先想，自己在家中的服务器上，搭建编译环境，也不是不可以，说白了也就是写一个Shell脚本嘛。不过后来放弃了，<strong>最主要的一个问题是：文章怎么同步？</strong> 我换电脑，写的东西怎么同步到环境里？更别说，如果要用手机呢？<br>后来，在百度和Google找来找去，发现很多提到的一个持续集成的工具TravisCI。<br>在英文版的Hexo官网中，提到了很多现在一键部署的方式，有兴趣可以点击下方传送门：<br><a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment">https://hexo.io/docs/one-command-deployment</a></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><ul>
+<li>文中并没有提及相关git操作的命令，如果你还不是很熟悉，请请自行查找相关知识</li>
+<li>本文是针对已经对hexo使用相对熟悉的哈，如果你还未从未接触过hexo，请先了解一下hexo。</li>
+<li><strong>如果未来</strong>你发现按照我的方法集成有问题，不排除可能有语法更新了，组件更新了。如果你有疑问，可以在评论区留言，或者通过Email联系我，我第一时间有空的话，会帮你解答疑问。</li>
+</ul>
+<h2 id="前置须知"><a href="#前置须知" class="headerlink" title="前置须知"></a>前置须知</h2><h3 id="关于TravisCI"><a href="#关于TravisCI" class="headerlink" title="关于TravisCI"></a>关于TravisCI</h3><p>一句话解释Travis CI干嘛的，说白了就是一个在线编译环境，如果你玩过Jekins，这玩意儿就很好懂了。具体细节，真的建议，看官方文档就好。<br><a target="_blank" rel="noopener" href="https://docs.travis-ci.com/">https://docs.travis-ci.com/</a><br>挑一个你了解的开发语言，如Java、Python什么的，去看看示例就好了。<br><img data-src="e62993b1/bg2017121901.png" alt="官网logo"><br>灵性的大胡子，哈哈哈哈</p>
+<h3 id="关于我的站点结构"><a href="#关于我的站点结构" class="headerlink" title="关于我的站点结构"></a>关于我的站点结构</h3><ul>
+<li>文章托管自然是GitHub，仓库的名字就是：nimbusking.github.io。PS：别折腾自定义的仓库名字了，你要是改了，后面又要折腾不少配置，尤其是绑定了自定义域名的。</li>
+<li>绑定了一个自己的主站域名，就是你所见到的。</li>
+<li>主站开启了HTTPS，没自己折腾Nginx，于是我交给了<a target="_blank" rel="noopener" href="https://www.netlify.com/">Netlify</a>托管，Netlify证书是通过Let’s Encrypt自签的。严格意义上说，现在我的文章都是部署在Netlify的.</li>
+<li>域名DNS解析绑到了DNSPOD</li>
+<li>无CDN（未来也不会加，理由不解释）</li>
+<li>Hexo主题用的是<a target="_blank" rel="noopener" href="https://github.com/next-theme/hexo-theme-next">NexT</a>，版本8.2.1，新版本仓库已经迁移了，集成到npm了，而且主要使用了Numjucks<br>以上就是主要的一些情况的补充说明</li>
+<li>Hexo版本默认用的是最新的版本（直接由npm安装了）</li>
+<li>NodeJS由于沿用自己最初在Windows平台编译的版本，使用的12。</li>
+</ul>
+<h3 id="关于Hexo与TravisCI集成"><a href="#关于Hexo与TravisCI集成" class="headerlink" title="关于Hexo与TravisCI集成"></a>关于Hexo与TravisCI集成</h3><p>折腾了，差不多1天吧，才搞通了。中间在一个问题上纠结了很久，把遇到的主要情况，先行说明一下。<br>网上百度和Google中搜了很多，很多都试了，都是不行，无法编译通过。主要编译不通过的，放在下文的插曲中有相关说明。后来不经意在，Hexo韩文官网下藏了一篇关于TravisCI集成的文章（很奇怪，为毛英文主站没有？还好Google收录了，让我搜到了）。<br>文章地址：<a target="_blank" rel="noopener" href="https://hexo.io/ko/docs/github-pages.html">https://hexo.io/ko/docs/github-pages.html</a><br>怕日后没了，我离线了，在附件小结中可以查看。<br>其实最主要的问题就一个：<strong>让TravisCI拉取的仓库中放哪些文件？</strong>这点很多别人的文章中，并没有明确说明，其中也不乏有误导性的文章，导致我自己也是绕了好大一个弯。<br>这点在官网的文章里，其实有详细说明的：</p>
+<div class="note primary"><p>Push the files of your Hexo folder to the repository. The public/ folder is not (and should not be) uploaded by default, make sure the .gitignore file contains public/ line. The folder structure should be roughly similar to this repo, without the .gitmodules file</p>
+</div>
+<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p><strong>就是</strong>：除了public以及git相关的文件之外，全部push到仓库里。<br>你可以参考我的站点的master文章源文件目录结构：<a target="_blank" rel="noopener" href="https://github.com/nimbusking/nimbusking.github.io/tree/master">https://github.com/nimbusking/nimbusking.github.io/tree/master</a></p>
+<h4 id="插曲"><a href="#插曲" class="headerlink" title="插曲"></a>插曲</h4><p><em>有的文章中提到，只需要传.travis.yml,.config.yml,source，这三个就行了，我真心不知道那些文章中的作者提到的，是怎么hexo generate过的</em><br>我也是在这上面绕了很久，也真的这么做了，结果发现，插件什么都装了，结果到执行hexo generate的时候，死活就会报下面类似的问题：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Commands:</span><br><span class="line">help Get help on a command.</span><br><span class="line">init Create a new Hexo folder.</span><br><span class="line">version Display version information.</span><br><span class="line"></span><br><span class="line">Global Options:</span><br><span class="line">--config Specify config file instead of using _config.yml</span><br><span class="line">--cwd Specify the CWD</span><br><span class="line">--debug Display all verbose messages in the terminal</span><br><span class="line">--draft Display draft posts</span><br><span class="line">--safe Disable all plugins and scripts</span><br><span class="line">--silent Hide output on console</span><br></pre></td></tr></table></figure>
+
+<p>这个类似的提示，hexo没有给出具体的错误，但是结果就是呢，根本就不会生成编译后的public文件夹。后来，我自己在我本地windows上，就copy上面提到的仨文件，一模一样的遇到的提示。至此，说明这个是错误的。</p>
+<p>PS：后来，我在_travis.yml，中自己建了一个临时文件夹，完了写shell命令，先hexo init一个临时目录，完了手工copy source目录以及与hexo相关的配置文件。最后，我确实搞定了，可以自动编译通过，但是问题就是，每次都是全新生成的。</p>
+<p>插曲就先说到这里，具体正确的步骤，我会在下面那个集成步骤中详细说明。</p>
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><ul>
+<li><p>一个空的名为[username].github.io的仓库，其中username是你自己定义的名字</p>
+<ul>
+<li>上面这个仓库中，有俩分支：一个默认的master分支，一个gh-pages(你可以起别的名字，但是建议就用这个好了，官网也是这个)。</li>
+<li>自定义名称可以，但是一定要记住：<strong>master分支存放博客源文件，gh-pages存放最终hexo generate生成的public文件夹下的内容</strong></li>
+<li>你的这个仓库的GitHub Pages指定的分支要选择为：gh-pages，如下图所示：<br><img data-src="e62993b1/AutoCapture_2021-02-22_170448.png" alt="gh-pages"></li>
+</ul>
+</li>
+<li><p>绑定TravisCI在线账号：现在的官网是：<a target="_blank" rel="noopener" href="https://travis-ci.com/">https://travis-ci.com/</a></p>
+</li>
+</ul>
+<h2 id="集成步骤"><a href="#集成步骤" class="headerlink" title="集成步骤"></a>集成步骤</h2><p>git clone你的那个空[username].github.io项目到本地的某个目录下</p>
+<h3 id="初始化一个空项目"><a href="#初始化一个空项目" class="headerlink" title="初始化一个空项目"></a>初始化一个空项目</h3><p>没啥说的，cd到目录下，hexo init</p>
+<h3 id="拷贝源文件"><a href="#拷贝源文件" class="headerlink" title="拷贝源文件"></a>拷贝源文件</h3><p>主要涉及到你之前的hexo工程中的配置文件，像我主要有两个：</p>
+<ul>
+<li><code>.config.yml</code></li>
+<li><code>.config.next.yml</code> (next主题的配置文件)</li>
+</ul>
+<p>剩下就是你的source目录下所有东西</p>
+<h3 id="修改配置文件中的敏感信息"><a href="#修改配置文件中的敏感信息" class="headerlink" title="修改配置文件中的敏感信息"></a>修改配置文件中的敏感信息</h3><p>主要是如果你使用了一些第三方插件，可能会有一些访问的API Token之类的东西，这部分可不能直接上传到github上，否则不久你懂的。<br>将这些敏感信息用一个变量名称代替，这些变量怎么用，后面会提到。比如，我在我的hexo里面使用了algolia搜索，那么在我的_config.yml配置文件中，则改为如下样子：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># algolia_applicationID就是一个占位符，其它类似</span></span><br><span class="line"><span class="attr">algolia:</span></span><br><span class="line">  <span class="attr">applicationID:</span> <span class="string">algolia_applicationID</span></span><br><span class="line">  <span class="attr">apiKey:</span> <span class="string">algolia_apiKey</span></span><br><span class="line">  <span class="attr">indexName:</span> <span class="string">algolia_indexName</span></span><br><span class="line">  <span class="attr">chunkSize:</span> <span class="number">5000</span></span><br><span class="line">  <span class="attr">fields:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">title</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">slug</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">path</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">content:strip</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="上传源文件到master分支"><a href="#上传源文件到master分支" class="headerlink" title="上传源文件到master分支"></a>上传源文件到master分支</h3><p>git push就是了，没什么好说的。</p>
+<h3 id="生成GitHub-Token"><a href="#生成GitHub-Token" class="headerlink" title="生成GitHub Token"></a>生成GitHub Token</h3><p>这个token是为了在外部授权可以提交代码所用。<br>设置路径，访问你的GitHub主页，路径：Settings(点击你的头像右边的下拉箭头) -&gt; Developer Settings -&gt; Personal access tokens -&gt; Generate New Token，如下图所示：<br><img data-src="e62993b1/AutoCapture_2021-02-22_154729.png" alt="Generate New Token"><br><strong>注意</strong>这个token要及时复制到文本编辑器里面，下次再进来之后，就看不到了。</p>
+<h3 id="配置TravisCI账号"><a href="#配置TravisCI账号" class="headerlink" title="配置TravisCI账号"></a>配置TravisCI账号</h3><p>用github授权登录之后，第一次登录travisci官网后，会让你同步仓库。你可能跟我这个不一样，第一次登录会让你去你的github中配置相关的授权信息，照着步骤操作即可。<br><img data-src="e62993b1/AutoCapture_2021-02-22_002857.jpg" alt="同步仓库信息"><br>在搜索框中键入你的仓库名称，随后点击Settings<br><img data-src="e62993b1/AutoCapture_2021-02-22_154127.png" alt="Settings页面"><br>在Settings页面中，只需要注意添加相应的变量即可。如下图所示：<br><img data-src="e62993b1/AutoCapture_2021-02-22_154416.png" alt="Settings页面"><br>我自己在这里添加了7个，其中一个GH_TOKEN就是上面在GitHub通过Generate New Token操作生成的。其余的，一个是GiTalk相关的，一个是algolia相关的。通常，其余配置保证默认即可，如果有特殊配置需求，可以阅读Travis相关的配置说明，如Cron Jobs等。<br>至此，关联上你的GitHub仓库之后，就等于加了一个钩子程序，但是在正式启用前，还缺一个重要的配置文件：<code>.travis.yml</code> ，只有配置了这个文件，才能会被Travis CI识别。</p>
+<h3 id="配置-travis-yml文件"><a href="#配置-travis-yml文件" class="headerlink" title="配置.travis.yml文件"></a>配置.travis.yml文件</h3><p>这个步骤是集成TravisCI的核心，注意修改。<br>按照Hexo官网的说明，官网的配置如下：<br>PS：官网默认没有给每项配置作说明，我这里直接在下面配置文件中加上注释了</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">sudo:</span> <span class="literal">false</span></span><br><span class="line"><span class="comment"># 脚本运行语言</span></span><br><span class="line"><span class="attr">language:</span> <span class="string">node_js</span></span><br><span class="line"><span class="comment"># NodeJS版本</span></span><br><span class="line"><span class="attr">node_js:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">10</span> <span class="comment"># use nodejs v10 LTS</span></span><br><span class="line"><span class="comment"># 开启npm缓存</span></span><br><span class="line"><span class="attr">cache:</span> <span class="string">npm</span></span><br><span class="line"><span class="comment"># TravisCI监听的分支为master分支</span></span><br><span class="line"><span class="attr">branches:</span></span><br><span class="line">  <span class="attr">only:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">master</span> <span class="comment"># build master branch only</span></span><br><span class="line"><span class="attr">script:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">generate</span> <span class="comment"># generate static files</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">provider:</span> <span class="string">pages</span></span><br><span class="line">  <span class="attr">skip-cleanup:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment"># 这个GH_TOKEN就是在TravisCI后台设置那里添加的变量</span></span><br><span class="line">  <span class="attr">github-token:</span> <span class="string">$GH_TOKEN</span></span><br><span class="line">  <span class="attr">keep-history:</span> <span class="literal">true</span></span><br><span class="line">  <span class="comment"># 远程分支</span></span><br><span class="line">  <span class="attr">on:</span></span><br><span class="line">    <span class="attr">branch:</span> <span class="string">master</span></span><br><span class="line">  <span class="comment"># 本地目录</span></span><br><span class="line">  <span class="attr">local-dir:</span> <span class="string">public</span></span><br></pre></td></tr></table></figure>
+<p>自己在配置的时候，发现，就这个完全已经可以成功部署了。<br><strong>注意</strong> 如果你使用的是TraivsCI自身自带的deploy命令，而且你的项目工程中，原先通过“hexo-deployer-git”插件来deploy的，那么你的hexo工程的配置文件：.config.yml中还需修改：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="comment"># 需要将repo给注释了</span></span><br><span class="line">  <span class="comment"># repo: git@github.com:nimbusking/nimbuskblog.git</span></span><br><span class="line">  <span class="comment"># 同时，这里的分支不要选错，hexo generate生成的最终页面，需要deploy到这个分支中</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">gh-pages</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="一点不一样的修改"><a href="#一点不一样的修改" class="headerlink" title="一点不一样的修改"></a>一点不一样的修改</h3><p>先贴上我的.travis.yml配置：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">language:</span> <span class="string">node_js</span></span><br><span class="line"><span class="attr">node_js:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="number">12</span></span><br><span class="line"><span class="attr">cache:</span> <span class="string">npm</span></span><br><span class="line"><span class="attr">branches:</span></span><br><span class="line">  <span class="attr">only:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">master</span> <span class="comment"># build master branch only</span></span><br><span class="line"><span class="comment"># 设置缓存文件</span></span><br><span class="line"><span class="attr">cache:</span></span><br><span class="line">  <span class="attr">directories:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">node_modules</span></span><br><span class="line"></span><br><span class="line"><span class="attr">install:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span></span><br><span class="line">  <span class="comment"># hexo主题</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">hexo-theme-next</span> <span class="string">--save</span></span><br><span class="line">  <span class="comment"># deployer git 插件</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">hexo-deployer-git</span> <span class="string">--save</span></span><br><span class="line">  <span class="comment"># - npm install hexo-generator-searchdb --save</span></span><br><span class="line">  <span class="comment"># rss订阅插件</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">hexo-generator-feed</span></span><br><span class="line">  <span class="comment"># 卜算子词数统计</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">hexo-wordcount</span> <span class="string">--save</span></span><br><span class="line">  <span class="comment"># 短链</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">hexo-abbrlink</span> <span class="string">--save</span></span><br><span class="line">  <span class="comment"># 懒加载</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">lozad</span> <span class="string">--save</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">uninstall</span> <span class="string">hexo-generator-index</span> <span class="string">--save</span></span><br><span class="line">  <span class="comment"># 置顶插件</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">hexo-generator-index-pin-top</span> <span class="string">--save</span></span><br><span class="line">  <span class="comment"># algolia搜索</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">npm</span> <span class="string">install</span> <span class="string">hexo-algolia</span> <span class="string">--save</span></span><br><span class="line"></span><br><span class="line"><span class="attr">before_script:</span></span><br><span class="line">  <span class="comment"># 替换同目录下的_config.yml文件中github_token字符串为travis后台刚才配置的变量，注&gt;意此处sed命令用了双引号。单引号无效！</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">sed</span> <span class="string">-i</span> <span class="string">&quot;s/algolia_applicationID/$&#123;ALGOLIA_APPLICATIONID&#125;/g&quot;</span> <span class="string">./_config.yml</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">sed</span> <span class="string">-i</span> <span class="string">&quot;s/algolia_apiKey/$&#123;ALGOLIA_APIKEY&#125;/g&quot;</span> <span class="string">./_config.yml</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">sed</span> <span class="string">-i</span> <span class="string">&quot;s/algolia_indexName/$&#123;ALGOLIA_INDEXNAME&#125;/g&quot;</span> <span class="string">./_config.yml</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">sed</span> <span class="string">-i</span> <span class="string">&quot;s/gitalk_client_id/$&#123;GITALK_CLIENT_ID&#125;/g&quot;</span> <span class="string">./_config.next.yml</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">sed</span> <span class="string">-i</span> <span class="string">&quot;s/gitalk_client_secret/$&#123;GITALK_CLIENT_SECRET&#125;/g&quot;</span> <span class="string">./_config.next.yml</span></span><br><span class="line">  <span class="comment"># - pwd</span></span><br><span class="line">  <span class="comment"># clone自定义配置</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">git</span> <span class="string">clone</span> <span class="string">-b</span> <span class="string">customer_config</span> <span class="string">https://github.com/nimbusking/nimbusking.github.io.git</span> <span class="string">temp</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">cp</span> <span class="string">-f</span> <span class="string">./temp/post-meta.njk</span> <span class="string">./node_modules/hexo-theme-next/layout/_partials/post</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">rm</span> <span class="string">-rf</span> <span class="string">./temp</span></span><br><span class="line"></span><br><span class="line"><span class="attr">script:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">clean</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">generate</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">hexo</span> <span class="string">algolia</span></span><br><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">provider:</span> <span class="string">pages</span></span><br><span class="line">  <span class="attr">skip-cleanup:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">github-token:</span> <span class="string">$GH_TOKEN</span></span><br><span class="line">  <span class="attr">keep-history:</span> <span class="literal">true</span></span><br><span class="line">  <span class="attr">on:</span></span><br><span class="line">    <span class="attr">branch:</span> <span class="string">master</span></span><br><span class="line">  <span class="attr">local-dir:</span> <span class="string">public</span></span><br></pre></td></tr></table></figure>
+
+<p>我这里比官网默认配置多了几个东西：</p>
+<ul>
+<li>设置了nodejs下的node_modules缓存目录，提高编译速度</li>
+<li>通过install前置步骤安装了一些必要的hexo插件</li>
+<li>在执行hexo generate命令之前，通过before_script进行了相关必要替换：在这个里面就通过linux sed命令通过取到在travisci后台配置的变量替换到配置文件中。</li>
+<li>最后一段git clone，是我自己在配置置顶插件之后，自己有修改相关置顶的样式。为了生效，我需要将next主题中的相关配置给替换成我自己的配置。</li>
+<li>在执行了hexo generate之后，我又执行了一下hexo algolia，更新algolia索引</li>
+<li>最后就是deploy，$GH_TOKEN就是从TravisCI后台获取的配置的Token值</li>
+<li>如果你同样使用了 <strong>netlify托管，别忘了修改其部署的分支（如果通过现在的仓库部署方式的话）为gh-pages</strong></li>
+</ul>
+<h3 id="异常情况"><a href="#异常情况" class="headerlink" title="异常情况"></a>异常情况</h3><h4 id="遇到Could-not-authorize-build-request错误"><a href="#遇到Could-not-authorize-build-request错误" class="headerlink" title="遇到Could not authorize build request错误"></a>遇到Could not authorize build request错误</h4><p>今天（2021-06-18）发现死活构建不了，在自己mac上push到github上，死活就没看到travis出现自动构建。又尝试手工构建了一下，结果发现怎么都失败了。提示了一个标题中遇到的错误。<br>起初还以为自己配置哪里有问题，到github的授权页面，发现token规则好像更新了，可以更新一下。于是乎又更新了一把，结果发现还是没用。<br>后来百度一下，在官网中找到了：<br>“Could not authorize build request”, usually means that the account’s subscription expired or that it ran out of trial builds.</p>
+<p>到你的账户设置下，plan一栏下，看看订阅。<br>如果没有显示，需要你选择的话，那就选择免费的，免费计划，有10000点，个人用户，能构建很久了。</p>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>至此，Hexo与TravisCI集成的步骤基本介绍完毕。目前基本完美的解决了编译平台的事情。之后就是，换了一个环境，只需要git clone分支就好了。不过有一个小小的遗憾，因为我用了短链，所以，如果我新建了一个主题文章，那么默认是不会生成短链的，只有在hexo g之后才会生成。所以。。。</p>
+<p>至此不过还有个疑问，还没搞定。为什么原来只放那三文件，hexo编译不通过呢？相比现在，上传的源文件中多了如下几个：</p>
+<ul>
+<li>_config.landscape.yml</li>
+<li>package-lock.json</li>
+<li>package.json</li>
+</ul>
+<p>就可以了？我在我的travis.yml脚本中，并没有安装通过npm安装hexo啊，但是照样执行成功了，这是怎么做到的呢？回头可能还得去了解了解NodeJS下底层工作机制了。<br>未完待续。。。</p>
+<h2 id="附件"><a href="#附件" class="headerlink" title="附件"></a>附件</h2><ul>
+<li><a href="e62993b1/hexo_github_pages.7z">Hexo官网中关于TravisCI集成的相关说明</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/e62993b1.html" title="Hexo与TravisCI持续集成">https://nimbusk.cc/post/e62993b1.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%AB%99%E7%82%B9/" rel="tag"># 站点</a>
+              <a href="/tags/Hexo/" rel="tag"># Hexo</a>
+              <a href="/tags/TravisCI/" rel="tag"># TravisCI</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/7a56ef2a.html" rel="prev" title="电影小评">
+                  <i class="fa fa-angle-left"></i> 电影小评
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/c58ba19c.html" rel="next" title="一则关于MySQL分区表索引的探索">
+                  一则关于MySQL分区表索引的探索 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"7486e9d37254da29f1ced5deb9460267"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

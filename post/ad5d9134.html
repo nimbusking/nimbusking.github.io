@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前言 本文默认JS即为JavaScript语言 “注：”为本人理解内容  第2条：理解JavaScript的浮点数 不管是整数还是浮点数，JavaScript都将它们简单归类为数字。事实上，所有的数字都是双精度浮点数 位运算符将数字视为32位的有符号整数 当心浮点运算中的精度陷阱  12345(0.1 + 0.2) + 0.3; &#x2F;&#x2F; 0.60000000000000010.1 + (0.2 +">
+<meta property="og:type" content="article">
+<meta property="og:title" content="effective-javascript">
+<meta property="og:url" content="https://nimbusk.cc/post/ad5d9134.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="前言 本文默认JS即为JavaScript语言 “注：”为本人理解内容  第2条：理解JavaScript的浮点数 不管是整数还是浮点数，JavaScript都将它们简单归类为数字。事实上，所有的数字都是双精度浮点数 位运算符将数字视为32位的有符号整数 当心浮点运算中的精度陷阱  12345(0.1 + 0.2) + 0.3; &#x2F;&#x2F; 0.60000000000000010.1 + (0.2 +">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/ad5d9134/table1.1.jpg">
+<meta property="article:published_time" content="2018-11-11T17:11:52.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="Effective JavaScript">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/ad5d9134/table1.1.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/ad5d9134.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/ad5d9134.html","path":"post/ad5d9134.html","title":"effective-javascript"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>effective-javascript | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC2%E6%9D%A1%EF%BC%9A%E7%90%86%E8%A7%A3JavaScript%E7%9A%84%E6%B5%AE%E7%82%B9%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">第2条：理解JavaScript的浮点数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC3%E6%9D%A1-%E5%BD%93%E5%BF%83%E9%9A%90%E5%BC%8F%E5%BC%BA%E5%88%B6%E8%BD%AC%E6%8D%A2"><span class="nav-number">3.</span> <span class="nav-text">第3条 当心隐式强制转换</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC5%E6%9D%A1%EF%BC%9A%E9%81%BF%E5%85%8D%E5%AF%B9%E6%B7%B7%E5%90%88%E7%B1%BB%E5%9E%8B%E4%BD%BF%E7%94%A8-%E8%BF%90%E7%AE%97%E7%AC%A6"><span class="nav-number">4.</span> <span class="nav-text">第5条：避免对混合类型使用&#x3D;&#x3D;运算符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%8F%B7%E6%8F%92%E5%85%A5%E5%B1%80%E9%99%90%E6%80%A7"><span class="nav-number">5.</span> <span class="nav-text">分号插入局限性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC8%E6%9D%A1%EF%BC%9A%E5%B0%BD%E9%87%8F%E5%B0%91%E7%94%A8%E5%85%A8%E5%B1%80%E5%AF%B9%E8%B1%A1"><span class="nav-number">6.</span> <span class="nav-text">第8条：尽量少用全局对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC9%E6%9D%A1%EF%BC%9A%E9%81%BF%E5%85%8D%E4%BD%BF%E7%94%A8with%E8%AF%AD%E5%8F%A5"><span class="nav-number">7.</span> <span class="nav-text">第9条：避免使用with语句</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%86%9F%E7%BB%83%E6%8E%8C%E6%8F%A1%E9%97%AD%E5%8C%85"><span class="nav-number">8.</span> <span class="nav-text">熟练掌握闭包</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AC%AC12%E6%9D%A1%EF%BC%9A%E7%90%86%E8%A7%A3%E5%8F%98%E9%87%8F%E5%A3%B0%E6%98%8E%E6%8F%90%E5%8D%87"><span class="nav-number">9.</span> <span class="nav-text">第12条：理解变量声明提升</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/ad5d9134.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="effective-javascript | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          effective-javascript
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-11 17:11:52" itemprop="dateCreated datePublished" datetime="2018-11-11T17:11:52+00:00">2018-11-11</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/JavaScript%E7%B3%BB%E5%88%97/" itemprop="url" rel="index"><span itemprop="name">JavaScript系列</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ul>
+<li>本文默认JS即为JavaScript语言</li>
+<li>“注：”为本人理解内容</li>
+</ul>
+<h4 id="第2条：理解JavaScript的浮点数"><a href="#第2条：理解JavaScript的浮点数" class="headerlink" title="第2条：理解JavaScript的浮点数"></a>第2条：理解JavaScript的浮点数</h4><ul>
+<li>不管是整数还是浮点数，JavaScript都将它们简单归类为数字。事实上，所有的数字都是<strong>双精度浮点数</strong></li>
+<li>位运算符将数字视为32位的有符号整数</li>
+<li>当心浮点运算中的精度陷阱</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0.1</span> + <span class="number">0.2</span>) + <span class="number">0.3</span>; <span class="comment">// 0.6000000000000001</span></span><br><span class="line"><span class="number">0.1</span> + (<span class="number">0.2</span> + <span class="number">0.3</span>); <span class="comment">// 0.6</span></span><br><span class="line"><span class="comment">// 一个有效的解决方式是将浮点数转化为整数运算，例如上例中可以转换为</span></span><br><span class="line">(<span class="number">10</span> + <span class="number">20</span>) + <span class="number">30</span>; <span class="comment">// 60</span></span><br><span class="line"><span class="number">10</span> + (<span class="number">20</span> + <span class="number">30</span>); <span class="comment">// 60</span></span><br></pre></td></tr></table></figure>
+<h4 id="第3条-当心隐式强制转换"><a href="#第3条-当心隐式强制转换" class="headerlink" title="第3条 当心隐式强制转换"></a>第3条 当心隐式强制转换</h4><ul>
+<li>特别注意字符强制转换的问题：结果为null的变量在算术运算中不会导致失败，而是被隐式转换为0</li>
+<li>测试某个值是否是NaN，在JS中唯一一个不等于其自身的值，因此，可以随时通过检查一个值是否等于其自身的方式来测试该值是否是NaN</li>
+</ul>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a = <span class="title class_">NaN</span>;</span><br><span class="line">a !== a; <span class="comment">// true</span></span><br><span class="line"><span class="keyword">var</span> b = <span class="string">&quot;foo&quot;</span>;</span><br><span class="line">b != b; <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<h4 id="第5条：避免对混合类型使用-运算符"><a href="#第5条：避免对混合类型使用-运算符" class="headerlink" title="第5条：避免对混合类型使用==运算符"></a>第5条：避免对混合类型使用==运算符</h4><p>一个好的替代方法是使用严格相等运算符<br><img data-src="ad5d9134/table1.1.jpg" alt="==运算符的强制转换规则"></p>
+<span id="more"></span>
+<h4 id="分号插入局限性"><a href="#分号插入局限性" class="headerlink" title="分号插入局限性"></a>分号插入局限性</h4><p>分号插入第一条规则：分号仅在|标记之前、一个或多个换行之后和程序输入的结尾被插入。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 合法</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">square</span>(<span class="params">x</span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> n = +x</span><br><span class="line">    <span class="keyword">return</span> n * n</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">area</span>(<span class="params">r</span>) &#123; r = +r; <span class="keyword">return</span> <span class="title class_">Math</span>.<span class="property">PI</span> * r * r&#125;</span><br><span class="line"><span class="keyword">function</span> <span class="title function_">add1</span>(<span class="params">x</span>) &#123; <span class="keyword">return</span> x + <span class="number">1</span>&#125;</span><br><span class="line"><span class="comment">// 不合法</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">area</span>(<span class="params">r</span>) &#123; r = +r <span class="keyword">return</span> <span class="title class_">Math</span>.<span class="property">PI</span> * r * r &#125;</span><br></pre></td></tr></table></figure>
+<p>分号插入第二条规则：分号仅在随后的输入标记不能解析时插入，也可以理解为是一种错误矫正机制。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">a = <span class="title function_">b</span></span><br><span class="line">(<span class="title function_">f</span>());</span><br><span class="line"><span class="comment">// 能正确解析为一条单独的语句，等价于：a = b(f());</span></span><br><span class="line">a = b</span><br><span class="line"><span class="title function_">f</span>();</span><br><span class="line"><span class="comment">// 则会解析为两条独立的语句</span></span><br></pre></td></tr></table></figure>
+<p>注：完全没必要用这个特性，知道有这么个玩意儿就行，但是在实际开发过程中，不要有这种特性的东西，不容易理解，还容易出错。</p>
+<h4 id="第8条：尽量少用全局对象"><a href="#第8条：尽量少用全局对象" class="headerlink" title="第8条：尽量少用全局对象"></a>第8条：尽量少用全局对象</h4><h4 id="第9条：避免使用with语句"><a href="#第9条：避免使用with语句" class="headerlink" title="第9条：避免使用with语句"></a>第9条：避免使用with语句</h4><h4 id="熟练掌握闭包"><a href="#熟练掌握闭包" class="headerlink" title="熟练掌握闭包"></a>熟练掌握闭包</h4><p>闭包第一个基本事实：JS允许你引用在当前函数意外定义的变量</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">makeSandwich</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> magicIngredient = <span class="string">&quot;peanut butter&quot;</span>;</span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">make</span>(<span class="params">filling</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> magicIngredient + <span class="string">&quot; and &quot;</span> + filling;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">make</span>(<span class="string">&quot;jelly&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">makeSandwich</span>(); <span class="comment">// &quot;reanut butter and jelly&quot;</span></span><br></pre></td></tr></table></figure>
+<p>第二个事实：即使外部函数返回，当前函数仍然可以引用在外部函数所定义的变量。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">sandwichMaker</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> magicIngredient = <span class="string">&quot;peanut butter&quot;</span>;</span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">make</span>(<span class="params">filling</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> magicIngredient + <span class="string">&quot; and &quot;</span> + filling;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> make;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> f = <span class="title function_">sandwichMaker</span>();</span><br><span class="line"><span class="title function_">f</span>(<span class="string">&quot;jelly&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 改进版本</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">sandwichMaker</span>(<span class="params">magicIngredient</span>) &#123;</span><br><span class="line">    <span class="keyword">function</span> <span class="title function_">make</span>(<span class="params">filling</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> magicIngredient + <span class="string">&quot; and &quot;</span> + filling;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> make;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> hamAnd = <span class="title function_">sandwichMaker</span>(<span class="string">&quot;ham&quot;</span>);</span><br><span class="line"><span class="title function_">hamAnd</span>(<span class="string">&quot;cheese&quot;</span>);</span><br><span class="line"><span class="comment">// 提供直接匿名返回的方式</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">sandwichMaker</span>(<span class="params">magicIngredient</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">function</span>(<span class="params">filling</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> magicIngredient + <span class="string">&quot; and &quot;</span> + filling;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>第三个事实：闭包可以更新外部变量的值。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">box</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> val = <span class="literal">undefined</span>;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        <span class="attr">set</span>: <span class="keyword">function</span>(<span class="params">newVal</span>) &#123; val = newVal; &#125;,</span><br><span class="line">        <span class="attr">get</span>: <span class="keyword">function</span>(<span class="params"></span>) &#123; <span class="keyword">return</span> val; &#125;,</span><br><span class="line">        <span class="attr">type</span>: <span class="keyword">function</span>(<span class="params"></span>) &#123; <span class="keyword">return</span> <span class="keyword">typeof</span> val; &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> b = <span class="title function_">box</span>();</span><br><span class="line">b.<span class="title function_">type</span>(); <span class="comment">// &quot;undefined&quot;</span></span><br><span class="line">b.<span class="title function_">set</span>(<span class="number">98.6</span>);</span><br><span class="line">b.<span class="title function_">get</span>(); <span class="comment">// 98.6</span></span><br><span class="line">b.<span class="title function_">type</span>(); <span class="comment">// &quot;number&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="第12条：理解变量声明提升"><a href="#第12条：理解变量声明提升" class="headerlink" title="第12条：理解变量声明提升"></a>第12条：理解变量声明提升</h4><p>JS不支持块级作用域，即变量定义的作用域不是离其最近的封闭语句或代码块中，而是包含它们的函数。当然try…catch语句是一个例外。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">function</span> <span class="title function_">test</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">var</span> x = <span class="string">&quot;var&quot;</span>, result = [];</span><br><span class="line">    result.<span class="title function_">push</span>(x);</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="string">&quot;exception&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (x) &#123;</span><br><span class="line">        x = <span class="string">&quot;catch&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    result.<span class="title function_">push</span>(x);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/ad5d9134.html" title="effective-javascript">https://nimbusk.cc/post/ad5d9134.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Effective-JavaScript/" rel="tag"># Effective JavaScript</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/f73b2f1e.html" rel="prev" title="Scala编程">
+                  <i class="fa fa-angle-left"></i> Scala编程
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/483443e6.html" rel="next" title="响应式架构（消息模式Actor实现与Scala、Akka应用集成）">
+                  响应式架构（消息模式Actor实现与Scala、Akka应用集成） <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"158c1542f6a0bbdc0e1a3e051afd9140"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

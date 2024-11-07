@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="前言本篇主要记录王争老师在极客时间算法课程中主要提到的核心要点。 课程纪实复杂度分析方法用课程中提到的一句话：复杂度分析是整个算法学习的精髓，只要掌握了它，数据结构和算法的内容基本上就掌握了一半。 如何分析与统计算法的执行效率和资源消耗为什么需要复杂度分析？ 测试结果非常依赖测试环境：不同的硬件环境，测试的结果自然不同 测试结果受数据规模的影响很大  因此需要一种不用具体的测试数据来测试，就可以粗">
+<meta property="og:type" content="article">
+<meta property="og:title" content="极客时间-数据结构与算法">
+<meta property="og:url" content="https://nimbusk.cc/post/6fac06a2.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="前言本篇主要记录王争老师在极客时间算法课程中主要提到的核心要点。 课程纪实复杂度分析方法用课程中提到的一句话：复杂度分析是整个算法学习的精髓，只要掌握了它，数据结构和算法的内容基本上就掌握了一半。 如何分析与统计算法的执行效率和资源消耗为什么需要复杂度分析？ 测试结果非常依赖测试环境：不同的硬件环境，测试的结果自然不同 测试结果受数据规模的影响很大  因此需要一种不用具体的测试数据来测试，就可以粗">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/1.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/2.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/3.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/4.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/5.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/6.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/7.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/8.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/9.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/10.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/11.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/12.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/13.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/14.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/15.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/16.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/17.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/18.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/19.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/20.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/21.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/22.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/23.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/24.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/25.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/26.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/27.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/28.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/29.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/30.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/31.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/32.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/33.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/34.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/35.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/36.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/37.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/38.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/39.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/40.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/41.png">
+<meta property="og:image" content="https://nimbusk.cc/post/6fac06a2/42.png">
+<meta property="article:published_time" content="2020-05-10T10:51:56.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="算法">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/6fac06a2/1.png">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/6fac06a2.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/6fac06a2.html","path":"post/6fac06a2.html","title":"极客时间-数据结构与算法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>极客时间-数据结构与算法 | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AF%BE%E7%A8%8B%E7%BA%AA%E5%AE%9E"><span class="nav-number">2.</span> <span class="nav-text">课程纪实</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E6%9E%90%E6%96%B9%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">复杂度分析方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%88%86%E6%9E%90%E4%B8%8E%E7%BB%9F%E8%AE%A1%E7%AE%97%E6%B3%95%E7%9A%84%E6%89%A7%E8%A1%8C%E6%95%88%E7%8E%87%E5%92%8C%E8%B5%84%E6%BA%90%E6%B6%88%E8%80%97"><span class="nav-number">2.1.1.</span> <span class="nav-text">如何分析与统计算法的执行效率和资源消耗</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E6%9E%90%EF%BC%9F"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">为什么需要复杂度分析？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%A7O%E5%A4%8D%E6%9D%82%E5%BA%A6%E8%A1%A8%E7%A4%BA%E6%B3%95"><span class="nav-number">2.1.1.2.</span> <span class="nav-text">大O复杂度表示法</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E6%9E%90"><span class="nav-number">2.1.1.2.1.</span> <span class="nav-text">时间复杂度分析</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="nav-number">2.1.1.2.2.</span> <span class="nav-text">几种常见时间复杂度实例分析</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A9%BA%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E5%88%86%E6%9E%90"><span class="nav-number">2.1.1.3.</span> <span class="nav-text">空间复杂度分析</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%85%E6%9E%90%E6%9C%80%E5%A5%BD%E3%80%81%E6%9C%80%E5%9D%8F%E3%80%81%E5%B9%B3%E5%9D%87%E3%80%81%E5%9D%87%E6%91%8A%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="nav-number">2.1.2.</span> <span class="nav-text">浅析最好、最坏、平均、均摊时间复杂度</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%80%E5%A5%BD%E6%83%85%E5%86%B5"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">最好情况</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%80%E5%BF%AB%E6%83%85%E5%86%B5"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">最快情况</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%B9%B3%E5%9D%87%E6%83%85%E5%86%B5"><span class="nav-number">2.1.2.3.</span> <span class="nav-text">平均情况</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9D%87%E6%91%8A%E6%97%B6%E9%97%B4"><span class="nav-number">2.1.2.4.</span> <span class="nav-text">均摊时间</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E5%87%A0%E7%A7%8D%E5%9F%BA%E6%9C%AC%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text">常见几种基本数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E7%BB%84"><span class="nav-number">2.2.1.</span> <span class="nav-text">数组</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E8%A1%A8-Linear-List"><span class="nav-number">2.2.1.1.</span> <span class="nav-text">线性表(Linear List)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9D%9E%E7%BA%BF%E6%80%A7%E8%A1%A8"><span class="nav-number">2.2.1.2.</span> <span class="nav-text">非线性表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E7%89%B9%E7%82%B9"><span class="nav-number">2.2.1.3.</span> <span class="nav-text">数组特点</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8F%92%E5%85%A5"><span class="nav-number">2.2.1.3.1.</span> <span class="nav-text">插入</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%88%A0%E9%99%A4"><span class="nav-number">2.2.1.3.2.</span> <span class="nav-text">删除</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%A0%E7%82%B9%E7%BB%8F%E9%AA%8C"><span class="nav-number">2.2.1.4.</span> <span class="nav-text">几点经验</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E7%AF%87%E7%AD%94%E7%96%91"><span class="nav-number">2.2.1.5.</span> <span class="nav-text">开篇答疑</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%93%BE%E8%A1%A8"><span class="nav-number">2.2.2.</span> <span class="nav-text">链表</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%93%BE%E8%A1%A8%E5%88%86%E7%B1%BB"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">链表分类</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%8D%95%E9%93%BE%E8%A1%A8"><span class="nav-number">2.2.2.1.1.</span> <span class="nav-text">单链表</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E9%93%BE%E8%A1%A8%E5%92%8C%E5%8F%8C%E5%90%91%E9%93%BE%E8%A1%A8"><span class="nav-number">2.2.2.1.2.</span> <span class="nav-text">循环链表和双向链表</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%A8%E7%A9%BA%E9%97%B4%E6%8D%A2%E6%97%B6%E9%97%B4"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">用空间换时间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E7%AF%87%E7%AD%94%E7%96%91%EF%BC%88%E4%B8%80%EF%BC%89"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">开篇答疑（一）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E8%BD%BB%E6%9D%BE%E5%86%99%E5%87%BA%E6%AD%A3%E7%A1%AE%E7%9A%84%E9%93%BE%E8%A1%A8%E4%BB%A3%E7%A0%81%EF%BC%9F"><span class="nav-number">2.2.2.4.</span> <span class="nav-text">如何轻松写出正确的链表代码？</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7%E4%B8%80-%E7%90%86%E8%A7%A3%E6%8C%87%E9%92%88%E6%88%96%E5%BC%95%E7%94%A8%E7%9A%84%E5%90%AB%E4%B9%89"><span class="nav-number">2.2.2.4.1.</span> <span class="nav-text">技巧一:理解指针或引用的含义</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7%E4%BA%8C-%E8%AD%A6%E6%83%95%E6%8C%87%E9%92%88%E4%B8%A2%E5%A4%B1%E5%92%8C%E5%86%85%E5%AD%98%E6%B3%84%E6%BC%8F"><span class="nav-number">2.2.2.4.2.</span> <span class="nav-text">技巧二:警惕指针丢失和内存泄漏</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7%E4%B8%89-%E5%88%A9%E7%94%A8%E5%93%A8%E5%85%B5%E7%AE%80%E5%8C%96%E5%AE%9E%E7%8E%B0%E9%9A%BE%E5%BA%A6"><span class="nav-number">2.2.2.4.3.</span> <span class="nav-text">技巧三:利用哨兵简化实现难度</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7%E5%9B%9B-%E9%87%8D%E7%82%B9%E7%95%99%E6%84%8F%E8%BE%B9%E7%95%8C%E6%9D%A1%E4%BB%B6%E5%A4%84%E7%90%86"><span class="nav-number">2.2.2.4.4.</span> <span class="nav-text">技巧四:重点留意边界条件处理</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7%E4%BA%94-%E4%B8%BE%E4%BE%8B%E7%94%BB%E5%9B%BE-%E8%BE%85%E5%8A%A9%E6%80%9D%E8%80%83"><span class="nav-number">2.2.2.4.5.</span> <span class="nav-text">技巧五:举例画图,辅助思考</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%8A%80%E5%B7%A7%E5%85%AD-%E5%A4%9A%E5%86%99%E5%A4%9A%E7%BB%83-%E6%B2%A1%E6%9C%89%E6%8D%B7%E5%BE%84"><span class="nav-number">2.2.2.4.6.</span> <span class="nav-text">技巧六:多写多练,没有捷径</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%88"><span class="nav-number">2.2.3.</span> <span class="nav-text">栈</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E6%A0%88%EF%BC%9F"><span class="nav-number">2.2.3.1.</span> <span class="nav-text">如何实现一个栈？</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%A1%BA%E5%BA%8F%E6%A0%88"><span class="nav-number">2.2.3.1.1.</span> <span class="nav-text">顺序栈</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%93%BE%E5%BC%8F%E6%A0%88"><span class="nav-number">2.2.3.1.2.</span> <span class="nav-text">链式栈</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%88%E5%9C%A8%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">2.2.3.2.</span> <span class="nav-text">栈在函数调用中的应用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%88%E5%9C%A8%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B1%82%E5%80%BC%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">2.2.3.3.</span> <span class="nav-text">栈在表达式求值中的应用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A0%88%E5%9C%A8%E6%8B%AC%E5%8F%B7%E5%8C%B9%E9%85%8D%E4%B8%AD%E7%9A%84%E5%BA%94%E7%94%A8"><span class="nav-number">2.2.3.4.</span> <span class="nav-text">栈在括号匹配中的应用</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%98%9F%E5%88%97"><span class="nav-number">2.2.4.</span> <span class="nav-text">队列</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%90%86%E8%A7%A3%E2%80%9C%E9%98%9F%E5%88%97%E2%80%9D"><span class="nav-number">2.2.4.1.</span> <span class="nav-text">如何理解“队列”?</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97"><span class="nav-number">2.2.4.2.</span> <span class="nav-text">循环队列</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E5%92%8C%E5%B9%B6%E5%8F%91%E9%98%9F%E5%88%97"><span class="nav-number">2.2.4.3.</span> <span class="nav-text">阻塞队列和并发队列</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97"><span class="nav-number">2.2.4.3.1.</span> <span class="nav-text">阻塞队列</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%B9%B6%E5%8F%91%E9%98%9F%E5%88%97"><span class="nav-number">2.2.4.3.2.</span> <span class="nav-text">并发队列</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E7%AF%87%E7%AD%94%E7%96%91-1"><span class="nav-number">2.2.4.4.</span> <span class="nav-text">开篇答疑</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%8E%92%E5%BA%8F"><span class="nav-number">2.3.</span> <span class="nav-text">基础排序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%88%86%E6%9E%90%E4%B8%80%E4%B8%AA%E2%80%9C%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E2%80%9D"><span class="nav-number">2.3.1.</span> <span class="nav-text">如何分析一个“排序算法”?</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E7%9A%84%E6%89%A7%E8%A1%8C%E6%95%88%E7%8E%87"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">排序算法的执行效率</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6%E7%9A%84%E7%B3%BB%E6%95%B0%E3%80%81%E5%B8%B8%E6%95%B0-%E3%80%81%E4%BD%8E%E9%98%B6"><span class="nav-number">2.3.1.2.</span> <span class="nav-text">时间复杂度的系数、常数 、低阶</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AF%94%E8%BE%83%E6%AC%A1%E6%95%B0%E5%92%8C%E4%BA%A4%E6%8D%A2-%E6%88%96%E7%A7%BB%E5%8A%A8-%E6%AC%A1%E6%95%B0"><span class="nav-number">2.3.1.3.</span> <span class="nav-text">比较次数和交换(或移动)次数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E7%9A%84%E5%86%85%E5%AD%98%E6%B6%88%E8%80%97"><span class="nav-number">2.3.1.4.</span> <span class="nav-text">排序算法的内存消耗</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E7%AE%97%E6%B3%95%E7%9A%84%E7%A8%B3%E5%AE%9A%E6%80%A7"><span class="nav-number">2.3.1.5.</span> <span class="nav-text">排序算法的稳定性</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F-Bubble-Sort"><span class="nav-number">2.3.2.</span> <span class="nav-text">冒泡排序(Bubble Sort)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%A0%E7%82%B9%E5%85%B3%E4%BA%8E%E5%86%92%E6%B3%A1%E6%8E%92%E5%BA%8F%E7%9A%84%E6%80%9D%E8%80%83"><span class="nav-number">2.3.2.1.</span> <span class="nav-text">几点关于冒泡排序的思考</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%9C%89%E5%85%B3%E6%9C%89%E5%BA%8F%E5%BA%A6%E4%B8%8E%E6%97%A0%E5%BA%8F%E5%BA%A6%E7%9A%84%E8%AE%A8%E8%AE%BA"><span class="nav-number">2.3.2.1.1.</span> <span class="nav-text">有关有序度与无序度的讨论</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F-Insertion-Sort"><span class="nav-number">2.3.3.</span> <span class="nav-text">插入排序(Insertion Sort)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E6%8B%86%E8%A7%A3"><span class="nav-number">2.3.3.1.</span> <span class="nav-text">步骤拆解</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%A0%E7%82%B9%E6%80%9D%E8%80%83"><span class="nav-number">2.3.3.2.</span> <span class="nav-text">几点思考</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E6%8E%92%E5%BA%8F-Selection-Sort"><span class="nav-number">2.3.4.</span> <span class="nav-text">选择排序(Selection Sort)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E7%AF%87%E7%AD%94%E7%96%91-2"><span class="nav-number">2.3.4.1.</span> <span class="nav-text">开篇答疑</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">2.3.4.2.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E7%94%A8%E5%BF%AB%E6%8E%92%E6%80%9D%E6%83%B3%E5%9C%A8O-n-%E5%86%85%E6%9F%A5%E6%89%BE%E7%AC%ACK%E5%A4%A7%E5%85%83%E7%B4%A0%EF%BC%9F"><span class="nav-number">2.3.5.</span> <span class="nav-text">如何用快排思想在O(n)内查找第K大元素？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F"><span class="nav-number">2.3.6.</span> <span class="nav-text">归并排序</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F%E7%9A%84%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90"><span class="nav-number">2.3.6.1.</span> <span class="nav-text">归并排序的性能分析</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F"><span class="nav-number">2.3.7.</span> <span class="nav-text">快速排序</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F%E4%B9%8B%E5%8E%9F%E5%9C%B0%E5%88%86%E5%8C%BA%E5%87%BD%E6%95%B0"><span class="nav-number">2.3.7.1.</span> <span class="nav-text">快速排序之原地分区函数</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BF%AB%E6%8E%92%E4%B8%8E%E5%BD%92%E5%B9%B6%E7%9A%84%E4%B8%8D%E5%90%8C"><span class="nav-number">2.3.7.2.</span> <span class="nav-text">快排与归并的不同</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BA%BF%E6%80%A7%E6%8E%92%E5%BA%8F"><span class="nav-number">2.4.</span> <span class="nav-text">线性排序</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A1%B6%E6%8E%92%E5%BA%8F"><span class="nav-number">2.4.1.</span> <span class="nav-text">桶排序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AE%A1%E6%95%B0%E6%8E%92%E5%BA%8F-Counting-sort"><span class="nav-number">2.4.2.</span> <span class="nav-text">计数排序( Counting sort)</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%E8%AE%A1%E6%95%B0%E5%90%AB%E4%B9%89"><span class="nav-number">2.4.2.1.</span> <span class="nav-text">深入理解计数含义</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E9%97%AE%E9%A2%98%EF%BC%9A%E5%A6%82%E4%BD%95%E8%AE%A1%E7%AE%97%E4%BD%8D%E7%BD%AE%EF%BC%9F"><span class="nav-number">2.4.2.2.</span> <span class="nav-text">关键问题：如何计算位置？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">2.4.2.3.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%95%B0%E6%8E%92%E5%BA%8F-Radix-sort"><span class="nav-number">2.4.3.</span> <span class="nav-text">基数排序( Radix sort)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E5%BA%8F%E4%BC%98%E5%8C%96"><span class="nav-number">2.5.</span> <span class="nav-text">排序优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96%E5%BF%AB%E9%80%9F%E6%8E%92%E5%BA%8F"><span class="nav-number">2.5.1.</span> <span class="nav-text">如何优化快速排序?</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BE%E4%BE%8B%E5%88%86%E6%9E%90%E6%8E%92%E5%BA%8F%E5%87%BD%E6%95%B0"><span class="nav-number">2.5.2.</span> <span class="nav-text">举例分析排序函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E6%88%98"><span class="nav-number">3.</span> <span class="nav-text">实战</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/6fac06a2.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="极客时间-数据结构与算法 | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          极客时间-数据结构与算法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-05-10 10:51:56" itemprop="dateCreated datePublished" datetime="2020-05-10T10:51:56+00:00">2020-05-10</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9E%81%E5%AE%A2%E6%97%B6%E9%97%B4/" itemprop="url" rel="index"><span itemprop="name">极客时间</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本篇主要记录王争老师在极客时间算法课程中主要提到的核心要点。</p>
+<h2 id="课程纪实"><a href="#课程纪实" class="headerlink" title="课程纪实"></a>课程纪实</h2><h3 id="复杂度分析方法"><a href="#复杂度分析方法" class="headerlink" title="复杂度分析方法"></a>复杂度分析方法</h3><p>用课程中提到的一句话：复杂度分析是整个算法学习的精髓，只要掌握了它，数据结构和算法的内容基本上就掌握了一半。</p>
+<h4 id="如何分析与统计算法的执行效率和资源消耗"><a href="#如何分析与统计算法的执行效率和资源消耗" class="headerlink" title="如何分析与统计算法的执行效率和资源消耗"></a>如何分析与统计算法的执行效率和资源消耗</h4><h5 id="为什么需要复杂度分析？"><a href="#为什么需要复杂度分析？" class="headerlink" title="为什么需要复杂度分析？"></a>为什么需要复杂度分析？</h5><ul>
+<li>测试结果非常依赖测试环境：不同的硬件环境，测试的结果自然不同</li>
+<li>测试结果受数据规模的影响很大</li>
+</ul>
+<p>因此需要一种不用具体的测试数据来测试，就可以粗略地估计算法的执行效率的方法。</p>
+<span id="more"></span>
+
+<h5 id="大O复杂度表示法"><a href="#大O复杂度表示法" class="headerlink" title="大O复杂度表示法"></a>大O复杂度表示法</h5><p>公式可以表示为：<br><img data-src="6fac06a2/1.png" alt="表达公式"><br>大 O 时间复杂度实际上并不具体表示代码真正的执行时间，而是表示代码执行时间随数据规模增长的变化趋势，所以，也叫作渐进时间复杂度(asymptotic time complexity)，简称时间复杂度。</p>
+<h6 id="时间复杂度分析"><a href="#时间复杂度分析" class="headerlink" title="时间复杂度分析"></a>时间复杂度分析</h6><ul>
+<li><p>只关注循环执行次数最多的一段代码<br>我们在分析一个算法、一段代码的时间复杂度的时候，也只关注循环执行次数最多的那一段代码就可以了<br><img data-src="6fac06a2/2.png" alt="示例代码"></p>
+</li>
+<li><p>加法法则:总复杂度等于量级最大的那段代码的复杂度<br>总的时间复杂度就等于量级最大的那段代码的时间复杂度</p>
+</li>
+<li><p>乘法法则:嵌套代码的复杂度等于嵌套内外代码复杂度的乘积<br>落实到具体的代码上,我们可以把乘法法则看成是嵌套循环</p>
+</li>
+</ul>
+<h6 id="几种常见时间复杂度实例分析"><a href="#几种常见时间复杂度实例分析" class="headerlink" title="几种常见时间复杂度实例分析"></a>几种常见时间复杂度实例分析</h6><p>常见的复杂度量级图解:<br><img data-src="6fac06a2/3.png" alt="复杂度量级"></p>
+<ul>
+<li>多项式量级<ul>
+<li>O(1)</li>
+<li>O(logn)、O(nlogn)</li>
+<li>O(m+n)、O(m*n)</li>
+</ul>
+</li>
+<li>非多项式量级</li>
+</ul>
+<p>几种时间复杂度增长关系<br><img data-src="6fac06a2/4.png" alt="复杂度增长关系"></p>
+<h5 id="空间复杂度分析"><a href="#空间复杂度分析" class="headerlink" title="空间复杂度分析"></a>空间复杂度分析</h5><p>时间复杂度的全称是渐进时间复杂度,表示算法的执行时间与数据规模之间的增长关系。类比一下，空间复杂度全称就是渐进空间复杂度(asymptotic space complexity)，表示算法的存储空间与数据规模之间的增长关系。</p>
+<h4 id="浅析最好、最坏、平均、均摊时间复杂度"><a href="#浅析最好、最坏、平均、均摊时间复杂度" class="headerlink" title="浅析最好、最坏、平均、均摊时间复杂度"></a>浅析最好、最坏、平均、均摊时间复杂度</h4><h5 id="最好情况"><a href="#最好情况" class="headerlink" title="最好情况"></a>最好情况</h5><p>最好情况时间复杂度就是：在 <strong>最理想</strong> 的情况下，执行这段代码的时间复杂度</p>
+<h5 id="最快情况"><a href="#最快情况" class="headerlink" title="最快情况"></a>最快情况</h5><p>最坏情况时间复杂度就是：在 <strong>最糟糕</strong> 的情况下，执行这段代码的时间复杂度</p>
+<h5 id="平均情况"><a href="#平均情况" class="headerlink" title="平均情况"></a>平均情况</h5><p>这是一个简单的概率论中的知识<br><img data-src="6fac06a2/5.png" alt="平均时间复杂度分析"></p>
+<h5 id="均摊时间"><a href="#均摊时间" class="headerlink" title="均摊时间"></a>均摊时间</h5><h3 id="常见几种基本数据结构"><a href="#常见几种基本数据结构" class="headerlink" title="常见几种基本数据结构"></a>常见几种基本数据结构</h3><p>数据结构和算法的魅力就在于此，很多时候我们并不是要去死记硬背某个数据结构或者算法，而是要学习它背后的思想和处理技巧，这些东西才是最有价值的。<br>如果你细心留意，不管是在软件开发还是架构设计中，总能找到某些算法和数据结构的影子。</p>
+<h4 id="数组"><a href="#数组" class="headerlink" title="数组"></a>数组</h4><p>解释：数组(Array)是一种线性表数据结构。它用一组连续的内存空间,来存储一组具有相同类型的数据。</p>
+<h5 id="线性表-Linear-List"><a href="#线性表-Linear-List" class="headerlink" title="线性表(Linear List)"></a>线性表(Linear List)</h5><p><img data-src="6fac06a2/6.png" alt="线性表逻辑结构"></p>
+<h5 id="非线性表"><a href="#非线性表" class="headerlink" title="非线性表"></a>非线性表</h5><p>之所以叫非线性,是因为,在非线性表中,数据之间并不是简单的前后关系。<br>连续的内存空间和相同类型的数据<br><img data-src="6fac06a2/7.png" alt="非线性表逻辑结构"></p>
+<p><strong>常常会问数组和链表的区别</strong><br>“链表适合插入、删除,时间复杂度 O(1);数组适合查找,查找时间复杂度为O(1)”。<br><em>正确的表述应该是</em>,数组支持随机访问,根据下标随机访问的时间复杂度为 O(1)。</p>
+<h5 id="数组特点"><a href="#数组特点" class="headerlink" title="数组特点"></a>数组特点</h5><p>低效的“插入”和“删除”</p>
+<h6 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h6><p>如果在数组的末尾插入元素,那就不需要移动数据了,这时的时间复杂度为 O(1)。但如果在数组的开头插入元素,那所有的数据都需要依次往后移动一位,所以最坏时间复杂度是O(n)。 因为我们在每个位置插入元素的概率是一样的,所以平均情况时间复杂度为 (1+2+ …n)/n=O(n)。</p>
+<h6 id="删除"><a href="#删除" class="headerlink" title="删除"></a>删除</h6><p>如果删除数组末尾的数据,则最好情况时间复杂度为 O(1);如果删除开头的数据,则最坏情况时间复杂度为 O(n);平均情况时间复杂度也为 O(n)。</p>
+<h5 id="几点经验"><a href="#几点经验" class="headerlink" title="几点经验"></a>几点经验</h5><ul>
+<li>ava ArrayList 无法存储基本类型,比如 int、long,需要封装为 Integer、Long 类,而Autoboxing、Unboxing 则有一定的性能消耗,所以如果特别关注性能,或者希望使用基本类型,就可以选用数组。</li>
+<li>如果数据大小事先已知,并且对数据的操作非常简单,用不到 ArrayList 提供的大部分方法,也可以直接使用数组。</li>
+<li>还有一个是我个人的喜好,当要表示多维数组时,用数组往往会更加直观。比如Object[][] array;而用容器的话则需要这样定义:ArrayList<ArrayList> array。</li>
+</ul>
+<h5 id="开篇答疑"><a href="#开篇答疑" class="headerlink" title="开篇答疑"></a>开篇答疑</h5><p>为什么大多数编程语言中,数组要从 0 开始编号,而不是从1 开始呢?<br>正常的寻址公式这样的：<br><img data-src="6fac06a2/8.png" alt="正常的数组寻址公式"><br>如果数组从1开始计数，那么寻址公式就是下面这样的<br><img data-src="6fac06a2/9.png" alt="数组起始为1的时候寻址公式"><br>此时很明显，计算机计算的步骤要比从0开始多计算，因而需要消耗更多的计算资源</p>
+<h4 id="链表"><a href="#链表" class="headerlink" title="链表"></a>链表</h4><p>先进先出策略 FIFO(First In,First Out)、最少使用策略 LFU(Least Frequently Used)、最近最少使用策略 LRU(Least Recently Used)。<br>数组需要一块连续的内存空间，而链表恰恰相反</p>
+<h5 id="链表分类"><a href="#链表分类" class="headerlink" title="链表分类"></a>链表分类</h5><p>单链表、双向链表和循环链表</p>
+<h6 id="单链表"><a href="#单链表" class="headerlink" title="单链表"></a>单链表</h6><p><img data-src="6fac06a2/10.png" alt="单链表模拟结构"><br>注意：第一个结点叫作头结点、最后一个结点叫作尾结点。</p>
+<h6 id="循环链表和双向链表"><a href="#循环链表和双向链表" class="headerlink" title="循环链表和双向链表"></a>循环链表和双向链表</h6><p>单链表的尾结点指针指向空地址,表示这就是最后的结点了。而循环链表的尾结点指针是指向链表的头结点<br><img data-src="6fac06a2/11.png" alt="循环链表模拟结构"></p>
+<p>双向链表,顾名思义,它支持两个方向,每个结点不止有一个后继指针 next 指向后面的结点,还有一个前驱指针 prev 指向前面的结点。<br><img data-src="6fac06a2/12.png" alt="双向链表模拟结构"><br>根据要查找的值与 p 的大小关系,决定是往前还是往后查找,所以平均只需要查找一半的数据。</p>
+<p>双向循环链表<br><img data-src="6fac06a2/13.png" alt="双向循环链表模拟结构"></p>
+<h5 id="用空间换时间"><a href="#用空间换时间" class="headerlink" title="用空间换时间"></a>用空间换时间</h5><p>当内存空间充足的时候,如果我们更加追求代码的执行速度,我们就可以选择空间复杂度相对较高、但时间复杂度相对很低的算法或者数据结构<br>如果内存比较紧缺,比如代码跑在手机或者单片机上,这个时候,就要反过来用时间换空间的设计思路。<br><img data-src="6fac06a2/14.png" alt="数组与链表操作时间复杂度"></p>
+<h5 id="开篇答疑（一）"><a href="#开篇答疑（一）" class="headerlink" title="开篇答疑（一）"></a>开篇答疑（一）</h5><p>如何基于链表实现 LRU 缓存淘汰算法?</p>
+<ul>
+<li><ol>
+<li>如果此数据之前已经被缓存在链表中了,我们遍历得到这个数据对应的结点,并将其从原来的位置删除,然后再插入到链表的头部。</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>如果此数据没有在缓存链表中,又可以分为两种情况</li>
+</ol>
+<ul>
+<li>如果此时缓存未满,则将此结点直接插入到链表的头部;</li>
+<li>如果此时缓存已满,则链表尾结点删除,将新的数据结点插入链表的头部。<br>当然也可以用数组来完成这个判断过程</li>
+</ul>
+</li>
+</ul>
+<h5 id="如何轻松写出正确的链表代码？"><a href="#如何轻松写出正确的链表代码？" class="headerlink" title="如何轻松写出正确的链表代码？"></a>如何轻松写出正确的链表代码？</h5><h6 id="技巧一-理解指针或引用的含义"><a href="#技巧一-理解指针或引用的含义" class="headerlink" title="技巧一:理解指针或引用的含义"></a>技巧一:理解指针或引用的含义</h6><p>没啥好说的，如果是通过C/C++来实现，需要注意</p>
+<h6 id="技巧二-警惕指针丢失和内存泄漏"><a href="#技巧二-警惕指针丢失和内存泄漏" class="headerlink" title="技巧二:警惕指针丢失和内存泄漏"></a>技巧二:警惕指针丢失和内存泄漏</h6><p>一个典型错误示例：<br><img data-src="6fac06a2/15.png" alt="错误的插入节点步骤"><br>正确的示例片段：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p-&gt;next = x; <span class="comment">// 将p的next指针指向x结点</span></span><br><span class="line">x-&gt;next = p-&gt;next; <span class="comment">// 将x的结点的next指针指向b结点</span></span><br></pre></td></tr></table></figure>
+<p>删除链表结点时,也一定要记得手动释放内存空间</p>
+<h6 id="技巧三-利用哨兵简化实现难度"><a href="#技巧三-利用哨兵简化实现难度" class="headerlink" title="技巧三:利用哨兵简化实现难度"></a>技巧三:利用哨兵简化实现难度</h6><p>在任何时候,不管链表是不是空,head 指针都会一直指向这个哨兵结点。我们也把这种有哨兵结点的链表叫带头链表。相反,没有哨兵结点的链表就叫作不带头链表。<br><img data-src="6fac06a2/16.png" alt="带头链表模拟结构"><br>这种利用哨兵简化编程难度的技巧,在很多代码实现中都有用到,比如<strong>插入排序、归并排序、动态规划</strong>等</p>
+<h6 id="技巧四-重点留意边界条件处理"><a href="#技巧四-重点留意边界条件处理" class="headerlink" title="技巧四:重点留意边界条件处理"></a>技巧四:重点留意边界条件处理</h6><ul>
+<li>如果链表为空时,代码是否能正常工作?</li>
+<li>如果链表只包含一个结点时,代码是否能正常工作?</li>
+<li>如果链表只包含两个结点时,代码是否能正常工作?</li>
+<li>代码逻辑在处理头结点和尾结点的时候,是否能正常工作?</li>
+</ul>
+<h6 id="技巧五-举例画图-辅助思考"><a href="#技巧五-举例画图-辅助思考" class="headerlink" title="技巧五:举例画图,辅助思考"></a>技巧五:举例画图,辅助思考</h6><p><img data-src="6fac06a2/17.png" alt="画图思考示例"></p>
+<h6 id="技巧六-多写多练-没有捷径"><a href="#技巧六-多写多练-没有捷径" class="headerlink" title="技巧六:多写多练,没有捷径"></a>技巧六:多写多练,没有捷径</h6><p>几个核心要点：</p>
+<ul>
+<li>单链表反转</li>
+<li>链表中环的检测</li>
+<li>两个有序的链表合并</li>
+<li>删除链表倒数第n个节点</li>
+<li>求链表的中间节点</li>
+</ul>
+<h4 id="栈"><a href="#栈" class="headerlink" title="栈"></a>栈</h4><p>栈是一种“操作受限”的线性表,只允许在一端插入和删除数据<br>当某个数据集合只涉及在一端插入和删除数据,并且满足后进先出、先进后出的特性,我们就应该首选“栈”这种数据结构。</p>
+<h5 id="如何实现一个栈？"><a href="#如何实现一个栈？" class="headerlink" title="如何实现一个栈？"></a>如何实现一个栈？</h5><h6 id="顺序栈"><a href="#顺序栈" class="headerlink" title="顺序栈"></a>顺序栈</h6><p>用数组实现的栈,我们叫作顺序栈，支持动态扩容的顺序栈<br>来看下面的思考：<br><img data-src="6fac06a2/18.png" alt="一些假设和定义"><br><img data-src="6fac06a2/19.png" alt="入栈的时间复杂度"></p>
+<h6 id="链式栈"><a href="#链式栈" class="headerlink" title="链式栈"></a>链式栈</h6><p>顾名思义，用链表来实现的</p>
+<h5 id="栈在函数调用中的应用"><a href="#栈在函数调用中的应用" class="headerlink" title="栈在函数调用中的应用"></a>栈在函数调用中的应用</h5><p>操作系统给每个线程分配了一块独立的内存空间,这块内存被组织成“栈”这种结构, 用来存储函数调用时的临时变量。每进入一个函数,就会将临时变量作为一个栈帧入栈,当被调用函数执行完成,返回之后,将这个函数对应的栈帧出栈。</p>
+<h5 id="栈在表达式求值中的应用"><a href="#栈在表达式求值中的应用" class="headerlink" title="栈在表达式求值中的应用"></a>栈在表达式求值中的应用</h5><h5 id="栈在括号匹配中的应用"><a href="#栈在括号匹配中的应用" class="headerlink" title="栈在括号匹配中的应用"></a>栈在括号匹配中的应用</h5><h4 id="队列"><a href="#队列" class="headerlink" title="队列"></a>队列</h4><h5 id="如何理解“队列”"><a href="#如何理解“队列”" class="headerlink" title="如何理解“队列”?"></a>如何理解“队列”?</h5><p>入队 enqueue(),放一个数据到队列尾部;出队 dequeue(),从队列头部取一个元素。<br><img data-src="6fac06a2/20.png" alt="入栈的时间复杂度"></p>
+<h5 id="循环队列"><a href="#循环队列" class="headerlink" title="循环队列"></a>循环队列</h5><h5 id="阻塞队列和并发队列"><a href="#阻塞队列和并发队列" class="headerlink" title="阻塞队列和并发队列"></a>阻塞队列和并发队列</h5><h6 id="阻塞队列"><a href="#阻塞队列" class="headerlink" title="阻塞队列"></a>阻塞队列</h6><p>阻塞队列其实就是在队列基础上增加了阻塞操作<br>在队列为空的时候,从队头取数据会被阻塞。因为此时还没有数据可取,直到队列中有了数据才能返回;如果队列已经满了,那么插入数据的操作就会被阻塞,直到队列中有空闲位置后再插入数据,然后再返回。<br><img data-src="6fac06a2/21.png" alt="阻塞队列模拟结构"></p>
+<h6 id="并发队列"><a href="#并发队列" class="headerlink" title="并发队列"></a>并发队列</h6><p>最简单直接的实现方式是直接在 enqueue()、dequeue() 方法上加锁,但是锁粒度大并发度会比较低,同一时刻仅允许一个存或者取操作。实际上,基于数组的循环队列,利用 CAS 原子操作,可以实现非常高效的并发队列</p>
+<h5 id="开篇答疑-1"><a href="#开篇答疑-1" class="headerlink" title="开篇答疑"></a>开篇答疑</h5><p><em>线程池没有空闲线程时,新的任务请求线程资源时,线程池该如何处理?各种处理策略又是如何实现的呢?</em></p>
+<ul>
+<li>是非阻塞的处理方式,直接拒绝任务请求;</li>
+<li>阻塞的处理方式,将请求排队,等到有空闲线程时,取出排队的请求继续处理</li>
+<li>基于链表<br>基于链表的实现方式,可以实现一个支持无限排队的无界队列(unbounded queue),但是可能会导致过多的请求排队等待,请求处理的响应时间过长。所以,针对响应时间比较敏感的系统,基于链表实现的无限排队的线程池是不合适的。</li>
+<li>基于数组<br>而基于数组实现的有界队列(bounded queue),队列的大小有限,所以线程池中排队的请求超过队列大小时,接下来的请求就会被拒绝,这种方式对响应时间敏感的系统来说,就相对更加合理。不过,设置一个合理的队列大小,也是非常有讲究的。队列太大导致等待的请求太多,队列太小会导致无法充分利用系统资源、发挥最大性能。</li>
+</ul>
+<h3 id="基础排序"><a href="#基础排序" class="headerlink" title="基础排序"></a>基础排序</h3><p>各基础排序时间复杂度比较<br><img data-src="6fac06a2/22.png" alt="基础排序时间复杂度比较"></p>
+<h4 id="如何分析一个“排序算法”"><a href="#如何分析一个“排序算法”" class="headerlink" title="如何分析一个“排序算法”?"></a>如何分析一个“排序算法”?</h4><h5 id="排序算法的执行效率"><a href="#排序算法的执行效率" class="headerlink" title="排序算法的执行效率"></a>排序算法的执行效率</h5><ul>
+<li>最好情况、最坏情况、平均情况时间复杂度</li>
+<li>分别给出最好情况、最坏情况、平均情况下的时间复杂度。除此之外,你还要说出最好、最坏时间复杂度对应的要排序的原始数据是什么样的。</li>
+<li>为什么要区分这三种时间复杂度呢?第一,有些排序算法会区分,为了好对比,所以我们最好都做一下区分。第二,对于要排序的数据,有的接近有序,有的完全无序。有序度不同的数据,对于排序的执行时间肯定是有影响的,我们要知道排序算法在不同数据下的性能表现。</li>
+</ul>
+<h5 id="时间复杂度的系数、常数-、低阶"><a href="#时间复杂度的系数、常数-、低阶" class="headerlink" title="时间复杂度的系数、常数 、低阶"></a>时间复杂度的系数、常数 、低阶</h5><p>对同一阶时间复杂度的排序算法性能对比的时候, 我们就要把系数、常数、低阶也考虑进来。</p>
+<h5 id="比较次数和交换-或移动-次数"><a href="#比较次数和交换-或移动-次数" class="headerlink" title="比较次数和交换(或移动)次数"></a>比较次数和交换(或移动)次数</h5><p>基于比较的排序算法的执行过程,会涉及两种操作,一种是元素比较大小,另一种是元素交换或移动。所以,如果我们在分析排序算法的执行效率的时候,应该把比较次数和交换(或移动)次数也考虑进去。</p>
+<h5 id="排序算法的内存消耗"><a href="#排序算法的内存消耗" class="headerlink" title="排序算法的内存消耗"></a>排序算法的内存消耗</h5><p>算法的内存消耗可以通过空间复杂度来衡量,排序算法也不例外。不过,针对排序算法的空间复杂度,我们还引入了一个新的概念,原地排序(Sorted in place)。<br>原地排序算法,就是特指空间复杂度是 O(1) 的排序算法。我们今天讲的三种排序算法,都是原地排序算法。</p>
+<h5 id="排序算法的稳定性"><a href="#排序算法的稳定性" class="headerlink" title="排序算法的稳定性"></a>排序算法的稳定性</h5><p>稳定性。这个概念是说,如果待排序的序列中存在值相等的元素,经过排序之后,相等元素之间原有的先后顺序不变。<br>稳定排序算法可以保持金额相同的两个对象,在排序之后的前后顺序不变<br><img data-src="6fac06a2/23.png" alt="基础排序时间复杂度比较"></p>
+<h4 id="冒泡排序-Bubble-Sort"><a href="#冒泡排序-Bubble-Sort" class="headerlink" title="冒泡排序(Bubble Sort)"></a>冒泡排序(Bubble Sort)</h4><p>冒泡排序只会操作相邻的两个数据。每次冒泡操作都会对相邻的两个元素进行比较,看是否满足大小关系要求。如果不满足就让它俩互换。一次冒泡会让至少一个元素移动到它应该在的位置,重复 n 次,就完成了 n 个数据的排序工作。<br><img data-src="6fac06a2/24.png" alt="冒泡排序示例步骤拆解"></p>
+<h5 id="几点关于冒泡排序的思考"><a href="#几点关于冒泡排序的思考" class="headerlink" title="几点关于冒泡排序的思考"></a>几点关于冒泡排序的思考</h5><ul>
+<li>冒泡排序是原地排序算法吗?<br>冒泡的过程只涉及相邻数据的交换操作,只需要常量级的临时空间,所以它的空间复杂度为O(1),是一个原地排序算法。</li>
+<li>冒泡排序是稳定的排序算法吗?<br>在冒泡排序中,只有交换才可以改变两个元素的前后顺序。<br>保证冒泡排序算法的稳定性,当有相邻的两个元素大小相等的时候,我们不做交换,相同大小的数据在排序前后不会改变顺序,所以冒泡排序是稳定的排序算法。</li>
+<li>冒泡排序的时间复杂度是多少?<br>最好情况时间复杂度是 O(n)<br>最坏情况时间复杂度为 O(n)。<br>用概率论方法定量分析平均时间复杂度,涉及的数学推理和计算就会很复杂。<br>一种思路,通过<strong>“有序度”和“逆序度”</strong>这两个概念来进行分析。<h6 id="有关有序度与无序度的讨论"><a href="#有关有序度与无序度的讨论" class="headerlink" title="有关有序度与无序度的讨论"></a>有关有序度与无序度的讨论</h6>有序度是数组中具有有序关系的元素对的个数<br>例如：<br><img data-src="6fac06a2/25.png" alt="数组的有序度"><br>对于一个倒序排列的数组,比如 6,5,4,3,2,1,有序度是 0;对于一个完全有序的数组,比如 1,2,3,4,5,6,有序度就是n*(n-1)/2,也就是 15。我们把这种完全有序的数组的有序度叫作满有序度。</li>
+</ul>
+<p><strong>一个公式:逆序度 = 满有序度 - 有序度。</strong></p>
+<p>拿前面举的那个冒泡排序的例子：<br><img data-src="6fac06a2/26.png" alt="一则冒泡排序示例分析"><br>逆序度,也就是n*(n-1)/2–初始有序度。此例中就是 15–3=12,要进行 12 次交换操作。<br>对于包含 n 个数据的数组进行冒泡排序,平均交换次数是多少呢?最坏情况下,初始状态的有序度是 0,所以要进行 n*(n-1)/2 次交换。最好情况下,初始状态的有序度是 n*(n- 1)/2,就不需要进行交换。我们可以取个中间值 n*(n-1)/4,来表示初始有序度既不是很高也不是很低的平均情况。<br>平均情况下,需要 n*(n-1)/4 次交换操作,比较操作肯定要比交换操作多,而复杂度的上限是 O(n ),所以平均情况下的时间复杂度就是 O(n )。</p>
+<h4 id="插入排序-Insertion-Sort"><a href="#插入排序-Insertion-Sort" class="headerlink" title="插入排序(Insertion Sort)"></a>插入排序(Insertion Sort)</h4><p>一个有序的数组,我们往里面添加一个新的数据后,如何继续保持数据有序呢?<br><img data-src="6fac06a2/27.png" alt="保持有序的插入排序示例"></p>
+<h5 id="步骤拆解"><a href="#步骤拆解" class="headerlink" title="步骤拆解"></a>步骤拆解</h5><p>我们将数组中的数据分为两个区间,已排序区间和未排序区间。<br>初始已排序区间只有一个元素,就是数组的第一个元素。<br>插入算法的核心思想是取未排序区间中的元素,在已排序区间中找到合适的插入位置将其插入,并保证已排序区间数据一直有序。重复这个过程, 直到未排序区间中元素为空,算法结束。<br><img data-src="6fac06a2/28.png" alt="插入排序分步骤拆解"></p>
+<h5 id="几点思考"><a href="#几点思考" class="headerlink" title="几点思考"></a>几点思考</h5><ul>
+<li>插入排序是原地排序算法吗?<br>实现过程可以很明显地看出,插入排序算法的运行并不需要额外的存储空间,所以空间复杂度是 O(1),也就是说,这是一个原地排序算法。</li>
+<li>插入排序是稳定的排序算法吗?<br>保持原有的前后顺序不变,所以插入排序是稳定的排序算法</li>
+<li>插入排序的时间复杂度是多少?<br>每次插入都相当于在数组的第一个位置插入新的数据,所以需要移动大量的数据,所以最坏情况时间复杂度为 O(n )</li>
+</ul>
+<h4 id="选择排序-Selection-Sort"><a href="#选择排序-Selection-Sort" class="headerlink" title="选择排序(Selection Sort)"></a>选择排序(Selection Sort)</h4><p>也分已排序区间和未排序区间。但是选择排序每次会从未排序区间中找到最小的元素,将其放到已排序区间的末尾。<br><img data-src="6fac06a2/29.png" alt="选择排序原理示意图"><br>选择排序空间复杂度为 O(1),是一种原地排序算法。选择排序的最好情况时间复杂度、最坏情况和平均情况时间复杂度都为 O(n )<br><strong>选择排序是一种不稳定的排序算法。</strong></p>
+<h5 id="开篇答疑-2"><a href="#开篇答疑-2" class="headerlink" title="开篇答疑"></a>开篇答疑</h5><p>冒泡排序和插入排序的时间复杂度都是O(n ),都是原地排序算法,为什么插入排序要比冒泡排序更受欢迎呢?</p>
+<ul>
+<li>冒泡排序不管怎么优化,元素交换的次数是一个固定值,是原始数据的逆序度。</li>
+<li>插入排序是同样的,不管怎么优化,元素移动的次数也等于原始数据的逆序度。</li>
+<li>冒泡排序的数据交换要比插入排序的数据移动要复杂,冒泡排序需要 3 个赋值操作,而插入排序只需要 1 个。</li>
+<li><strong>插入排序的优化感兴趣,可以自行学习一下希尔排序</strong></li>
+</ul>
+<h5 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h5><p>对于小规模数据的排序,用起来非常高效。但是在大规模数据排序的时候,这个时间复杂度还是稍微有点高,所以我们更倾向于用下一节要讲的时间复杂度为 O(nlogn) 的排序算法。</p>
+<h4 id="如何用快排思想在O-n-内查找第K大元素？"><a href="#如何用快排思想在O-n-内查找第K大元素？" class="headerlink" title="如何用快排思想在O(n)内查找第K大元素？"></a>如何用快排思想在O(n)内查找第K大元素？</h4><p>两种时间复杂度为 O(nlogn) 的排序算法,归并排序和快速排序。这两种排序算法适合大规模的数据排序<br>我们选择数组区间 A[0…n-1] 的最后一个元素 A[n-1] 作为 pivot,对数组 A[0…n-1] 原地分区,这样数组就分成了三部分,A[0…p-1]、A[p]、A[p+1…n-1]。<br>如果 p+1=K,那 A[p] 就是要求解的元素;如果 K&gt;p+1, 说明第 K 大元素出现在 A[p+1…n-1] 区间,我们再按照上面的思路递归地在 A[p+1…n-1] 这个区间内查找。同理,如果K &lt; p+1,那我们就在 A[0…p-1] 区间查找。</p>
+<h4 id="归并排序"><a href="#归并排序" class="headerlink" title="归并排序"></a>归并排序</h4><p>核心思想还是蛮简单的。如果要排序一个数组,我们先把数组从中间分成前后两部分,然后对前后两部分分别排序,再将排好序的两部分合并在一起,这样整个数组就都有序了。<br><img data-src="6fac06a2/30.png" alt="归并排序分解图"><br>分治是一种解决问题的处理思想,递归是一种编程技巧</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 归并排序算法, A 是数组，n 表示数组大小</span></span><br><span class="line">merge_sort(A, n) &#123;</span><br><span class="line">merge_sort_c(A, <span class="number">0</span>, n-<span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 递归调用函数</span></span><br><span class="line">merge_sort_c(A, p, r) &#123;</span><br><span class="line"><span class="comment">// 递归终止条件</span></span><br><span class="line"><span class="keyword">if</span> p &gt;= r then <span class="keyword">return</span></span><br><span class="line"><span class="comment">// 取 p 到 r 之间的中间位置 q</span></span><br><span class="line">q = (p+r) / <span class="number">2</span></span><br><span class="line"><span class="comment">// 分治递归</span></span><br><span class="line">merge_sort_c(A, p, q)</span><br><span class="line">merge_sort_c(A, q+<span class="number">1</span>, r)</span><br><span class="line"><span class="comment">// 将 A[p...q] 和 A[q+1...r] 合并为 A[p...r]</span></span><br><span class="line">merge(A[p...r], A[p...q], A[q+<span class="number">1.</span>..r])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="归并排序的性能分析"><a href="#归并排序的性能分析" class="headerlink" title="归并排序的性能分析"></a>归并排序的性能分析</h5><ul>
+<li>归并排序是稳定的排序算法吗?<br>归并排序稳不稳定关键要看merge() 函数,也就是两个有序子数组合并成一个有序数组的那部分代码</li>
+<li>归并排序的时间复杂度是多少?<br>不仅递归求解的问题可以写成递推公式,递归代码的时间复杂度也可以写成递推公式。<br>如果我们定义求解问题 a 的时间是 T(a)，求解问题 b、c 的时间分别是 T(b) 和 T( c)，那我<br>们就可以得到这样的递推关系式：<br>T(a) = T(b) + T(c) + K<br>不仅递归求解的问题可以写成递推公式，递归代码的时间复杂度也可以写成递推公式。</li>
+<li>第三,归并排序的空间复杂度是多少?<br>归并排序的时间复杂度任何情况下都是 O(nlogn)<br>有一个致命的“弱点”,<strong>那就是归并排序不是原地排序算法。</strong></li>
+</ul>
+<h4 id="快速排序"><a href="#快速排序" class="headerlink" title="快速排序"></a>快速排序</h4><p>如果要排序数组中下标从 p 到 r 之间的一组数据,我们选择 p 到 r 之间的任意一个数据作为 pivot(分区点)。<br>我们遍历 p 到 r 之间的数据,将小于 pivot 的放到左边,将大于 pivot 的放到右边,将pivot 放到中间。经过这一步骤之后,数组 p 到 r 之间的数据就被分成了三个部分,前面 p 到 q-1 之间都是小于 pivot 的,中间是 pivot,后面的 q+1 到 r 之间是大于 pivot 的。<br><img data-src="6fac06a2/31.png" alt="快速排序分区示意图"></p>
+<p>根据分治、递归的处理思想，我们可以用递归排序下标从 p 到 q-1 之间的数据和下标从q+1 到 r 之间的数据，直到区间缩小为 1，就说明所有的数据都有序了。<br>递推公式：<br>quick_sort(p…r) = quick_sort(p…q-1) + quick_sort(q+1, r)<br>终止条件：<br>p &gt;= r<br>用代码表示就如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 快速排序，A 是数组，n 表示数组的大小</span></span><br><span class="line">quick_sort(A, n) &#123;</span><br><span class="line">quick_sort_c(A, <span class="number">0</span>, n-<span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 快速排序递归函数，p,r 为下标</span></span><br><span class="line">quick_sort_c(A, p, r) &#123;</span><br><span class="line"><span class="keyword">if</span> p &gt;= r then <span class="type">return</span></span><br><span class="line"><span class="variable">q</span> <span class="operator">=</span> partition(A, p, r) <span class="comment">// 获取分区点</span></span><br><span class="line">quick_sort_c(A, p, q-<span class="number">1</span>)</span><br><span class="line">quick_sort_c(A, q+<span class="number">1</span>, r)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5 id="快速排序之原地分区函数"><a href="#快速排序之原地分区函数" class="headerlink" title="快速排序之原地分区函数"></a>快速排序之原地分区函数</h5><p>伪代码如下：<br><img data-src="6fac06a2/32.png" alt="快速排序原地分区函数伪代码示例"></p>
+<p><img data-src="6fac06a2/33.png" alt="原地分区后的快速排序步骤拆解示例"><br>因为分区的过程涉及交换操作，如果数组中有两个相同的元素，比如序列 6，8，7，6，3，5，9，4，在经过第一次分区操作之后，两个 6 的相对先后顺序就会改变。所以，快速排序并不是一个稳定的排序算法</p>
+<h5 id="快排与归并的不同"><a href="#快排与归并的不同" class="headerlink" title="快排与归并的不同"></a>快排与归并的不同</h5><p>快排和归并用的都是分治思想，递推公式和递归代码也非常相似，那它们的区别在哪里呢？<br><img data-src="6fac06a2/34.png" alt="图解快排与归并的不同"><br>可以发现，归并排序的处理过程是由下到上的，先处理子问题，然后再合并。而快排正好相反，它的处理过程是由上到下的，先分区，然后再处理子问题。归并排序虽然是稳定的、时间复杂度为 O(nlogn) 的排序算法，但是它是非原地排序算法。我们前面讲过，归并之所以是非原地排序算法，主要原因是合并函数无法在原地执行。快速排序通过设计巧妙的原地分区函数，可以实现原地排序，解决了归并排序占用太多内存的问题。</p>
+<h3 id="线性排序"><a href="#线性排序" class="headerlink" title="线性排序"></a>线性排序</h3><p>三种时间复杂度是O(n)的排序算法:桶排序、计数排序、基数排序。因为这些排序算法的时间复杂度是线性的,所以我们把这类排序算法叫作线性排序( Linear sort</p>
+<h4 id="桶排序"><a href="#桶排序" class="headerlink" title="桶排序"></a>桶排序</h4><p><img data-src="6fac06a2/35.png" alt="桶排序示例"><br>桶排序看起来很优秀,那它是不是可以替代我们之前讲的排序算法呢?<br>桶排序比较适合用在外部排序中。所谓的外部排序就是数据存储在外部磁盘中,数据量比较大,内存有限,无法将数据全部加載到内存中。<br>例如：<br>比如说我们有10GB的订单数据,我们希望按订单金额(假设金额都是正整数)进行排序,但是我们的内存有限,只有几百MB,没办法一次性把106B的数据都加载到内存中。这个时候该怎么办呢?<br>先扫描一遍文件,看订单金额所处的数据范围。假设经过扫描之后我们得到,订单金额最小是1元最大是10万元。我们将所有订单根据金额划分到100个桶里,第一个桶我们存储金额在1元到1000元之内的订单,第二桶存储金额在1001元到2000元之内的订单,以此类推。每一个桶对应一个文件,并且按照金额范围的大小顺序编号命名(00,01,0299)<br>如果订单金额在1到10万之间均匀分布,那订单会被均匀划分到100个文件中,每个小文件中存储大约100MB的订单数据,我们就可以将这100个小文件依次放到内存中,用快排来排序<br><strong>但是</strong>订单按照金额在1元到10万元之间并不一定是均匀分布的:<br><em>如何借助桶排序的处理思想来解决这个问题。</em><br>可以先扫描一遍文件,看订单金额所处的数据范国。假设经过扫描之后我们得到; 最小是1元,最大是10万元。我们将所有订单根据金额划分到100个桶里,第门存储金额在1元到1000元之内的订单,第二桶存储金额在1001元到2000元单,以此类推。每一个桶对应一个文件,并且按照金额范围的大小顺序编号命名01,02.99)。<br>针对这些划分之后还是比较大的文件,我们可以继续划分,比如,订单金额在1元到1000 元之间的比较多,我们就将这个区间继续划分为10个小区间,1元到100元,101元到200元,201元到300元.901元到1000元。如果划分之后,101元到200元之间的订单还是太多,无法一次性读入内存,那就继续再划分,直到所有的文件都能读入内存为止</p>
+<h4 id="计数排序-Counting-sort"><a href="#计数排序-Counting-sort" class="headerlink" title="计数排序( Counting sort)"></a>计数排序( Counting sort)</h4><p>计数排序其实是桶排序的一种特殊情况<br>举例：考生的满分是900分,最小是0分,这个数据的范围很小,所以我们可以分成901个桶对应分数从0分到900分。根据考生的成绩,我们将这50万考生划分到这901个桶里。</p>
+<h5 id="深入理解计数含义"><a href="#深入理解计数含义" class="headerlink" title="深入理解计数含义"></a>深入理解计数含义</h5><p>计数排序的算法思想就是这么简单,跟桶排序非常类似,只是桶的大小粒度不一样。不过, 为什么这个排序算法叫“计数”排序呢?“计数”的含义来自哪里呢?<br>【举例】假设只有8个考生,分数在0到5分之间。这8 个考生的成绩我们放在一个数组A[8]中,它们分別是:2,5,3,0,2,3,0,3。<br>考生的成绩从0到5分,我们使用大小为6的数组C[6]表示桶,其中下标对应分数。如下图所示：<br><img data-src="6fac06a2/36.png" alt="考生成绩划分后的计数数组"><br>从上图中可以看出：<br><img data-src="6fac06a2/37.png" alt="思考"><br><img data-src="6fac06a2/38.png" alt="成绩3的划分场景"></p>
+<h5 id="关键问题：如何计算位置？"><a href="#关键问题：如何计算位置？" class="headerlink" title="关键问题：如何计算位置？"></a>关键问题：如何计算位置？</h5><p>如何快速计算出,每个分数的考生在有序数组中对应的存储位置呢?<br>我们对C[6]数组顺序求和,C[6]存储的数据就变成了下面这样子。C[k]里存储小于等于分数k的考生个数，如下图所示：<br><img data-src="6fac06a2/39.png" alt="顺序求和之后的数组"><br>我们从后到前依次扫描数组 A。比如，当扫描到 3 时，我们可以从数组 C 中取出下标为 3的值 7，也就是说，到目前为止，包括自己在内，分数小于等于 3 的考生有 7 个，也就是说 3 是数组 R 中的第 7 个元素（也就是数组 R 中下标为 6 的位置）。当 3 放入到数组 R中后，小于等于 3 的元素就只剩下了 6 个了，所以相应的 C[3] 要减 1，变成 6。<br>以此类推，当我们扫描到第 2 个分数为 3 的考生的时候，就会把它放入数组 R 中的第 6 个元素的位置（也就是下标为 5 的位置）。当我们扫描完整个数组 A 后，数组 R 内的数据就是按照分数从小到大有序排列的了。<br><img data-src="6fac06a2/40.png" alt="拆解计算步骤"></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 计数排序，a 是数组，n 是数组大小。假设数组中存储的都是非负整数。</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">countingSort</span><span class="params">(<span class="type">int</span>[] a, <span class="type">int</span> n)</span> &#123;</span><br><span class="line"><span class="keyword">if</span> (n &lt;= <span class="number">1</span>) <span class="keyword">return</span>;</span><br><span class="line"><span class="comment">// 查找数组中数据的范围</span></span><br><span class="line"><span class="type">int</span> <span class="variable">max</span> <span class="operator">=</span> a[<span class="number">0</span>];</span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt; n; ++i) &#123;</span><br><span class="line"><span class="keyword">if</span> (max &lt; a[i]) &#123;</span><br><span class="line">max = a[i];</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span>[] c = <span class="keyword">new</span> <span class="title class_">int</span>[max + <span class="number">1</span>]; <span class="comment">// 申请一个计数数组 c，下标大小 [0,max]</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt;= max; ++i) &#123;</span><br><span class="line">c[i] = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 计算每个元素的个数，放入 c 中</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">c[a[i]]++;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 依次累加</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">1</span>; i &lt;= max; ++i) &#123;</span><br><span class="line">c[i] = c[i-<span class="number">1</span>] + c[i];</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 临时数组 r，存储排序之后的结果</span></span><br><span class="line"><span class="type">int</span>[] r = <span class="keyword">new</span> <span class="title class_">int</span>[n];</span><br><span class="line"><span class="comment">// 计算排序的关键步骤，有点难理解</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> n - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i) &#123;</span><br><span class="line"><span class="type">int</span> <span class="variable">index</span> <span class="operator">=</span> c[a[i]]-<span class="number">1</span>;</span><br><span class="line">r[index] = a[i];</span><br><span class="line">c[a[i]]--;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 将结果拷贝给 a 数组</span></span><br><span class="line"><span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; n; ++i) &#123;</span><br><span class="line">a[i] = r[i];</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h5><p>计数排序只能用在数据范围不大的场景中，如果数据范围 k 比要排序的数据n 大很多，就不适合用计数排序了。而且，计数排序只能给非负整数排序，如果要排序的数据是其他类型的，要将其在不改变相对大小的情况下，转化为非负整数。</p>
+<p>比如，还是拿考生这个例子。如果考生成绩精确到小数后一位，我们就需要将所有的分数都先乘以 10，转化成整数，然后再放到 9010 个桶内。再比如，如果要排序的数据中有负数，数据的范围是 [-1000, 1000]，那我们就需要先对每个数据都加 1000，转化成非负整数。</p>
+<h4 id="基数排序-Radix-sort"><a href="#基数排序-Radix-sort" class="headerlink" title="基数排序( Radix sort)"></a>基数排序( Radix sort)</h4><p>假设我们有10万个手机号码,希望将这10万个手机号码从小到大排序,你有什么比较快速的排序方法呢?<br><img data-src="6fac06a2/41.png" alt="图解计数排序过程"><br>这里按照每位来排序的排序算法要是稳定的,否则这个实现思路就是不正确的。因为如如果是非稳定排序算法,那最后一次排序只会考虑最高位的大小顺序,完全不管其他位的大小关系,那么低位的排序就完全没有意义了。<br><strong>有时候要排序的数据并不都是等长的</strong><br>实际上,我们可以把所有的单词补齐到相同长度,位数不够的可以在后面补“0”,因为根据ASCI值,所有字母都大于“0”,所以补“0”不会影响到原有的大小顺序。这样就可以继续用基数排序了</p>
+<p>基数排序对要排序的数据是有要求的,需要可以分割出独立的“位”来比较,而且位之间有递进的关系,如果a数据的高位比b数据大,那剩下的低位就不用比较了。除此之外,每一位的数据范围不能太大,要可以用线性排序算法来排序,否则,基数排序的时间复杂度就无法做到O(n)了。</p>
+<h3 id="排序优化"><a href="#排序优化" class="headerlink" title="排序优化"></a>排序优化</h3><p>如何实现一个通用的、高性能的排序函数？<br><img data-src="6fac06a2/42.png" alt="各排序函数时间复杂度一览"><br>为了兼顾任意规模数据的排序, 一般都会首选时间复杂度是 O(nlogn) 的排序算法来实现排序函数。<br>快速排序在最坏情况下的时间复杂度是 O(n ),如何来解决这个“复杂度恶化”的问题呢?</p>
+<h4 id="如何优化快速排序"><a href="#如何优化快速排序" class="headerlink" title="如何优化快速排序?"></a>如何优化快速排序?</h4><p>每次分区点都选择最后一个数据,那快速排序算法就会变得非常糟糕,时间复杂度就会退化为 O(n )。实际上,这种 O(n ) 时间复杂度出现的主要原因还是因为我们分区点选的不够合理。<br>最理想的分区点是:被分区点分开的两个分区中,数据的数量差不多。</p>
+<ul>
+<li>三数取中法<br>我们从区间的首、尾、中间,分别取出一个数,然后对比大小,取这 3 个数的中间值作为分区点。</li>
+<li>随机法<br>随机法就是每次从要排序的区间中,随机选择一个元素作为分区点。</li>
+</ul>
+<p><strong>递归要警惕堆栈溢出。为了避免快速排序里,递归过深而堆栈过小,导致堆栈溢出,我们有两种解决办法:第一种是限制递归深度。一旦递归过深,超过了我们事先设定的阈值,就停止递归。第二种是通过在堆上模拟实现一个函数调用栈,手动模拟递归压栈、出栈的过程,这样就没有了系统栈大小的限制。</strong></p>
+<h4 id="举例分析排序函数"><a href="#举例分析排序函数" class="headerlink" title="举例分析排序函数"></a>举例分析排序函数</h4><p>Glibc 中的 qsort() 函数举例</p>
+<ul>
+<li>qsort() 会优先使用归并排序来排序输入数据</li>
+<li>要排序的数据量比较大的时候,qsort() 会改为用快速排序算法来排序。</li>
+<li>提到的递归太深会导致堆栈溢出的问题,qsort() 是通过自己实现一个堆上的栈,手动模拟递归来解决的</li>
+<li>用到了插入排序。在快速排序的过程中,当要排序的区间中,元素的个数小于等于 4 时,qsort() 就退化为插入排序,不再继续用递归来做快速排序,</li>
+</ul>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><p>实战总结篇，限于本文篇幅可能会过长，该部分参见个人另一篇博客中的具体实战讨论细节<br>传送门：<a href="https://nimbusk.cc/post/faed3d05">极客时间-数据结构与算法-实战篇</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/6fac06a2.html" title="极客时间-数据结构与算法">https://nimbusk.cc/post/6fac06a2.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%AE%97%E6%B3%95/" rel="tag"># 算法</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag"># 数据结构</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/34b1852f.html" rel="prev" title="rss订阅测试">
+                  <i class="fa fa-angle-left"></i> rss订阅测试
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/faed3d05.html" rel="next" title="极客时间-数据结构与算法-实战篇">
+                  极客时间-数据结构与算法-实战篇 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"3ead8439ff1e73ca65f535762b78d98e"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>

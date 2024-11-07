@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic%7CLobster+Two:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha256-5eIC48iZUHmSlSUz9XtjRyK2mzQkHScZY1WdMaoz74E=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.css" integrity="sha256-gkQVf8UKZgQ0HyuxL/VnacadJ+D2Kox2TCEBuNQg5+w=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"nimbusk.cc","root":"/","images":"/images","scheme":"Pisces","darkmode":false,"version":"8.21.0","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"copycode":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false,"trigger":"auto"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="背景一位好友找我，问我有没有弄过RStudio，以前了解过R语言，用于统计分析的，但是实际没有实战过。所以嘛，就准备了一下，记录一下探索过程。 :) 前言本片文章简单介绍一些RStudio相关以及少量统计学相关的知识，供上手学习使用。毕竟是一门编程语言，语法看了一下，不是很复杂，具备一定C语言即可，一些代码片段就可能看懂了。如有相关错误，欢迎评论区留言指正，谢谢。本文相关运行环境为：  OS：Mi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="R语言统计分析实战（RStudio）">
+<meta property="og:url" content="https://nimbusk.cc/post/a93eddc5.html">
+<meta property="og:site_name" content="NimbusK&#39;s Blog">
+<meta property="og:description" content="背景一位好友找我，问我有没有弄过RStudio，以前了解过R语言，用于统计分析的，但是实际没有实战过。所以嘛，就准备了一下，记录一下探索过程。 :) 前言本片文章简单介绍一些RStudio相关以及少量统计学相关的知识，供上手学习使用。毕竟是一门编程语言，语法看了一下，不是很复杂，具备一定C语言即可，一些代码片段就可能看懂了。如有相关错误，欢迎评论区留言指正，谢谢。本文相关运行环境为：  OS：Mi">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/mainsite_of_r_project.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/mirror_site_of_r_download_page.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/different_platform_of_r.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/different_version_of_r.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/install_select_install_path.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/install_start_option.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/download_site_of_rstudio.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/select_different_version_of_rstudio.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/rstudio_main_page.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Histogram_email_domain_frequence.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Histogram_email_domain_site_frequence.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Bayes_Theorem.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Bernoulli_distribution.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Binomial_pdf.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Beta_pdf.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/AutoCapture_2019-12-28_014018.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/AutoCapture_2019-12-28_014024.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/AutoCapture_2019-12-28_014028.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/AutoCapture_2019-12-28_014034.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/AutoCapture_2019-12-28_014039.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/AutoCapture_2019-12-28_014044.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/AutoCapture_2019-12-28_014049.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Bayesian_Inference1.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Bayesian_Inference2.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Bayesian_Inference3.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/probability_mass_function.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Poisson_Distribution.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/probability_density_function.jpg">
+<meta property="og:image" content="https://nimbusk.cc/post/a93eddc5/Exponential_Distribution.jpg">
+<meta property="article:published_time" content="2019-12-27T21:42:17.000Z">
+<meta property="article:modified_time" content="2024-10-28T20:30:21.000Z">
+<meta property="article:author" content="nimbusk">
+<meta property="article:tag" content="统计学">
+<meta property="article:tag" content="R语言">
+<meta property="article:tag" content="RStudio">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nimbusk.cc/post/a93eddc5/mainsite_of_r_project.jpg">
+
+
+<link rel="canonical" href="https://nimbusk.cc/post/a93eddc5.html">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://nimbusk.cc/post/a93eddc5.html","path":"post/a93eddc5.html","title":"R语言统计分析实战（RStudio）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>R语言统计分析实战（RStudio） | NimbusK's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">NimbusK's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li><li class="menu-item menu-item-commonweal"><a href="/404/" rel="section"><i class="fa fa-heartbeat fa-fw"></i>公益 404</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="搜索..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">2.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%9F%E8%AE%A1%E5%AD%A6%E7%9B%B8%E5%85%B3%E7%90%86%E8%AE%BA%EF%BC%88%E7%AE%80%E8%A6%81%EF%BC%89"><span class="nav-number">3.</span> <span class="nav-text">统计学相关理论（简要）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5%E4%BB%8B%E7%BB%8D"><span class="nav-number">4.</span> <span class="nav-text">相关概念介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFR%E8%AF%AD%E8%A8%80"><span class="nav-number">4.1.</span> <span class="nav-text">什么是R语言</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFRStudio"><span class="nav-number">4.2.</span> <span class="nav-text">什么是RStudio</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#R%E5%92%8CRStudio%E4%B9%8B%E9%97%B4%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">4.3.</span> <span class="nav-text">R和RStudio之间的关系</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83%E5%87%86%E5%A4%87"><span class="nav-number">5.</span> <span class="nav-text">环境准备</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85R"><span class="nav-number">5.1.</span> <span class="nav-text">安装R</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDR%E5%AE%89%E8%A3%85%E5%8C%85"><span class="nav-number">5.1.1.</span> <span class="nav-text">下载R安装包</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">5.1.2.</span> <span class="nav-text">安装</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85RStudio"><span class="nav-number">5.2.</span> <span class="nav-text">安装RStudio</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%8B%E8%BD%BDRStudio%E5%AE%89%E8%A3%85%E5%8C%85"><span class="nav-number">5.2.1.</span> <span class="nav-text">下载RStudio安装包</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-1"><span class="nav-number">5.2.2.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E8%BF%90%E8%A1%8C%E8%B0%83%E8%AF%95"><span class="nav-number">5.2.3.</span> <span class="nav-text">基本运行调试</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#R%E8%AF%AD%E8%A8%80%E8%AF%AD%E6%B3%95%E6%93%8D%E4%BD%9C%E7%9B%B8%E5%85%B3"><span class="nav-number">6.</span> <span class="nav-text">R语言语法操作相关</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95"><span class="nav-number">6.1.</span> <span class="nav-text">基础语法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E8%BF%90%E7%AE%97%E7%AC%A6-Simple-manipulations"><span class="nav-number">6.1.1.</span> <span class="nav-text">基础运算符(Simple manipulations)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9%E8%B1%A1%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B1%9E%E6%80%A7-Objects-their-modes-and-attributes"><span class="nav-number">6.1.2.</span> <span class="nav-text">对象模型和属性(Objects, their modes and attributes)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%9C%89%E5%BA%8F%E5%92%8C%E6%97%A0%E5%BA%8F%E6%93%8D%E4%BD%9C%E7%AC%A6-Ordered-and-unordered-factors"><span class="nav-number">6.1.3.</span> <span class="nav-text">有序和无序操作符(Ordered and unordered factors)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B0%E7%BB%84%E5%92%8C%E7%9F%A9%E9%98%B5-Arrays-and-matrices"><span class="nav-number">6.1.4.</span> <span class="nav-text">数组和矩阵(Arrays and matrices)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%97%E8%A1%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E7%89%87%E6%AE%B5-Lists-and-data-frames"><span class="nav-number">6.1.5.</span> <span class="nav-text">列表和数据片段(Lists and data frames)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E6%93%8D%E4%BD%9C"><span class="nav-number">6.2.</span> <span class="nav-text">基础操作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BB%8E%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E6%95%B0%E6%8D%AE-Reading-data-from-files"><span class="nav-number">6.2.1.</span> <span class="nav-text">从文件读取数据(Reading data from files)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%AF%E8%83%BD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%88%86%E5%B8%83-Probability-distributions"><span class="nav-number">6.2.2.</span> <span class="nav-text">可能的数据分布(Probability distributions)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%88%86%E7%BB%84%E3%80%81%E5%BE%AA%E7%8E%AF%E5%92%8C%E6%9D%A1%E4%BB%B6%E8%BF%90%E7%AE%97-Grouping-loops-and-conditional-execution"><span class="nav-number">6.2.3.</span> <span class="nav-text">数据分组、循环和条件运算(Grouping, loops and conditional execution)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E8%87%AA%E5%B7%B1%E7%9A%84%E8%BF%90%E7%AE%97%E5%87%BD%E6%95%B0-Writing-your-own-functions"><span class="nav-number">6.2.4.</span> <span class="nav-text">编写自己的运算函数(Writing your own functions)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#R%E4%B8%AD%E7%9A%84%E7%BB%9F%E8%AE%A1%E6%A8%A1%E5%9E%8B-Statistical-models-in-R"><span class="nav-number">6.2.5.</span> <span class="nav-text">R中的统计模型(Statistical models in R)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9B%BE%E5%BD%A2%E5%A4%84%E7%90%86-Graphical-procedures"><span class="nav-number">6.2.6.</span> <span class="nav-text">图形处理(Graphical procedures)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RStudio%E4%BD%BF%E7%94%A8%E6%95%99%E7%A8%8B"><span class="nav-number">7.</span> <span class="nav-text">RStudio使用教程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%95%8C%E9%9D%A2%E4%BB%8B%E7%BB%8D"><span class="nav-number">7.1.</span> <span class="nav-text">基本界面介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%AF%87"><span class="nav-number">7.2.</span> <span class="nav-text">基础篇</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9B%E9%98%B6%E7%AF%87"><span class="nav-number">7.3.</span> <span class="nav-text">进阶篇</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B7%E4%BE%8B%E5%AE%9E%E6%88%98"><span class="nav-number">8.</span> <span class="nav-text">样例实战</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%B7%E4%BE%8B1%EF%BC%9A%E4%B8%80%E4%BE%8B%E9%BB%91%E5%AE%A2%E5%9B%A2%E9%98%9F%E9%82%AE%E7%AE%B1%E5%88%97%E8%A1%A8%E5%88%86%E6%9E%90"><span class="nav-number">8.1.</span> <span class="nav-text">样例1：一例黑客团队邮箱列表分析</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8E%9F%E6%96%87%E5%88%86%E6%9E%90%E7%9B%AE%E7%9A%84"><span class="nav-number">8.1.1.</span> <span class="nav-text">原文分析目的</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE%E6%BA%90"><span class="nav-number">8.1.2.</span> <span class="nav-text">获取数据源</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E5%88%86%E6%9E%90"><span class="nav-number">8.1.3.</span> <span class="nav-text">开始分析</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E5%BC%95%E7%94%A8%E5%BF%85%E8%A6%81%E7%9A%84%E7%B1%BB%E5%BA%93"><span class="nav-number">8.1.3.1.</span> <span class="nav-text">引用必要的类库</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%B1%87%E6%80%BB%E5%9F%9F%E5%90%8D%E9%A2%91%E7%8E%87%E5%88%86%E5%B8%83%E6%9F%B1%E7%8A%B6%E5%9B%BE"><span class="nav-number">8.1.4.</span> <span class="nav-text">分析汇总域名频率分布柱状图</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E5%9F%9F%E5%90%8D%E5%AF%B9%E5%BA%94%E5%9B%BD%E5%AE%B6%E5%87%BA%E7%8E%B0%E9%A2%91%E7%8E%87"><span class="nav-number">8.1.5.</span> <span class="nav-text">分析域名对应国家出现频率</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">8.1.6.</span> <span class="nav-text">结论</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E4%BB%A3%E7%A0%81"><span class="nav-number">8.1.7.</span> <span class="nav-text">完整代码</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A0%B7%E4%BE%8B2%EF%BC%9A%E8%B4%9D%E5%8F%B6%E6%96%AF%E7%BB%9F%E8%AE%A1%E7%90%86%E8%AE%BA%E6%8E%A2%E8%AE%A8"><span class="nav-number">8.2.</span> <span class="nav-text">样例2：贝叶斯统计理论探讨</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A6%82%E5%BF%B5%E7%9B%B8%E5%85%B3"><span class="nav-number">8.2.1.</span> <span class="nav-text">概念相关</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E8%B4%9D%E5%8F%B6%E6%96%AF%E5%AE%9A%E7%90%86"><span class="nav-number">8.2.1.1.</span> <span class="nav-text">贝叶斯定理</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BC%AF%E5%8A%AA%E5%88%A9%E5%88%86%E5%B8%83"><span class="nav-number">8.2.1.2.</span> <span class="nav-text">伯努利分布</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%E4%BA%8C%E9%A1%B9%E5%BC%8F%E5%AE%9A%E7%90%86"><span class="nav-number">8.2.1.3.</span> <span class="nav-text">二项式定理</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#%CE%B2%E5%88%86%E5%B8%83"><span class="nav-number">8.2.1.4.</span> <span class="nav-text">β分布</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8E%A2%E7%A9%B6%E8%AF%BE%E9%A2%98"><span class="nav-number">8.2.2.</span> <span class="nav-text">探究课题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B3%8A%E6%9D%BE%E5%88%86%E5%B8%83"><span class="nav-number">8.2.3.</span> <span class="nav-text">泊松分布</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%A6%82%E7%8E%87%E8%B4%A8%E9%87%8F%E5%87%BD%E6%95%B0"><span class="nav-number">8.2.3.1.</span> <span class="nav-text">概率质量函数</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%8C%87%E6%95%B0%E5%88%86%E5%B8%83"><span class="nav-number">8.2.4.</span> <span class="nav-text">指数分布</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#%E6%A6%82%E7%8E%87%E5%AF%86%E5%BA%A6%E5%87%BD%E6%95%B0"><span class="nav-number">8.2.4.1.</span> <span class="nav-text">概率密度函数</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%95%E7%94%A8"><span class="nav-number">9.</span> <span class="nav-text">引用</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nimbusk"
+      src="/images/avatar.gif">
+  <p class="site-author-name" itemprop="name">nimbusk</p>
+  <div class="site-description" itemprop="description">写好一个博客</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">78</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">29</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/nimbusking" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;nimbusking" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:kemivong@hotmail.com" title="E-Mail → mailto:kemivong@hotmail.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nimbusk.cc/post/a93eddc5.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="nimbusk">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="NimbusK's Blog">
+      <meta itemprop="description" content="写好一个博客">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="R语言统计分析实战（RStudio） | NimbusK's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          R语言统计分析实战（RStudio）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+
+  
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-12-27 21:42:17" itemprop="dateCreated datePublished" datetime="2019-12-27T21:42:17+00:00">2019-12-27</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2024-10-28 20:30:21" itemprop="dateModified" datetime="2024-10-28T20:30:21+00:00">2024-10-28</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E7%BB%9F%E8%AE%A1%E5%88%86%E6%9E%90/" itemprop="url" rel="index"><span itemprop="name">统计分析</span></a>
+        </span>
+    </span>
+
+  
+    <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="far fa-eye"></i>
+      </span>
+      <span class="post-meta-item-text">阅读次数：</span>
+      <span id="busuanzi_value_page_pv"></span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>一位好友找我，问我有没有弄过RStudio，以前了解过R语言，用于统计分析的，但是实际没有实战过。所以嘛，就准备了一下，记录一下探索过程。 :)</p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本片文章简单介绍一些RStudio相关以及少量统计学相关的知识，供上手学习使用。毕竟是一门编程语言，语法看了一下，不是很复杂，具备一定C语言即可，一些代码片段就可能看懂了。<br>如有相关错误，欢迎评论区留言指正，谢谢。<br>本文相关运行环境为：</p>
+<ul>
+<li>OS：Microsoft Windows [版本 10.0.18363.535]</li>
+<li>内存：32GB</li>
+<li>R版本：3.6.2</li>
+<li>RStudio版本：1.2.5033.0<br>【注】 下文相关截图等数据均基于上述软件版本，如后期版本更新等，类推即可。</li>
+</ul>
+<h3 id="统计学相关理论（简要）"><a href="#统计学相关理论（简要）" class="headerlink" title="统计学相关理论（简要）"></a>统计学相关理论（简要）</h3><h3 id="相关概念介绍"><a href="#相关概念介绍" class="headerlink" title="相关概念介绍"></a>相关概念介绍</h3><h4 id="什么是R语言"><a href="#什么是R语言" class="headerlink" title="什么是R语言"></a>什么是R语言</h4><p>R是R统计计算基金支持的用于统计计算，图形编程的免费软件环境。R语言在统计学家和数据挖掘者中广泛用于数据分析软件和数据挖掘。数据挖掘和学术文献数据库研究表明其普及程度大幅度提高。截至到2019年11月，在TIOBE排行[一个知名的编程语言排行榜，用于衡量编程语言的热度]中，R语言排名第16位。<sup>[1]</sup></p>
+<h4 id="什么是RStudio"><a href="#什么是RStudio" class="headerlink" title="什么是RStudio"></a>什么是RStudio</h4><p>RStudio是R语言的一款免费的IDE编写工具。为计算环境提供最灌灌的使用的开源和企业就绪型专业软件。提供了脚本调试、可视化等功能，支持纯R脚本、Rmarkdown（脚本文档混排）、Bookdown（脚本混排混排成书）、Shiny（交互式网络应用）等功能。<sup>[2]</sup></p>
+<h4 id="R和RStudio之间的关系"><a href="#R和RStudio之间的关系" class="headerlink" title="R和RStudio之间的关系"></a>R和RStudio之间的关系</h4><p>R是一个基础的环境程序，是运行R语言脚本必须的基础运行时环境。类似的像其它的编程语言，类如：Java、C、Python等等，必须安装相关的运行时环境一样，否则你无法直接运行的。而RStudio只是一款可视化编辑工具而已。</p>
+<span id="more"></span>
+<h3 id="环境准备"><a href="#环境准备" class="headerlink" title="环境准备"></a>环境准备</h3><h4 id="安装R"><a href="#安装R" class="headerlink" title="安装R"></a>安装R</h4><h5 id="下载R安装包"><a href="#下载R安装包" class="headerlink" title="下载R安装包"></a>下载R安装包</h5><ol>
+<li>打开R的官网：<a target="_blank" rel="noopener" href="https://www.r-project.org/">https://www.r-project.org/</a></li>
+<li>在左侧菜单栏中找到下载(download)，点击 <em>CRAN</em>，打开镜像网站列表页面，如下图所示：<br><img data-src="a93eddc5/mainsite_of_r_project.jpg" alt="R语言主站"></li>
+<li>找到中国站点，列了很多国内大学及机构的站点，像清华、中科大、同济，随笔找一个点击连接，如下图所示：<br><img data-src="a93eddc5/mirror_site_of_r_download_page.jpg" alt="下载"></li>
+<li>选择指定平台的R语言平台，如果是windows的就选择 <em>Download R for Windows</em>就是，如下图所示：<br><img data-src="a93eddc5/different_platform_of_r.jpg" alt="windows"></li>
+<li>选择R的版本，直接单击<em>base</em>即可<br><img data-src="a93eddc5/different_version_of_r.jpg" alt="version"></li>
+<li>直接单击<em>Download R 3.6.2 for Windows</em>开始下载</li>
+</ol>
+<h5 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h5><p>基本一路 <strong>next</strong>下去即可，有三步提一下</p>
+<ol>
+<li>安装路径，默认C盘，选择你指定的盘路径即可：<br><img data-src="a93eddc5/install_select_install_path.jpg" alt="安装路径"></li>
+<li>选择组件，默认全部勾选即可</li>
+<li>启动选项，选择第二个：*No(接受默认选择)*即可<br><img data-src="a93eddc5/install_start_option.jpg" alt="启动选项"></li>
+</ol>
+<h4 id="安装RStudio"><a href="#安装RStudio" class="headerlink" title="安装RStudio"></a>安装RStudio</h4><h5 id="下载RStudio安装包"><a href="#下载RStudio安装包" class="headerlink" title="下载RStudio安装包"></a>下载RStudio安装包</h5><ol>
+<li>打开RStudio官网：<a target="_blank" rel="noopener" href="https://rstudio.com/products/rstudio/download/">https://rstudio.com/products/rstudio/download/</a></li>
+<li>点击页面中 <em>Free</em>下的 <em>DOWNLOAD</em>按钮，跳转到下载页面<br><img data-src="a93eddc5/download_site_of_rstudio.jpg" alt="下载rstudio"></li>
+<li>选择你需要的版本，如windows版本<br><img data-src="a93eddc5/select_different_version_of_rstudio.jpg" alt="选择指定版本"></li>
+</ol>
+<h5 id="安装-1"><a href="#安装-1" class="headerlink" title="安装"></a>安装</h5><p>过程很简单，除了第一步你需要选择安装路径之外，其余默认即可，过程3步就可以安装完成。<br>此过程就不贴安装过程了。</p>
+<h5 id="基本运行调试"><a href="#基本运行调试" class="headerlink" title="基本运行调试"></a>基本运行调试</h5><p>运行RStudio（页面没有快捷方式的话，去开始菜单栏里找一下），如下图所示：<br><img data-src="a93eddc5/rstudio_main_page.jpg" alt="主界面"><br>在左侧的 <em>Console</em>选项卡下，闪烁的光标后输入：<em>1+1</em>后，按键盘 *回车(Enter)*，如果下一行显示[1] 2，证明安装好了。</p>
+<h3 id="R语言语法操作相关"><a href="#R语言语法操作相关" class="headerlink" title="R语言语法操作相关"></a>R语言语法操作相关</h3><p>本语法小节参考R语言官方手册<sup>[3]</sup>中关于语法相关(基本上就是翻译了一下)，更多相关介绍直接请查阅手册其余内容。</p>
+<h4 id="基础语法"><a href="#基础语法" class="headerlink" title="基础语法"></a>基础语法</h4><h5 id="基础运算符-Simple-manipulations"><a href="#基础运算符-Simple-manipulations" class="headerlink" title="基础运算符(Simple manipulations)"></a>基础运算符(Simple manipulations)</h5><h5 id="对象模型和属性-Objects-their-modes-and-attributes"><a href="#对象模型和属性-Objects-their-modes-and-attributes" class="headerlink" title="对象模型和属性(Objects, their modes and attributes)"></a>对象模型和属性(Objects, their modes and attributes)</h5><h5 id="有序和无序操作符-Ordered-and-unordered-factors"><a href="#有序和无序操作符-Ordered-and-unordered-factors" class="headerlink" title="有序和无序操作符(Ordered and unordered factors)"></a>有序和无序操作符(Ordered and unordered factors)</h5><h5 id="数组和矩阵-Arrays-and-matrices"><a href="#数组和矩阵-Arrays-and-matrices" class="headerlink" title="数组和矩阵(Arrays and matrices)"></a>数组和矩阵(Arrays and matrices)</h5><h5 id="列表和数据片段-Lists-and-data-frames"><a href="#列表和数据片段-Lists-and-data-frames" class="headerlink" title="列表和数据片段(Lists and data frames)"></a>列表和数据片段(Lists and data frames)</h5><h4 id="基础操作"><a href="#基础操作" class="headerlink" title="基础操作"></a>基础操作</h4><h5 id="从文件读取数据-Reading-data-from-files"><a href="#从文件读取数据-Reading-data-from-files" class="headerlink" title="从文件读取数据(Reading data from files)"></a>从文件读取数据(Reading data from files)</h5><h5 id="可能的数据分布-Probability-distributions"><a href="#可能的数据分布-Probability-distributions" class="headerlink" title="可能的数据分布(Probability distributions)"></a>可能的数据分布(Probability distributions)</h5><h5 id="数据分组、循环和条件运算-Grouping-loops-and-conditional-execution"><a href="#数据分组、循环和条件运算-Grouping-loops-and-conditional-execution" class="headerlink" title="数据分组、循环和条件运算(Grouping, loops and conditional execution)"></a>数据分组、循环和条件运算(Grouping, loops and conditional execution)</h5><h5 id="编写自己的运算函数-Writing-your-own-functions"><a href="#编写自己的运算函数-Writing-your-own-functions" class="headerlink" title="编写自己的运算函数(Writing your own functions)"></a>编写自己的运算函数(Writing your own functions)</h5><h5 id="R中的统计模型-Statistical-models-in-R"><a href="#R中的统计模型-Statistical-models-in-R" class="headerlink" title="R中的统计模型(Statistical models in R)"></a>R中的统计模型(Statistical models in R)</h5><h5 id="图形处理-Graphical-procedures"><a href="#图形处理-Graphical-procedures" class="headerlink" title="图形处理(Graphical procedures)"></a>图形处理(Graphical procedures)</h5><h3 id="RStudio使用教程"><a href="#RStudio使用教程" class="headerlink" title="RStudio使用教程"></a>RStudio使用教程</h3><h4 id="基本界面介绍"><a href="#基本界面介绍" class="headerlink" title="基本界面介绍"></a>基本界面介绍</h4><h4 id="基础篇"><a href="#基础篇" class="headerlink" title="基础篇"></a>基础篇</h4><h4 id="进阶篇"><a href="#进阶篇" class="headerlink" title="进阶篇"></a>进阶篇</h4><h3 id="样例实战"><a href="#样例实战" class="headerlink" title="样例实战"></a>样例实战</h3><h4 id="样例1：一例黑客团队邮箱列表分析"><a href="#样例1：一例黑客团队邮箱列表分析" class="headerlink" title="样例1：一例黑客团队邮箱列表分析"></a>样例1：一例黑客团队邮箱列表分析</h4><p>原始参考案例：<a target="_blank" rel="noopener" href="http://rpubs.com/F789GH/HackingTeamEmails">http://rpubs.com/F789GH/HackingTeamEmails</a></p>
+<h5 id="原文分析目的"><a href="#原文分析目的" class="headerlink" title="原文分析目的"></a>原文分析目的</h5><ul>
+<li>统计列表中所有邮箱域名个数</li>
+<li>统计邮箱域名所属区域，分析这些黑客邮件地址都来自什么地方<h5 id="获取数据源"><a href="#获取数据源" class="headerlink" title="获取数据源"></a>获取数据源</h5>直接从这个链接：<a target="_blank" rel="noopener" href="https://wikileaks.org/hackingteam/emails/emailid/144932">黑客邮箱列表</a>，中获取黑客邮箱名单。<br>Copy邮箱列表到txt文件中，保存准备处理。需要简单处理一下里面的邮箱地址，列表中有#号和空白行等等。<br>处理后的列表文件，<a target="_blank" rel="noopener" href="https://github.com/nimbusking/start_r_programming/blob/master/hack_team_email_list.txt">https://github.com/nimbusking/start_r_programming/blob/master/hack_team_email_list.txt</a><h5 id="开始分析"><a href="#开始分析" class="headerlink" title="开始分析"></a>开始分析</h5><h6 id="引用必要的类库"><a href="#引用必要的类库" class="headerlink" title="引用必要的类库"></a>引用必要的类库</h6>分析过程中使用了一些函数，因此需要引用相关类库<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">library<span class="punctuation">(</span>rvest<span class="punctuation">)</span></span><br><span class="line"><span class="comment"># ggplot2绘图函数包</span></span><br><span class="line">library<span class="punctuation">(</span>ggplot2<span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>stringi<span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>magrittr<span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>plyr<span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>dplyr<span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+第一次运行，控制台中键入上述代码后，会自动联网下载相应类库并安装<h5 id="分析汇总域名频率分布柱状图"><a href="#分析汇总域名频率分布柱状图" class="headerlink" title="分析汇总域名频率分布柱状图"></a>分析汇总域名频率分布柱状图</h5>分析完成后的展示，如下图所示：<br><img data-src="a93eddc5/Histogram_email_domain_frequence.jpg" alt="柱状图1"><h5 id="分析域名对应国家出现频率"><a href="#分析域名对应国家出现频率" class="headerlink" title="分析域名对应国家出现频率"></a>分析域名对应国家出现频率</h5>分析完成后的展示，如下图所示：<br><img data-src="a93eddc5/Histogram_email_domain_site_frequence.jpg" alt="柱状图2"><h5 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h5>排名第一的居然是it（意大利），其次是德国、英国、美国、捷克…<h5 id="完整代码"><a href="#完整代码" class="headerlink" title="完整代码"></a>完整代码</h5><figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 导入函数库</span></span><br><span class="line">library<span class="punctuation">(</span>rvest<span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>ggplot2<span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>stringi<span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>magrittr<span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>plyr<span class="punctuation">)</span></span><br><span class="line">library<span class="punctuation">(</span>dplyr<span class="punctuation">)</span></span><br><span class="line"><span class="comment"># 从txt数据源中读取数据到变量email_list中</span></span><br><span class="line">email_list <span class="operator">&lt;-</span> read.table<span class="punctuation">(</span><span class="string">&quot;hack_team_email_list.txt&quot;</span><span class="punctuation">,</span> header <span class="operator">=</span> <span class="built_in">T</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment"># 打印前6行数据</span></span><br><span class="line">head<span class="punctuation">(</span>email_list<span class="punctuation">)</span></span><br><span class="line"><span class="comment"># 按符号@分割电子邮件地址到变量splitted_email中</span></span><br><span class="line">splitted_email <span class="operator">&lt;-</span> data.frame<span class="punctuation">(</span>stri_split_fixed<span class="punctuation">(</span>tolower<span class="punctuation">(</span>email_list<span class="operator">$</span>V1<span class="punctuation">)</span><span class="punctuation">,</span> <span class="string">&quot;@&quot;</span><span class="punctuation">,</span> <span class="number">2</span><span class="punctuation">,</span> omit_empty <span class="operator">=</span> <span class="literal">NA</span><span class="punctuation">,</span> simplify <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment"># 复制完整邮箱名到第三列</span></span><br><span class="line">splitted_email<span class="operator">$</span>X3 <span class="operator">&lt;-</span> paste<span class="punctuation">(</span>tolower<span class="punctuation">(</span>splitted_email<span class="operator">$</span>X1<span class="punctuation">)</span><span class="punctuation">,</span> tolower<span class="punctuation">(</span>splitted_email<span class="operator">$</span>X2<span class="punctuation">)</span><span class="punctuation">,</span> sep <span class="operator">=</span> <span class="string">&quot;@&quot;</span><span class="punctuation">)</span></span><br><span class="line">head<span class="punctuation">(</span>splitted_email<span class="punctuation">)</span></span><br><span class="line"><span class="comment"># 绘制域名频率柱状图</span></span><br><span class="line"><span class="comment">## 表格转换数据帧</span></span><br><span class="line">splitted_email_freq <span class="operator">&lt;-</span> as.data.frame<span class="punctuation">(</span>table<span class="punctuation">(</span>splitted_email<span class="operator">$</span>X2<span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 调用plyr函数包中的arrange方法进行排序</span></span><br><span class="line">splitted_email_freq <span class="operator">&lt;-</span> plyr<span class="operator">::</span>arrange<span class="punctuation">(</span>splitted_email_freq<span class="punctuation">,</span> desc<span class="punctuation">(</span>splitted_email_freq<span class="operator">$</span>Freq<span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line">head<span class="punctuation">(</span>splitted_email_freq<span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 绘制柱状图</span></span><br><span class="line">splitted_email_freq_plot <span class="operator">&lt;-</span> ggplot<span class="punctuation">(</span>data<span class="operator">=</span>splitted_email_freq<span class="punctuation">[</span><span class="number">1</span><span class="operator">:</span><span class="number">20</span><span class="punctuation">,</span><span class="punctuation">]</span><span class="punctuation">,</span> aes<span class="punctuation">(</span>x<span class="operator">=</span>reorder<span class="punctuation">(</span>Var1<span class="punctuation">,</span> Freq<span class="punctuation">)</span><span class="punctuation">,</span> y<span class="operator">=</span>Freq<span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 设置图形展示样式</span></span><br><span class="line">splitted_email_freq_plot <span class="operator">&lt;-</span> splitted_email_freq_plot <span class="operator">+</span> geom_bar<span class="punctuation">(</span>stat <span class="operator">=</span> <span class="string">&quot;identity&quot;</span><span class="punctuation">)</span> <span class="operator">+</span> coord_flip<span class="punctuation">(</span>ylim<span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">0</span><span class="punctuation">,</span><span class="number">430</span><span class="punctuation">)</span><span class="punctuation">)</span> <span class="operator">+</span> theme<span class="punctuation">(</span></span><br><span class="line">  axis.text.y <span class="operator">=</span> element_text<span class="punctuation">(</span>size <span class="operator">=</span> <span class="number">12</span><span class="punctuation">)</span><span class="punctuation">,</span> </span><br><span class="line">  axis.text.x <span class="operator">=</span> element_text<span class="punctuation">(</span>size <span class="operator">=</span> <span class="number">12</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 设置图形标题横纵坐标</span></span><br><span class="line">splitted_email_freq_plot <span class="operator">&lt;-</span> splitted_email_freq_plot <span class="operator">+</span> xlab<span class="punctuation">(</span><span class="string">&quot;域名&quot;</span><span class="punctuation">)</span> <span class="operator">+</span> ylab<span class="punctuation">(</span><span class="string">&quot;各域名提供商所拥有的黑客数量&quot;</span><span class="punctuation">)</span> <span class="operator">+</span> ggtitle<span class="punctuation">(</span><span class="string">&quot;从黑客邮件列表中能发现多少域名提供商？&quot;</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 图形坐标范围</span></span><br><span class="line">splitted_email_freq_plot <span class="operator">&lt;-</span> splitted_email_freq_plot <span class="operator">+</span> scale_y_continuous<span class="punctuation">(</span>breaks <span class="operator">=</span> seq<span class="punctuation">(</span><span class="number">0</span><span class="punctuation">,</span> <span class="number">430</span><span class="punctuation">,</span> <span class="number">30</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 生成图形</span></span><br><span class="line">splitted_email_freq_plot</span><br><span class="line"></span><br><span class="line"><span class="comment"># 绘制国家出现频率</span></span><br><span class="line"><span class="comment">## 先过滤一些公共域名</span></span><br><span class="line">blackListDomains <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&quot;outlook|gmail|yahoo|live|hotmail|googlemail&quot;</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 过滤列表域名列表</span></span><br><span class="line">splitted_email_freq_bld <span class="operator">&lt;-</span> splitted_email<span class="punctuation">[</span><span class="operator">!</span>stri_detect_regex<span class="punctuation">(</span>splitted_email<span class="operator">$</span>X2<span class="punctuation">,</span> blackListDomains<span class="punctuation">)</span><span class="punctuation">,</span> <span class="punctuation">]</span></span><br><span class="line"><span class="comment">## 转换X2为数据帧</span></span><br><span class="line">splitted_email_freq_bld <span class="operator">&lt;-</span> as.data.frame<span class="punctuation">(</span>table<span class="punctuation">(</span>splitted_email_freq_bld<span class="operator">$</span>X2<span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 排序</span></span><br><span class="line">splitted_email_freq_bld <span class="operator">&lt;-</span> plyr<span class="operator">::</span>arrange<span class="punctuation">(</span>splitted_email_freq_bld<span class="punctuation">,</span> desc<span class="punctuation">(</span>splitted_email_freq_bld<span class="operator">$</span>Freq<span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 打印前15行</span></span><br><span class="line">head<span class="punctuation">(</span>splitted_email_freq_bld<span class="punctuation">,</span> <span class="number">15</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment"># 处理国家归属</span></span><br><span class="line">domain_list <span class="operator">&lt;-</span> data.frame<span class="punctuation">(</span>stri_split_fixed<span class="punctuation">(</span>tolower<span class="punctuation">(</span>splitted_email_freq_bld<span class="operator">$</span>Var1<span class="punctuation">)</span><span class="punctuation">,</span> <span class="string">&quot;.&quot;</span><span class="punctuation">,</span> <span class="operator">-</span><span class="number">1</span><span class="punctuation">,</span> omit_empty <span class="operator">=</span> <span class="literal">NA</span><span class="punctuation">,</span> simplify <span class="operator">=</span> <span class="literal">TRUE</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line">domain_list<span class="punctuation">[</span>domain_list <span class="operator">==</span> <span class="string">&quot;&quot;</span><span class="punctuation">]</span> <span class="operator">&lt;-</span> <span class="literal">NA</span></span><br><span class="line">domain_list<span class="operator">$</span>X1 <span class="operator">&lt;-</span> <span class="built_in">as.character</span><span class="punctuation">(</span>domain_list<span class="operator">$</span>X1<span class="punctuation">)</span></span><br><span class="line">domain_list<span class="operator">$</span>X2 <span class="operator">&lt;-</span> <span class="built_in">as.character</span><span class="punctuation">(</span>domain_list<span class="operator">$</span>X2<span class="punctuation">)</span></span><br><span class="line">domain_list<span class="operator">$</span>X3 <span class="operator">&lt;-</span> <span class="built_in">as.character</span><span class="punctuation">(</span>domain_list<span class="operator">$</span>X3<span class="punctuation">)</span></span><br><span class="line">domain_list<span class="operator">$</span>X4 <span class="operator">&lt;-</span> <span class="built_in">as.character</span><span class="punctuation">(</span>domain_list<span class="operator">$</span>X4<span class="punctuation">)</span></span><br><span class="line">domain_list<span class="operator">$</span>X5 <span class="operator">&lt;-</span> <span class="built_in">as.character</span><span class="punctuation">(</span>domain_list<span class="operator">$</span>X5<span class="punctuation">)</span></span><br><span class="line">domain_list<span class="operator">$</span>new_NEW <span class="operator">&lt;-</span> domain_list<span class="punctuation">[</span><span class="operator">-</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">[</span>cbind<span class="punctuation">(</span><span class="number">1</span><span class="operator">:</span>nrow<span class="punctuation">(</span>domain_list<span class="punctuation">)</span><span class="punctuation">,</span> max.col<span class="punctuation">(</span><span class="operator">!</span><span class="built_in">is.na</span><span class="punctuation">(</span>domain_list<span class="punctuation">[</span><span class="operator">-</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">)</span><span class="punctuation">,</span> ties.method <span class="operator">=</span> <span class="string">&quot;last&quot;</span><span class="punctuation">)</span><span class="punctuation">)</span><span class="punctuation">]</span></span><br><span class="line"><span class="comment">## 合并行</span></span><br><span class="line">domain_list<span class="operator">$</span>new_NEW <span class="operator">&lt;-</span> domain_list<span class="punctuation">[</span><span class="operator">-</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">[</span>cbind<span class="punctuation">(</span><span class="number">1</span><span class="operator">:</span>nrow<span class="punctuation">(</span>domain_list<span class="punctuation">)</span><span class="punctuation">,</span> max.col<span class="punctuation">(</span><span class="operator">!</span><span class="built_in">is.na</span><span class="punctuation">(</span>domain_list<span class="punctuation">[</span><span class="operator">-</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">)</span><span class="punctuation">,</span> ties.method <span class="operator">=</span> <span class="string">&quot;last&quot;</span><span class="punctuation">)</span><span class="punctuation">)</span><span class="punctuation">]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">## freq again</span></span><br><span class="line">domain_list <span class="operator">&lt;-</span> as.data.frame<span class="punctuation">(</span>table<span class="punctuation">(</span>domain_list<span class="operator">$</span>new_NEW<span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line">domain_list <span class="operator">&lt;-</span> plyr<span class="operator">::</span>arrange<span class="punctuation">(</span>domain_list<span class="punctuation">,</span> desc<span class="punctuation">(</span>domain_list<span class="operator">$</span>Freq<span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line">domain_list <span class="operator">&lt;-</span> domain_list<span class="punctuation">[</span><span class="operator">!</span>stri_detect_regex<span class="punctuation">(</span>domain_list<span class="operator">$</span>Var1<span class="punctuation">,</span> <span class="string">&quot;com|org|net|edu|gov|mil&quot;</span><span class="punctuation">)</span><span class="punctuation">,</span> <span class="punctuation">]</span></span><br><span class="line"><span class="comment">## 打印前10行</span></span><br><span class="line">head<span class="punctuation">(</span>domain_list<span class="punctuation">,</span> <span class="number">10</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 绘制域名</span></span><br><span class="line">domain_list_plot <span class="operator">&lt;-</span> ggplot<span class="punctuation">(</span>data<span class="operator">=</span>domain_list<span class="punctuation">[</span><span class="number">1</span><span class="operator">:</span><span class="number">20</span><span class="punctuation">,</span><span class="punctuation">]</span><span class="punctuation">,</span> aes<span class="punctuation">(</span>x<span class="operator">=</span>reorder<span class="punctuation">(</span>Var1<span class="punctuation">,</span> Freq<span class="punctuation">)</span><span class="punctuation">,</span> y<span class="operator">=</span>Freq<span class="punctuation">)</span><span class="punctuation">)</span> </span><br><span class="line">domain_list_plot <span class="operator">&lt;-</span> domain_list_plot <span class="operator">+</span> geom_bar<span class="punctuation">(</span>stat <span class="operator">=</span> <span class="string">&quot;identity&quot;</span><span class="punctuation">)</span> <span class="operator">+</span> coord_flip<span class="punctuation">(</span>ylim<span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">0</span><span class="punctuation">,</span><span class="number">100</span><span class="punctuation">)</span><span class="punctuation">)</span> <span class="operator">+</span> theme<span class="punctuation">(</span></span><br><span class="line">  axis.text.y <span class="operator">=</span> element_text<span class="punctuation">(</span>size <span class="operator">=</span> <span class="number">14</span><span class="punctuation">)</span><span class="punctuation">,</span> </span><br><span class="line">  axis.text.x <span class="operator">=</span> element_text<span class="punctuation">(</span>size <span class="operator">=</span> <span class="number">14</span><span class="punctuation">)</span><span class="punctuation">)</span> </span><br><span class="line">domain_list_plot <span class="operator">&lt;-</span> domain_list_plot <span class="operator">+</span> xlab<span class="punctuation">(</span><span class="string">&quot;域名Top数&quot;</span><span class="punctuation">)</span> <span class="operator">+</span> ylab<span class="punctuation">(</span><span class="string">&quot;特殊域名数&quot;</span><span class="punctuation">)</span> <span class="operator">+</span> ggtitle<span class="punctuation">(</span><span class="string">&quot;从黑客邮件列表中能发现多少域名分布？&quot;</span><span class="punctuation">)</span></span><br><span class="line">domain_list_plot <span class="operator">&lt;-</span> domain_list_plot <span class="operator">+</span> scale_y_continuous<span class="punctuation">(</span>breaks <span class="operator">=</span> seq<span class="punctuation">(</span><span class="number">0</span><span class="punctuation">,</span> <span class="number">100</span><span class="punctuation">,</span> <span class="number">5</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment">## 生成图形</span></span><br><span class="line">domain_list_plot</span><br><span class="line"></span><br><span class="line"><span class="comment"># 从图形中看，cz（捷克Czech Republic）归属的比较特别，统计看一下</span></span><br><span class="line">splitted_email_czech <span class="operator">&lt;-</span> splitted_email<span class="punctuation">[</span>grepl<span class="punctuation">(</span><span class="string">&quot;.cz&quot;</span><span class="punctuation">,</span> splitted_email<span class="operator">$</span>X2<span class="punctuation">)</span><span class="punctuation">,</span> <span class="punctuation">]</span></span><br><span class="line">head<span class="punctuation">(</span>splitted_email_czech<span class="punctuation">,</span> <span class="number">10</span><span class="punctuation">)</span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h4 id="样例2：贝叶斯统计理论探讨"><a href="#样例2：贝叶斯统计理论探讨" class="headerlink" title="样例2：贝叶斯统计理论探讨"></a>样例2：贝叶斯统计理论探讨</h4><p>原文参考：<a target="_blank" rel="noopener" href="https://www.statsjoke.me/posts/philosophy-of-bayesian-statistics/">https://www.statsjoke.me/posts/philosophy-of-bayesian-statistics/</a></p>
+<h5 id="概念相关"><a href="#概念相关" class="headerlink" title="概念相关"></a>概念相关</h5><h6 id="贝叶斯定理"><a href="#贝叶斯定理" class="headerlink" title="贝叶斯定理"></a>贝叶斯定理</h6><p><img data-src="a93eddc5/Bayes_Theorem.jpg" alt="贝叶斯定理"></p>
+<h6 id="伯努利分布"><a href="#伯努利分布" class="headerlink" title="伯努利分布"></a>伯努利分布</h6><p><img data-src="a93eddc5/Bernoulli_distribution.jpg" alt="伯努利分布"></p>
+<h6 id="二项式定理"><a href="#二项式定理" class="headerlink" title="二项式定理"></a>二项式定理</h6><p><img data-src="a93eddc5/Binomial_pdf.jpg" alt="二项式定理"></p>
+<h6 id="β分布"><a href="#β分布" class="headerlink" title="β分布"></a>β分布</h6><p><img data-src="a93eddc5/Beta_pdf.jpg" alt="β定理"></p>
+<h5 id="探究课题"><a href="#探究课题" class="headerlink" title="探究课题"></a>探究课题</h5><p>通过模拟硬币反转来绘制这项后验概率的更新图<br>代码片段如下</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置随机种子</span></span><br><span class="line">set.seed<span class="punctuation">(</span><span class="number">1234</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment"># 随机样本次数</span></span><br><span class="line">n_trials <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">0</span><span class="punctuation">,</span> <span class="number">1</span><span class="punctuation">,</span> <span class="number">2</span><span class="punctuation">,</span> <span class="number">3</span><span class="punctuation">,</span> <span class="number">4</span><span class="punctuation">,</span> <span class="number">5</span><span class="punctuation">,</span> <span class="number">8</span><span class="punctuation">,</span> <span class="number">15</span><span class="punctuation">,</span> <span class="number">50</span><span class="punctuation">,</span> <span class="number">500</span><span class="punctuation">,</span> <span class="number">1000</span><span class="punctuation">,</span> <span class="number">2000</span><span class="punctuation">,</span> <span class="number">5000</span><span class="punctuation">)</span></span><br><span class="line"><span class="comment"># 设置二项分布</span></span><br><span class="line">data <span class="operator">&lt;-</span> rbinom<span class="punctuation">(</span>n_trials<span class="punctuation">[</span><span class="built_in">length</span><span class="punctuation">(</span>n_trials<span class="punctuation">)</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="number">1</span><span class="punctuation">,</span> <span class="number">0.5</span><span class="punctuation">)</span></span><br><span class="line">x <span class="operator">&lt;-</span> seq<span class="punctuation">(</span><span class="number">0</span><span class="punctuation">,</span> <span class="number">1</span><span class="punctuation">,</span> length.out<span class="operator">=</span><span class="number">100</span><span class="punctuation">)</span></span><br><span class="line">par<span class="punctuation">(</span>mfrow<span class="operator">=</span><span class="built_in">c</span><span class="punctuation">(</span><span class="number">1</span><span class="punctuation">,</span> <span class="number">2</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line"><span class="keyword">for</span> <span class="punctuation">(</span>N <span class="keyword">in</span> n_trials<span class="punctuation">)</span> <span class="punctuation">&#123;</span></span><br><span class="line">  heads <span class="operator">&lt;-</span> <span class="built_in">sum</span><span class="punctuation">(</span>data<span class="punctuation">[</span><span class="number">1</span><span class="operator">:</span>N<span class="punctuation">]</span><span class="punctuation">)</span></span><br><span class="line">  <span class="comment"># β</span></span><br><span class="line">  y <span class="operator">&lt;-</span> dbeta<span class="punctuation">(</span>x<span class="punctuation">,</span> <span class="number">1</span><span class="operator">+</span>heads<span class="punctuation">,</span> <span class="number">1</span><span class="operator">+</span>N<span class="operator">-</span>heads<span class="punctuation">)</span></span><br><span class="line">  plot<span class="punctuation">(</span>x<span class="punctuation">,</span> y<span class="punctuation">,</span> type <span class="operator">=</span> <span class="string">&#x27;l&#x27;</span><span class="punctuation">,</span> col<span class="operator">=</span><span class="string">&#x27;blue&#x27;</span><span class="punctuation">)</span></span><br><span class="line">  legend<span class="punctuation">(</span><span class="string">&#x27;topright&#x27;</span><span class="punctuation">,</span> sprintf<span class="punctuation">(</span><span class="string">&quot;observe %d tosses,\n %d heads&quot;</span><span class="punctuation">,</span> N<span class="punctuation">,</span> heads<span class="punctuation">)</span><span class="punctuation">,</span> bg<span class="operator">=</span><span class="string">&#x27;transparent&#x27;</span><span class="punctuation">,</span> box.lty<span class="operator">=</span><span class="number">0</span><span class="punctuation">)</span></span><br><span class="line">  <span class="comment"># 绘制斜线</span></span><br><span class="line">  abline<span class="punctuation">(</span>v<span class="operator">=</span><span class="number">0.5</span><span class="punctuation">,</span> col<span class="operator">=</span><span class="string">&quot;red&quot;</span><span class="punctuation">,</span> lty<span class="operator">=</span><span class="number">2</span><span class="punctuation">,</span> lwd<span class="operator">=</span><span class="number">1</span><span class="punctuation">)</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>观察每次样本数后的的分布图<br><img data-src="a93eddc5/AutoCapture_2019-12-28_014018.jpg" alt="1"><br><img data-src="a93eddc5/AutoCapture_2019-12-28_014024.jpg" alt="2"><br><img data-src="a93eddc5/AutoCapture_2019-12-28_014028.jpg" alt="3"><br><img data-src="a93eddc5/AutoCapture_2019-12-28_014034.jpg" alt="4"><br><img data-src="a93eddc5/AutoCapture_2019-12-28_014039.jpg" alt="5"><br><img data-src="a93eddc5/AutoCapture_2019-12-28_014044.jpg" alt="6"><br><img data-src="a93eddc5/AutoCapture_2019-12-28_014049.jpg" alt="7"></p>
+<p>可以看出，随着样本数的不断增加，可以得出概率越来越趋近p = 0.5，尽管不是全部。</p>
+<p>一个简单的贝叶斯推断：</p>
+<ul>
+<li>先验概率：P(A) = p</li>
+<li>后验概率：P(A|X)</li>
+<li>P(X|A)</li>
+<li>P(X)</li>
+</ul>
+<p>推理如下图所示：<br><img data-src="a93eddc5/Bayesian_Inference1.jpg" alt="Bayesian Inference1"></p>
+<p>近似为：P(X| ~ A) = 0.5，因此：<br><img data-src="a93eddc5/Bayesian_Inference2.jpg" alt="Bayesian Inference2"></p>
+<p>演示代码为：</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p <span class="operator">&lt;-</span> seq<span class="punctuation">(</span><span class="number">0</span><span class="punctuation">,</span> <span class="number">1</span><span class="punctuation">,</span> length.out <span class="operator">=</span> <span class="number">50</span><span class="punctuation">)</span></span><br><span class="line">plot<span class="punctuation">(</span>p<span class="punctuation">,</span> <span class="number">2</span><span class="operator">*</span>p<span class="operator">/</span><span class="punctuation">(</span><span class="number">1</span><span class="operator">+</span>p<span class="punctuation">)</span><span class="punctuation">,</span>col<span class="operator">=</span><span class="string">&#x27;blue&#x27;</span><span class="punctuation">,</span>type<span class="operator">=</span><span class="string">&#x27;l&#x27;</span><span class="punctuation">,</span>xlab <span class="operator">=</span> <span class="string">&#x27;Prior&#x27;</span><span class="punctuation">,</span>ylab <span class="operator">=</span> <span class="string">&#x27;Posterior&#x27;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+<p>RStudio中演示为<br><img data-src="a93eddc5/Bayesian_Inference3.jpg" alt="Bayesian Inference3"></p>
+<h5 id="泊松分布"><a href="#泊松分布" class="headerlink" title="泊松分布"></a>泊松分布</h5><h6 id="概率质量函数"><a href="#概率质量函数" class="headerlink" title="概率质量函数"></a>概率质量函数</h6><p><img data-src="a93eddc5/probability_mass_function.jpg" alt="probability mass function"></p>
+<p>示例代码：</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">a <span class="operator">&lt;-</span> 0<span class="operator">:</span><span class="number">15</span></span><br><span class="line">lambda <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">1.5</span><span class="punctuation">,</span> <span class="number">4.25</span><span class="punctuation">)</span></span><br><span class="line">barplot<span class="punctuation">(</span>dpois<span class="punctuation">(</span>a<span class="punctuation">,</span> lambda<span class="punctuation">[</span><span class="number">1</span><span class="punctuation">]</span><span class="punctuation">)</span><span class="punctuation">,</span> names.arg <span class="operator">=</span> a<span class="punctuation">,</span> col <span class="operator">=</span> <span class="string">&#x27;#348ABD&#x27;</span><span class="punctuation">)</span></span><br><span class="line">barplot<span class="punctuation">(</span>dpois<span class="punctuation">(</span>a<span class="punctuation">,</span> lambda<span class="punctuation">[</span><span class="number">2</span><span class="punctuation">]</span><span class="punctuation">)</span><span class="punctuation">,</span> names.arg <span class="operator">=</span> a<span class="punctuation">,</span> col <span class="operator">=</span> <span class="string">&#x27;#A60628&#x27;</span><span class="punctuation">,</span> add <span class="operator">=</span> <span class="built_in">T</span><span class="punctuation">)</span></span><br><span class="line">legend<span class="punctuation">(</span><span class="string">&#x27;topright&#x27;</span><span class="punctuation">,</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&#x27;lambda=1.5&#x27;</span><span class="punctuation">,</span> <span class="string">&#x27;lambda=4.25&#x27;</span><span class="punctuation">)</span><span class="punctuation">,</span> fill <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="string">&#x27;#348ABD&#x27;</span><span class="punctuation">,</span> <span class="string">&#x27;#A60628&#x27;</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+
+<p><img data-src="a93eddc5/Poisson_Distribution.jpg" alt="Poisson Distribution"></p>
+<h5 id="指数分布"><a href="#指数分布" class="headerlink" title="指数分布"></a>指数分布</h5><h6 id="概率密度函数"><a href="#概率密度函数" class="headerlink" title="概率密度函数"></a>概率密度函数</h6><p><img data-src="a93eddc5/probability_density_function.jpg" alt="probability density function"></p>
+<p>示例代码：</p>
+<figure class="highlight r"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a <span class="operator">&lt;-</span> seq<span class="punctuation">(</span><span class="number">0</span><span class="punctuation">,</span> <span class="number">4</span><span class="punctuation">,</span> length.out <span class="operator">=</span> <span class="number">100</span><span class="punctuation">)</span></span><br><span class="line">lambda <span class="operator">&lt;-</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">0.5</span><span class="punctuation">,</span> <span class="number">1</span><span class="punctuation">)</span></span><br><span class="line">plot<span class="punctuation">(</span>a<span class="punctuation">,</span> dexp<span class="punctuation">(</span>a<span class="punctuation">,</span> <span class="number">0.5</span><span class="punctuation">)</span><span class="punctuation">,</span> col<span class="operator">=</span><span class="string">&#x27;#348ABD&#x27;</span><span class="punctuation">,</span> type <span class="operator">=</span> <span class="string">&#x27;l&#x27;</span><span class="punctuation">,</span> xlab <span class="operator">=</span> <span class="string">&#x27;z&#x27;</span><span class="punctuation">,</span> ylab <span class="operator">=</span> <span class="string">&#x27;PDF at z&#x27;</span><span class="punctuation">,</span> ylim <span class="operator">=</span> <span class="built_in">c</span><span class="punctuation">(</span><span class="number">0</span><span class="punctuation">,</span><span class="number">1</span><span class="punctuation">)</span><span class="punctuation">)</span></span><br><span class="line">lines<span class="punctuation">(</span>a<span class="punctuation">,</span> dexp<span class="punctuation">(</span>a<span class="punctuation">,</span> <span class="number">1</span><span class="punctuation">)</span><span class="punctuation">,</span> col<span class="operator">=</span><span class="string">&#x27;#A60628&#x27;</span><span class="punctuation">)</span></span><br></pre></td></tr></table></figure>
+
+<p><img data-src="a93eddc5/Exponential_Distribution.jpg" alt="Exponential Distribution"></p>
+<h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><p>[1] R (programming language):[EB/OL]. 2004.10[2019-12]. <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/R_(programming_language)">https://en.wikipedia.org/wiki/R_(programming_language)</a><br>[2] About RStudio:[EB/OL]. [2019-12]. <a target="_blank" rel="noopener" href="https://rstudio.com/about/">https://rstudio.com/about/</a><br>[3] An Introduction to R:Notes On R: A Programming Environment for Data Analysis And Graphics.[EB/OL].2019.12.12[2019-12]. <a target="_blank" rel="noopener" href="https://mirrors.tuna.tsinghua.edu.cn/CRAN/doc/manuals/r-release/R-intro.pdf">https://mirrors.tuna.tsinghua.edu.cn/CRAN/doc/manuals/r-release/R-intro.pdf</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>nimbusk
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://nimbusk.cc/post/a93eddc5.html" title="R语言统计分析实战（RStudio）">https://nimbusk.cc/post/a93eddc5.html</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="followme">
+  <span>欢迎关注我的其它发布渠道</span>
+
+  <div class="social-list">
+
+      <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
+
+            <span class="label">RSS</span>
+          </a>
+      </div>
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E7%BB%9F%E8%AE%A1%E5%AD%A6/" rel="tag"># 统计学</a>
+              <a href="/tags/R%E8%AF%AD%E8%A8%80/" rel="tag"># R语言</a>
+              <a href="/tags/RStudio/" rel="tag"># RStudio</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/post/71e5bb42.html" rel="prev" title="英语学习相关-词组">
+                  <i class="fa fa-angle-left"></i> 英语学习相关-词组
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/post/39705835.html" rel="next" title="ELK初探之CentOS7环境搭建">
+                  ELK初探之CentOS7环境搭建 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments gitalk-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2024</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">nimbusk</span>
+  </div>
+<div class="busuanzi-count">
+    <span class="post-meta-item" id="busuanzi_container_site_uv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/pisces/" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/5.0.31/fancybox/fancybox.umd.js" integrity="sha256-a+H7FYzJv6oU2hfsfDGM2Ohw/cR9v+hPfxHCLdmCrE8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/sidebar.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+  <script class="next-config" data-name="pdf" type="application/json">{"object_url":{"url":"https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.3.0/pdfobject.min.js","integrity":"sha256-JJZNsid68vnh3/zyj0lY9BN5ynxVX/12XgOa1TlaYN0="},"url":"/lib/pdf/web/viewer.html"}</script>
+  <script src="/js/third-party/tags/pdf.js"></script>
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js","integrity":"sha256-YbM1pG3wWnzhyYN49g5fPnen+2CKEFaZfopkkwSpNtY="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+
+  
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.css" integrity="sha256-AJnUHL7dBv6PGaeyPQJcgQPDjt/Hn/PvYZde1iqfp8U=" crossorigin="anonymous">
+
+<script class="next-config" data-name="gitalk" type="application/json">{"enable":true,"github_id":"nimbusking","repo":"blog_comments","client_id":"3ba56d7e4658bddb03ae","client_secret":"7f7dae0b54cbd02df9ced28e9f1ce739f94e33d4","admin_user":"nimbusking","distraction_free_mode":true,"proxy":"https://cors-anywhere.azm.workers.dev/https://github.com/login/oauth/access_token","language":"en|zh-CN|zh-TW","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/gitalk/1.8.0/gitalk.min.js","integrity":"sha256-MVK9MGD/XJaGyIghSVrONSnoXoGh3IFxLw0zfvzpxR4="},"path_md5":"8d89ce8cb13d5f3ecf7baea79ec21832"}</script>
+<script src="/js/third-party/comments/gitalk.js"></script>
+
+</body>
+</html>
