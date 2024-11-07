@@ -21,18 +21,18 @@ jobs:
         rm -rf /home/runner/work/nimbusking.github.io/nimbusking.github.io/node_modules/
 
     - name: 安装 Node
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v1
       with:
         node-version: "20.x"
 
     - name: 安装 Hexo
       run: |
         export TZ='Asia/Shanghai'
-        npm install hexo-cli --save
+        npm install hexo-cli -g --save
 
     - name: 缓存 Hexo
       id: cache
-      uses: actions/cache@v4
+      uses: actions/cache@v1
       env:
         cache-name: cache-node-modules
       with:
