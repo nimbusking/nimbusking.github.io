@@ -1,4 +1,4 @@
-name: Pages
+name: depoloy_pages
 
 on:
   push:
@@ -28,7 +28,9 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-npm-cache
       - name: Install Dependencies
-        run: npm install
+        run: |
+          npm install https://github.com/foreveryang321/hexo-asset-image.git --save
+          npm install
       - name: Replace some vars
         run: |
           sed -i 's/GITALK_CLIENT_ID/${{ secrets.GITALK_CLIENT_ID }}/g' ./_config.next.yml
