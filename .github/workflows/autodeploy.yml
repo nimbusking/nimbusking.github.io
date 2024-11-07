@@ -54,8 +54,8 @@ jobs:
         # npm install hexo-generator-index-pin-top@latest --save
         # rm -rf node_modules
         # npm install --save bluebird
-        # npm install --force
-        npm ci
+        rm -rf node_modules && npm install --force
+        # npm ci
 
     - name: 处理相关变量
       run: |
