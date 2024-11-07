@@ -30,33 +30,33 @@ jobs:
     - name: 安装 Hexo
       run: |
         export TZ='Asia/Shanghai'
-        npm install hexo-cli -g --save
+        npm install hexo@latest --save
 
-    - name: 缓存 Hexo
-      id: cache
-      uses: actions/cache@v4
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+    # - name: 缓存 Hexo
+    #   id: cache
+    #   uses: actions/cache@v4
+    #   env:
+    #     cache-name: cache-node-modules
+    #   with:
+    #     path: node_modules
+    #     key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+    #     restore-keys: |
+    #         ${{ runner.os }}-build-${{ env.cache-name }}-
+    #         ${{ runner.os }}-build-
+    #         ${{ runner.os }}-
 
     - name: 安装依赖
-      if: steps.cache.outputs.cache-hit != 'true'
+      # if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        npm install hexo-theme-next --save
-        npm install hexo-deployer-git --save
-        npm install hexo-generator-searchdb --save
-        npm install hexo-generator-feed
-        npm install hexo-wordcount --save
-        npm install hexo-abbrlink --save
-        npm install lozad --save
+        npm install hexo-theme-next@latest --save
+        npm install hexo-deployer-git@latest --save
+        npm install hexo-generator-searchdb@latest --save
+        npm install hexo-generator-feed@latest --save
+        npm install hexo-wordcount@latest --save
+        npm install hexo-abbrlink@latest --save
+        npm install lozad@latest --save
         npm uninstall hexo-generator-index --save
-        npm install hexo-generator-index-pin-top --save
+        npm install hexo-generator-index-pin-top@latest --save
         npm install --save
 
     - name: 处理相关变量
@@ -82,5 +82,5 @@ jobs:
 
     - name: 部署 Nimbusk博客
       run: |
-        hexo clean
-        hexo d
+        npx hexo clean
+        npx hexo d
