@@ -1,4 +1,16 @@
 {
+  "name": "hexo-site",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "hexo generate",
+    "clean": "hexo clean",
+    "deploy": "hexo deploy",
+    "server": "hexo server"
+  },
+  "hexo": {
+    "version": "7.3.0"
+  },
   "dependencies": {
     "hexo": "^7.3.0",
     "hexo-abbrlink": "^2.2.1",
