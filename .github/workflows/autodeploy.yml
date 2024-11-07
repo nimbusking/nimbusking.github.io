@@ -38,9 +38,7 @@ jobs:
           cp -f ./temp/post-meta.njk ./node_modules/hexo-theme-next/layout/_partials/post
           rm -rf ./temp
       - name: Build
-        run: |
-          npx hexo clean
-          npx hexo g
+        run: npm run build
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
