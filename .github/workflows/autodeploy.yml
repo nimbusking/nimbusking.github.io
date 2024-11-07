@@ -55,7 +55,6 @@ jobs:
         npm install lozad --save
         npm uninstall hexo-generator-index --save
         npm install hexo-generator-index-pin-top --save
-        npm install hexo-tag-plantuml --save
         npm install --save
 
     - name: 处理相关变量
