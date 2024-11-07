@@ -16,6 +16,10 @@ jobs:
       with:
         ref: master
 
+    - name: 删除临时文件
+      run: |
+        rm -rf /home/runner/work/nimbusking.github.io/nimbusking.github.io/node_modules/
+
     - name: 安装 Node
       uses: actions/setup-node@v2
       with:
@@ -24,7 +28,7 @@ jobs:
     - name: 安装 Hexo
       run: |
         export TZ='Asia/Shanghai'
-        npm install hexo-cli -g --save
+        npm install hexo --save
 
     - name: 缓存 Hexo
       id: cache
@@ -42,7 +46,6 @@ jobs:
     - name: 安装依赖
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
-        rm -rf /home/runner/work/nimbusking.github.io/nimbusking.github.io/node_modules/
         npm install hexo-theme-next --save
         npm install hexo-deployer-git --save
         npm install hexo-generator-searchdb --save
@@ -78,5 +81,5 @@ jobs:
 
     - name: 部署 Nimbusk博客
       run: |
-        hexo clean
-        hexo d
+        npx hexo clean
+        npx hexo d
