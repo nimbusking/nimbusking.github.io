@@ -29,7 +29,7 @@ jobs:
             ${{ runner.OS }}-npm-cache
       - name: Install Dependencies
         run: |
-          npm install https://github.com/foreveryang321/hexo-asset-image.git --save
+          # npm install https://github.com/foreveryang321/hexo-asset-image.git --save
           npm install
       - name: Replace some vars
         run: |
