@@ -16,7 +16,7 @@ categories: Spring
 
 ### SpringBean生命周期
 大体分为5个大的步骤，如下图所示：
-![SpringBean生命周期](f5eb228d/SpringBean生命周期.jpg)
+![SpringBean生命周期](SpringBean生命周期.jpg)
 
 #### Bean加载过程
 {% plantuml %}
