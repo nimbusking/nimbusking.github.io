@@ -138,16 +138,13 @@ filter_optimize:
   # lower means it will be executed first, default of Hexo is 10
   priority: 12
 
-tag_plantuml:
-  type: static
-
-# algolia:
-#   applicationID: ALGOLIA_APPLICATIONID
-#   apiKey: ALGOLIA_APIKEY
-#   indexName: ALGOLIA_INDEXNAME
-#   chunkSize: 5000
-#   fields:
-#     - title
-#     - slug
-#     - path
-#     - content:strip
+algolia:
+  applicationID: ALGOLIA_APPLICATIONID
+  apiKey: ALGOLIA_APIKEY
+  indexName: ALGOLIA_INDEXNAME
+  chunkSize: 5000
+  fields:
+    - title
+    - slug
+    - path
+    - content:strip
