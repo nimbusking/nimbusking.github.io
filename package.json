@@ -8,6 +8,7 @@
     "deploy": "hexo deploy",
     "server": "hexo server"
   },
+  // 这个文件里面，插件版本慎重改动！！！！
   "hexo": {
     "version": "7.3.0"
   },

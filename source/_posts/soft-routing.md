@@ -44,7 +44,7 @@ categories: 软路由
 
 但是这俩文件，是无法直接在ESXi后台控制页面，通过添加虚拟机的方式使用的。这里以vmdk文件为例，通过ESXi后台自带的**vmkfstools**转换一下之后，就可以了。
 1. 先将上述编译好的vmdk文件，通过“数据库存储浏览器”上传到指定目录下，如下图所示：
-![upload_vmdk](post/c07c0078/upload_vmdk.jpg)
+![upload_vmdk](c07c0078/upload_vmdk.jpg)
 
 2. 打开ESXi的SSH：主机->操作->服务->启用安全的Shell
 3. 通过SSH客户端工具，远程连接到ESXi后台
@@ -58,14 +58,14 @@ vmkfstools -i openwrt-x86-64-combined-squashfs.vmdk openwrt_new-x86-64-combined-
 ```
 
 如下图所示，转换完成：
-![转换完成](post/c07c0078/convert_done.jpg)
+![转换完成](c07c0078/convert_done.jpg)
 
 转换完成后的vmdk文件就可以直接正常通过ESXi创建虚拟机了。
 
 ### 安装过程
 与正常安装Windows过程大体相同，将ESXi对应的ISO文件（这里我安装的是6.7U3b版本），用第三方工具写入U盘即可
 这里推荐rufus，rufus官网下载最新的版本(http://rufus.ie/)，如下图所示：
-![rufus](post/c07c0078/AutoCapture_2021-01-03_235940.jpg)
+![rufus](c07c0078/AutoCapture_2021-01-03_235940.jpg)
 - 设备选择你的U盘，不要选错了。
 - 点击选择，选择指定路径下的ESXi的ISO镜像文件
 - 分区类型和目标系统类型保持默认即可，如图分别为MBR和BIOS或UEFI
@@ -119,7 +119,7 @@ http://vibsdepot.v-front.de/tools/ESXi-Customizer-PS-v2.6.0.ps1
 [官网VMware vSphere Hypervisor 6.7](https://my.vmware.com/zh/web/vmware/evalcenter?p=free-esxi6)
 需要登录，建议提前注册一个vmware账号，注册流程略。
 这里下载最新的6.7U3b版本即可，如下图所示：
-![ESXi670-201912001](post/c07c0078/AutoCapture_2021-01-04_000640.jpg)
+![ESXi670-201912001](c07c0078/AutoCapture_2021-01-04_000640.jpg)
 MD5值：153EA9DE288D1CC2518E747F3806F929
 备用下载：
 链接: https://pan.baidu.com/s/1ScNhiCr0BqKTIhJJsbgHwQ 提取码: 7j9r
@@ -131,7 +131,7 @@ MD5值：153EA9DE288D1CC2518E747F3806F929
 
 ###### 开始bundle
 - 在本地任一磁盘根目录新建文件夹，例如我的是在G盘，建了一个名为newesxi的文件夹，文件夹内容目录如下，把上述下载的东西放进去。
-![目录结构](post/c07c0078/AutoCapture_2021-01-04_005334.jpg)
+![目录结构](c07c0078/AutoCapture_2021-01-04_005334.jpg)
 - 其中offline文件夹内，提取上述ESXi670-NE1000压缩包中的VIB文件
 - 运行PowerCLI
 CD到上述newesxi目录下
@@ -148,7 +148,7 @@ CD到上述newesxi目录下
 ```
 
 稍等片刻之后，看到如下提示则表示bundle完成。
-![打包过程](post/c07c0078/AutoCapture_2021-01-04_011047.jpg)
+![打包过程](c07c0078/AutoCapture_2021-01-04_011047.jpg)
 
 至此离线驱动镜像包就制作好了，接下来就可以正常写入U盘安装了。
 这里分享自己打包好的多驱动集成ISO镜像包。
@@ -167,7 +167,7 @@ MD5值：2EC7F4417E8C233F4F36B52DF6D564CD
 ##### IPv4设置
 ##### 替换ESXI登录HTTPS证书
 通常在刚安装好esxi之后，默认后台登录控制台，会提示你当前访问的链接不安全的提示，就像下面那样：
-![不安全的链接](post/c07c0078/AutoCapture_2021-01-30_211415.jpg)
+![不安全的链接](c07c0078/AutoCapture_2021-01-30_211415.jpg)
 这种问题本质就是，你当前通过https访问的地址并未签发相应的SSL证书导致的。
 因此，找到一个免费的SSL证书，并替换esxi后台的默认ssl证书即可。
 由于我本站博客域名国内的DNS解析加速选择的是dnspod，所以这里就以腾讯DNSpod申请免费证书为例，其它国内诸如阿里云、七牛云等等，都有提供免费申请SSL证书的渠道，不过目前来看，似乎腾讯的dnspod审批的比较快。
@@ -175,7 +175,7 @@ dnspod免费的ssl证书提供商是亚信，自己本地玩无所谓的。
 ###### mkcert（推荐）
 严格意义上来说，这种exsi服务器，不对公网，其实完全自签证书就可以了，不需要搞那么多费神的东西。
 使用github上一个开源工具：[mkcert地址](https://github.com/FiloSottile/mkcert)
-这里的自签一次是2年3个月的（主要原因是考虑到mac和ios限制），如果你想一次10年，可以使用我这个找到的 [直接右键下载](post/c07c0078/mkcert_10years.zip)
+这里的自签一次是2年3个月的（主要原因是考虑到mac和ios限制），如果你想一次10年，可以使用我这个找到的 [直接右键下载](c07c0078/mkcert_10years.zip)
 
 1. 下载下来使用命令行（管理员权限）执行下面两个命令
 ```shell
@@ -184,7 +184,7 @@ mkcert_10years.exe -install
 ```
 
 如下图所示：
-![执行命令](post/c07c0078/mkcert_10_years.png)
+![执行命令](c07c0078/mkcert_10_years.png)
 
 2. 准备exsi证书文件
 经过上述命令行执行过后，会在对应目录下生成两个文件，**并依次替换**（别整错了）：
@@ -199,15 +199,15 @@ mkcert_10years.exe -install
 ```
 5. 此时再访问后台，就不会再提示ssl证书问题了
 6. 如果需要在其它电脑上，只需要把证书导出后，安装即可，如下图所示：
-![证书管理器页面](post/c07c0078/mkcert_install.png)
+![证书管理器页面](c07c0078/mkcert_install.png)
 
 ###### dnspod申请免费SSL证书
 登录到DNSPOD控制台：https://console.dnspod.cn/
 搜索SSL证书，或直接访问URL：https://console.cloud.tencent.com/ssl 如下图所示：
 点击“申请免费证书”
-![购买证书第一页](post/c07c0078/AutoCapture_2021-01-30_212517.jpg)
+![购买证书第一页](c07c0078/AutoCapture_2021-01-30_212517.jpg)
 默认，点击确认即可，选择其它的ssl证书提供商，会收费。
-![提交资料](post/c07c0078/AutoCapture_2021-01-30_212701.jpg)
+![提交资料](c07c0078/AutoCapture_2021-01-30_212701.jpg)
 在提交资料页面：
 - 算法选择：默认即可
 - 证书绑定域名：填写你要申请绑定证书的域名地址，例如我的就是esxi.nimbusk.cc
@@ -216,7 +216,7 @@ mkcert_10years.exe -install
 - 私钥密码：自己本地玩，不需要填写
 
 填完之后，下一步，选择验证方式：
-![选择验证方式](post/c07c0078/AutoCapture_2021-01-30_213052.jpg)
+![选择验证方式](c07c0078/AutoCapture_2021-01-30_213052.jpg)
 选择第一个，第一个会自动在你当前匹配的域名下增加一条TXT记录
 第三步验证的时候，dnspod会验证你的解析域名下是否包含相应的记录，进而会影响你最终审核结果。
 
@@ -239,7 +239,7 @@ mkcert_10years.exe -install
 当然，你在windows下浏览器下直接这么访问，可能会提示你根本无法访问，那是通过这种方式，你本地esxi后台ip是没有跟你的域名证书绑定在一起的。最简单的解决方案就是，在你windows的host文件加上一条域名解析记录即可。
 
 完事之后，再通过浏览器https访问就好了，如下图所示：
-![https访问esxi后台](post/c07c0078/AutoCapture_2021-01-30_215000.jpg)
+![https访问esxi后台](c07c0078/AutoCapture_2021-01-30_215000.jpg)
 
 ###### Let's Encrypt自签
 在网上找到一段脚本，先贴在这里，主要是用的linux的certbot来自签的，**目前我还没有自己实践过，暂时还不知脚本的准确性如何**

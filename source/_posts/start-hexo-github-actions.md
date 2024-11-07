@@ -31,16 +31,16 @@ categories: 站点
 在配置actions脚本的时候，需要在仓库的Settings界面先配置两处东西
 ### 仓库Settings界面
 点开你的仓库，点开Settings
-![仓库Settings](post/9bb5c5d6/Github Repository Setttings.png)
+![仓库Settings](9bb5c5d6/Github Repository Setttings.png)
 
 注意圈出来的两个地方，我们需要先设置一下
 1. Deploy keys
 	这个地方，将刚才*准备过程*中新生成的公钥（id_rsa.pub文件中），不漏的copy上，完了点击右上角的“Add depoly key”之后，在下图中填上，标题随便，Key就是刚才你粘贴的那个公钥内容。
-	![AddDeployKeys](post/9bb5c5d6/AddDeployKeys.png)
+	![AddDeployKeys](9bb5c5d6/AddDeployKeys.png)
 	**注意勾上写权限**
 2. Secrets and variables
 	这个里面主要设置一些变量相关的内容，步骤不多赘述。这里主要是配置一些，在hexo配置文件中使用到的一些变量相关的值，特别是一些插件的client_id，授权密钥相关的敏感信息都可以放在这个里面配置。在后面配置脚本的时候，可以看到在哪里用到。
-	![secrets and variables](post/9bb5c5d6/secrets and variables.png)
+	![secrets and variables](9bb5c5d6/secrets and variables.png)
 
 	其中有一个变量，DEPLOY_KEY是上面生成的私钥（id_rsa文件中），完整复制进去即可。
 

@@ -38,8 +38,8 @@ categories: 影视后期
 当照片中阴影面积较多，可以适当通过分离色调中，对阴影部分加一点绿色，来提升照片的亲和度。
 电影感的色调中，比如原片中包含充足的光线时：可以在高光部分添加一点绿色，让原本的日光的冷色弱化一些。阴影中可以添加暖色调，让画面柔和一点。
 来自B站：摄影师EDI（ https://www.bilibili.com/video/BV1Yv411i721 ）的调色分享：
-![调色前](post/bbf06dfa/AutoCapture_2020-11-08_193408.jpg)
-![调色后](post/bbf06dfa/AutoCapture_2020-11-08_193451.jpg)
+![调色前](bbf06dfa/AutoCapture_2020-11-08_193408.jpg)
+![调色后](bbf06dfa/AutoCapture_2020-11-08_193451.jpg)
 
 ## 构图相关
 ### Part1
@@ -50,12 +50,12 @@ categories: 影视后期
 横竖共四根分割线将图像分为9块。相交的4个点称之为视觉重点。将图片中呈现的重点元素分布在这4个点周围
 #### “画面做减法”
 概括为“少即是多”，有突出主体的情况下，尽可能精简
-![示例1](post/bbf06dfa/AutoCapture_2020-11-07_205058.jpg)
+![示例1](bbf06dfa/AutoCapture_2020-11-07_205058.jpg)
 
 #### 主体优先
 关键在于是否将主体的展示元素放在视觉的关键点上。
-![示例2](post/bbf06dfa/AutoCapture_2020-11-07_205412.jpg)
-![示例3](post/bbf06dfa/AutoCapture_2020-11-07_205450.jpg)
+![示例2](bbf06dfa/AutoCapture_2020-11-07_205412.jpg)
+![示例3](bbf06dfa/AutoCapture_2020-11-07_205450.jpg)
 
 #### 留白
 #### 中心构图

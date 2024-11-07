@@ -19,9 +19,9 @@ categories: Java系列
 
 ## Tomcat架构相关
 **Tomcat核心： Http服务器+Servlet容器**
-![Tomcat请求调用链](post/2f453177/Tomcat请求调用链.png)
+![Tomcat请求调用链](2f453177/Tomcat请求调用链.png)
 Tomcat架构模型
-![Tomcat架构模型](post/2f453177/Tomcat架构模型.png)
+![Tomcat架构模型](2f453177/Tomcat架构模型.png)
 
 **Tomcat 要实现 2 个核心功能：**
 - 处理 Socket 连接，负责网络字节流与 Request 和 Response 对象的转化。
@@ -33,7 +33,7 @@ Tomcat架构模型
 指的就是整个 Tomcat 服务器，包含多组服务（Service），负责管理和启动各个Service，同时监听 8005 端口发过来的 shutdown 命令，用于关闭整个容器 。
 #### Service组件
 每个 Service 组件都包含了若干用于接收客户端消息的 Connector 组件和处理请求的Engine 组件。 Service 组件还包含了若干 Executor 组件，每个 Executor 都是一个线程池，它可以为 Service 内所有组件提供线程池执行任务。
-![Service组件架构示意图](post/2f453177/Service组件架构示意图.png)
+![Service组件架构示意图](2f453177/Service组件架构示意图.png)
 
 ##### 为什么这么设计？
 Tomcat 为了实现支持多种 I/O 模型和应用层协议，一个容器可能对接多个连接器，就好比一个房间有多个门，**但是单独的连接器或者容器都不能对外提供服务，需要把它们组装起来才能工作，组装后这个整体叫作 Service 组件。**
@@ -61,7 +61,7 @@ Service 本身没有做什么重要的事情，只是在连接器和容器外面
 - Adapter 负责提供 ServletRequest 对象给容器。
 
 #### ProtocalHandle组件
-![ProtocalHandler架构示意图](post/2f453177/ProtocalHandler架构示意图.png)
+![ProtocalHandler架构示意图](2f453177/ProtocalHandler架构示意图.png)
 
 ## Tomcat线程模型相关
 ### 主题要点
@@ -69,7 +69,7 @@ Service 本身没有做什么重要的事情，只是在连接器和容器外面
 - 主从Reactor多线程模型在Tomcat中的实现
 
 ### 关于阻塞唤醒
-![linux线程阻塞示意图](post/2f453177/linux线程阻塞示意图.png)
+![linux线程阻塞示意图](2f453177/linux线程阻塞示意图.png)
 阻塞的本质就是将进程的task_struct移出运行队列，添加到等待队列，并且将进程的状态的置为TASK_UNINTERRUPTIBLE或者TASK_INTERRUPTIBLE，重新触发一次 CPU调度让出 CPU
 
 ### IO模型下的异步/同步，阻塞/非阻塞问题
@@ -89,7 +89,7 @@ Service 本身没有做什么重要的事情，只是在连接器和容器外面
 2) **内核将数据从内核空间拷贝到用户空间（应用进程的缓冲区）。**
 
 **各种 I/O 模型的区别就是：它们实现这两个步骤的方式是不一样的。也就是对这两个步骤的优化过程**
-![IO调用用户态和内核态数据交换示意图](post/2f453177/IO调用用户态和内核态数据交换示意图.png)
+![IO调用用户态和内核态数据交换示意图](2f453177/IO调用用户态和内核态数据交换示意图.png)
 
 ### Unix(Linux)下的5种IO模型
 Linux 系统下的 I/O 模型有 5 种：
@@ -99,9 +99,9 @@ Linux 系统下的 I/O 模型有 5 种：
 4. 信号驱动式I/O（signal-driven I/O）(*不常用*)
 5. 异步I/O（asynchronous I/O）
 
-![同步阻塞IO模型分类](post/2f453177/同步阻塞IO模型分类.png)
+![同步阻塞IO模型分类](2f453177/同步阻塞IO模型分类.png)
 各种IO模型行为的差异对比示意图：
-![各种IO模型行为差异](post/2f453177/各种IO模型行为差异.png)
+![各种IO模型行为差异](2f453177/各种IO模型行为差异.png)
 
 一个非常简单的在Java中实现的BIO：
 ```java

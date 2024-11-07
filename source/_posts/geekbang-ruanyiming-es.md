@@ -11,7 +11,7 @@ categories: 极客时间
 
 ## 课程实录
 ### (08)Logstash安装与导入数据
-[Movies示例数据集](post/70b658a/movies.csv)
+[Movies示例数据集](70b658a/movies.csv)
 ES Mapping：
 ```json
 PUT movies
@@ -95,7 +95,7 @@ output {
 - JSON文档，格式灵活，不需要预先定义格式
     + 字段的类型可以指定或者通过Elasticsearch自动推算
     + 支持数组/支持嵌套
-![CSV流文件处理后示例](post/70b658a/AutoCapture_2020-07-11_093758.jpg)
+![CSV流文件处理后示例](70b658a/AutoCapture_2020-07-11_093758.jpg)
 **注：**在课程中，通过一个CSV源文件，再经过logstash处理后输出到ES中到文档存储格式
 
 ##### 文档的元数据
@@ -240,7 +240,7 @@ GET /_cat/indices?v&h=i,tm&s=tm:desc
 - 副本，用于解决数据高可用的问题，分片是主分片的拷贝
     + 副本分片数，可以动态调整
     + 增加副本数，还可以在一定程度上提高服务的可用性（读取到吞吐）
-![分片示例](post/70b658a/AutoCapture_2020-07-11_103828.jpg)
+![分片示例](70b658a/AutoCapture_2020-07-11_103828.jpg)
 
 ##### 分片的设定
 对于生产环境中的分片设定，需要提前做好容量规划，
@@ -257,7 +257,7 @@ GET /_cat/indices?v&h=i,tm&s=tm:desc
 - Create - 如果ID已经存在，会失败
 - Index - 如果ID不存在，创建新的文档。否则，先删除现有的文档，再创建新的文档，版本会增加
 - Update - 文档必须已经存在，更新只会对相应字段做增量修改
-![CRUD示例](post/70b658a/AutoCapture_2020-07-11_110449.jpg)
+![CRUD示例](70b658a/AutoCapture_2020-07-11_110449.jpg)
 
 ##### BULK API
 - 支持在一次API调用中，对不同的索引进行操作
@@ -294,7 +294,7 @@ POST kibana_sample_data_ecommerce/_msearch
 
 ### (12)倒排索引介绍
 在搜索引擎中，正排索引是一个文档ID到文档内容到关联，而倒排索引恰恰相反，就是一个单词到文档ID关联的关系。例如：
-![倒排索引与正排索引对比](post/70b658a/AutoCapture_2020-07-11_113536.jpg)
+![倒排索引与正排索引对比](70b658a/AutoCapture_2020-07-11_113536.jpg)
 
 #### 倒排索引的核心组成
 倒排索引通常包含两个部分：
@@ -325,12 +325,12 @@ JSON文档中的每个字段，都有自己的倒排索引，可以指定对某�
 - Tokenizer（按照规则切分单词）
 - Token Filter（将切分的单词进行加工，小写，删除Stopwords，增加同义词）
 处理流程示例如下图所示：
-![分词处理流程示例](post/70b658a/AutoCapture_2020-07-11_115912.jpg)
+![分词处理流程示例](70b658a/AutoCapture_2020-07-11_115912.jpg)
 
 
 ### (14)Search API概览
 指定查询的索引
-![指定查询的索引](post/70b658a/AutoCapture_2020-07-11_133509.jpg)
+![指定查询的索引](70b658a/AutoCapture_2020-07-11_133509.jpg)
 查询响应：
 - took 花费的时间
 - total 符合条件的总文档数
@@ -603,7 +603,7 @@ GET /movies/_search
 - 当类型如果设置不对时，会导致一些功能无法正常运行，例如Range查询
 
 ##### 类型的自动识别
-![ES动态Mapping中类型自动匹配关系](post/70b658a/AutoCapture_2020-07-11_173010.jpg)
+![ES动态Mapping中类型自动匹配关系](70b658a/AutoCapture_2020-07-11_173010.jpg)
 ##### 能否改mapping的字段类型
 分两种情况：
 - 新增字段：
@@ -642,7 +642,7 @@ GET /movies/_search
     + pinyin字段的搜索
     + 还支持为搜索和索引指定不同的analyzer
 例如：
-![多字段Mapping示例](post/70b658a/AutoCapture_2020-07-11_213211.jpg)
+![多字段Mapping示例](70b658a/AutoCapture_2020-07-11_213211.jpg)
 
 #### 精确值(Exact Values) 与 全文本(Full text)
 精确值：包括数字、日期、具体一个字符串（例如“Apple Store”）
@@ -679,7 +679,7 @@ ES内置的Tokenizers：
 - synonym（添加近义词）
 ##### 设置一个Custom Analyzer
 例如：
-![自定义分词器实现](post/70b658a/AutoCapture_2020-07-11_215242.jpg)
+![自定义分词器实现](70b658a/AutoCapture_2020-07-11_215242.jpg)
 
 #### 课程示例
 ```
@@ -975,7 +975,7 @@ PUT my_index
 Metric类比于SQL中的一系列统计方法
 Bucket类比于SQL中的一系列的Group
 Bucket示意图：
-![Bucket示意图](post/70b658a/AutoCapture_2020-07-11_232645.jpg)
+![Bucket示意图](70b658a/AutoCapture_2020-07-11_232645.jpg)
 Metric：
 - Metric会基于数据集计算结果，除了支持在字段上进行计算，同样也支持在脚本（painless script）产生的结果之上进行计算
 - 大多数Metric是数学计算，仅输出一个值
@@ -1407,7 +1407,7 @@ POST /products/_search
     + 索引和搜索时都会进行分词，查询字符串先传递到一个合适的分词器，然后生成一个供查询的词项列表
     + 查询的时候，**先对输入的查询进行分词**，然后每个词项逐个进行底层查询，最终将结果进行合并。并为每个文档生成一个算分。例如：查“Matrix reloaded”，实际会查到包括Matrix或者reload的所有结果
 拆解步骤例如：
-![Match Query分步骤拆解示例](post/70b658a/AutoCapture_2020-07-12_105807.jpg)
+![Match Query分步骤拆解示例](70b658a/AutoCapture_2020-07-12_105807.jpg)
 
 ### (25)结构化搜索
 #### 结构化数据
@@ -1777,7 +1777,7 @@ POST products/_search
 - Inverse Document Frequency: 简单说 = log(全部文档数 / 检索词出现过的文档总数)
 - TF-IDF **本质上就是讲TF求和变成了加权求和**，例如：
     + TF(区块链) * IDF(区块链) + TF() * IDF(的) + TF(应用) * IDF(应用)
-  ![TF-IDF假设运算结果表](post/70b658a/AutoCapture_2020-07-12_123744.jpg)  
+  ![TF-IDF假设运算结果表](70b658a/AutoCapture_2020-07-12_123744.jpg)  
 
 #### TF-IDF的概念
 - TF-IDF被公认为是信息检索领域最重要的发明
@@ -1789,16 +1789,16 @@ POST products/_search
 - 现代搜索引擎，对TF-IDF进行了大量细微的优化
 
 在Lucene中的TF-IDF评分公式：
-![Lucene中的TF-IDF评分公式](post/70b658a/AutoCapture_2020-07-12_125601.jpg)  
+![Lucene中的TF-IDF评分公式](70b658a/AutoCapture_2020-07-12_125601.jpg)  
 boosting-权重提升因子
 
 #### BM25
 - 从ES5开始，默认算法改为BM25
 - 和经典的TF-IDF相比，当TF无限增加时，BM25算分会趋于一个数值
-![BM25-Classic TF算分曲线](post/70b658a/AutoCapture_2020-07-12_125752.jpg)  
+![BM25-Classic TF算分曲线](70b658a/AutoCapture_2020-07-12_125752.jpg)  
 
 定制Similarity
-![定制Similarity](post/70b658a/AutoCapture_2020-07-12_130022.jpg) 
+![定制Similarity](70b658a/AutoCapture_2020-07-12_130022.jpg) 
 
 可以在查询中打开explain开关，开关注算分步骤
 
@@ -1889,7 +1889,7 @@ POST /newmovies/_search
 ```
 ##### 相关度算分影响
 查询语句的结构，会对相关度算分产生影响
-![相关度算分产生影响示例](post/70b658a/AutoCapture_2020-07-26_090151.jpg)
+![相关度算分产生影响示例](70b658a/AutoCapture_2020-07-26_090151.jpg)
 - 同一层级下的竞争字段，具有相同的权重
 - 通过嵌套bool查询，可以改变对算分的影响
 
@@ -2277,10 +2277,10 @@ ElasticSearch 5.0之后，引入的一种新的节点类型。默认配置下，
 Pipeline管道会对通过的数据（文档），按照顺序进行加工。
 Processor: ElasticSearch对一些加工的行为进行了抽象的包装
 ElasticSearch有很多内置的Processors，**也可以通过自定义编写插件的方式**，来实现自己的Processor
-![Pipeline处理](post/70b658a/AutoCapture_2020-06-20_174345.jpg)
+![Pipeline处理](70b658a/AutoCapture_2020-06-20_174345.jpg)
 
 ##### Ingest Node v.s Logstash
-![Ingest Node v.s Logstash](post/70b658a/AutoCapture_2020-06-20_175410.jpg)
+![Ingest Node v.s Logstash](70b658a/AutoCapture_2020-06-20_175410.jpg)
 #### Painless简介
 - 自ElasticSearch 5.X后引入，专门为ElasticSearch设计，扩展了Java的语法
 - 6.0 开始，ES只支持Painless。Groovy，JavaScript和Python都不再支持
@@ -2349,7 +2349,7 @@ POST tech_blogs/_search
 ```
 
 注意：此种编译脚本编译开销还是比较大的
-![脚本编译开销](post/70b658a/AutoCapture_2020-06-20_181355.jpg)
+![脚本编译开销](70b658a/AutoCapture_2020-06-20_181355.jpg)
 
 ### (53)数据建模实例与最佳实践
 #### 什么是数据建模？
@@ -2422,13 +2422,13 @@ POST tech_blogs/_search
     + 因为：无法看到 _source字段，无法做Reindex，无法做Update
 
 #### 一个数据建模的案例
-![一个图书索引信息](post/70b658a/AutoCapture_2020-06-29_222348.jpg)
+![一个图书索引信息](70b658a/AutoCapture_2020-06-29_222348.jpg)
 解释备注：
 - 这是一个图书信息，包含：书名、简介、作者、发行日期、图书封面
 - 默认Mapping的时候，会把“图书封面”设置成一个text类型，还加了一个子的字段keyword。
 
 优化：
-![一个图书索引信息](post/70b658a/AutoCapture_2020-06-29_222750.jpg)
+![一个图书索引信息](70b658a/AutoCapture_2020-06-29_222750.jpg)
 解释备注：
 - “图书封面”一般不会去检索
 

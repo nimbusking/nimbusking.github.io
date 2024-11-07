@@ -37,37 +37,37 @@ R是一个基础的环境程序，是运行R语言脚本必须的基础运行时
 ##### 下载R安装包
 1. 打开R的官网：https://www.r-project.org/
 2. 在左侧菜单栏中找到下载(download)，点击 *CRAN*，打开镜像网站列表页面，如下图所示：
-![R语言主站](post/a93eddc5/mainsite_of_r_project.jpg)
+![R语言主站](a93eddc5/mainsite_of_r_project.jpg)
 3. 找到中国站点，列了很多国内大学及机构的站点，像清华、中科大、同济，随笔找一个点击连接，如下图所示：
-![下载](post/a93eddc5/mirror_site_of_r_download_page.jpg)
+![下载](a93eddc5/mirror_site_of_r_download_page.jpg)
 4. 选择指定平台的R语言平台，如果是windows的就选择 *Download R for Windows*就是，如下图所示：
-![windows](post/a93eddc5/different_platform_of_r.jpg)
+![windows](a93eddc5/different_platform_of_r.jpg)
 5. 选择R的版本，直接单击*base*即可
-![version](post/a93eddc5/different_version_of_r.jpg)
+![version](a93eddc5/different_version_of_r.jpg)
 6. 直接单击*Download R 3.6.2 for Windows*开始下载
 
 ##### 安装
 基本一路 **next**下去即可，有三步提一下
 1. 安装路径，默认C盘，选择你指定的盘路径即可：
-![安装路径](post/a93eddc5/install_select_install_path.jpg)
+![安装路径](a93eddc5/install_select_install_path.jpg)
 2. 选择组件，默认全部勾选即可
 3. 启动选项，选择第二个：*No(接受默认选择)*即可
-![启动选项](post/a93eddc5/install_start_option.jpg)
+![启动选项](a93eddc5/install_start_option.jpg)
 
 #### 安装RStudio
 ##### 下载RStudio安装包
 1. 打开RStudio官网：https://rstudio.com/products/rstudio/download/
 2. 点击页面中 *Free*下的 *DOWNLOAD*按钮，跳转到下载页面
-![下载rstudio](post/a93eddc5/download_site_of_rstudio.jpg)
+![下载rstudio](a93eddc5/download_site_of_rstudio.jpg)
 3. 选择你需要的版本，如windows版本
-![选择指定版本](post/a93eddc5/select_different_version_of_rstudio.jpg)
+![选择指定版本](a93eddc5/select_different_version_of_rstudio.jpg)
 
 ##### 安装
 过程很简单，除了第一步你需要选择安装路径之外，其余默认即可，过程3步就可以安装完成。
 此过程就不贴安装过程了。
 ##### 基本运行调试
 运行RStudio（页面没有快捷方式的话，去开始菜单栏里找一下），如下图所示：
-![主界面](post/a93eddc5/rstudio_main_page.jpg)
+![主界面](a93eddc5/rstudio_main_page.jpg)
 在左侧的 *Console*选项卡下，闪烁的光标后输入：*1+1*后，按键盘 *回车(Enter)*，如果下一行显示[1] 2，证明安装好了。
 
 ### R语言语法操作相关
@@ -114,10 +114,10 @@ library(dplyr)
 第一次运行，控制台中键入上述代码后，会自动联网下载相应类库并安装
 ##### 分析汇总域名频率分布柱状图
 分析完成后的展示，如下图所示：
-![柱状图1](post/a93eddc5/Histogram_email_domain_frequence.jpg)
+![柱状图1](a93eddc5/Histogram_email_domain_frequence.jpg)
 ##### 分析域名对应国家出现频率
 分析完成后的展示，如下图所示：
-![柱状图2](post/a93eddc5/Histogram_email_domain_site_frequence.jpg)
+![柱状图2](a93eddc5/Histogram_email_domain_site_frequence.jpg)
 ##### 结论
 排名第一的居然是it（意大利），其次是德国、英国、美国、捷克...
 ##### 完整代码
@@ -208,16 +208,16 @@ head(splitted_email_czech, 10)
 
 ##### 概念相关
 ###### 贝叶斯定理
-![贝叶斯定理](post/a93eddc5/Bayes_Theorem.jpg)
+![贝叶斯定理](a93eddc5/Bayes_Theorem.jpg)
 
 ###### 伯努利分布
-![伯努利分布](post/a93eddc5/Bernoulli_distribution.jpg)
+![伯努利分布](a93eddc5/Bernoulli_distribution.jpg)
 
 ###### 二项式定理
-![二项式定理](post/a93eddc5/Binomial_pdf.jpg)
+![二项式定理](a93eddc5/Binomial_pdf.jpg)
 
 ###### β分布
-![β定理](post/a93eddc5/Beta_pdf.jpg)
+![β定理](a93eddc5/Beta_pdf.jpg)
 
 ##### 探究课题
 通过模拟硬币反转来绘制这项后验概率的更新图
@@ -242,13 +242,13 @@ for (N in n_trials) {
 }
 ```
 观察每次样本数后的的分布图
-![1](post/a93eddc5/AutoCapture_2019-12-28_014018.jpg)
-![2](post/a93eddc5/AutoCapture_2019-12-28_014024.jpg)
-![3](post/a93eddc5/AutoCapture_2019-12-28_014028.jpg)
-![4](post/a93eddc5/AutoCapture_2019-12-28_014034.jpg)
-![5](post/a93eddc5/AutoCapture_2019-12-28_014039.jpg)
-![6](post/a93eddc5/AutoCapture_2019-12-28_014044.jpg)
-![7](post/a93eddc5/AutoCapture_2019-12-28_014049.jpg)
+![1](a93eddc5/AutoCapture_2019-12-28_014018.jpg)
+![2](a93eddc5/AutoCapture_2019-12-28_014024.jpg)
+![3](a93eddc5/AutoCapture_2019-12-28_014028.jpg)
+![4](a93eddc5/AutoCapture_2019-12-28_014034.jpg)
+![5](a93eddc5/AutoCapture_2019-12-28_014039.jpg)
+![6](a93eddc5/AutoCapture_2019-12-28_014044.jpg)
+![7](a93eddc5/AutoCapture_2019-12-28_014049.jpg)
 
 可以看出，随着样本数的不断增加，可以得出概率越来越趋近p = 0.5，尽管不是全部。
 
@@ -259,10 +259,10 @@ for (N in n_trials) {
 - P(X)
 
 推理如下图所示：
-![Bayesian Inference1](post/a93eddc5/Bayesian_Inference1.jpg)
+![Bayesian Inference1](a93eddc5/Bayesian_Inference1.jpg)
 
 近似为：P(X| ~ A) = 0.5，因此：
-![Bayesian Inference2](post/a93eddc5/Bayesian_Inference2.jpg)
+![Bayesian Inference2](a93eddc5/Bayesian_Inference2.jpg)
 
 演示代码为：
 ```R
@@ -270,11 +270,11 @@ p <- seq(0, 1, length.out = 50)
 plot(p, 2*p/(1+p),col='blue',type='l',xlab = 'Prior',ylab = 'Posterior')
 ```
 RStudio中演示为
-![Bayesian Inference3](post/a93eddc5/Bayesian_Inference3.jpg)
+![Bayesian Inference3](a93eddc5/Bayesian_Inference3.jpg)
 
 ##### 泊松分布
 ###### 概率质量函数
-![probability mass function](post/a93eddc5/probability_mass_function.jpg)
+![probability mass function](a93eddc5/probability_mass_function.jpg)
 
 示例代码：
 ```R
@@ -285,11 +285,11 @@ barplot(dpois(a, lambda[2]), names.arg = a, col = '#A60628', add = T)
 legend('topright', c('lambda=1.5', 'lambda=4.25'), fill = c('#348ABD', '#A60628'))
 ```
 
-![Poisson Distribution](post/a93eddc5/Poisson_Distribution.jpg)
+![Poisson Distribution](a93eddc5/Poisson_Distribution.jpg)
 
 ##### 指数分布
 ###### 概率密度函数
-![probability density function](post/a93eddc5/probability_density_function.jpg)
+![probability density function](a93eddc5/probability_density_function.jpg)
 
 示例代码：
 ```R
@@ -299,7 +299,7 @@ plot(a, dexp(a, 0.5), col='#348ABD', type = 'l', xlab = 'z', ylab = 'PDF at z', 
 lines(a, dexp(a, 1), col='#A60628')
 ```
 
-![Exponential Distribution](post/a93eddc5/Exponential_Distribution.jpg)
+![Exponential Distribution](a93eddc5/Exponential_Distribution.jpg)
 
 ### 引用
 [1] R (programming language):[EB/OL]. 2004.10[2019-12]. https://en.wikipedia.org/wiki/R_(programming_language)

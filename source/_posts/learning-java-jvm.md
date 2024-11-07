@@ -146,8 +146,8 @@ Java程序会通过栈上的reference数据来操作对上的具体对象，但�
 - 句柄访问：Java堆中可能会划分出一块内存来作为 *句柄池*，reference中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自具体的地址信息
 - 直接指针访问：reference中存储的直接就是对象的地址
 
-![通过句柄访问内存](post/d7ba81a7/memory_hander_detect.png)
-![通过直接指针访问内存](post/d7ba81a7/direct_memory_detect.png)
+![通过句柄访问内存](d7ba81a7/memory_hander_detect.png)
+![通过直接指针访问内存](d7ba81a7/direct_memory_detect.png)
 
 #### 实战：OutOfMemoryError异常
 **注：** 书中介绍了很多实战经验，这里仅记录一些经验相关事项，具体实例代码参考书中详细说明
@@ -254,7 +254,7 @@ Appel式回收的具体做法是：**把新生代分为一块较大的Eden空间
 
 #### 标记-整理算法
 1974年Edward Lueders提出了另外一种有针对性的“标记-整理”（Mark-Compact）算法，其中的标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象进行清理，**而是让所有存活的对象都向内存空间一端移动，然后直接清理掉边界以外的内存**，“标记-整理”算法的示意图如图所示：
-![“标记-整理”算法示意图](post/d7ba81a7/mark_compact_demostration.png)
+![“标记-整理”算法示意图](d7ba81a7/mark_compact_demostration.png)
 
 ### HotSpot的算法细节实现
 **注：** 这一节非常琐碎，对算法实现细节做了很多阐述，核心就是怎么高效的收集？与之带来的问题基本上是一环套一环的，可以暂时先了解，如遇到特定场景、特定问题之后，再回过头来啃一啃这里面的实现。暂时，也就记录一些名词，不去理解具体的实现细节。
@@ -293,15 +293,15 @@ Appel式回收的具体做法是：**把新生代分为一块较大的Eden空间
 
 ### 经典垃圾收集器
 说明：使用“经典”二字是为了与几款目前仍处于实验状态，但执行效果上有革命性改进的高性能低延迟收集器区分开来，这些经典的收集器尽管已经算不上是最先进的技术，但它们曾在实践中千锤百炼，足够成熟，基本上可认为是现在到未来两、三年内，能够在商用生产环境上放心使用的全部垃圾收集器了。
-![HotSpot虚拟机的垃圾收集器](post/d7ba81a7/hotspot_gc.png)
+![HotSpot虚拟机的垃圾收集器](d7ba81a7/hotspot_gc.png)
 #### Serial收集器
 这个收集器是一个单线程工作的收集器，但它的“单线程”的意义并不仅仅是说明它只会使用一个处理器或一条收集线程去完成垃圾收集工作，更重要的是强调在它进行垃圾收集时，必须暂停其他所有工作线程，直到它收集结束。
-![Serial/Serial Old收集器运行示意图](post/d7ba81a7/Serial_SerialOld.png)
+![Serial/Serial Old收集器运行示意图](d7ba81a7/Serial_SerialOld.png)
 **Serial收集器对于运行在客户端模式下的虚拟机来说是一个很好的选择**
 
 #### ParNew收集器
 ParNew收集器实质上是Serial收集器的多线程并行版本，除了**同时使用多条线程进行垃圾收集**之外，其余的行为包括Serial收集器完全一致。
-![ParNew/Serial Old收集器运行示意图](post/d7ba81a7/ParNew_SerialOld.png)
+![ParNew/Serial Old收集器运行示意图](d7ba81a7/ParNew_SerialOld.png)
 不少运行在服务端模式下的HotSpot虚拟机，尤其是JDK 7之前的遗留系统中首选的新生代收集器，其中有一个与功能、性能无关但其实很重要的原因是：*除了Serial收集器外，目前只有它能与CMS收集器配合工作。*
 可以理解为：ParNew合并入CMS，成为它专门处理新生代的组成部分。ParNew可以说是HotSpot虚拟机中第一款退出历史舞台的垃圾收集器。
 
@@ -320,12 +320,12 @@ Parallel Scavenge收集器提供了两个参数用于精确控制吞吐量，分
 
 #### Serial Old收集器
 Serial Old是Serial收集器的老年代版本，它同样是一个单线程收集器，使用标记-整理算法。这个收集器的主要意义也是供客户端模式下的HotSpot虚拟机使用。
-![Serial Old收集器运行示意图](post/d7ba81a7/SerialOld.png)
+![Serial Old收集器运行示意图](d7ba81a7/SerialOld.png)
 
 #### Parallel Old收集器
 Parallel Old是Parallel Scavenge收集器的老年代版本，支持多线程并发收集，基于标记-整理算法实现。
 由于老年代Serial Old收集器在服务端应用性能上的“拖累”，使用Parallel Scavenge收集器也未必能在整体上获得吞吐量最大化的效果。同样，由于单线程的老年代收集中无法充分利用服务器多处理器的并行处理能力，*在老年代内存空间很大而且硬件规格比较高级的运行环境中*，**这种组合的总吞吐量甚至不一定比ParNew加CMS的组合来得优秀。**
-![ParallelOld收集器运行示意图](post/d7ba81a7/ParallelOld.png)
+![ParallelOld收集器运行示意图](d7ba81a7/ParallelOld.png)
 
 **在注重吞吐量或者处理器资源较为稀缺的场合，都可以优先考虑Parallel Scavenge加Parallel Old收集器这个组合。
 **
@@ -337,7 +337,7 @@ CMS（Concurrent Mark Sweep）收集器是一种以**获取最短回收停顿时
 - 2）并发标记（CMS concurrent mark）：并发标记阶段就是从GC Roots的直接关联对象开始遍历整个对象图的过程，这个过程耗时较长但是不需要停顿用户线程，可以与垃圾收集线程一起并发运行；
 - 3）重新标记（CMS remark）**（Stop The World）**：而重新标记阶段则是为了修正并发标记期间，因用户程序继续运作而导致标记产生变动的那一部分对象的标记记录（详见3.4.6节中关于增量更新的讲解），这个阶段的停顿时间通常会比初始标记阶段稍长一些，但也远比并发标记阶段的时间短。
 - 4）并发清除（CMS concurrent sweep）：清理删除掉标记阶段判断的已经死亡的对象，由于不需要移动存活对象，所以这个阶段也是可以与用户线程同时并发的。
-![Concurrent Mark Sweep收集器运行示意图](post/d7ba81a7/Concurrent_Mark_Sweep.png)
+![Concurrent Mark Sweep收集器运行示意图](d7ba81a7/Concurrent_Mark_Sweep.png)
 
 CMS至少有以下三个明显的缺点：
 - CMS收集器对处理器资源非常敏感
@@ -392,8 +392,8 @@ ZGC和Shenandoah的目标是高度相似的，都希望在尽可能对吞吐量�
 - 查看熬过收集后剩余对象的年龄分布信息，在JDK 9前使用-XX：+PrintTenuring-Distribution，JDK 9之后使用-Xlog：gc+age=trace
 
 #### 垃圾收集器参数总结
-![垃圾收集相关的常用参数1](post/d7ba81a7/gc_params1.png)
-![垃圾收集相关的常用参数2](post/d7ba81a7/gc_params2.png)
+![垃圾收集相关的常用参数1](d7ba81a7/gc_params1.png)
+![垃圾收集相关的常用参数2](d7ba81a7/gc_params2.png)
 
 ### 实战：内存分配与回收策略
 Java技术体系的自动内存管理，最根本的目标是自动化地解决两个问题：**自动给对象分配内存以及自动回收分配给对象的内存**。
@@ -499,12 +499,12 @@ public static void testTenuringThreshold2() {
 除了名字像UNIX的ps命令之外，它的功能也和ps命令类似：可以列出正在运行的虚拟机进程，并显示虚拟机执行主类（Main Class，main()函数所在的类）名称以及这些进程的本地虚拟机唯一ID（LVMID，Local Virtual M achine Identifier）。
 
 **作用：** 如果同时启动了多个虚拟机进程，无法根据进程名称定位时，那就必须依赖jps命令显示主类的功能才能区分了。
-![jps工具主要选项](post/d7ba81a7/jps_params.png)
+![jps工具主要选项](d7ba81a7/jps_params.png)
 
 #### jstat：虚拟机统计信息监视工具
 jstat（JVM Statistics M onitoring Tool）是用于监视虚拟机各种运行状态信息的命令行工具。它可以显示本地或者远程虚拟机进程中的**类加载、内存、垃圾收集、即时编译等运行时数据**，在没有GUI图形界面、只提供了纯文本控制台环境的服务器上，它将是运行期定位虚拟机性能问题的常用工具。
 
-![jstat工具主要选项](post/d7ba81a7/jstat_params.png)
+![jstat工具主要选项](d7ba81a7/jstat_params.png)
 
 #### jinfo：Java配置信息工具
 jinfo（Configuration Info for Java）的作用是实时查看和调整虚拟机各项参数。使用jps命令的-v参数可以查看虚拟机启动时显式指定的参数列表，但如果想知道未被显式指定的参数的系统默认值，除了去找资料外，就只能使用jinfo的-flag选项进行查询了。
@@ -512,7 +512,7 @@ jinfo（Configuration Info for Java）的作用是实时查看和调整虚拟机
 #### jmap：Java内存映像工具
 jmap（Memory Map for Java）命令用于生成堆转储快照（一般称为heapdump或dump文件）。如果不使用jmap命令，要想获取Java堆转储快照也还有一些比较“暴力”的手段：譬如在第2章中用过的-XX：+HeapDumpOnOutOfMemoryError参数，可以让虚拟机在内存溢出异常出现之后自动生成堆转储快照文件，通过-XX：+HeapDumpOnCtrlBreak参数则可以使用[Ctrl]+[Break]键让虚拟机生成堆转储快照文件，又或者在Linux系统下通过**Kill -3**命令发送进程退出信号“恐吓”一下虚拟机，也能顺利拿到堆转储快照。
 
-![jmap工具主要选项](post/d7ba81a7/jmap_params.png)
+![jmap工具主要选项](d7ba81a7/jmap_params.png)
 
 #### jhat：虚拟机堆转储快照分析工具
 JDK提供jhat（JVM Heap Analysis Tool）命令与jmap搭配使用，来分析jmap生成的堆转储快照。jhat内置了一个微型的HTTP/Web服务器，生成堆转储快照的分析结果后，可以在浏览器中查看。*不过实事求是地说，在实际工作中，除非手上真的没有别的工具可用，否则多数人是不会直接使用jhat命令来分析堆转储快照文件的。*
@@ -520,7 +520,7 @@ JDK提供jhat（JVM Heap Analysis Tool）命令与jmap搭配使用，来分析jm
 #### jstack：Java堆栈跟踪工具
 jstack（Stack Trace for Java）命令用于生成虚拟机当前时刻的线程快照（一般称为threaddump或者javacore文件）。线程快照就是当前虚拟机内每一条线程正在执行的方法堆栈的集合，生成线程快照的目的通常是定位线程出现长时间停顿的原因，如线程间死锁、死循环、请求外部资源导致的长时间挂起等，都是导致线程长时间停顿的常见原因。
 
-![jstack工具主要选项](post/d7ba81a7/jstack_params.png)
+![jstack工具主要选项](d7ba81a7/jstack_params.png)
 
 ### 可视化故障处理工具
 注：本小结介绍了几种集中可视化分析内存的方案，各有特色，值得仔细研究，这是理论与实践相结合的最佳实践。
@@ -585,12 +585,12 @@ jhsdb hsdb --pid 8588
 ```
 
 运行之后，界面如下图所示
-![JHSDB的界面](post/d7ba81a7/hsdb_running_window.png)
+![JHSDB的界面](d7ba81a7/hsdb_running_window.png)
 从运行效果来看其实生成的就是一个Swing的小程序，这点我们从jdk8的sa-jdi.jar包中的目录结构也能看出来
-![sa-jdi.jar包目录结构](post/d7ba81a7/sa-jdi_jar_infrastructure.png)
+![sa-jdi.jar包目录结构](d7ba81a7/sa-jdi_jar_infrastructure.png)
 
 点击菜单：**Tools->Heap Parameters**，就可以看到堆内存分配布局，由于作者的运行参数中 **指定了使用的是Serial收集器**，图中我们看到了典型的Serial的分代内存布局，Heap Parameters窗口中清楚列出了新生代的Eden、S1、S2和老年代的容量（单位为字节）以及它们的虚拟内存地址起止范围。
-![Serial收集器的堆布局](post/d7ba81a7/jhsdb_heap_parameters.png)
+![Serial收集器的堆布局](d7ba81a7/jhsdb_heap_parameters.png)
 实际如下所示：
 ```
 Heap Parameters:
@@ -629,7 +629,7 @@ hsdb>
 这三个对象的地址前缀都是：**0x0000026f4d2**，而我们通过前面的Heap Parameters拿到所有分代内存分布发现，只有Eden区域地址（eden [0x0000026f4d200000,0x0000026f4d2d57c8,0x0000026f4d4b0000)），**这也就顺带验证了：一般情况下新对象在Eden中创建的分配规则**。
 
 再使用：**Tools->Inspector** 功能确认一下这三个地址中存放的对象：
-![Insepector实例数据](post/d7ba81a7/jhsdb_tools_inspector.png)
+![Insepector实例数据](d7ba81a7/jhsdb_tools_inspector.png)
 
 Inspector为我们展示了对象头和指向对象元数据的指针，里面包括了 **Java类型的名字、继承关系、实现接口关系，字段信息、方法信息、运行时常量池的指针、内嵌的虚方法表（vtable）以及接口方法表（itable）等。** 由于我们的确没有在ObjectHolder上定义过任何字段，所以图中并没有看到任何实例字段数据，读者在做实验时不妨定义一些不同数据类型的字段，观察它们在HotSpot虚拟机里面是如何存储的。
 
@@ -651,7 +651,7 @@ Oop for java/lang/Class @ 0x00000119d44c9488
 ```
 
 在通过Inspector查找这个地址：0x00000119d44c9488，得到如下图所示：
-![方法区实例内存地址](post/d7ba81a7/jhsdb_class_object.png)
+![方法区实例内存地址](d7ba81a7/jhsdb_class_object.png)
 果然找到了一个引用该对象的地方，是在一个 ```java.lang.Class``` 的实例里，并且给出了这个实例的地址，通过Inspector查看该对象实例，可以清楚看到这确实是一个 ```java.lang.Class``` 类型的对象实例，里面有一个名为 **staticObj** 的实例字段。（在JDK 7以前，即还没有开始“去永久代”行动时，这些静态变量是存放在永久代上的，JDK 7起把静态变量、字符常量这些从永久代移除出去。）
 
 从《Java虚拟机规范》所定义的概念模型来看，所有Class相关的信息都应该存放在方法区之中，但方法区该如何实现，《Java虚拟机规范》并未做出规定，这就成了一件允许不同虚拟机自己灵活把握的事情。**JDK 7及其以后版本的HotSpot虚拟机选择把静态变量与类型在Java语言一端的映射Class对象存放在一起，存储于Java堆之中，从我们的实验中也明确验证了这一点。**
@@ -664,7 +664,7 @@ Oop for JHSDBTest$Test @ 0x00000119d44ca878
 ```
 
 这次找到一个类型为JHSDBTest$Test的对象实例，在Inspector中该对象实例显示如图所示：
-![方法区实例内存地址](post/d7ba81a7/jhsdb_instance_object.png)
+![方法区实例内存地址](d7ba81a7/jhsdb_instance_object.png)
 这个结果完全符合我们的预期，第二个ObjectHolder的指针是在Java堆中JHSDBTest$Test对象的instanceObj字段上。
 
 我们查找第三个对象的时候，发现：
@@ -676,12 +676,12 @@ hsdb>
 ```
 
 **看来revptrs命令并不支持查找栈上的指针引用，不过没有关系，得益于我们测试代码足够简洁，人工也可以来完成这件事情。** 在Java Thread窗口选中main线程后点击Stack Memory按钮查看该线程的栈内存，如图下图所示：
-![stack memory按钮](post/d7ba81a7/jhsdb_statck_memory.png)
+![stack memory按钮](d7ba81a7/jhsdb_statck_memory.png)
 打开栈内存之后：
-![main线程的栈内存](post/d7ba81a7/jhsdb_statck_memory_view.png)
+![main线程的栈内存](d7ba81a7/jhsdb_statck_memory_view.png)
 
 观察一个唯一的栈上的分配的内存，如下图所示：
-![栈内存上的分配情况](post/d7ba81a7/jhsdb_statck_memory_collection.png)
+![栈内存上的分配情况](d7ba81a7/jhsdb_statck_memory_collection.png)
 这个线程只有两个方法栈帧，尽管没有查找功能，**但通过肉眼观察在地址0x0000000cb5aff570上的值正好就是0x00000119d44ca8a0**，而且JHSDB在旁边已经自动生成注释，说明这里确实是引用了一个来自新生代的JHSDBTest$ObjectHolder对象。
 至此，本次实验中三个对象均已找到，并成功追溯到引用它们的地方，也就实践验证了开篇中提出的这些对象的引用是存储在什么地方的问题。
 
@@ -693,9 +693,9 @@ JConsole（Java Monitoring and Management Console）是一款基于JMX（Java Ma
 JMX是一种开放性的技术，不仅可以用在虚拟机本身的管理上，还可以运行于虚拟机之上的软件中，典型的如中间件大多也基于JMX来实现管理与监控。虚拟机对JMX MBean的访问也是完全开放的，可以使用代码调用API、支持JMX协议的管理控制台，或者其他符合JMX规范的软件进行访问。
 
 ##### 启动JConsole
-![JConsole连接页面](post/d7ba81a7/jconsole_login.jpg)
+![JConsole连接页面](d7ba81a7/jconsole_login.jpg)
 通过JDK/bin目录下的jconsole.exe启动JConsole后，会自动搜索出本机运行的所有虚拟机进程，而不需要用户自己使用jps来查询，如图4-10所示。双击选择其中一个进程便可进入主界面开始监控。JMX支持跨服务器的管理，也可以使用下面的“远程进程”功能来连接远程服务器，对远程虚拟机进行监控。如下图所示：
-![JConsole主界面](post/d7ba81a7/jconsole_main_page.jpg)
+![JConsole主界面](d7ba81a7/jconsole_main_page.jpg)
 
 ##### 内存监控
 “内存”页签的作用相当于可视化的jstat命令，用于监视被收集器管理的虚拟机内存（被收集器直接管理的Java堆和被间接管理的方法区）的变化趋势。
@@ -742,7 +742,7 @@ public class OOMObjectTest {
 - 虚拟机启动参数只限制了Java堆为100M B，但没有明确使用-Xmn参数指定新生代大小，读者能否从监控图中估算出新生代的容量？
 - 为何执行了System.gc()之后，图4-12中代表老年代的柱状图仍然显示峰值状态，代码需要如何调整才能让System.gc()回收掉填充到堆中的对象？
 
-![Eden区内存变化状况](post/d7ba81a7/jconsole_memory_monitoring.jpg)
+![Eden区内存变化状况](d7ba81a7/jconsole_memory_monitoring.jpg)
 
 问题1答案：图4-12显示Eden空间为27328KB，因为没有设置-XX：SurvivorRadio参数，所以Eden与Survivor空间比例的默认值为8∶1，因此整个新生代空间大约为27328KB×125%=34160KB。
 问题2答案：执行System.gc()之后，空间未能回收是因为List<OOMObject>list对象仍然存活，fillHeap()方法仍然没有退出，因此list对象在System.gc()执行时仍然处于作用域之内 **(准确地说，只有虚拟机使用解释器执行的时候，“在作用域之内”才能保证它不会被回收，因为这里的回收还涉及局部变量表变量槽的复用、即时编译器介入时机等问题，具体读者可参考第8章)** 。如果把System.gc()移动到fillHeap()方法外调用就可以回收掉全部内存。
@@ -764,7 +764,7 @@ public static void main(String[] args) throws Exception {
 ```
 
 此时运行监控结过，如下图所示：
-![Eden区内存完全回收场景](post/d7ba81a7/jconsole_memory_monitoring2.jpg)
+![Eden区内存完全回收场景](d7ba81a7/jconsole_memory_monitoring2.jpg)
 从图中可以看出，确实完全回收了（留有少部分，毕竟还有其它区域代码的实例需要占用空间）
 
 ##### 线程监控
@@ -825,11 +825,11 @@ public class ThreadMonitor {
 ```
 
 程序运行后，首先在“线程”页签中选择main线程，如图4-13所示。堆栈追踪显示BufferedReader的readBytes()方法正在等待System.in的键盘输入，这时候线程为Runnable状态，Runnable状态的线程仍会被分配运行时间，但readBytes()方法检查到流没有更新就会立刻归还执行令牌给操作系统，这种等待只消耗很小的处理器资源。
-![main线程](post/d7ba81a7/jconsole_thread_main.jpg)
+![main线程](d7ba81a7/jconsole_thread_main.jpg)
 接着监控testBusyThread线程，又如下图所示。testBusyThread线程一直在执行空循环，从堆栈追踪中看到一直在MonitoringTest.java代码的41行停留，41行的代码为while(true)。这时候线程为Runnable状态，而且没有归还线程执行令牌的动作，所以会在空循环耗尽操作系统分配给它的执行时间，直到线程切换为止，这种等待会消耗大量的处理器资源。
-![testBusyThread线程](post/d7ba81a7/jconsole_thread_testBusyThread.jpg)
+![testBusyThread线程](d7ba81a7/jconsole_thread_testBusyThread.jpg)
 testLockThread线程在等待lock对象的notify()或notifyAll()方法的出现，**线程这时候处于WAITING状态，在重新唤醒前不会被分配执行时间。** 如下图所示：
-![testLockThread线程](post/d7ba81a7/jconsole_memory_testLockThread.jpg)
+![testLockThread线程](d7ba81a7/jconsole_memory_testLockThread.jpg)
 testLockThread线程正处于正常的活锁等待中，只要lock对象的notify()或notifyAll()方法被调用，这个线程便能激活继续执行
 
 ###### 死锁代码样例
@@ -878,7 +878,7 @@ public class DeadLockTest {
 造成死锁的根本原
 因是Integer.valueOf()方法出于减少对象创建次数和节省内存的考虑，会对数值为-128～127之间的Integer对象进行缓存（这是《Java虚拟机规范》中明确要求缓存的默认值，实际值可以调整，具体取决于java.lang.Integer.Integer-Cache.high参数的设置。），如果valueOf()方法传入的参数在这个范围之内，就直接返回缓存中的对象。也就是说代码中尽管调用了200次Integer.valueOf()方法，但一共只返回了两个不同的Integer对象。*假如某个线程的两个synchronized块之间发生了一次线程切换，那就会出现线程A在等待被线程B持有的Integer.valueOf(1)，线程B又在等待被线程A持有的Integer.valueOf(2)，结果大家都跑不下去的情况。*
 
-![testLockThread线程](post/d7ba81a7/jconsole_deadlock.jpg)
+![testLockThread线程](d7ba81a7/jconsole_deadlock.jpg)
 **很清晰地显示，线程Thread-3在等待一个被线程Thread-4持有的Integer对象，而点击线程Thread-4则显示它也在等待一个被线程Thread-3持有的Integer对象，这样两个线程就互相卡住，除非牺牲其中一个，否则死锁无法释放。**
 
 
@@ -902,7 +902,7 @@ VisualVM基于NetBeans平台开发工具，所以一开始它就具备了通过�
 JDK 9之后VisulalVM形成了一个独立项目：[VisualVM主页](https://visualvm.github.io/?Java_VisualVM)
 
 插件安装非特殊场景，无需手动安装，在有网络连接的环境下，点击“工具->插件菜单”，在页签的“可用插件”及“已安装”中列举了当前版本VisualVM可以使用的全部插件，选中插件后在右边窗口会显示这个插件的基本信息，如开发者、版本、功能描述等。
-![testLockThread线程](post/d7ba81a7/visualvm_plugins_main_page.jpg)
+![testLockThread线程](d7ba81a7/visualvm_plugins_main_page.jpg)
 
 ##### 生成、浏览堆转储快照
 在VisualVM中生成堆转储快照文件有两种方式，可以执行下列任一操作：
@@ -910,7 +910,7 @@ JDK 9之后VisulalVM形成了一个独立项目：[VisualVM主页](https://visua
 - 在“应用程序”窗口中双击应用程序节点以打开应用程序标签，然后在“监视”标签中单击“堆Dump”。
 
 生成堆转储快照文件之后，应用程序页签会在该堆的应用程序下增加一个以[heap-dump]开头的子节点，并且在主页签中打开该转储快照，如图4-20所示。如果需要把堆转储快照保存或发送出去，就应在heapdump节点上右键选择“另存为”菜单，否则当VisualVM关闭时，生成的堆转储快照文件会被当作临时文件自动清理掉。要打开一个由已经存在的堆转储快照文件，通过文件菜单中的“装入”功能，选择硬盘上的文件即可。
-![浏览dump文件](post/d7ba81a7/visualvm_heapdump.jpg)
+![浏览dump文件](d7ba81a7/visualvm_heapdump.jpg)
 
 堆页签中的“摘要”面板可以看到应用程序dump时的运行时参数、System.getPro-perties()的内容、线程堆栈等信息；“类”面板则是以类为统计口径统计类的实例数量、容量信息；“实例”面板不能直接使用，因为VisualVM在此时还无法确定用户想查看哪个类的实例，所以需要通过“类”面板进入，在“类”中选择一个需要查看的类，然后双击即可在“实例”里面看到此类的其中500个实例的具体属性信息；“OQL控制台”面板则是运行OQL查询语句的，同jhat中介绍的OQL功能一样。如果读者想要了解具体OQL的语法和使用方法，可参见本书附录D的内容。
 
@@ -937,7 +937,7 @@ JFR是一套内建在HotSpot虚拟机里面的监控和基于事件的信息搜�
 HSDIS是一个被官方推荐的HotSpot虚拟机即时编译代码的反汇编插件，它包含在HotSpot虚拟机的源码当中，在OpenJDK的网站[3](https://hg.openjdk.java.net/jdk7u/jdk7u/hotspot/file/tip/src/share/tools/hsdis/)也可以找到单独的源码下载，但并没有提供编译后的程序。
 
 HSDIS插件的作用是让HotSpot的-XX：+PrintAssembly指令调用它来把即时编译器动态生成的本地代码还原为汇编代码输出，同时还会自动产生大量非常有价值的注释，这样我们就可以通过输出的汇编代码来从最本质的角度分析问题。读者可以根据自己的操作系统和处理器型号，**从网上直接搜索、下载编译好的插件，直接放到JDK_HOME/jre/bin/server目录（JDK 9以下）或JDK_HOME/lib/amd64/server（JDK 9或以上）中即可使用。** 
-**注：** 这里我自己编译了一个64位windows的![hsdis-amd64.dll](post/d7ba81a7/hsdis-amd64.dll)，运行jdk版本是：1.8.211
+**注：** 这里我自己编译了一个64位windows的![hsdis-amd64.dll](d7ba81a7/hsdis-amd64.dll)，运行jdk版本是：1.8.211
 
 如果读者使用的是SlowDebug或者FastDebug版的HotSpot，那可以直接通过-XX：+PrintAssembly指令使用的插件；如果读者使用的是Product版的HotSpot，则还要额外加入一个-XX：+UnlockDiagnosticVMOptions参数才可以工作。
 测试代码如下：
@@ -1083,9 +1083,9 @@ Code:
 ```
 
 **注：** GitHub页面上有对应的release包使用，直接访问下载即可。重新修改参数之后，运行一下得到运行结果的log，这里贴一下我运行的
-![logfile.log](post/d7ba81a7/logfile.log)
+![logfile.log](d7ba81a7/logfile.log)
 运行界面如下图所示（由于作者没有继续深入，暂时这块笔者暂定，后续有机会再补充详细设定）：
-![JITWatch运行界面](post/d7ba81a7/JITWatch_window.jpg)
+![JITWatch运行界面](d7ba81a7/JITWatch_window.jpg)
 
 ##### JITWatch详细使用
 
@@ -1183,7 +1183,7 @@ at org.apache.axis.transport.http.HTTPSender.invoke(HTTPSender.java:143)
 根据《Java虚拟机规范》的规定，Class文件格式采用一种类似于C语言结构体的伪结构来存储数据，这种伪结构中只有两种数据类型：**“无符号数”和“表”。**
 - **无符号数**属于基本的数据类型，以u1、u2、u4、u8来分别代表1个字节、2个字节、4个字节和8个字节的无符号数，无符号数可以用来描述数字、索引引用、数量值或者按照UTF-8编码构成字符串值。
 - **表**是由多个无符号数或者其他表作为数据项构成的*复合数据类型*，为了便于区分，所有表的命名都习惯性地以“_info”结尾。表用于描述有层次关系的复合结构的数据，整个Class文件本质上也可以视作是一张表，这张表由表6-1所示的数据项按严格顺序排列构成。
-![Class文件格式](post/d7ba81a7/class_file_infrastracture.jpg)
+![Class文件格式](d7ba81a7/class_file_infrastracture.jpg)
 无论是无符号数还是表，当需要描述同一类型但数量不定的多个数据时，经常会使用一个前置的容量计数器加若干个连续的数据项的形式，这时候称这一系列连续的某一类型的数据为某一类型的“集合”。
 
 ### 魔数与Class文件的版本
@@ -1200,14 +1200,14 @@ public class TestClass {
 }
 ```
 **注：**书中作者都是用JDK1.6编译运行的，后文贴图等相关，均会是我通过JDK1.9编译运行
-![Java Class文件结构-主版本号](post/d7ba81a7/data_interpretor_major_version.jpg)
+![Java Class文件结构-主版本号](d7ba81a7/data_interpretor_major_version.jpg)
 如书中所述：开头4个字节的十六进制表示是0xCAFEBABE，代表次版本号的第5个和第6个字节值为0x0000，而主版本号的值为0x0035，也即是十进制的53，也就是支持JDK1.9版本
 关于次版本号：而到了JDK 12时期，由于JDK提供的功能集已经非常庞大，有一些复杂的新特性需要以“公测”的形式放出，所以设计者重新启用了副版本号，将它用于标识“技术预览版”功能特性的支持。如果Class文件中使用了该版本JDK尚未列入正式特性清单中的预览功能，则必须把次版本号标识为65535，以便Java虚拟机在加载类文件时能够区分出来。
 
 ### 常量池
 紧接着主、次版本号之后的是常量池入口，常量池可以比喻为Class文件里的资源仓库，*它是Class文件结构中与其他项目关联最多的数据*，通常也是占用Class文件空间最大的数据项目之一，另外，它还是在Class文件中第一个出现的表类型数据项目。
 由于常量池中常量的数量是不固定的，所以在常量池的入口需要放置一项u2类型的数据，代表常量池容量计数值（constant_pool_count）。与Java中语言习惯不同，这个容量计数是从1而不是0开始的。如下图所示：
-![常量池计数](post/d7ba81a7/data_interpretor_constant_poll_count.jpg)
+![常量池计数](d7ba81a7/data_interpretor_constant_poll_count.jpg)
 **注** 常量池容量（偏移地址：0x00000008）为十六进制数0x0013，即十进制的19，这就代表常量池中有18项常量。（这个跟作者的1.6编译的，不一样，书中标注的有21项，整整少了3项）。
 **之所以常量池从1开始计数：** 设计者将第0项常量空出来是有特殊考虑的，这样做的目的在于，如果后面某些指向常量池的索引值的数据在特定情况下需要表达“不引用任何一个常量池项目”的含义，可以把索引值设置为0来表示。Class文件结构中只有常量池的容量计数是从1开始，对于其他集合类型，包括接口索引集合、字段表集合、方法表集合等的容量计数都与一般习惯相同，是从0开始。
 常量池中主要存放两大类常量：**字面量（Literal）和符号引用（Symbolic References）。**字面量比较接近于Java语言层面的常量概念，如文本字符串、被声明为final的常量值等。而 *符号引用则属于编译原理方面* 的概念，主要包括下面几类常量：
@@ -1219,12 +1219,12 @@ public class TestClass {
 - 动态调用点和动态常量（Dynamically-Computed Call Site、Dynamically-Computed Constant）
 Java代码在进行Javac编译的时候，并不像C和C++那样有“连接”这一步骤，而是在虚拟机加载Class文件的时候进行动态连接（具体见第7章）。也就是说，**在Class文件中不会保存各个方法、字段最终在内存中的布局信息**，这些字段、方法的符号引用不经过虚拟机在运行期转换的话是无法得到真正的内存入口地址，也就无法直接被虚拟机使用的。当虚拟机做类加载时，将会从常量池获得对应的符号引用，再在类创建时或运行时解析、翻译到具体的内存地址之中。
 常量池中每一项常量都是一个表，最初常量表中共有11种结构各不相同的表结构数据，后来为了更好地支持动态语言调用，额外增加了4种动态语言相关的常量[1]，为了支持Java模块化系统（Jigsaw），又加入了CONSTANT_M odule_info和CONSTANT_Package_info两个常量，所以截至JDK13，常量表中分别有17种不同类型的常量。
-![常量池的项目类型](post/d7ba81a7/data_interpretor_constant_poll_tags.jpg)
+![常量池的项目类型](d7ba81a7/data_interpretor_constant_poll_tags.jpg)
 *之所以说常量池是最烦琐的数据，是因为这17种常量类型各自有着完全独立的数据结构，两两之间并没有什么共性和联系，因此只能逐项进行讲解。*
 **注：**笔者也会根据The Java Virtual Machine Specification Java SE 9 Edition版本中的相关章节描述进行补充说明，由于实际在win10系统下编译跟书本中描述出入有点大，后续关于具体细致内容，主要以书本介绍为主。具体自行编译结果，后续等章节末尾，会单独开小节去研究。
-![常量池结构](post/d7ba81a7/constant_pool_structure.jpg)
+![常量池结构](d7ba81a7/constant_pool_structure.jpg)
 第一项常量，它的标志位（偏移地址：0x0000000A）是0x07，查表的标志列可知这个常量属于 **CONSTANT_Class_info**类型，此类型的常量代表一个类或者接口的符号引用。CONSTANT_Class_info的结构比较简单：
-![CONSTANT_Class_info型常量的结构](post/d7ba81a7/CONSTANT_Class_info.jpg)
+![CONSTANT_Class_info型常量的结构](d7ba81a7/CONSTANT_Class_info.jpg)
 书中示例用javap分析Class文件字节码：
 ```
 C:\>javap -verbose TestClass
@@ -1259,7 +1259,7 @@ const #21 = Asciz TestClass.java;
 
 #### 访问标志
 在常量池结束之后，紧接着的2个字节代表访问标志（access_flags），这个标志用于识别一些类或者接口层次的访问信息，包括：这个Class是类还是接口；是否定义为public类型；是否定义为abstract类型；如果是类的话，是否被声明为final；等等。如下图所示：
-![访问标志](post/d7ba81a7/access_flag.jpg)
+![访问标志](d7ba81a7/access_flag.jpg)
 **分析过程：**access_flags中一共有16个标志位可以使用，当前只定义了其中9个，没有使用到的标志位要求一律为零。以代码清单6-1中的代码为例，TestClass是一个普通Java类，不是接口、枚举、注解或者模块，被public关键字修饰但没有被声明为final和abstract，并且它使用了JDK 1.2之后的编译器进行编译，因此它的ACC_PUBLIC、ACC_SUPER标志应当为真，而ACC_FINAL、ACC_INTERFACE、ACC_ABSTRACT、ACC_SYNTHETIC、ACC_ANNOTATION、ACC_ENUM、ACC_M ODULE这七个标志应当为假，因此它的access_flags的值应为：0x0001|0x0020=0x0021。从图6-5中看到，access_flags标志（偏移地址：0x000000EF）的确为0x0021。
 #### 类索引、父类索引与接口索引集合
 类索引（this_class）和父类索引（super_class）都是一个u2类型的数据，而接口索引集合（interfaces）是一组u2类型的数据的集合，Class文件中由这三项数据来确定该类型的继承关系。类索引用于确定这个类的全限定名，父类索引用于确定这个类的父类的全限定名。由于Java语言不允许多重继承，所以父类索引只有一个，除了java.lang.Object之外，所有的Java类都有父类，因此除了java.lang.Object外，所有Java类的父类索引都不为0。接口索引集合就用来描述这个类实现了哪些接口，这些被实现的接口将按implements关键字（如果这个Class文件表示的是一个接口，则应当是extends关键字）后的接口顺序从左到右排列在接口索引集合中。
@@ -1390,7 +1390,7 @@ FromTo Target Type
 Java虚拟机把描述类的数据从Class文件加载到内存，并对数据进行校验、转换解析和初始化，最终形成可以被虚拟机直接使用的Java类型，这个过程被称作 **虚拟机的类加载机制。**
 ### 类加载的时机
 一个类型从被加载到虚拟机内存中开始，到卸载出内存为止，它的整个生命周期将会经历加载（Loading）、验证（Verification）、准备（Preparation）、解析（Resolution）、初始化（Initialization）、使用（Using）和卸载（Unloading）七个阶段，其中验证、准备、解析三个部分统称为连接（Linking）。
-![类的生命周期](post/d7ba81a7/class_lifecycle.jpg)
+![类的生命周期](d7ba81a7/class_lifecycle.jpg)
 加载、验证、准备、初始化和卸载这五个阶段的顺序是确定的，类型的加载过程必须按照这种顺序按部就班地开始，而 **解析阶段则不一定**：它在某些情况下可以在初始化阶段之后再开始，这是为了支持Java语言的运行时绑定特性（也称为动态绑定或晚期绑定）
 类加载过程的第一个阶段“加载”，《Java虚拟机规范》中并*没有进行强制约束*，这点可以交给虚拟机的具体实现来自由把握。但是对于*初始化阶段*，《Java虚拟机规范》则是**严格**规定了有且只有六种情况必须立即对类进行“初始化”（而加载、验证、准备自然需要在此之前开始）：
 - 遇到new、getstatic、putstatic或invokestatic这四条字节码指令时，如果类型没有进行过初始化，则需要先触发其初始化阶段。能够生成这四条指令的典型Java代码场景有：
@@ -1477,7 +1477,7 @@ public class NotInitialization {
 ```
 上述代码运行之后，也没有输出“ConstClass init！”，这是因为虽然在Java源码中确实引用了ConstClass类的常量HELLOWORLD，但其实在**编译阶段通过常量传播优化，已经将此常量的值“helloworld”直接存储在NotInitialization类的常量池中**，以后NotInitialization对常量ConstClass.HELLOWORLD的引用，实际都被转化为NotInitialization类对自身常量池的引用了。也就是说，实际上NotInitialization的Class文件之中并没有ConstClass类的符号引用入口，这两个类在编译成Class文件后就已不存在任何联系了。
 **注：**关于这个示例，我们可以通过两个途径来作证：第一：前文提到的开启JVM的+TraceClassLoading参数可以看的加载过程。第二：我们通过反编译工具看一下，常量持有的情况
-![被动引用3反编译](post/d7ba81a7/decompile_java_const_pool_transfering.jpg)
+![被动引用3反编译](d7ba81a7/decompile_java_const_pool_transfering.jpg)
 
 ### 类加载的过程
 加载、验证、准备、解析和初始化这五个阶段所执行的具体动作。
@@ -1529,7 +1529,7 @@ public class NotInitialization {
 public static int value = 123;
 ```
 那变量value在准备阶段过后的初始值为0而不是123，因为这时尚未开始执行任何Java方法，而把value赋值为123的putstatic指令是程序被编译后，存放于类构造器```<clinit>()```方法之中，所以把 **value赋值为123的动作要到类的初始化阶段才会被执行**。
-![基本数据类型的零值](post/d7ba81a7/primitive_types_default_value.jpg)
+![基本数据类型的零值](d7ba81a7/primitive_types_default_value.jpg)
 
 #### 解析
 解析阶段是Java虚拟机将常量池内的符号引用替换为直接引用的过程。
@@ -1647,7 +1647,7 @@ protected synchronized Class<?> loadClass(String name, boolean resolve) throws C
 Java虚拟机以方法作为最基本的执行单元，“栈帧”（Stack Frame）则是用于支持虚拟机进行方法调用和方法执行背后的数据结构，它也是虚拟机运行时数据区中的虚拟机栈（Virtual MachineStack）的栈元素。
 每一个栈帧都包括了局部变量表、操作数栈、动态连接、方法返回地址和一些额外的附加信息。在编译Java程序源码的时候，栈帧中需要多大的局部变量表，需要多深的操作数栈就已经被分析计算出来，并且写入到方法表的Code属性之中。
 对于执行引擎来讲，在活动线程中，只有位于栈顶的方法才是在运行的，只有位于栈顶的栈帧才是生效的，其被称为“当前栈帧”（Current Stack Frame），与这个栈帧所关联的方法被称为“当前方法”（Current Method）。
-![栈帧概念结构](post/d7ba81a7/stack_frame_model.jpg)
+![栈帧概念结构](d7ba81a7/stack_frame_model.jpg)
 #### 局部变量表
 局部变量表（Local Variables Table）是一组变量值的存储空间，用于存放方法参数和方法内部定义的局部变量。在Java程序被编译为Class文件时，就在方法的Code属性的max_locals数据项中确定了该方法所需分配的局部变量表的最大容量。
 #### 操作数栈

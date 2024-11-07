@@ -37,7 +37,7 @@ DataGrip目前使用导入场景来说，最好的一点就是，如果有错误
 
 ### Navicat
 操作还是比较简单的，在对应数据库上右键，选择“导入向导”，在剩下步骤选择对应的源文件，完了映射关联表，后续一步一步点下去，最后运行就行了：
-![navicat导入](post/b0471e7f/import_with_navicat.png)
+![navicat导入](b0471e7f/import_with_navicat.png)
 
 ### DataGrip
 关于DataGrip的一些介绍，[官网传送门](https://www.jetbrains.com/datagrip/)

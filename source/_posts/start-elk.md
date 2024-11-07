@@ -168,7 +168,7 @@ sudo systemctl start elasticsearch
 sudo systemctl enable elasticsearch
 ```
 看到下图所示started，则表明启动完成：
-![start_es_successfully](post/39705835/start_es_successfully.jpg)
+![start_es_successfully](39705835/start_es_successfully.jpg)
 启动完成后，可以通过tail查看默认日志路径/var/log/elasticsearch下的日志文件查看启动情况。
 ##### 其余两个从节点配置
 上传tar.gz包到指定路径下并解压缩
@@ -293,7 +293,7 @@ node.max_local_storage_nodes: 3
 #### ElasticSearch-head插件
 这个插件es辅助可视化管理es集群的工具
 安装好之后，通过浏览器页面浏览张这个样子：
-![elasticsearch-head](post/39705835/elasticsearch-head.jpg)
+![elasticsearch-head](39705835/elasticsearch-head.jpg)
 ##### 下载插件
 ```shell
 # 如果提示找不到wget命令，yum install wget安装一下
@@ -330,9 +330,9 @@ grunt -version
 ###### 修改head插件源码
 1. 修改服务器监听地址：Gruntfile.js
 找到如下位置，新加一行hostname，如下图所示:
-![modify_gruntjs_file](post/39705835/modify_gruntjs_file.jpg)
+![modify_gruntjs_file](39705835/modify_gruntjs_file.jpg)
 2. 修改连接地址：_site/app.js，大概位置在4374行
-![modify_app_js](post/39705835/modify_app_js.jpg)
+![modify_app_js](39705835/modify_app_js.jpg)
 
 ###### head插件npm安装
 直接在当前目录下执行如下命令安装
@@ -352,7 +352,7 @@ cerebro相对上一小节通过nodejs方式访问，就安装步骤而言，简�
 cerebro是一款以来Scala、JS等相关技术编写的，其官方github有详细配置说明：https://github.com/lmenezes/cerebro
 下载release包，上传到服务器后台之后，可以不用配置conf目录下的配置文件，直接通过登录页面直接连接es集群。
 运行截图如下：
-![cerebro_run_capture](post/39705835/cerebro_run_capture.jpg)
+![cerebro_run_capture](39705835/cerebro_run_capture.jpg)
 
 
 #### Kibana
@@ -375,7 +375,7 @@ $ sudo chkconfig kibana on
 
 稍等片刻，通过浏览器，kibana默认端口是5601，直接访问，进去之后，就大致可以看到如下页面了，
 初始化，进去会让你是否选择一个kibana示例，初始化一些es数据后展示的一个监控大盘，我点了一个，之后就如下图所示：
-![kibanadashborad](post/39705835/kibana_dashborad.jpg)
+![kibanadashborad](39705835/kibana_dashborad.jpg)
 
 嗯，配色还是很好看的！
 
@@ -397,7 +397,7 @@ $ sudo chkconfig kibana on
 ```
 同样等待光标等你键入之后，输入：Hello World!，回车
 可能发现并没有json回显，此时通过head检索一下，发现如下图，消息内容为正为你手工输入的，即表明正常发送到es：
-![标准输入输出](post/39705835/get_messages_from_standard_input.jpg)
+![标准输入输出](39705835/get_messages_from_standard_input.jpg)
 ###### 配置一个简单示例
 目标：通过监听centos系统日志文件，只要该日志文件中写入信息，就被logstash收集发送到es，最后通过配置kibana检索日志信息。
 1. 配置一个简单的conf文件
@@ -436,15 +436,15 @@ output{
 ```
 
 2. 启动后，再去head查看一下，发现多出一列信息
-![head_overview_after_configuring_system_log](post/39705835/head_overview_after_configuring_system_log.jpg)
+![head_overview_after_configuring_system_log](39705835/head_overview_after_configuring_system_log.jpg)
 此时表明以及成功收集到系统信息了
 3. 配置一下kibana索引即可通过kibana搜索了
 打开kibana的Management配置菜单（左侧菜单栏下方的小齿轮），点击 **Index Patterns**创建索引，如下图所示：
-![config_kibana_index_1](post/39705835/config_kibana_index_1.jpg)
+![config_kibana_index_1](39705835/config_kibana_index_1.jpg)
 创建新的索引，按下图配置
-![config_kibana_index_2](post/39705835/config_kibana_index_2.jpg)
+![config_kibana_index_2](39705835/config_kibana_index_2.jpg)
 生效之后，就可以再发现(Discovery)菜单中检索了，如下图所示：
-![config_kibana_index_3](post/39705835/config_kibana_index_3.jpg)
+![config_kibana_index_3](39705835/config_kibana_index_3.jpg)
 
 至此，所有ELK组件搭建完毕，下一步就是进一步搜集我们需要的信息了！
 

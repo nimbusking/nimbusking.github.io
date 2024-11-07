@@ -44,7 +44,7 @@ https://hexo.io/docs/one-command-deployment
 一句话解释Travis CI干嘛的，说白了就是一个在线编译环境，如果你玩过Jekins，这玩意儿就很好懂了。具体细节，真的建议，看官方文档就好。
 https://docs.travis-ci.com/
 挑一个你了解的开发语言，如Java、Python什么的，去看看示例就好了。
-![官网logo](post/e62993b1/bg2017121901.png)
+![官网logo](e62993b1/bg2017121901.png)
 灵性的大胡子，哈哈哈哈
 ### 关于我的站点结构
 - 文章托管自然是GitHub，仓库的名字就是：nimbusking.github.io。PS：别折腾自定义的仓库名字了，你要是改了，后面又要折腾不少配置，尤其是绑定了自定义域名的。
@@ -100,7 +100,7 @@ PS：后来，我在_travis.yml，中自己建了一个临时文件夹，完了�
     + 上面这个仓库中，有俩分支：一个默认的master分支，一个gh-pages(你可以起别的名字，但是建议就用这个好了，官网也是这个)。
     + 自定义名称可以，但是一定要记住：**master分支存放博客源文件，gh-pages存放最终hexo generate生成的public文件夹下的内容**
     + 你的这个仓库的GitHub Pages指定的分支要选择为：gh-pages，如下图所示：
-    ![gh-pages](post/e62993b1/AutoCapture_2021-02-22_170448.png)
+    ![gh-pages](e62993b1/AutoCapture_2021-02-22_170448.png)
 
 - 绑定TravisCI在线账号：现在的官网是：https://travis-ci.com/
 
@@ -138,16 +138,16 @@ git push就是了，没什么好说的。
 ### 生成GitHub Token
 这个token是为了在外部授权可以提交代码所用。
 设置路径，访问你的GitHub主页，路径：Settings(点击你的头像右边的下拉箭头) -> Developer Settings -> Personal access tokens -> Generate New Token，如下图所示：
-![Generate New Token](post/e62993b1/AutoCapture_2021-02-22_154729.png)
+![Generate New Token](e62993b1/AutoCapture_2021-02-22_154729.png)
 **注意**这个token要及时复制到文本编辑器里面，下次再进来之后，就看不到了。
 
 ### 配置TravisCI账号
 用github授权登录之后，第一次登录travisci官网后，会让你同步仓库。你可能跟我这个不一样，第一次登录会让你去你的github中配置相关的授权信息，照着步骤操作即可。
-![同步仓库信息](post/e62993b1/AutoCapture_2021-02-22_002857.jpg)
+![同步仓库信息](e62993b1/AutoCapture_2021-02-22_002857.jpg)
 在搜索框中键入你的仓库名称，随后点击Settings
-![Settings页面](post/e62993b1/AutoCapture_2021-02-22_154127.png)
+![Settings页面](e62993b1/AutoCapture_2021-02-22_154127.png)
 在Settings页面中，只需要注意添加相应的变量即可。如下图所示：
-![Settings页面](post/e62993b1/AutoCapture_2021-02-22_154416.png)
+![Settings页面](e62993b1/AutoCapture_2021-02-22_154416.png)
 我自己在这里添加了7个，其中一个GH_TOKEN就是上面在GitHub通过Generate New Token操作生成的。其余的，一个是GiTalk相关的，一个是algolia相关的。通常，其余配置保证默认即可，如果有特殊配置需求，可以阅读Travis相关的配置说明，如Cron Jobs等。
 至此，关联上你的GitHub仓库之后，就等于加了一个钩子程序，但是在正式启用前，还缺一个重要的配置文件：```.travis.yml``` ，只有配置了这个文件，才能会被Travis CI识别。
 ### 配置.travis.yml文件
@@ -286,4 +286,4 @@ deploy:
 未完待续。。。
 
 ## 附件
-- [Hexo官网中关于TravisCI集成的相关说明](post/e62993b1/hexo_github_pages.7z)
+- [Hexo官网中关于TravisCI集成的相关说明](e62993b1/hexo_github_pages.7z)

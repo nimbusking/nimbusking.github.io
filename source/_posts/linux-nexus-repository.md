@@ -55,7 +55,7 @@ tcp        0      0 0.0.0.0:8081            0.0.0.0:*               LISTEN      
 
 启动nexus之后，在浏览器访问http://ip:8081端口，ip就是你服务器的ip，访问之后，单击页面右上角的Sign in
 初次登录会提示一个获取admin用户的默认密码路径，如下图所示：
-![admin初始密码](post/f3b827b0/03c5869d4ef5c4b3ee329ea106999903.png)
+![admin初始密码](f3b827b0/03c5869d4ef5c4b3ee329ea106999903.png)
 
 按指定的路径，cat即可，获取到初始化admin用户密码之后就可以登录了，登录后会提示重置admin用户密码。
 在Configure Anonymous Access时，按需选择，如果允许匿名访问私服，则可以允许，反之选择disable。

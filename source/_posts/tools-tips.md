@@ -14,19 +14,19 @@ date: 2018-04-15 10:37:03
 #### Sublime Text 3
 ##### win10下解决中文输入法光标不跟随问题
 国内一大老Fork并修改之后的IMESupport[主页地址](http://zcodes.net/2017/02/12/sublime_text_3_imesupport.html)，在win10下使用完美解决。看下图所示：
-![使用效果](post/a4b1030a/ChineseTypeWritingInSublimeText_CursorFollowing.jpg)
+![使用效果](a4b1030a/ChineseTypeWritingInSublimeText_CursorFollowing.jpg)
 <!--more-->
 可以直接从GitHub上下载下来，把插件路径解压到：**%AppData%\Sublime Text 3\Packages**
 下即可，下图是我本地安装的：
-![本地安装包](post/a4b1030a/SublimeTextInstalledPackages.jpg)
+![本地安装包](a4b1030a/SublimeTextInstalledPackages.jpg)
 ##### 安装Markdown Editing插件之后文本编辑区域过窄问题
 跟该插件的默认设置有关，解决方案：
 打开路径：Preferences->Package Settings->Markdown Editing->Markdown GFM Settings --User，在配置下添加关于**wrap_width**的属性，我修改成了130，如下图所示：
-![MarkdownEditing用户配置](post/a4b1030a/MarkdownEditingUserConfiguration.jpg)
+![MarkdownEditing用户配置](a4b1030a/MarkdownEditingUserConfiguration.jpg)
 设置前效果：
-![设置前](post/a4b1030a/BeforeConfiguring.jpg)
+![设置前](a4b1030a/BeforeConfiguring.jpg)
 设置后效果：
-![设置后](post/a4b1030a/AfterConfiguring.jpg)
+![设置后](a4b1030a/AfterConfiguring.jpg)
 **效果明显！**
 
 ##### Markdown Editing插件配置
@@ -60,9 +60,9 @@ Ctrl+Shift+P，输入Remove，选择Remove Package，之后选择相应的插件
 这里面的语法很简单：
 **<![CDATA[写入你想要快速插入的代码片段]]>** 这个XML转义票签里面就是写入你想要快速插入的代码片段
 **tabTrigger**就是你需要再什么单词后按tab键自动插入上述你编写的代码片段
-![配置Sublime Snippet](post/a4b1030a/ConfigSublimeSnippet.jpg)
+![配置Sublime Snippet](a4b1030a/ConfigSublimeSnippet.jpg)
 Ctrl + S 保存，目录默认即可，文件名随意，文件后缀名必须是：**.sublime-snippet**，效果就如下图所示：
-![演示效果](post/a4b1030a/shellAfterPressTabButton.gif)
+![演示效果](a4b1030a/shellAfterPressTabButton.gif)
 
 ##### 快速查找重复行
 Ctrl + F 打开查找控制面板，输入：
@@ -85,22 +85,22 @@ Ctrl + F 打开查找控制面板，输入：
 近期周末在玩一款游戏的时候，老是会遇到蓝屏的情况，不清楚什么原因，可见的过程中对这个游戏送一串？？？？
 ##### 准备工作
 windows蓝屏之后，通常都会在C:\Windows\Minidump该目录下面转存储相应的dump文件，如下图所示：
-![windows蓝屏dump文件](post/a4b1030a/windowsbluescreendumpfiles.jpg)
+![windows蓝屏dump文件](a4b1030a/windowsbluescreendumpfiles.jpg)
 此时需要用到微软官方dump文件分析工具，官方下载地址，如下：
 [Windows SKD Tool Kits](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk)
 点击页面中的“DOWNLOAD THE INSTALLER”
 下载一个约1.29MB大小的安装文件
 双击运行之后，前面的安装路径自行填写，其中在“Select the Features you want to download”页面，如下图所示：
-![Select the Features you want to download](post/a4b1030a/selectthefutures.jpg)
+![Select the Features you want to download](a4b1030a/selectthefutures.jpg)
 当中，特别注意“Debuging Tools for Windows”，这个便是我们想要的工具
 **当然，如果你想最简单的方式，直接默认全选，一路next下去，也是可以的**
 等待安装完成
 *PS：可能要试具体网络环境，我这边很快，不到5分钟全部安装完成*
 ##### 分析dump文件之前的配置工作
 在开始中找到WinDbg(x64)，运行，运行之后是这样的：
-![windbg](post/a4b1030a/windbg.jpg)
+![windbg](a4b1030a/windbg.jpg)
 点击：File->Symbol File Path，如下图所示：
-![symbolspath](post/a4b1030a/symbolspath.jpg)
+![symbolspath](a4b1030a/symbolspath.jpg)
 在Symbol Path会话框里输入如下路径：
 ``` shell
 SRV*G:\Symbol*http://msdl.microsoft.com/download/symbols
@@ -117,15 +117,15 @@ Your debugger is not using the correct symbols
 ##### 开始分析dump文件
 点击：File->Open Crash Dump，找到对应的dump文件
 打开之后，开始由于上述配置symbols路径，会自动从msdl下载分析时遇到的symbols，如下图所示：
-![开始下载symbols文件](post/a4b1030a/startdownloadsymbols.jpg)
+![开始下载symbols文件](a4b1030a/startdownloadsymbols.jpg)
 **注意：此时左下角状态栏会显示debuggee not connected字样，这是正常现象，表示debug分析还在准备中，如果你注意最外层WinDbg左下角的状态栏，是可以看到相应的下载Symbols进程的，一个'/'符号在转圈，注意观察**
 如果网络正常，你会看到在你配置下载的symbols路径下面会多了很多文件夹，如下图所示：
-![已下载好的符号文件](post/a4b1030a/downloadedsymbols.jpg)
+![已下载好的符号文件](a4b1030a/downloadedsymbols.jpg)
 **但是，如果你长时间发现，只有一个文件夹，而且点进去，如果发现一个名为：download.error文件，而且这个文件不是0kb，那么你就要考虑可能是你的网络有问题，不能正常从msdl下载。一种可能DNS解析msdl就是有问题；另一种可能被ban了？没考证，我的解决方案是直接把这个域名msdl.microsoft.com加到黑名单里，走科学上网，发现很快就能正常下载symbols文件了。**下载好的内容如下图所示：
-![一个成功下载的symbol文件](post/a4b1030a/onesymboldownloadsuccessfully.jpg)
+![一个成功下载的symbol文件](a4b1030a/onesymboldownloadsuccessfully.jpg)
 
 稍等片刻，等变成如下图所示的页面，表面可进入到准备分析阶段：
-![准备分析](post/a4b1030a/readytoanalys.jpg)
+![准备分析](a4b1030a/readytoanalys.jpg)
 **此时注意，左下角状态已变**
 
 点击上图中的**!analyze -v**链接，或者在下方状态栏的命令行中直接输入“!analyze -v”，两者等价。
@@ -371,7 +371,7 @@ PROCESS_NAME:  services.exe
 昨晚惯例周五晚上打游戏的时间（Gaming Night），玩着玩着，就蓝屏了。
 蓝屏页面没有拍，报的是：SYSTEM_SERVICE_EXCEPTION的错误。
 重启之后，WinDbg打开分析一下，发现是OneDrive的锅。
-![SystemServiceException](post/a4b1030a/SystemServiceException.png)
+![SystemServiceException](a4b1030a/SystemServiceException.png)
 很有可能是最近重新做系统之后，OneDrive一直在更新状态导致的，具体原因不知。
 ##### 解决过程
 卸载OneDrive，官网重新下载安装包。重新安装。**安装好之后，重新指定新的路径为OD的同步路径**

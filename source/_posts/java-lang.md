@@ -45,7 +45,7 @@ Appendable append(CharSequence csq, int start, int end) throws IOException;
 Appendable append(char c) throws IOException;
 ```
 ###### 继承图谱
-![hierachy_appendable](post/56093694/hierachy_appendable.jpg)
+![hierachy_appendable](56093694/hierachy_appendable.jpg)
 
 
 ##### AutoCloseable

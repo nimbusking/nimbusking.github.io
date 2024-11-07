@@ -48,7 +48,7 @@ categories: ZooKeeper
 
 关于CAP的应用，我们要知道，分布式系统无法同时满足这三个需求的。往往只能满足其中两项，关于这点，在书中有个表格，这里贴出来，需要的时候可以看看缺失其中一项的应用场景是什么：
 
-![CAP定理应用](post/324f2c0b/CAP定理应用.jpg)
+![CAP定理应用](324f2c0b/CAP定理应用.jpg)
 
 另外，在分布式场景下，分区容错性（P）是一定要解决的，不然怎么称之为分布式系统？
 
@@ -58,7 +58,7 @@ BASE是由Basically Available(基本可用)、Soft state（软状态）和Eventu
 
 来自EBAY工程师Dan Pritchett在2008年发布的一篇文章中提到的概念，笔者从ACM网站上下载了下来，有需要可以翻阅看看。
 
- [Introduce BASE different with ACID.pdf](post/324f2c0b\Introduce BASE different with ACID.pdf) 
+ [Introduce BASE different with ACID.pdf](324f2c0b\Introduce BASE different with ACID.pdf) 
 
 原文文章连接：https://dl.acm.org/doi/10.1145/1394127.1394128
 
@@ -92,7 +92,7 @@ PC, 是Two-Phase Commit的缩写， 即二阶段提交，是计算机网络尤�
 
 二段提交示意图，如下图所示：
 
-![二段事务提交示意图](post/324f2c0b/二段事务提交示意图.jpg)
+![二段事务提交示意图](324f2c0b/二段事务提交示意图.jpg)
 
 ##### 优缺点
 
@@ -121,7 +121,7 @@ PC, 是Two-Phase Commit的缩写， 即二阶段提交，是计算机网络尤�
 
 其原理示意图（来自Google）：
 
-![三段事务提交示意图](post/324f2c0b/三段事务提交示意图.jpg)
+![三段事务提交示意图](324f2c0b/三段事务提交示意图.jpg)
 
 ##### 优缺点
 
@@ -225,7 +225,7 @@ ZAB协议包含两个基本的模式，分别是崩溃恢复和消息广播。
 
 ZAB协议的消息广播过程使用的是一个原子广播协议，***类似于**一个二阶段提交过程*。针ZAB协议的消息广播过程使用的是对客户端的事务请求，Leader服务器会为其生成对应的事务Proposal, 并将其发送给集群中其余所有的机器， 然后再分别收集各自的选票， 最后进行事务提交，如下图所示：
 
-![ZAB协议消息广播流程示意图](post/324f2c0b/ZAB协议消息广播流程示意图.jpg)
+![ZAB协议消息广播流程示意图](324f2c0b/ZAB协议消息广播流程示意图.jpg)
 
 前文中提到这个过程仅仅是类似于一个2PC过程，但是又与2PC过从不同的是：
 

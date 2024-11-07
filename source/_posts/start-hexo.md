@@ -46,7 +46,7 @@ npm install hexo-algolia --save
 关于hexo语法，插件什么的，这里不再赘述，瞅瞅官网什么，再本地init一个测试blog即可，语法不是很复杂。常用的，就那么几个。
 #### github托管源码
 先上我的仓库的图：
-![我的博客源码目录结构](post/178a5861/github.png)
+![我的博客源码目录结构](178a5861/github.png)
 
 最主要的就是：source目录下的文章
 其余有几个配置文件，分别说明一下：
@@ -128,12 +128,12 @@ deploy:
 作为一个自建博客，免费方案的这个流量绰绰有余。
 #### 配置大体流程
 注册进入之后，点击左侧Sites选项卡，下面“Add new site”，按照步骤关联github指定仓库接口。
-![新建站点](post/178a5861/netlify_add_site.png)
+![新建站点](178a5861/netlify_add_site.png)
 
 随后需要在左侧的Domains新增你需要关联的域名，也非常简单，跟着填就行了：
-![新建域名](post/178a5861/netlify_add_domain1.png)
+![新建域名](178a5861/netlify_add_domain1.png)
 创建好之后，点击进来会看到你的dns记录，这个记录如果你要有其它使用，譬如CDN加速啥的，你可能会用到
-![DNS记录](post/178a5861/netlify_add_site.png)
+![DNS记录](178a5861/netlify_add_site.png)
 
 ##### 效果
 
