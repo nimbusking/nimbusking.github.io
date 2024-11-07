@@ -25,7 +25,7 @@ jobs:
     - name: 安装 Hexo
       run: |
         export TZ='Asia/Shanghai'
-        npm install hexo@latest -g --save
+        npm install hexo-cli@latest -g --save
 
     - name: 缓存 Hexo
       id: cache
@@ -52,10 +52,10 @@ jobs:
         # npm install lozad@latest --save
         # npm uninstall hexo-generator-index --save
         # npm install hexo-generator-index-pin-top@latest --save
-        rm -rf node_modules
-        npm install --save bluebird
-        npm install --force
-        # npm ci
+        # rm -rf node_modules
+        # npm install --save bluebird
+        # npm install --force
+        npm ci
 
     - name: 处理相关变量
       run: |
@@ -80,5 +80,5 @@ jobs:
 
     - name: 部署 Nimbusk博客
       run: |
-        npx hexo clean
-        npx hexo d
+        hexo clean
+        hexo d
