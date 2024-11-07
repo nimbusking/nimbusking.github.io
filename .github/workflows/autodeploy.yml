@@ -52,7 +52,8 @@ jobs:
         # npm install lozad@latest --save
         # npm uninstall hexo-generator-index --save
         # npm install hexo-generator-index-pin-top@latest --save
-        npm ci
+        rm -rf node_modules && npm install --force
+        # npm ci
 
     - name: 处理相关变量
       run: |
