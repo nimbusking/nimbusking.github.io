@@ -20,12 +20,16 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: "20.x"
+        cache: npm
+
+    - name: 处理问题
+      if: github.event.name == 'repository_dispatch'
+      run: |
+        npm install hexo-algolia@latest
 
     - name: 安装 Hexo
       run: |
         export TZ='Asia/Shanghai'
-        npm remove node_modules 
-        npm remove package-lock.json
         npm install hexo-cli -g --save
 
     - name: 缓存 Hexo
