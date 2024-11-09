@@ -10,9 +10,17 @@ categories: Spring
 ---
 
 ## Spring概述
+一句话的就是：Java体系的里面的另一座高山，不是在于底层多么的硬核，而是在于这个框架体系非常庞大，以至于想要一下次吃透很难。
 <!-- more -->
 
+### 前置准备
+- GitHub上fork了一个5.1.15版本的Spring框架源码（可以参考我的：https://github.com/nimbusking/spring-framework）
+- 具备一点Gradle的知识
+- Spring调试模块均在项目里面的：spring-nimbusk-为开头的子模块中
+
 ## Spring IOC
+
+### Spring上下文生命周期
 
 ### SpringBean生命周期
 大体分为5个大的步骤，如下图所示：
@@ -67,8 +75,12 @@ SimpleAliasRegistry                 -[#008200,dashed]-^  AliasRegistry
 {% endplantuml %}
 
 
+
 ### 一些杂项问题
-####  构造器注入和Setter注入
+#### BeanFactory与FactoryBean
+BeanFactory是spring顶层接口，使用了简单工厂模式，负责生产Bean实例
+FactoryBean是对普通Bean对象增强的一个接口，实例化这种对象的时候，是会调用到实现的重新方法getObject()方法中初始化对象的。
+#### 构造器注入和Setter注入
 **构造器注入**：通过构造器的参数注入相关依赖对象
 **Setter注入**：通过 Setter 方法注入依赖对象，也可以理解为字段注入
 对于两种注入方式的看法：
