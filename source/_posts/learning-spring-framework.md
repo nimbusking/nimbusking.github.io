@@ -2,7 +2,7 @@
 title: 细磕Spring点滴
 abbrlink: f5eb228d
 date: 2024-11-07 08:33:54
-updated: 2024-11-07 08:33:54
+updated: 2024-11-10 09:27:06
 tags:
   - Spring全家桶
   - Java
@@ -35,7 +35,7 @@ BeanDefinition 是 Spring Framework 中定义 Bean 的配置元信息接口，�
 - 其他 Bean 引用，又可称作合作者或者依赖
 - 配置设置，比如 Bean 属性
 看一下相关的类图：
-```plantuml
+{% plantuml %}
 !theme plain
 top to bottom direction
 skinparam linetype ortho
@@ -64,13 +64,44 @@ GenericBeanDefinition           -[#000082,plain]-^  AbstractBeanDefinition
 RootBeanDefinition              -[#000082,plain]-^  AbstractBeanDefinition         
 ScannedGenericBeanDefinition    -[#008200,dashed]-^  AnnotatedBeanDefinition        
 ScannedGenericBeanDefinition    -[#000082,plain]-^  GenericBeanDefinition          
-```
+{% endplantuml %}
 这里面总结来看，按照不同的使用场景可以划分为：
 - 基于XML定义的bean：GenericBeanDefinition
 - @Component 以及派生注解定义 Bean：ScannedGenericBeanDefinition
 - 借助于 @Import 导入 Bean：AnnotatedGenericBeanDefinition
 - @Bean 定义的方法：ConfigurationClassBeanDefinition
 - 在 Spring BeanFactory 初始化 Bean 的前阶段，会根据 BeanDefinition 生成一个合并后的 RootBeanDefinition 对象
+
+### 基于XML的Bean的解析
+一图总结：
+![XML方式加载BeanDefinition流程](f5eb228d/XML方式加载.jpg)
+#### component:scan标签
+通过ContextNamespaceHandler注册了很多BeanDefinitionParser类
+```java
+public class ContextNamespaceHandler extends NamespaceHandlerSupport {
+
+  @Override
+  public void init() {
+    registerBeanDefinitionParser("property-placeholder", new PropertyPlaceholderBeanDefinitionParser());
+    registerBeanDefinitionParser("property-override", new PropertyOverrideBeanDefinitionParser());
+    registerBeanDefinitionParser("annotation-config", new AnnotationConfigBeanDefinitionParser());
+    registerBeanDefinitionParser("component-scan", new ComponentScanBeanDefinitionParser());
+    registerBeanDefinitionParser("load-time-weaver", new LoadTimeWeaverBeanDefinitionParser());
+    registerBeanDefinitionParser("spring-configured", new SpringConfiguredBeanDefinitionParser());
+    registerBeanDefinitionParser("mbean-export", new MBeanExportBeanDefinitionParser());
+    registerBeanDefinitionParser("mbean-server", new MBeanServerBeanDefinitionParser());
+  }
+}
+```
+### 基于注解的Bean的解析
+与XML方式基本类似，大致总结就是：
+1. 创建AnnotationConfigApplicationContext，来执行解析配置，这里面有俩分支，这俩基本类似，只是起始的步骤不大一样而已：
+    - 通过ClassPathBeanDefinitionScanner 会去扫描到包路径下所有的 .class 文件。
+    - 通过AnnotatedBeanDefinitionReader去读指定class及其派生的类信息，从给定的组件类中派生 bean 定义并自动刷新上下文。
+2. 通过 ASM（Java 字节码操作和分析框架）获取 .class 对应类的所有元信息
+3. 根据元信息判断是否符合条件（带有 @Component 注解或其派生注解），符合条件则根据这个类的元信息生成一个 BeanDefinition 进行注册
+
+### Bean加载过程（IOC核心）
 
 
 ### 一些杂项问题
