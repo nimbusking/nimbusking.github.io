@@ -13,10 +13,12 @@ categories: Spring
 一句话的就是：Java体系的里面的另一座高山，不是在于底层多么的硬核，而是在于这个框架体系非常庞大，以至于想要一下次吃透很难。
 <!-- more -->
 
-### 前置准备
+### 前置说明
 - GitHub上fork了一个5.1.15版本的Spring框架源码（可以参考我的：https://github.com/nimbusking/spring-framework）
-- 具备一点Gradle的知识
+- 需要具备一点Gradle的知识：Spring是基于Gradle构建
 - Spring调试模块均在项目里面的：spring-nimbusk-为开头的子模块中
+- 文章提供的类继承图是通过Idea导出的plantuml图，为了方便更好直观的嵌入我的博客里面，我直接拿来用了。原因是：直接截图没法灵活的修改继承树中的内容，比如加注释、关联注释什么的
+  很遗憾，plantuml目前不支持从底部到顶部的那种常规的继承图，**而是倒过来的，**即最顶层的实现不是在底部，而是在顶部，继承树从上往下看。看的时候注意区分一下。
 
 ## Spring IOC
 
@@ -26,54 +28,49 @@ categories: Spring
 大体分为5个大的步骤，如下图所示：
 ![SpringBean生命周期](f5eb228d/SpringBean生命周期.jpg)
 
-#### Bean加载过程
-{% plantuml %}
-    !theme plain
+#### BeanDefinition定义
+BeanDefinition 是 Spring Framework 中定义 Bean 的配置元信息接口，主要包含一下信息：
+- Bean 的类名
+- Bean 行为配置类，如作用域、自动绑定模式、生命周期回调等
+- 其他 Bean 引用，又可称作合作者或者依赖
+- 配置设置，比如 Bean 属性
+看一下相关的类图：
+```plantuml
+!theme plain
 top to bottom direction
 skinparam linetype ortho
 
-class AbstractAutowireCapableBeanFactory
-class AbstractBeanFactory
-interface AliasRegistry << interface >>
-interface AutowireCapableBeanFactory << interface >>
-interface BeanDefinitionRegistry << interface >>
-interface BeanFactory << interface >>
-interface ConfigurableBeanFactory << interface >>
-interface ConfigurableListableBeanFactory << interface >>
-class DefaultListableBeanFactory
-class DefaultSingletonBeanRegistry
-class FactoryBeanRegistrySupport
-interface HierarchicalBeanFactory << interface >>
-interface ListableBeanFactory << interface >>
-interface Serializable << interface >>
-class SimpleAliasRegistry
-interface SingletonBeanRegistry << interface >>
-annotation SuppressWarnings << annotation >>
+class AbstractBeanDefinition
+interface AnnotatedBeanDefinition << interface >>
+class AnnotatedGenericBeanDefinition
+interface AttributeAccessor << interface >>
+interface BeanDefinition << interface >>
+interface BeanMetadataElement << interface >>
+class ChildBeanDefinition
+class GenericBeanDefinition
+class RootBeanDefinition
+class ScannedGenericBeanDefinition
 
-AbstractAutowireCapableBeanFactory  -[#000082,plain]-^  AbstractBeanFactory                
-AbstractAutowireCapableBeanFactory  -[#008200,dashed]-^  AutowireCapableBeanFactory         
-AbstractBeanFactory                 -[#008200,dashed]-^  ConfigurableBeanFactory            
-AbstractBeanFactory                 -[#000082,plain]-^  FactoryBeanRegistrySupport         
-AutowireCapableBeanFactory          -[#008200,plain]-^  BeanFactory                        
-BeanDefinitionRegistry              -[#008200,plain]-^  AliasRegistry                      
-ConfigurableBeanFactory             -[#008200,plain]-^  HierarchicalBeanFactory            
-ConfigurableBeanFactory             -[#008200,plain]-^  SingletonBeanRegistry              
-ConfigurableListableBeanFactory     -[#008200,plain]-^  AutowireCapableBeanFactory         
-ConfigurableListableBeanFactory     -[#008200,plain]-^  ConfigurableBeanFactory            
-ConfigurableListableBeanFactory     -[#008200,plain]-^  ListableBeanFactory                
-DefaultListableBeanFactory          -[#000082,plain]-^  AbstractAutowireCapableBeanFactory 
-DefaultListableBeanFactory          -[#008200,dashed]-^  BeanDefinitionRegistry             
-DefaultListableBeanFactory          -[#008200,dashed]-^  ConfigurableListableBeanFactory    
-DefaultListableBeanFactory          -[#008200,dashed]-^  Serializable                       
-DefaultListableBeanFactory          -[#999900,dotted]-  SuppressWarnings                   
-DefaultSingletonBeanRegistry        -[#000082,plain]-^  SimpleAliasRegistry                
-DefaultSingletonBeanRegistry        -[#008200,dashed]-^  SingletonBeanRegistry              
-FactoryBeanRegistrySupport          -[#000082,plain]-^  DefaultSingletonBeanRegistry       
-HierarchicalBeanFactory             -[#008200,plain]-^  BeanFactory                        
-ListableBeanFactory                 -[#008200,plain]-^  BeanFactory                        
-SimpleAliasRegistry                 -[#008200,dashed]-^  AliasRegistry  
-{% endplantuml %}
-
+AbstractBeanDefinition          -[#008200,dashed]-^  AttributeAccessor              
+AbstractBeanDefinition          -[#008200,dashed]-^  BeanDefinition                 
+AbstractBeanDefinition          -[#008200,dashed]-^  BeanMetadataElement            
+AnnotatedBeanDefinition         -[#008200,plain]-^  BeanDefinition                 
+AnnotatedGenericBeanDefinition  -[#008200,dashed]-^  AnnotatedBeanDefinition        
+AnnotatedGenericBeanDefinition  -[#000082,plain]-^  GenericBeanDefinition          
+BeanDefinition                  -[#008200,plain]-^  AttributeAccessor              
+BeanDefinition                  -[#008200,plain]-^  BeanMetadataElement            
+ChildBeanDefinition             -[#000082,plain]-^  AbstractBeanDefinition         
+GenericBeanDefinition           -[#000082,plain]-^  AbstractBeanDefinition         
+RootBeanDefinition              -[#000082,plain]-^  AbstractBeanDefinition         
+ScannedGenericBeanDefinition    -[#008200,dashed]-^  AnnotatedBeanDefinition        
+ScannedGenericBeanDefinition    -[#000082,plain]-^  GenericBeanDefinition          
+```
+这里面总结来看，按照不同的使用场景可以划分为：
+- 基于XML定义的bean：GenericBeanDefinition
+- @Component 以及派生注解定义 Bean：ScannedGenericBeanDefinition
+- 借助于 @Import 导入 Bean：AnnotatedGenericBeanDefinition
+- @Bean 定义的方法：ConfigurationClassBeanDefinition
+- 在 Spring BeanFactory 初始化 Bean 的前阶段，会根据 BeanDefinition 生成一个合并后的 RootBeanDefinition 对象
 
 
 ### 一些杂项问题
