@@ -2,7 +2,7 @@
 title: 细磕Spring点滴
 abbrlink: f5eb228d
 date: 2024-11-07 08:33:54
-updated: 2024-11-10 09:27:06
+updated: 2024-11-11 21:36:25
 tags:
   - Spring全家桶
   - Java
@@ -403,20 +403,32 @@ return
   4.3. 处理nonOrdered 的 BeanFactoryPostProcessor 对象， 缓存并注册初始化
 5. 清除一些元数据缓存
 
-
 ##### registerBeanPostProcessors(beanFactory)
-跟上面是调用的同一个
+跟上面是调用的同一Delegate对象，主要处理：对 BeanPostProcessor 处理器进行初始化，并添加至 BeanFactory 中
+**这个里面初始化就是调用BeanFacory的getBean方法**。
+这个getBean处理了常见的循环依赖问题，后文中单独作一小节描述。
+
 ##### initMessageSource()
+设置上下文的 MessageSource 对象，常见的类如国际化相关的。
 
 ##### initApplicationEventMulticaster()
+设置上下文的 ApplicationEventMulticaster 对象，上下文事件广播器
 
 ##### onRefresh()
+刷新上下文时再进行一些初始化工作，交由子类进行扩展
 
 ##### registerListeners()
+将所有 ApplicationListener 监听器添加至 `applicationEventMulticaster` 事件广播器，如果已有事件则进行广播
 
 ##### finishBeanFactoryInitialization(beanFactory)
+置 ConversionService 类型转换器，**初始化**所有还未初始化的 Bean（不是抽象、不是懒加载方式，是单例模式的）。
+**这里面基本上就是初始化我们自己定义的相关的Bean对象了**
 
 ##### finishRefresh()
+刷新上下文的最后一步工作，会发布 ContextRefreshedEvent 上下文完成刷新事件
+
+### Bean加载之getBean初始化
+TODO
 
 ### 一些杂项问题
 #### BeanFactory与FactoryBean
