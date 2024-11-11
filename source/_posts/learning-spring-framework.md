@@ -188,7 +188,6 @@ public interface BeanFactoryPostProcessor {
 
 #### register(componentClasses);
 主要外层有个循环，调用到DefaultListableBeanFactory#registerBeanDefinition方法里注册BeanDefinition
-
 #### refresh();
 核心的是调用refresh方法，这个方法脉络非常清楚，但调用链非常深，让我们一个个按重点看看。
 PS：**下文中，重要的核心方法，会配上相关的时序图。**
@@ -387,20 +386,20 @@ return
 ![PostProcessorRegistrationDelegate结构](f5eb228d/structure_of_PostProcessorRegistrationDelegate.jpg)
 先看invokeBeanFactoryPostProcessors方法，另外一个在下面介绍：
 - 方法签名：```public static void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors)```
-具体执行步骤：
-进行前置判断：beanFactory instanceof BeanDefinitionRegistry
+具体执行步骤如下：
+先进行前置判断：beanFactory instanceof BeanDefinitionRegistry
 1. (true) 执行当前 Spring 应用上下文和底层 BeanFactory 容器中的 BeanFactoryPostProcessor、BeanDefinitionRegistryPostProcessor 们的处理
-  1. 先遍历当前 Spring 应用上下文中的 `beanFactoryPostProcessors`，如果是 BeanDefinitionRegistryPostProcessor 类型则进行处理
-  2. 获取底层 BeanFactory 容器中所有 BeanDefinitionRegistryPostProcessor 类型的 Bean 们，**遍历处理：PriorityOrdered类型**
-  3. 获取底层 BeanFactory 容器中所有 BeanDefinitionRegistryPostProcessor 类型的 Bean 们，**遍历处理：PriorityOrdered类型**
-  4. 处理上面还没处理的BeanDefinitionRegistryPostProcessor
-  5. 调用接下来执行它们的 postProcessBeanFactory(beanFactory) 方法
+    1. 先遍历当前 Spring 应用上下文中的 `beanFactoryPostProcessors`，如果是 BeanDefinitionRegistryPostProcessor 类型则进行处理
+    2. 获取底层 BeanFactory 容器中所有 BeanDefinitionRegistryPostProcessor 类型的 Bean 们，**遍历处理：PriorityOrdered类型**
+    3. 获取底层 BeanFactory 容器中所有 BeanDefinitionRegistryPostProcessor 类型的 Bean 们，**遍历处理：PriorityOrdered类型**
+    4. 处理上面还没处理的BeanDefinitionRegistryPostProcessor
+    5. 调用接下来执行它们的 postProcessBeanFactory(beanFactory) 方法
 2. (false) **执行当前 Spring 应用上下文中的 BeanFactoryPostProcessor 处理器的 postProcessBeanFactory(beanFactory) 方法**，下面的执行就是执行postProcessBeanFactory方法。
 3. 获取底层 BeanFactory 容器中所有 BeanFactoryPostProcessor 类型的 Beans
 4. 循环判断，在实现 PriorityOrdered 的 BeanFactoryPostProcessor 之间分开用单独List存：这个步骤为了后续处理一些排序的BeanFactoryPostProcessor
-  1. 处理PriorityOrdered 类型的 BeanFactoryPostProcessor 对象，缓存并注册初始化
-  2. 处理Ordered 类型的 BeanFactoryPostProcessor 对象，缓存并注册初始化
-  3. 处理nonOrdered 的 BeanFactoryPostProcessor 对象， 缓存并注册初始化
+    1. 处理PriorityOrdered 类型的 BeanFactoryPostProcessor 对象，缓存并注册初始化
+    2. 处理Ordered 类型的 BeanFactoryPostProcessor 对象，缓存并注册初始化
+    3. 处理nonOrdered 的 BeanFactoryPostProcessor 对象， 缓存并注册初始化
 5. 清除一些元数据缓存
 
 ##### registerBeanPostProcessors(beanFactory)
@@ -428,6 +427,7 @@ return
 刷新上下文的最后一步工作，会发布 ContextRefreshedEvent 上下文完成刷新事件
 
 ### Bean加载之getBean初始化
+这个过程相对比较复杂一点，需要处理的东西有点多：
 TODO
 
 ### 一些杂项问题
