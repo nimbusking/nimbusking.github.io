@@ -29,6 +29,7 @@ categories: Spring
 ![SpringBean生命周期](f5eb228d/SpringBean生命周期.jpg)
 
 #### BeanDefinition定义
+
 BeanDefinition 是 Spring Framework 中定义 Bean 的配置元信息接口，主要包含一下信息：
 - Bean 的类名
 - Bean 行为配置类，如作用域、自动绑定模式、生命周期回调等
@@ -93,6 +94,7 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
   }
 }
 ```
+
 ### 基于注解的Bean的解析
 与XML方式基本类似，大致总结就是：
 1. 创建AnnotationConfigApplicationContext，来执行解析配置，这里面有俩分支，这俩基本类似，只是起始的步骤不大一样而已：
@@ -102,7 +104,319 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 3. 根据元信息判断是否符合条件（带有 @Component 注解或其派生注解），符合条件则根据这个类的元信息生成一个 BeanDefinition 进行注册
 
 ### Bean加载过程（IOC核心）
+以AnnotationConfigApplicationContext为示例，下面将梳理一下处理过程
+#### this();
+初始化准备工作，这里面主要分为三个步骤：
+1. 初始化核心Bean工厂：this.beanFactory = new DefaultListableBeanFactory();
+2. 注册内置的后置处理器：this.reader = new AnnotatedBeanDefinitionReader(this);
+3. 注册包扫描器：this.scanner = new ClassPathBeanDefinitionScanner(this);
+具体步骤如下图所示：
+![AnnotationConfigApplicationContext初始化准备](f5eb228d/AnnotationConfigApplicationContext初始化准备.jpg)
 
+##### 关于DefaultListableBeanFactory
+IOC容器的核心的Bean工厂实现
+{% plantuml %}
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class AbstractApplicationContext
+class AbstractAutowireCapableBeanFactory
+class AbstractBeanFactory
+interface AliasRegistry << interface >>
+interface ApplicationContext << interface >>
+interface AutowireCapableBeanFactory << interface >>
+interface BeanDefinitionRegistry << interface >>
+interface BeanFactory << interface >>
+interface ConfigurableBeanFactory << interface >>
+interface ConfigurableListableBeanFactory << interface >>
+note left:这个接口下文要看
+class DefaultListableBeanFactory
+class DefaultSingletonBeanRegistry
+class FactoryBeanRegistrySupport
+interface HierarchicalBeanFactory << interface >>
+interface ListableBeanFactory << interface >>
+class SimpleAliasRegistry
+interface SingletonBeanRegistry << interface >>
+
+AbstractApplicationContext          -[#008200,dashed]-^  ApplicationContext                 
+AbstractAutowireCapableBeanFactory  -[#000082,plain]-^  AbstractBeanFactory                
+AbstractAutowireCapableBeanFactory  -[#008200,dashed]-^  AutowireCapableBeanFactory         
+AbstractBeanFactory                 -[#008200,dashed]-^  ConfigurableBeanFactory            
+AbstractBeanFactory                 -[#000082,plain]-^  FactoryBeanRegistrySupport         
+ApplicationContext                  -[#008200,plain]-^  HierarchicalBeanFactory            
+ApplicationContext                  -[#008200,plain]-^  ListableBeanFactory                
+AutowireCapableBeanFactory          -[#008200,plain]-^  BeanFactory                        
+BeanDefinitionRegistry              -[#008200,plain]-^  AliasRegistry                      
+ConfigurableBeanFactory             -[#008200,plain]-^  HierarchicalBeanFactory            
+ConfigurableBeanFactory             -[#008200,plain]-^  SingletonBeanRegistry              
+ConfigurableListableBeanFactory     -[#008200,plain]-^  AutowireCapableBeanFactory         
+ConfigurableListableBeanFactory     -[#008200,plain]-^  ConfigurableBeanFactory            
+ConfigurableListableBeanFactory     -[#008200,plain]-^  ListableBeanFactory                
+DefaultListableBeanFactory          -[#000082,plain]-^  AbstractAutowireCapableBeanFactory 
+DefaultListableBeanFactory          -[#008200,dashed]-^  BeanDefinitionRegistry             
+DefaultListableBeanFactory          -[#008200,dashed]-^  ConfigurableListableBeanFactory    
+DefaultSingletonBeanRegistry        -[#000082,plain]-^  SimpleAliasRegistry                
+DefaultSingletonBeanRegistry        -[#008200,dashed]-^  SingletonBeanRegistry              
+FactoryBeanRegistrySupport          -[#000082,plain]-^  DefaultSingletonBeanRegistry       
+HierarchicalBeanFactory             -[#008200,plain]-^  BeanFactory                        
+ListableBeanFactory                 -[#008200,plain]-^  BeanFactory                        
+SimpleAliasRegistry                 -[#008200,dashed]-^  AliasRegistry                     
+{% endplantuml %}
+
+##### 关于BeanFactoryPostProcessor
+**这里面特别需要提一个，就是上小节中第2步中的后置处理器，IOC框架初始化的时候大量使用：**
+```java
+/***
+ * 
+允许对应用程序上下文的 bean 定义进行自定义修改，从而调整上下文的基础 bean 工厂的 bean 属性值。
+应用程序上下文可以在其 bean 定义中自动检测 BeanFactoryPostProcessor bean，并在创建任何其他 bean 之前应用它们。
+对于针对系统管理员的自定义配置文件非常有用，这些文件会覆盖在应用程序上下文中配置的 Bean 属性。
+有关满足此类配置需求的开箱即用的解决方案，请参见PropertyResourceConfigurer及其具体实现。
+BeanFactoryPostProcessor可以与 bean 定义交互并修改 bean，但不能与 bean 实例进行交互。这样做可能会导致 bean 过早实例化，违反容器并导致意外的副作用。如果需要 bean 实例交互，请考虑改为实现 BeanPostProcessor 。
+ */
+@FunctionalInterface
+public interface BeanFactoryPostProcessor {
+
+  /**
+   * 在标准初始化后修改应用程序上下文的内部 Bean 工厂。所有 bean 定义都已加载，但尚未实例化任何 bean。这允许覆盖或添加属性，甚至允许预先初始化 bean。
+   */
+  void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException;
+
+}
+```
+
+#### register(componentClasses);
+主要外层有个循环，调用到DefaultListableBeanFactory#registerBeanDefinition方法里注册BeanDefinition
+
+#### refresh();
+核心的是调用refresh方法，这个方法脉络非常清楚，但调用链非常深，让我们一个个按重点看看。
+PS：**下文中，重要的核心方法，会配上相关的时序图。**
+```java
+@Override
+  public void refresh() throws BeansException, IllegalStateException {
+    // <1> 来个锁，不然 refresh() 还没结束，你又来个启动或销毁容器的操作，那不就乱套了嘛
+    synchronized (this.startupShutdownMonitor) {
+      
+      // <2> 刷新上下文环境的准备工作，记录下容器的启动时间、标记'已启动'状态、对上下文环境属性进行校验
+      prepareRefresh();
+
+      // <3> 创建并初始化一个 BeanFactory 对象 `beanFactory`，会加载出对应的 BeanDefinition 元信息们
+      ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+      // <4> 为 `beanFactory` 进行一些准备工作，例如添加几个 BeanPostProcessor，手动注册几个特殊的 Bean
+      prepareBeanFactory(beanFactory);
+
+      try {
+        // <5> 对 `beanFactory` 在进行一些后期的加工，交由子类进行扩展
+        postProcessBeanFactory(beanFactory);
+
+        // <6> 执行 BeanFactoryPostProcessor 处理器，包含初始化 BeanDefinitionRegistryPostProcessor 处理器
+        invokeBeanFactoryPostProcessors(beanFactory);
+
+        // <7> 对 BeanPostProcessor 处理器进行初始化，并添加至 BeanFactory 中
+        registerBeanPostProcessors(beanFactory);
+
+        // <8> 设置上下文的 MessageSource 对象
+        initMessageSource();
+
+        // <9> 设置上下文的 ApplicationEventMulticaster 对象，上下文事件广播器
+        initApplicationEventMulticaster();
+
+        // <10> 刷新上下文时再进行一些初始化工作，交由子类进行扩展
+        onRefresh();
+
+        // <11> 将所有 ApplicationListener 监听器添加至 `applicationEventMulticaster` 事件广播器，如果已有事件则进行广播
+        registerListeners();
+
+        // <12> 设置 ConversionService 类型转换器，**初始化**所有还未初始化的 Bean（不是抽象、不是懒加载方式，是单例模式的）
+        finishBeanFactoryInitialization(beanFactory);
+
+        // <13> 刷新上下文的最后一步工作，会发布 ContextRefreshedEvent 上下文完成刷新事件
+        finishRefresh();
+      }
+      // <14> 如果上面过程出现 BeansException 异常
+      catch (BeansException ex) {
+        if (logger.isWarnEnabled()) {
+          logger.warn("Exception encountered during context initialization - " +
+              "cancelling refresh attempt: " + ex);
+        }
+
+        // <14.1> “销毁” 已注册的单例 Bean
+        destroyBeans();
+
+        // <14.2> 设置上下文的 `active` 状态为 `false`
+        cancelRefresh(ex);
+
+        // <14.3> 抛出异常
+        throw ex;
+      }
+      // <15> `finally` 代码块
+      finally {
+        // Reset common introspection caches in Spring's core, since we
+        // might not ever need metadata for singleton beans anymore...
+        // 清除相关缓存，例如通过反射机制缓存的 Method 和 Field 对象，缓存的注解元数据，缓存的泛型类型对象，缓存的类加载器
+        resetCommonCaches();
+      }
+    }
+  }
+```
+##### prepareRefresh()
+刷新上下文环境的准备工作，记录下容器的启动时间、标记'已启动'状态、对上下文环境属性进行校验
+过程比较简单，就不具体贴时序图了
+##### obtainFreshBeanFactory()
+这个过程，主要就是创建：ConfigurableListableBeanFactory：一个BeanFactory的子类实现配置接口由大多数可列出的 bean 工厂实现。除了 ConfigurableBeanFactory之外，**它还提供了分析和修改 bean 定义以及预实例化单例的工具**。
+**实际上是创建的DefaultListableBeanFactory，上文有说明。**
+
+{% plantuml %}
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+interface AutowireCapableBeanFactory << interface >>
+interface BeanFactory << interface >>
+interface ConfigurableBeanFactory << interface >>
+interface ConfigurableListableBeanFactory << interface >>
+interface HierarchicalBeanFactory << interface >>
+interface ListableBeanFactory << interface >>
+interface SingletonBeanRegistry << interface >>
+
+AutowireCapableBeanFactory       -[#008200,plain]-^  BeanFactory                     
+ConfigurableBeanFactory          -[#008200,plain]-^  HierarchicalBeanFactory         
+ConfigurableBeanFactory          -[#008200,plain]-^  SingletonBeanRegistry           
+ConfigurableListableBeanFactory  -[#008200,plain]-^  AutowireCapableBeanFactory      
+ConfigurableListableBeanFactory  -[#008200,plain]-^  ConfigurableBeanFactory         
+ConfigurableListableBeanFactory  -[#008200,plain]-^  ListableBeanFactory             
+HierarchicalBeanFactory          -[#008200,plain]-^  BeanFactory                     
+ListableBeanFactory              -[#008200,plain]-^  BeanFactory     
+{% endplantuml %}
+
+##### postProcessBeanFactory(beanFactory)
+做一些准备工作，为 `beanFactory` 进行一些准备工作，例如添加几个 BeanPostProcessor，手动注册几个特殊的 Bean，没什么特别需要标注的地方：
+{% plantuml %}
+participant Actor
+note over AbstractApplicationContext:这个过程主要是向ConfigurableListableBeanFactory\n做一些初始化及Bean工厂中注册BeanPostProcessor
+Actor -> AbstractApplicationContext : prepareBeanFactory
+
+activate AbstractApplicationContext
+AbstractApplicationContext -> AbstractApplicationContext:setBeanClassLoader设置ClassLoder
+
+create StandardBeanExpressionResolver
+AbstractApplicationContext -> StandardBeanExpressionResolver : new
+note right:设置 BeanExpressionResolver 表达式语言处理器
+activate StandardBeanExpressionResolver
+StandardBeanExpressionResolver --> AbstractApplicationContext
+deactivate StandardBeanExpressionResolver
+
+create ResourceEditorRegistrar
+AbstractApplicationContext -> ResourceEditorRegistrar : new 添加一个默认的 PropertyEditorRegistrar 属性编辑器
+activate ResourceEditorRegistrar
+ResourceEditorRegistrar --> AbstractApplicationContext
+deactivate ResourceEditorRegistrar
+AbstractApplicationContext -> ConfigurableBeanFactory : addPropertyEditorRegistrar
+activate ConfigurableBeanFactory
+ConfigurableBeanFactory --> AbstractApplicationContext
+deactivate ConfigurableBeanFactory
+
+create ApplicationContextAwareProcessor
+AbstractApplicationContext -> ApplicationContextAwareProcessor : new 添加一个 BeanPostProcessor 处理器，ApplicationContextAwareProcessor，初始化 Bean 的前置处理
+note left:这个 BeanPostProcessor 其实是对几种 Aware 接口的处理，调用其 setXxx 方法
+activate ApplicationContextAwareProcessor
+ApplicationContextAwareProcessor --> AbstractApplicationContext
+deactivate ApplicationContextAwareProcessor
+AbstractApplicationContext -> ConfigurableBeanFactory : addBeanPostProcessor
+activate ConfigurableBeanFactory
+ConfigurableBeanFactory --> AbstractApplicationContext
+deactivate ConfigurableBeanFactory
+
+create ApplicationListenerDetector
+AbstractApplicationContext -> ApplicationListenerDetector : new 添加一个 BeanPostProcessor 处理器，ApplicationListenerDetector，用于装饰监听器
+activate ApplicationListenerDetector
+ApplicationListenerDetector --> AbstractApplicationContext
+deactivate ApplicationListenerDetector
+AbstractApplicationContext -> ConfigurableBeanFactory : addBeanPostProcessor
+activate ConfigurableBeanFactory
+ConfigurableBeanFactory --> AbstractApplicationContext
+deactivate ConfigurableBeanFactory
+alt 存在
+AbstractApplicationContext -> BeanFactory : containsBean
+activate BeanFactory
+BeanFactory --> AbstractApplicationContext
+deactivate BeanFactory
+create LoadTimeWeaverAwareProcessor
+AbstractApplicationContext -> LoadTimeWeaverAwareProcessor : new 增加对 AspectJ 的支持，AOP 相关的PostProcessor
+activate LoadTimeWeaverAwareProcessor
+LoadTimeWeaverAwareProcessor --> AbstractApplicationContext
+deactivate LoadTimeWeaverAwareProcessor
+AbstractApplicationContext -> ConfigurableBeanFactory : addBeanPostProcessor
+end
+== 下面几个就是：注册几个 ApplicationContext 上下文默认的 Bean 对象 ==
+activate ConfigurableBeanFactory
+ConfigurableBeanFactory --> AbstractApplicationContext
+deactivate ConfigurableBeanFactory
+AbstractApplicationContext -> HierarchicalBeanFactory : containsLocalBean
+activate HierarchicalBeanFactory
+HierarchicalBeanFactory --> AbstractApplicationContext
+deactivate HierarchicalBeanFactory
+AbstractApplicationContext -> SingletonBeanRegistry : registerSingleton 注册的：ConfigurableEnvironment
+activate SingletonBeanRegistry
+SingletonBeanRegistry --> AbstractApplicationContext
+deactivate SingletonBeanRegistry
+AbstractApplicationContext -> HierarchicalBeanFactory : containsLocalBean
+activate HierarchicalBeanFactory
+HierarchicalBeanFactory --> AbstractApplicationContext
+deactivate HierarchicalBeanFactory
+AbstractApplicationContext -> SingletonBeanRegistry : registerSingleton 注册的一个系统Properties属性的Map
+activate SingletonBeanRegistry
+SingletonBeanRegistry --> AbstractApplicationContext
+deactivate SingletonBeanRegistry
+AbstractApplicationContext -> HierarchicalBeanFactory : containsLocalBean
+activate HierarchicalBeanFactory
+HierarchicalBeanFactory --> AbstractApplicationContext
+deactivate HierarchicalBeanFactory
+AbstractApplicationContext -> SingletonBeanRegistry : registerSingleton 注册一个系统环境变量的Map
+activate SingletonBeanRegistry
+SingletonBeanRegistry --> AbstractApplicationContext
+deactivate SingletonBeanRegistry
+return
+{% endplantuml %}
+
+##### invokeBeanFactoryPostProcessors(beanFactory)
+执行 BeanFactoryPostProcessor 处理器，包含初始化 BeanDefinitionRegistryPostProcessor 处理器。
+这里面用到一个委托Delegate设计模式类：PostProcessorRegistrationDelegate，这个类用于 AbstractApplicationContext 的后处理器处理，这里面有俩核心的public方法：
+![PostProcessorRegistrationDelegate结构](f5eb228d/structure_of_PostProcessorRegistrationDelegate.jpg)
+先看invokeBeanFactoryPostProcessors方法，另外一个在下面介绍：
+- 方法签名：```public static void invokeBeanFactoryPostProcessors(ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors)```
+具体执行步骤：
+进行前置判断：beanFactory instanceof BeanDefinitionRegistry
+1. (true) 执行当前 Spring 应用上下文和底层 BeanFactory 容器中的 BeanFactoryPostProcessor、BeanDefinitionRegistryPostProcessor 们的处理
+  1.1. 先遍历当前 Spring 应用上下文中的 `beanFactoryPostProcessors`，如果是 BeanDefinitionRegistryPostProcessor 类型则进行处理
+  1.2. 获取底层 BeanFactory 容器中所有 BeanDefinitionRegistryPostProcessor 类型的 Bean 们，**遍历处理：PriorityOrdered类型**
+  1.3. 获取底层 BeanFactory 容器中所有 BeanDefinitionRegistryPostProcessor 类型的 Bean 们，**遍历处理：PriorityOrdered类型**
+  1.4. 处理上面还没处理的BeanDefinitionRegistryPostProcessor
+  1.5. 调用接下来执行它们的 postProcessBeanFactory(beanFactory) 方法
+2. (false) **执行当前 Spring 应用上下文中的 BeanFactoryPostProcessor 处理器的 postProcessBeanFactory(beanFactory) 方法**，下面的执行就是执行postProcessBeanFactory方法。
+3. 获取底层 BeanFactory 容器中所有 BeanFactoryPostProcessor 类型的 Beans
+4. 循环判断，在实现 PriorityOrdered 的 BeanFactoryPostProcessor 之间分开用单独List存：这个步骤为了后续处理一些排序的BeanFactoryPostProcessor
+  4.1. 处理PriorityOrdered 类型的 BeanFactoryPostProcessor 对象，缓存并注册初始化
+  4.2. 处理Ordered 类型的 BeanFactoryPostProcessor 对象，缓存并注册初始化
+  4.3. 处理nonOrdered 的 BeanFactoryPostProcessor 对象， 缓存并注册初始化
+5. 清除一些元数据缓存
+
+
+##### registerBeanPostProcessors(beanFactory)
+跟上面是调用的同一个
+##### initMessageSource()
+
+##### initApplicationEventMulticaster()
+
+##### onRefresh()
+
+##### registerListeners()
+
+##### finishBeanFactoryInitialization(beanFactory)
+
+##### finishRefresh()
 
 ### 一些杂项问题
 #### BeanFactory与FactoryBean
