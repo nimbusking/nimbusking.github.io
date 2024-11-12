@@ -82,6 +82,7 @@ public class AboutStreamSample {
 ### Stream的操作分类
 Stream 的操作分为两大类：**中间操作（Intermediate operations）和终结操作（Terminal operations）**。
 我们通常还会将中间操作称为懒操作，也正是由这种懒操作结合终结操作、数据源构成的处理管道（Pipeline），实现了 Stream 的高效。
+
 | 操作类型        | 详情           | 备注  |
 | ------------- | :-------------: | :-------------: |
 |  中间操作      | 只对操作进行了记录，即只会返回一个流，不会进行计算操作 | 可以分为无状态（Stateless）与有状态（Stateful）操作，前者是指元素的处理不受之前元素的影响，后者是指该操作只有拿到所有元素之后才能继续下去。 |
@@ -130,9 +131,6 @@ Sink             -[#008200,plain]-^  Consumer
 ### Stream的操作叠加
 管道结构通常是由 ReferencePipeline 类实现的，前面的类图Stream 包结构时，解释过 ReferencePipeline 包含了 Head、StatelessOp、StatefulOp 三种内部类。
 这几个内部类分别包含的作用如下表所示：
-| 1,1      |  1,2           |
-| ------------- |:-------------:|
-| 2,1      | 2,2 |
 
 | 内部类      |  作用           |
 | ------------- | :-------------: |
