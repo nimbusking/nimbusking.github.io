@@ -130,6 +130,10 @@ Sink             -[#008200,plain]-^  Consumer
 ### Stream的操作叠加
 管道结构通常是由 ReferencePipeline 类实现的，前面的类图Stream 包结构时，解释过 ReferencePipeline 包含了 Head、StatelessOp、StatefulOp 三种内部类。
 这几个内部类分别包含的作用如下表所示：
+| 1,1      |  1,2           |
+| ------------- |:-------------:|
+| 2,1      | 2,2 |
+
 | 内部类      |  作用           |
 | ------------- | :-------------: |
 | Head      | 主要用来定义数据源操作，在我们初次调用 names.stream() 方法时，会初次加载 Head 对象，此时为加载数据源操作 |
