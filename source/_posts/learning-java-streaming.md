@@ -2,7 +2,7 @@
 title: Java8函数式编程原理剖析
 abbrlink: 4a0d265b
 date: 2024-11-02 09:33:11
-updated: 2024-11-12 15:17:18
+updated: 2024-11-14 19:56:51
 tags:
   - Java函数式编程
   - Java Stream
@@ -169,6 +169,7 @@ public class ExecutionStep {
 - 获取年龄集合；
 - 最后再从年龄集合中找到最大的年龄；
 - 如果存在就打印到控制台
+
 但是实际的流程是：
 1. students.stream() 方法将会调用集合类基础接口 Collection 的 Stream 方法；
 2. Stream 方法就会调用 StreamSupport 类的 Stream 方法，方法中**初始化了一个 ReferencePipeline 的 Head 内部类**对象；
@@ -197,6 +198,30 @@ public static <T> Stream<T> stream(Spliterator<T> spliterator, boolean parallel)
     }
 ```
 
-
-
 #### 关于Spliterator
+
+
+#### 关于在idea中怎么调试
+上面的例子我作了一点扩充
+```java
+// 配套生成
+        List<Long> idList = Arrays.asList(10L, 22L, 22L, 33L, 1L, 4L, 10L, 4L, 100L, 200L, 300L, 102L, 20L, 30L, 11L);
+        List<Student> debugList = idList.stream()
+                .distinct()
+                .map(id -> new Student(id, "name" + id, null, 20, 0))
+                .filter(student -> student.getId() > 10)
+                .filter(student -> student.getId() < 100)
+                .sorted(Comparator.comparing(Student::getId))
+                .collect(Collectors.toList());
+        log.info("After test students list:{}", debugList);
+```
+
+在idea中有个非常可视化的调试工具，可以方便的看出这个数据在stream流计算下的过程，可以很方便的观察每个步骤处理的结果：
+点击调试面板的三个点：
+![调试面板](4a0d265b/debug1.jpg)
+在弹开的页面中选择“Trace Current Stream Chain”：
+![Trace Current Stream Chain](4a0d265b/debug2.jpg)
+默认弹出的页面是：
+![默认弹出页面](4a0d265b/debug3.jpg)
+此时你可以选择不同的tab页来观察每个步骤的数据的变化情况，同时你也可以点击左下角的“Flat Mode”来改变试图：
+![Flat Mode](4a0d265b/debug4.jpg)

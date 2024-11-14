@@ -422,6 +422,71 @@ return
 ##### finishBeanFactoryInitialization(beanFactory)
 置 ConversionService 类型转换器，**初始化**所有还未初始化的 Bean（不是抽象、不是懒加载方式，是单例模式的）。
 **这里面基本上就是初始化我们自己定义的相关的Bean对象了**
+看一下里面的具体的调用时序：
+{% plantuml %}
+participant Actor
+Actor -> AbstractApplicationContext : finishBeanFactoryInitialization
+note over AbstractApplicationContext:完成此上下文的 bean 工厂的初始化，初始化所有剩余的单例 bean
+
+alt beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) && beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)
+AbstractApplicationContext -> BeanFactory : getBean
+note over BeanFactory:如果底层 BeanFactory 容器包含 ConversionService 类型转换器，则初始化并设置到底层 BeanFactory 容器的属性中
+activate BeanFactory
+BeanFactory --> AbstractApplicationContext
+deactivate BeanFactory
+end
+
+alt !beanFactory.hasEmbeddedValueResolver()
+AbstractApplicationContext -> ConfigurableBeanFactory : addEmbeddedValueResolver
+note over ConfigurableBeanFactory:如果底层 BeanFactory 容器没有设置 StringValueResolver 解析器，则添加一个 PropertySourcesPropertyResolver 解析器
+activate ConfigurableBeanFactory
+ConfigurableBeanFactory -> AbstractApplicationContext : strVal ->
+activate AbstractApplicationContext
+AbstractApplicationContext -> PropertyResolver : resolvePlaceholders
+activate PropertyResolver
+PropertyResolver --> AbstractApplicationContext
+deactivate PropertyResolver
+AbstractApplicationContext --> ConfigurableBeanFactory
+deactivate AbstractApplicationContext
+ConfigurableBeanFactory --> AbstractApplicationContext
+deactivate ConfigurableBeanFactory
+end
+
+note over AbstractApplicationContext:提前初始化 LoadTimeWeaverAware 类型的 Bean，跟AOP 相关
+loop weaverAwareNames
+AbstractApplicationContext -> AbstractApplicationContext : getBean
+activate AbstractApplicationContext
+AbstractApplicationContext -> AbstractApplicationContext : assertBeanFactoryActive
+activate AbstractApplicationContext
+alt !this.active.get()
+alt this.closed.get()
+else
+note right of AbstractApplicationContext : Empty
+end
+note right of AbstractApplicationContext : Empty
+end
+AbstractApplicationContext --> AbstractApplicationContext
+deactivate AbstractApplicationContext
+AbstractApplicationContext -> BeanFactory : getBean
+activate BeanFactory
+BeanFactory --> AbstractApplicationContext
+deactivate BeanFactory
+AbstractApplicationContext --> AbstractApplicationContext
+deactivate AbstractApplicationContext
+end
+
+AbstractApplicationContext -> ConfigurableListableBeanFactory : freezeConfiguration 冻结底层 BeanFactory 容器所有的 BeanDefinition，目的是不希望再去修改 BeanDefinition
+activate ConfigurableListableBeanFactory
+ConfigurableListableBeanFactory --> AbstractApplicationContext
+deactivate ConfigurableListableBeanFactory
+AbstractApplicationContext -[#red]> ConfigurableListableBeanFactory : preInstantiateSingletons 【重点】初始化所有还未初始化的 Bean（不是抽象、单例模式、不是懒加载方式），依赖查找
+activate ConfigurableListableBeanFactory
+ConfigurableListableBeanFactory --> AbstractApplicationContext
+deactivate ConfigurableListableBeanFactory
+return
+{% endplantuml %}
+
+**关于这个里面创建Bean相关的重要逻辑，在文章后面的单独小节作介绍**
 
 ##### finishRefresh()
 刷新上下文的最后一步工作，会发布 ContextRefreshedEvent 上下文完成刷新事件
