@@ -2,7 +2,7 @@
 title: 细磕Spring点滴
 abbrlink: f5eb228d
 date: 2024-11-07 08:33:54
-updated: 2024-11-11 21:36:25
+updated: 2024-11-17 18:53:12
 tags:
   - Spring全家桶
   - Java
@@ -1153,6 +1153,81 @@ Spring 内部有一个处理器 EventListenerMethodProcessor，它实现了 Smar
 不是的，@Configuration Class 在得到 CGLIB 提升后，会设置一个拦截器专门对 @Bean 方法进行拦截处理，通过依赖查找的方式从 IoC 容器中获取 Bean 对象，如果是单例 Bean，那么每次都是返回同一个对象，所以当主动调用这个方法时获取到的都是同一个 User 对象。
 
 ## SpringMVC
+### 前瞻相关补充
+#### 简单介绍一下 Spring MVC 框架
+在早期 Java Web 的开发中，统一把显示层、控制层、显示层的操作全部交给 JSP 或者 Java Bean 来进行处理，存在一定的弊端，例如：JSP 和 Java Bean 之间严重耦合、开发效率低等弊端。
+Spring MVC 是 Spring 体系中的一员，提供 **“模型-视图-控制器”（Model-View-Controller）架构** 和随时可用的组件，用于开发灵活且松散耦合的 Web 应用程序。
+MVC 模式有助于分离应用程序的不同方面，如输入逻辑，业务逻辑和 UI 逻辑，同时在所有这些元素之间提供松散耦合。
+#### Spring MVC 有什么优点
+- 使用真的非常方便，无论是添加 HTTP 请求方法映射的方法，还是不同数据格式的响应。
+- 提供拦截器机制，可以方便的对请求进行拦截处理。
+- 提供异常机制，可以方便的对异常做统一处理。
+- 可以任意使用各种视图技术，而不仅仅局限于 JSP ，例如 Freemarker、Thymeleaf 等等。
+
+#### 描述一下 Spring MVC 的工作流程
+Spring MVC 也是基于 Servlet 来处理请求的，主要通过 DispatcherServlet 这个 Servlet 来处理请求，处理过程需要通过九大组件来完成，先看到下面这个流程图：
+![SpringMVC工作流程](f5eb228d/SpringMVC工作流程.jpg)
+大体的步骤如下：
+1. 用户的浏览器发送一个请求，这个请求经过互联网到达了我们的服务器。Servlet 容器（如常见的Tomcat）首先接待了这个请求，并将该请求委托给 `DispatcherServlet` 进行处理。
+2. DispatcherServlet 将该请求传给了处理器映射组件 `HandlerMapping`，并获取到适合该请求的 `HandlerExecutionChain` 拦截器和处理器对象。
+3. 在获取到处理器后，DispatcherServlet 还不能直接调用处理器的逻辑，需要进行对处理器进行适配。处理器适配成功后，DispatcherServlet 通过处理器适配器 `HandlerAdapter` 调用处理器的逻辑，并获取返回值 `ModelAndView` 对象。
+4. 之后，DispatcherServlet 需要根据 ModelAndView 解析视图。解析视图的工作由 `ViewResolver` 完成，若能解析成功，ViewResolver 会返回相应的 `View` 视图对象。
+5. 在获取到具体的 `View` 对象后，最后一步要做的事情就是由 `View` 渲染视图，并将渲染结果返回给用户。
+
+总结就是：客户端发起请求后，最终会交由 DispatcherServlet 来处理，它会通过你的 URI 找到对应的方法，从请求中解析参数，然后通过反射机制调用该方法，将方法的执行结果设置到响应中，如果存在对应的 View 对象，则进行页面渲染，实际上就是将请求转发到指定的 URL
+
+#### Spring MVC 的核心组件
+九大组件（按使用顺序排序的）：
+
+| 组件      |  说明           |
+| ------------- |:-------------:|
+| DispatcherServlet      | Spring MVC 的核心组件，是请求的入口，负责协调各个组件工作 |
+| MultipartResolver      | 内容类型( Content-Type )为 multipart/* 的请求的解析器，例如解析处理文件上传的请求，便于获取参数信息以及上传的文件 |
+| HandlerMapping      | 请求的处理器匹配器，负责为请求找到合适的 HandlerExecutionChain 处理器执行链，包含处理器（handler）和拦截器们（interceptors） |
+| HandlerAdapter      | 处理器的适配器。因为处理器 handler 的类型是 Object 类型，需要有一个调用者来实现 handler 是怎么被执行。Spring 中的处理器的实现多变，比如用户处理器可以实现 Controller 接口、HttpRequestHandler 接口，也可以用 @RequestMapping 注解将方法作为一个处理器等，这就导致 Spring MVC 无法直接执行这个处理器。**所以这里需要一个处理器适配器，由它去执行处理器** |
+| HandlerExceptionResolver      | 处理器异常解析器，将处理器（ handler ）执行时发生的异常，解析( 转换 )成对应的 ModelAndView 结果 |
+| RequestToViewNameTranslator      | 视图名称转换器，用于解析出请求的默认视图名 |
+| LocaleResolver      | 本地化（国际化）解析器，提供国际化支持 |
+| ThemeResolver      | 主题解析器，提供可设置应用整体样式风格的支持 |
+| ViewResolver      | 视图解析器，根据视图名和国际化，获得最终的视图 View 对象 |
+| FlashMapManager      | FlashMap 管理器，负责重定向时，保存参数至临时存储（默认 Session） |
+
+#### 一些关于SpringMVC的注解
+##### @Controller 注解
+`@Controller` 注解标记一个类为 Spring Web MVC 控制器 Controller。Spring MVC 会将扫描到该注解的类，然后扫描这个类下面带有 @RequestMapping 注解的方法，根据注解信息，**为这个方法生成一个对应的处理器对象**，在上面的 HandlerMapping 和 HandlerAdapter组件中讲到过。
+当然，除了添加 @Controller 注解这种方式以外，你还可以实现 Spring MVC 提供的 Controller 或者 HttpRequestHandler 接口，对应的实现类也会被作为一个处理器对象。
+##### @RequestMapping 注解
+@RequestMapping 注解，配置处理器的 HTTP 请求方法，URI等信息，这样才能将请求和方法进行映射。这个注解可以作用于类上面，也可以作用于方法上面，在类上面一般是配置这个控制器的 URI 前缀。方法上的一般具体指定的路径。
+##### @RestController 和 @Controller 的区别
+@RestController 注解，在 @Controller 基础上，增加了 @ResponseBody 注解，更加适合目前前后端分离的架构下，**提供 Restful API** ，返回例如 JSON 数据格式。当然，返回什么样的数据格式，根据客户端的 ACCEPT 请求头来决定。
+##### @RequestMapping 和 @GetMapping 的区别
+- @RequestMapping：可注解在类和方法上；@GetMapping 仅可注册在方法上
+- @RequestMapping：可进行 GET、POST、PUT、DELETE 等请求方法；
+- @GetMapping 是 @RequestMapping 的 GET 请求方法的特例，目的是为了提高清晰度。
+
+##### @RequestParam 和 @PathVariable的区别
+两个注解都用于方法参数，**获取参数值的方式不同**：@RequestParam 注解的参数从请求携带的参数中获取，而 @PathVariable 注解从请求的 URI 中获取
+#### 返回 JSON 格式使用什么注解
+可以使用 @ResponseBody 注解，或者使用包含 @ResponseBody 注解的 @RestController 注解。
+当然，还是需要配合相应的支持 JSON 格式化的 `HttpMessageConverter` 实现类。例如，Spring MVC 默认使用 `MappingJackson2HttpMessageConverter`
+#### WebApplicationContext
+WebApplicationContext 是实现 ApplicationContext 接口的子类，**专门为 WEB 应用准备的**
+- 它允许从相对于 Web 根目录的路径中加载配置文件，完成初始化 Spring MVC 组件的工作。
+- 从 WebApplicationContext 中，可以获取 ServletContext 引用，整个 Web 应用上下文对象将作为属性放置在 ServletContext 中，以便 Web 应用环境可以访问 Spring 上下文。
+
+#### Spring MVC 拦截器
+Spring MVC 拦截器有三个增强处理的地方：
+- **前置处理**：在执行方法前执行，全部成功执行才会往下执行方法
+- **后置处理**：在成功执行方法后执行，倒序
+- **已完成处理**：不管方法是否成功执行都会执行，不过只会执行前置处理成功的拦截器，倒序
+可以通过拦截器进行权限检验，参数校验，记录日志等操作
+#### Spring MVC 的拦截器和 Filter 过滤器的区别
+- **功能相同**：拦截器和 Filter 都能实现相应的功能，谁也不比谁强
+- **容器不同**：拦截器构建在 Spring MVC 体系中；Filter 构建在 Servlet 容器之上
+- **使用便利性不同**：拦截器提供了三个方法，分别在不同的时机执行；过滤器仅提供一个方法，当然也能实现拦截器的执行时机的效果，就是麻烦一些
+一般拓展性好的框架，都会提供相应的拦截器或过滤器机制，方便的开发人员做一些拓展
+
+### 从web.xml谈起
 
 
 ## SpringBoot
