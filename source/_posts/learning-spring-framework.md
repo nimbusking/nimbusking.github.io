@@ -20,6 +20,11 @@ categories: Spring
 - 文章提供的类继承图是通过Idea导出的plantuml图，为了方便更好直观的嵌入我的博客里面，我直接拿来用了。原因是：直接截图没法灵活的修改继承树中的内容，比如加注释、关联注释什么的
   很遗憾，plantuml目前不支持从底部到顶部的那种常规的继承图，**而是倒过来的，**即最顶层的实现不是在底部，而是在顶部，继承树从上往下看。看的时候注意区分一下。
 
+### 项目编译环境
+- 系统：window 11
+- Gradle：5.6.4
+- IDE：IntelliJ IDEA 2024.3
+
 ## Spring IOC
 
 ### Spring上下文生命周期
@@ -1152,6 +1157,8 @@ Spring 内部有一个处理器 EventListenerMethodProcessor，它实现了 Smar
 #### 通过 @Bean 注解定义在方法上面注入一个 Spring Bean，每次调用该方法所属的 Bean 的这个方法，得到的是同一个对象吗
 不是的，@Configuration Class 在得到 CGLIB 提升后，会设置一个拦截器专门对 @Bean 方法进行拦截处理，通过依赖查找的方式从 IoC 容器中获取 Bean 对象，如果是单例 Bean，那么每次都是返回同一个对象，所以当主动调用这个方法时获取到的都是同一个 User 对象。
 
+---
+
 ## SpringMVC
 ### 前瞻相关补充
 #### 简单介绍一下 Spring MVC 框架
@@ -1227,11 +1234,356 @@ Spring MVC 拦截器有三个增强处理的地方：
 - **使用便利性不同**：拦截器提供了三个方法，分别在不同的时机执行；过滤器仅提供一个方法，当然也能实现拦截器的执行时机的效果，就是麻烦一些
 一般拓展性好的框架，都会提供相应的拦截器或过滤器机制，方便的开发人员做一些拓展
 
-### 从web.xml谈起
+### web.xml的生命之旅
+#### Servlet3.0之前
+回忆一下那时候，在Java Configuration技术出现之前，还是通过xml文件的方式配置，正如下面一个示例的web.xml配置开始：
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <servlet>
+        <servlet-name>HelloWorldServlet</servlet-name>
+        <servlet-class>cc.nimbusk.webapp.servlet.HelloWorldServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>HelloWorldServlet</servlet-name>
+        <url-pattern>/hello</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <filter-name>HelloWorldFilter</filter-name>
+        <filter-class>cc.nimbusk.webapp.filter.HelloWorldFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>HelloWorldFilter</filter-name>
+        <url-pattern>/hello</url-pattern>
+    </filter-mapping>
+
+</web-app>
+
+```
+在项目里面，我们通过手动继承`HttpServlet`类来实现Servlet功能，与之对应的可能还有过滤器的实现：
+```java
+public class HelloWorldServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("text/plain");
+        PrintWriter writer = resp.getWriter();
+        writer.println("Hello World");
+    }
+}
+
+public class HelloWorldFilter implements Filter {
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+
+    }
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        System.out.println("触发 Hello World 过滤器...");
+        filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    @Override
+    public void destroy() {
+
+    }
+}
+```
+就像这样，配置Tomcat运行相关之后，启动通过浏览器指定端口：http://xx:8080/hello 就可以访问到后台返回的“Hello World”了。
+
+#### Servlet 3.0
+关于Servlet 3.0技术特性，这里就不提了，毕竟上古的东西。要知道两点，在Servlet3.0中引入了对注解的支持同时，对`ServletContext`的管理也得到了增强，具体就是ServletContext 为动态配置 Servlet 增加了如下方法：
+- ServletRegistration.Dynamic addServlet(String servletName,Class<? extends Servlet> servletClass)
+- ServletRegistration.Dynamic addServlet(String servletName, Servlet servlet)
+- ServletRegistration.Dynamic addServlet(String servletName, String className)
+- T createServlet(Class clazz)
+- ServletRegistration getServletRegistration(String servletName)
+- Map<string,? extends servletregistration> getServletRegistrations()
+
+其中前三个方法的作用是相同的，只是参数类型不同而已；
+通过 createServlet() 方法创建的 Servlet，通常需要做一些自定义的配置，然后**使用 addServlet() 方法来将其动态注册为一个可以用于服务的 Servlet**。
+两个 getServletRegistration() 方法主要用于动态为 Servlet 增加映射信息，这等价于在 web.xml( 抑或 web-fragment.xml) 中使用 标签为存在的 Servlet 增加映射信息。
+
+以上 ServletContext 新增的方法要么是在 `ServletContextListener` 的 contexInitialized 方法中调用，要么是在 `ServletContainerInitializer` 的 `onStartup()` 方法中调用。
+**ServletContainerInitializer 也是 Servlet 3.0 新增的一个接口**，容器在启动时使用 JAR 服务 API(JAR Service API) 来发现 ServletContainerInitializer 的实现类，并且容器将 WEB-INF/lib 目录下 JAR 包中的类都交给该类的 onStartup() 方法处理，我们通常需要在该实现类上使用 @HandlesTypes 注解来指定希望被处理的类，过滤掉不希望给 onStartup() 处理的类。
+
+有了上面这个动态添加的机制，我们就可以像下面这样来动态添加一个Servlet服务了：
+```java
+public class CustomServletContainerInitializer implements ServletContainerInitializer {
+
+    @Override
+    public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
+        System.out.println("创建 Hello World Servlet...");
+        javax.servlet.ServletRegistration.Dynamic servlet = ctx.addServlet(
+            HelloWorldServlet.class.getSimpleName(), HelloWorldServlet.class);
+        servlet.addMapping("/hello");
+
+        System.out.println("创建 Hello World Filter...");
+        javax.servlet.FilterRegistration.Dynamic filter = ctx.addFilter(HelloWorldFilter.class.getSimpleName(), HelloWorldFilter.class);
+        EnumSet<DispatcherType> dispatcherTypes = EnumSet.allOf(DispatcherType.class);
+        dispatcherTypes.add(DispatcherType.REQUEST);
+        dispatcherTypes.add(DispatcherType.FORWARD);
+        filter.addMappingForUrlPatterns(dispatcherTypes, true, "/hello");
+    }
+}
+
+```
+
+这里还有个问题，正如前文所说，可以通过`ServletContainerInitializer`来扫描并添加我们实现的代码，但是怎么让容器发现我们的实现类呢？
+这里就需要借助SPI的机制来辅助我们的web容器来发现我们的实现类，具体就是，通过在项目 ClassPath 路径下创建 `META-INF/services/javax.servlet.ServletContainerInitializer` 文件来做到的，内容如下：
+```java
+cc.nimbusk.webapp.CustomServletContainerInitializer
+```
+
+这样一来就可以转起来了，通过ServletContainerInitializer和SPI机制就可以和web.xml说再见了。
+
+#### Servlet 3.0与Spring整合
+说到这里，我们已经可以构建一个动态拓展的Servlet服务了，但是我们回想使用Spring（具体指SpringMVC）这么多年来，似乎已经忘记为啥，不知不觉从以前的web.xml的项目就不用这个xml文件了！
+这里，我们很有必要回顾一下，为什么整合到spring之后，不用配置这个文件了。
+通常，我们使用springmvc构建javaweb程序的时候，肯定需要依赖一个spring子工程，spring-web，我们看spring-web子工程源码的时候，可以发现，在其classpath下有这么一个文件：
+```java
+META-INF/services/javax.servlet.ServletContainerInitializer
+```
+
+这个文件里面有个一行配置：
+```java
+org.springframework.web.SpringServletContainerInitializer
+```
+
+如下图所示：
+![SpringServletContainerInitializer](f5eb228d/spring-web对应的SpringServletContainerInitializer.jpg)
+我们来看看，这个类的实现
+```java
+// 删除了类和方法注释，其实这两段注释，非常详细的解释了这个类以及这个onStartUp方法具体是要干嘛的。
+@HandlesTypes(WebApplicationInitializer.class)
+public class SpringServletContainerInitializer implements ServletContainerInitializer {
+
+  @Override
+  public void onStartup(@Nullable Set<Class<?>> webAppInitializerClasses, ServletContext servletContext)
+      throws ServletException {
+
+    List<WebApplicationInitializer> initializers = new LinkedList<>();
+
+    if (webAppInitializerClasses != null) {
+      for (Class<?> waiClass : webAppInitializerClasses) {
+        // Be defensive: Some servlet containers provide us with invalid classes,
+        // no matter what @HandlesTypes says...
+        // <1> 过滤不满足Spring加载的类：不是接口、不是抽象类，是WebApplicationInitializer实现子类
+        // NOTE: isAssignableFrom是从class源码级别判断，而不是从实例对象判断两者的继承关系的，是一个native方法，这个与instance of有着本质区别
+        if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
+            WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
+          try {
+            initializers.add((WebApplicationInitializer)
+                ReflectionUtils.accessibleConstructor(waiClass).newInstance());
+          }
+          catch (Throwable ex) {
+            throw new ServletException("Failed to instantiate WebApplicationInitializer class", ex);
+          }
+        }
+      }
+    }
+
+    if (initializers.isEmpty()) {
+      servletContext.log("No Spring WebApplicationInitializer types detected on classpath");
+      return;
+    }
+
+    servletContext.log(initializers.size() + " Spring WebApplicationInitializers detected on classpath");
+    AnnotationAwareOrderComparator.sort(initializers);
+    for (WebApplicationInitializer initializer : initializers) {
+      // <2> 循环调用onStartup方法
+      initializer.onStartup(servletContext);
+    }
+  }
+
+}
+```
+这里有几个点需要解释一下：
+1. @HandlesTypes注解是Servlet3.0中引入的一个新注解，这个注解用来标记表示当前ServletContainerInitializer的实现类，能处理的类型。
+2. <1> 示我们由于 Servlet 厂商实现的差异，onStartup 方法会加载我们本不想处理的 Class 对象，所以进行了特判。
+3. Spring 与我们上述提供的 Demo 不同，并没有在 SpringServletContainerInitializer 中直接对 Servlet 和 Filter 进行注册，而是委托给了一个陌生的类 `WebApplicationInitializer` ，这个类便是 Spring 用来初始化 Web 环境的委托者类。
+
+##### WebApplicationInitializer
+先来看看这个类的继承图：
+![WebApplicationInitializer](f5eb228d/WebApplicationInitializer.png)
+这里面出现了一个身影：`AbstractDispatcherServletInitializer`，这个类如果不熟悉，那大名鼎鼎的`DispatcherServlet`你一定不陌生。
+**而`AbstractDispatcherServletInitializer` 便是无 `web.xml` 前提下，创建 `DispatcherServlet` 的关键**，相关代码如下：
+```java
+// org.springframework.web.servlet.support.AbstractDispatcherServletInitializer
+public abstract class AbstractDispatcherServletInitializer extends AbstractContextLoaderInitializer {
+
+  /**
+   * The default servlet name. Can be customized by overriding {@link #getServletName}.
+   */
+  public static final String DEFAULT_SERVLET_NAME = "dispatcher";
 
 
+  @Override
+  public void onStartup(ServletContext servletContext) throws ServletException {
+    // 调用父类启动的逻辑，创建WebApplicationContext相关
+    // 创建AnnotationConfigWebApplicationContext后，创建ContextLoaderListener实例，该实例持有AnnotationConfigWebApplicationContext，该实例主要用于获取加载spring IOC配置信息相关
+    super.onStartup(servletContext);
+    // 注册 DispatcherServlet
+    registerDispatcherServlet(servletContext);
+  }
+
+  protected void registerDispatcherServlet(ServletContext servletContext) {
+    // 获得 Servlet 名
+    String servletName = getServletName();
+    Assert.hasLength(servletName, "getServletName() must not return null or empty");
+
+    // <1> 创建 WebApplicationContext 对象
+    WebApplicationContext servletAppContext = createServletApplicationContext();
+    Assert.notNull(servletAppContext, "createServletApplicationContext() must not return null");
+
+    // <2> 创建 DispatchServlet 对象，FrameworkServlet 是其父类
+    FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
+    Assert.notNull(dispatcherServlet, "createDispatcherServlet(WebApplicationContext) must not return null");
+    dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
+
+    ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
+    if (registration == null) {
+      throw new IllegalStateException("Failed to register servlet with name '" + servletName + "'. " +
+          "Check if there is another servlet registered under the same name.");
+    }
+
+    registration.setLoadOnStartup(1);
+    registration.addMapping(getServletMappings());
+    registration.setAsyncSupported(isAsyncSupported());
+
+    // <3> 注册过滤器
+    Filter[] filters = getServletFilters();
+    if (!ObjectUtils.isEmpty(filters)) {
+      for (Filter filter : filters) {
+        registerServletFilter(servletContext, filter);
+      }
+    }
+    // <4> 执行可选的自定义的注册信息
+    customizeRegistration(registration);
+  }
+}
+```
+至此传统的SpringMVC如何跟我们过去的web.xml进行解耦的过程，大致弄清楚了。
+但是，创建之旅还需要提前介绍一下SpringBoot是如何加载Sevlet的，毕竟目前而言，很少有项目使用原生的SpringMVC来构建java-web程序的了。
+
+#### SpringBoot与Servlet创建
+先铺垫一下，前文中的传统加载方式，在springboot中的加载流程基本上没有关系，这是一个全新的加载流程。
+##### 两种加载方式
+1. Servlet3.0 注解 +@ServletComponentScan
+SpringBoot 依旧兼容 Servlet 3.0 一系列以 @Web* 开头的注解：@WebServlet，@WebFilter，@WebListener
+例如：
+```java
+@WebServlet("/hello")
+public class HelloWorldServlet extends HttpServlet{}
+
+@WebFilter("/hello/*")
+public class HelloWorldFilter implements Filter {}
+```
+
+在启动类上面添加 `@ServletComponentScan` 注解去扫描到这些注解
+```java
+@SpringBootApplication
+@ServletComponentScan
+public class SpringBootServletApplication {
+   public static void main(String[] args) {
+      SpringApplication.run(SpringBootServletApplication.class, args);
+   }
+}
+```
+
+这种方式相对来说比较简介直观，其中 `org.springframework.boot.web.servlet.@ServletComponentScan` 注解通过 `@Import(ServletComponentScanRegistrar.class)` 方式，它会将扫描到的 `@WebServlet、@WebFilter、@WebListener` 的注解对应的类，最终封装成 `FilterRegistrationBean、ServletRegistrationBean、ServletListenerRegistrationBean` 对象，注册到 Spring 容器中。
+也就是说，和注册方式二：RegistrationBean统一了
+
+2. RegistrationBean
+例如：
+```java
+@Configuration
+public class WebConfig {
+    @Bean
+    public ServletRegistrationBean<HelloWorldServlet> helloWorldServlet() {
+        ServletRegistrationBean<HelloWorldServlet> servlet = new ServletRegistrationBean<>();
+        servlet.addUrlMappings("/hello");
+        servlet.setServlet(new HelloWorldServlet());
+        return servlet;
+    }
+
+    @Bean
+    public FilterRegistrationBean<HelloWorldFilter> helloWorldFilter() {
+        FilterRegistrationBean<HelloWorldFilter> filter = new FilterRegistrationBean<>();
+        filter.addUrlPatterns("/hello/*");
+        filter.setFilter(new HelloWorldFilter());
+        return filter;
+    }
+}
+```
+
+`ServletRegistrationBean` 和 `FilterRegistrationBean` 都继成 RegistrationBean，它是 SpringBoot 中广泛应用的一个注册类，负责把 Servlet，Filter，Listener 给容器化，使它们被 Spring 托管，并且完成自身对 Web 容器的注册。
+
+##### SpringBoot加载 Servlet 的流程
+当使用内嵌的 Tomcat 时，你在 `SpringServletContainerInitializer` 上面打断点，会发现根本不会进入该类的内部，因为 SpringBoot 完全走了另一套初始化流程，而是进入了 `org.springframework.boot.web.embedded.tomcat.TomcatStarter` 这个类
+SpringBoot在取舍原始`java -jar`模式运行的基础上，构建了一个新的加载器：`ServletContextInitializer`，和 Servlet**Container**Initializer 不一样：
+- 前者 ServletContextInitializer 是 *org.springframework.boot.web.servlet.ServletContextInitializer*
+- 后者 ServletContainerInitializer 是 *javax.servlet.ServletContainerInitializer*，前文提到的 RegistrationBean 就实现了 ServletContextInitializer 接口
+
+TomcatStarter 中 org.springframework.boot.context.embedded.ServletContextInitializer[] initializers 属性，是 SpringBoot 初始化 Servlet，Filter，Listener 的关键，代码如下：
+```java
+class TomcatStarter implements ServletContainerInitializer {
+
+  private static final Log logger = LogFactory.getLog(TomcatStarter.class);
+
+  private final ServletContextInitializer[] initializers;
+
+  private volatile Exception startUpException;
+
+  TomcatStarter(ServletContextInitializer[] initializers) {
+    this.initializers = initializers;
+  }
+
+  @Override
+  public void onStartup(Set<Class<?>> classes, ServletContext servletContext) throws ServletException {
+    try {
+      for (ServletContextInitializer initializer : this.initializers) {
+        initializer.onStartup(servletContext);
+      }
+    }
+    catch (Exception ex) {
+      this.startUpException = ex;
+      // Prevent Tomcat from logging and re-throwing when we know we can
+      // deal with it in the main thread, but log for information here.
+      if (logger.isErrorEnabled()) {
+        logger.error("Error starting Tomcat context. Exception: "
+            + ex.getClass().getName() + ". Message: " + ex.getMessage());
+      }
+    }
+  }
+
+  public Exception getStartUpException() {
+    return this.startUpException;
+  }
+
+}
+
+```
+
+这里面加载的时候，内嵌容器是通过它在内嵌容器中的实现类：`org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext `，来加载 Filter、Servlet 和 Listener 这部分的代码，总结来看，这部分流程就是：
+- ServletWebServerApplicationContext 的 onRefresh() 方法触发配置了一个匿名的 ServletContextInitializer
+- 这个匿名的 ServletContextInitializer 的 onStartup 方法会去容器中搜索到了所有的 RegisterBean 并按照顺序加载到 ServletContext 中
+- 这个匿名的 ServletContextInitializer 最终传递给 TomcatStarter，由 TomcatStarter 的 onStartup 方法去触发 ServletContextInitializer 的 onStartup 方法，最终完成装配
+
+至此前面大致铺垫了相关知识之后，我们开始正式剖析SpringMVC内部的核心要点：
+### 
+
+---
 ## SpringBoot
 
+---
 ## SpringCloud
 
+---
 ## Spring其它相关
