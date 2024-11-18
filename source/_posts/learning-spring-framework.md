@@ -2340,7 +2340,298 @@ public void onApplicationEvent(ContextRefreshedEvent event) {
 **至此我们就了解到了传统SpringMVC初始化相关的大部分内容，关于注解的内容，后面结合SpringBoot我们再一起来看。**
 
 ### DispatcherServlet
+再次回顾一下前文中的关于一个http请求流的执行流程：
+https://nimbusk.cc/post/f5eb228d.html#default-10
+Spring MVC 对各个组件的职责划分的比较清晰。
+DispatcherServlet 负责协调，其他组件则各自做分内之事，互不干扰。
+经过这样的职责划分，代码会便于维护。同时对于源码阅读者来说，也会很友好。可以降低理解源码的难度，使大家能够快速理清主逻辑。这一点值得我们学习。
+#### 静态代码块
+```java
+private static final String DEFAULT_STRATEGIES_PATH = "DispatcherServlet.properties";
 
+private static final Properties defaultStrategies;
+
+static {
+    // Load default strategy implementations from properties file.
+    // This is currently strictly internal and not meant to be customized by application developers.
+    try {
+        ClassPathResource resource = new ClassPathResource(DEFAULT_STRATEGIES_PATH, DispatcherServlet.class);
+        defaultStrategies = PropertiesLoaderUtils.loadProperties(resource);
+    }
+    catch (IOException ex) {
+        throw new IllegalStateException("Could not load '" + DEFAULT_STRATEGIES_PATH + "': " + ex.getMessage());
+    }
+}
+```
+这部分会**从 `DispatcherServlet.properties` 文件中加载默认的组件实现类，**将相关配置加载到 defaultStrategies 中，文件如下：
+```properties
+# Default implementation classes for DispatcherServlet's strategy interfaces.
+# Used as fallback when no matching beans are found in the DispatcherServlet context.
+# Not meant to be customized by application developers.
+
+org.springframework.web.servlet.LocaleResolver=org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver
+
+org.springframework.web.servlet.ThemeResolver=org.springframework.web.servlet.theme.FixedThemeResolver
+
+org.springframework.web.servlet.HandlerMapping=org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping,\
+  org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+
+org.springframework.web.servlet.HandlerAdapter=org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter,\
+  org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter,\
+  org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
+
+org.springframework.web.servlet.HandlerExceptionResolver=org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver,\
+  org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver,\
+  org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
+
+org.springframework.web.servlet.RequestToViewNameTranslator=org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator
+
+org.springframework.web.servlet.ViewResolver=org.springframework.web.servlet.view.InternalResourceViewResolver
+
+org.springframework.web.servlet.FlashMapManager=org.springframework.web.servlet.support.SessionFlashMapManager
+```
+
+#### 构造方法
+```java
+/** MultipartResolver used by this servlet. multipart 数据（文件）处理器 */
+@Nullable
+private MultipartResolver multipartResolver;
+
+/** LocaleResolver used by this servlet. 语言处理器，提供国际化的支持 */
+@Nullable
+private LocaleResolver localeResolver;
+
+/** ThemeResolver used by this servlet. 主题处理器，设置需要应用的整体样式 */
+@Nullable
+private ThemeResolver themeResolver;
+
+/** List of HandlerMappings used by this servlet. 处理器匹配器，返回请求对应的处理器和拦截器们 */
+@Nullable
+private List<HandlerMapping> handlerMappings;
+
+/** List of HandlerAdapters used by this servlet. 处理器适配器，用于执行处理器 */
+@Nullable
+private List<HandlerAdapter> handlerAdapters;
+
+/** List of HandlerExceptionResolvers used by this servlet. 异常处理器，用于解析处理器发生的异常 */
+@Nullable
+private List<HandlerExceptionResolver> handlerExceptionResolvers;
+
+/** RequestToViewNameTranslator used by this servlet. 视图名称转换器 */
+@Nullable
+private RequestToViewNameTranslator viewNameTranslator;
+
+/** FlashMapManager used by this servlet. FlashMap 管理器，负责重定向时保存参数到临时存储（默认 Session）中 */
+@Nullable
+private FlashMapManager flashMapManager;
+
+/** List of ViewResolvers used by this servlet. 视图解析器，根据视图名称和语言，获取 View 视图 */
+@Nullable
+private List<ViewResolver> viewResolvers;
+
+public DispatcherServlet() {
+    super();
+    setDispatchOptionsRequest(true);
+}
+
+public DispatcherServlet(WebApplicationContext webApplicationContext) {
+    super(webApplicationContext);
+    setDispatchOptionsRequest(true);
+}
+
+```
+值得注意的是，构造器里面默认初始化设置了一个true值：setDispatchOptionsRequest(true)
+这个值呢，初始的时候默认是false的，主要作用：设置当前 Servlet 是否应将 HTTP OPTIONS 请求分派给 doService 该方法，即能否处理Options请求
+**从 4.3版本 DispatcherServlet 开始，由于FrameworkServlet内置了对 OPTIONS 的支持，因此默认将此属性设置为 “true”。**
+
+#### onRefresh方法
+前文已经看过了，初始化每个组件的东西，在下一个小节中单独介绍
+
+#### doService方法
+doService(HttpServletRequest request, HttpServletResponse response)方法，DispatcherServlet 的处理请求的入口方法，代码如下：
+```java
+protected void doService(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    // <1> 如果日志级别为 DEBUG，则打印请求日志
+    logRequest(request);
+
+    // Keep a snapshot of the request attributes in case of an include,
+    // to be able to restore the original attributes after the include.
+    // <2> 保存当前请求中相关属性的一个快照
+    Map<String, Object> attributesSnapshot = null;
+    if (WebUtils.isIncludeRequest(request)) {
+      attributesSnapshot = new HashMap<>();
+      Enumeration<?> attrNames = request.getAttributeNames();
+      while (attrNames.hasMoreElements()) {
+        String attrName = (String) attrNames.nextElement();
+        // this.cleanupAfterInclude == true || 以org.springframework.web.servlet开头
+        if (this.cleanupAfterInclude || attrName.startsWith(DEFAULT_STRATEGIES_PREFIX)) {
+          attributesSnapshot.put(attrName, request.getAttribute(attrName));
+        }
+      }
+    }
+
+    // Make framework objects available to handlers and view objects.
+    // <3> 设置 Spring 框架中的常用对象到 request 属性中
+    request.setAttribute(WEB_APPLICATION_CONTEXT_ATTRIBUTE, getWebApplicationContext());
+    request.setAttribute(LOCALE_RESOLVER_ATTRIBUTE, this.localeResolver);
+    request.setAttribute(THEME_RESOLVER_ATTRIBUTE, this.themeResolver);
+    request.setAttribute(THEME_SOURCE_ATTRIBUTE, getThemeSource());
+
+    // <4> FlashMap 的相关配置初始化，PS：处理重定向请求的时候会用到
+    if (this.flashMapManager != null) {
+      FlashMap inputFlashMap = this.flashMapManager.retrieveAndUpdate(request, response);
+      if (inputFlashMap != null) {
+        request.setAttribute(INPUT_FLASH_MAP_ATTRIBUTE, Collections.unmodifiableMap(inputFlashMap));
+      }
+      request.setAttribute(OUTPUT_FLASH_MAP_ATTRIBUTE, new FlashMap());
+      request.setAttribute(FLASH_MAP_MANAGER_ATTRIBUTE, this.flashMapManager);
+    }
+
+    try {
+      // <5> 执行请求的分发
+      doDispatch(request, response);
+    }
+    finally {
+      // <6> 异步请求相关，通过：WebAsyncManager来管理的
+      if (!WebAsyncUtils.getAsyncManager(request).isConcurrentHandlingStarted()) {
+        // Restore the original attribute snapshot, in case of an include.
+        if (attributesSnapshot != null) {
+          restoreAttributesAfterInclude(request, attributesSnapshot);
+        }
+      }
+    }
+  }
+```
+
+其中：
+1. 调用logRequest(HttpServletRequest request) 方法，如果日志级别为 DEBUG，则打印请求日志
+2. 保存当前请求中相关属性的一个快照，作为异步处理的属性值，防止被修改，暂时忽略
+3. 设置 Spring 框架中的常用对象到 request 属性中，例如 webApplicationContext、localeResolver、themeResolver
+4. FlashMap 的相关配置：先简单的知道，这个是一个Session相关的缓存Map，在处理请求重定向的时候会用到。
+5. 【重点】**调用 doDispatch(HttpServletRequest request, HttpServletResponse response) 方法，执行请求的分发**
+6. 异步处理相关，暂时忽略
+
+#### doDispatch方法 【核心】
+开始之前，再次唠叨回顾一下前文中的SpringMVC请求分发图：
+![SpringMVC工作流程](f5eb228d/SpringMVC工作流程.jpg)
+接着我们来看一下这个方法的核心代码：
+```java
+protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    HttpServletRequest processedRequest = request;
+    HandlerExecutionChain mappedHandler = null;
+    boolean multipartRequestParsed = false;
+
+    // <1> 获取异步管理器
+    WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+
+    try {
+      ModelAndView mv = null;
+      Exception dispatchException = null;
+
+      try {
+        // <2> 检测请求是否为上传请求，如果是则通过 multipartResolver 将其封装成 MultipartHttpServletRequest 对象
+        processedRequest = checkMultipart(request);
+        multipartRequestParsed = (processedRequest != request);
+
+        // Determine handler for the current request.
+        // <3> 获得请求对应的 HandlerExecutionChain 对象（HandlerMethod 和 HandlerInterceptor 拦截器们）
+        mappedHandler = getHandler(processedRequest);
+        if (mappedHandler == null) { // <3.1> 如果获取不到，则根据配置抛出异常或返回 404 错误
+          noHandlerFound(processedRequest, response);
+          return;
+        }
+
+        // Determine handler adapter for the current request.
+        // <4> 获得当前 handler 对应的 HandlerAdapter 对象
+        HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+
+        // Process last-modified header, if supported by the handler.
+        // <4.1> 处理有 Last-Modified 请求头的场景
+        String method = request.getMethod();
+        boolean isGet = "GET".equals(method);
+        if (isGet || "HEAD".equals(method)) { // 这里对于HTTP的HEAD请求，SpringMVC处理和GET请求处理一致，没有单独起分支处理
+          // 获取请求中服务器端最后被修改时间
+          long lastModified = ha.getLastModified(request, mappedHandler.getHandler());
+          if (new ServletWebRequest(request, response).checkNotModified(lastModified) && isGet) {
+            return;
+          }
+        }
+
+        // <5> 前置处理 拦截器
+        // 注意：该方法如果有一个拦截器的前置处理返回false，则开始倒序触发所有的拦截器的 已完成处理
+        if (!mappedHandler.applyPreHandle(processedRequest, response)) {
+          return;
+        }
+
+        // Actually invoke the handler.
+        // <6> 真正的调用 handler 方法，也就是执行对应的方法，并返回视图
+        mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+        
+        // <7> 如果是异步
+        if (asyncManager.isConcurrentHandlingStarted()) {
+          return;
+        }
+
+        // <8> 无视图的情况下设置默认视图名称
+        applyDefaultViewName(processedRequest, mv);
+        // <9> 后置处理 拦截器
+        mappedHandler.applyPostHandle(processedRequest, response, mv);
+      }
+      catch (Exception ex) {
+        dispatchException = ex; // <10> 记录异常
+      }
+      catch (Throwable err) {
+        // As of 4.3, we're processing Errors thrown from handler methods as well,
+        // making them available for @ExceptionHandler methods and other scenarios.
+        dispatchException = new NestedServletException("Handler dispatch failed", err);
+      }
+      // <11> 处理正常和异常的请求调用结果
+      processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+    }
+    catch (Exception ex) {
+      // <12> 已完成处理 拦截器
+      triggerAfterCompletion(processedRequest, response, mappedHandler, ex);
+    }
+    catch (Throwable err) {
+      // <12> 已完成处理 拦截器
+      triggerAfterCompletion(processedRequest, response, mappedHandler, new NestedServletException("Handler processing failed", err));
+    }
+    finally {
+      // <13.1> Async回调处理
+      if (asyncManager.isConcurrentHandlingStarted()) {
+        // Instead of postHandle and afterCompletion
+        if (mappedHandler != null) {
+          mappedHandler.applyAfterConcurrentHandlingStarted(processedRequest, response);
+        }
+      }
+      // <13.1> 如果是上传请求则清理资源，清理
+      else {
+        // Clean up any resources used by a multipart request.
+        if (multipartRequestParsed) {
+          cleanupMultipart(processedRequest);
+        }
+      }
+    }
+  }
+```
+我们来看一下每个步骤的功能：
+1. 获得 WebAsyncManager 异步处理器，TODO 暂时忽略
+2. 【文件】 调用 checkMultipart(HttpServletRequest request) 方法，检测请求是否为上传请求，**如果是则通过 multipartResolver 组件将其封装成 MultipartHttpServletRequest 对象，便于获取参数信息以及文件**
+3. 【处理器匹配器】 调用 getHandler(HttpServletRequest request) 方法，通过 HandlerMapping 组件**获得请求对应的 HandlerExecutionChain 处理器执行链**，包含 HandlerMethod 处理器和 HandlerInterceptor 拦截器们。如果获取不到对应的执行链，则根据配置抛出异常或返回 404 错误。
+4. 【处理器适配器】 调用 getHandlerAdapter(Object handler) 方法，获得当前处理器对应的 HandlerAdapter 适配器对象
+5. 处理有 Last-Modified 请求头的场景，TODO 暂时忽略
+6. 【拦截器】 调用 HandlerExecutionChain 执行链的 applyPreHandle(HttpServletRequest request, HttpServletResponse response) 方法，拦截器的前置处理；如果出现拦截器前置处理失败，则会**调用拦截器的已完成处理方法（倒序）**
+7. 【重点】 调用 HandlerAdapter 适配器的 handle(HttpServletRequest request, HttpServletResponse response, Object handler) 方法，**真正的执行处理器，也就是执行对应的方法（例如我们定义的 Controller 中的方法），并返回视图**
+8. 如果是异步，则直接 return，**注意**，还是会执行 finally 中的代码
+9. 调用 applyDefaultViewName(HttpServletRequest request, ModelAndView mv) 方法，ModelAndView 不为空，但是没有视图，则设置默认视图名称，使用到了 viewNameTranslator 视图名称转换器组件
+10. 【拦截器】 调用 HandlerExecutionChain 执行链的 applyPostHandle(HttpServletRequest request, HttpServletResponse response, ModelAndView mv) 方法，拦截器的后置处理（倒序）
+11. 记录异常，**注意**，此处仅仅记录，不会抛出异常，而是统一交给 <11> 处理
+12. 【处理执行结果】 调用 **processDispatchResult()** 方法，处理正常和异常的请求调用结果，包含页面渲染
+13. 【拦截器】 如果上一步发生了异常，则调用triggerAfterCompletion()方法，即调用 HandlerInterceptor 执行链的triggerAfterCompletion()方法，拦截器已完成处理（倒序）
+14. finally 代码块，异步处理，暂时忽略，如果是涉及到文件的请求，则清理相关资源
+
+我们来总结一下：
+![doDispatch执行流程](f5eb228d/doDispatch执行流程.jpg)
 
 #### 九大组件
 为了节省本文篇幅，这部分内容独立到单独文章中：
