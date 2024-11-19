@@ -13,7 +13,7 @@ categories: Spring
 HandlerMapping 组件，请求的处理器匹配器，**负责为请求找到合适的 HandlerExecutionChain 处理器执行链，包含处理器（handler）和拦截器们（interceptors）**
 - `handler` 处理器是 Object 类型，可以将其理解成 HandlerMethod 对象（例如我们使用最多的 @RequestMapping 注解所标注的方法会解析成该对象），包含了方法的所有信息，通过该对象能够执行该方法
 - `HandlerInterceptor` 拦截器对处理请求进行增强处理，可用于在执行方法前、成功执行方法后、处理完成后进行一些逻辑处理
-
+<!-- more -->
 ## HandlerMapping 组件
 ### 回顾一下doDispatch中的调用
 ```java
@@ -414,8 +414,23 @@ public class InterceptorConfig implements WebMvcConfigurer {
 ```
 
 ### AbstractHandlerMethodMapping
+先来回顾一下在 DispatcherServlet 中处理请求的过程中通过 HandlerMapping 组件，获取到 HandlerExecutionChain 处理器执行链的方法，**是通过AbstractHandlerMapping 的 getHandler 方法来获取的**，如下：
+```java
+@Override
+@Nullable
+public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+    // <1> 获得处理器（HandlerMethod 或者 HandlerExecutionChain），该方法是抽象方法，由子类实现
+    Object handler = getHandlerInternal(request);
+    // <2> 获得不到，则使用默认处理器
+    // <3> 还是获得不到，则返回 null
+    // <4> 如果找到的处理器是 String 类型，则从 Spring 容器中找到对应的 Bean 作为处理器
+    // <5> 创建 HandlerExecutionChain 对象（包含处理器和拦截器）
+    // ... 省略相关代码
+    return executionChain;
+}
 
-
+```
+在 AbstractHandlerMapping 获取 HandlerExecutionChain 处理器执行链的方法中，**需要先调用 getHandlerInternal(HttpServletRequest request) 抽象方法，获取请求对应的处理器，该方法由子类去实现。**
 
 ## HandlerMapping 组件（二）之 HandlerInterceptor 拦截器
 
