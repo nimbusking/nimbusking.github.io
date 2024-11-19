@@ -2638,6 +2638,14 @@ protected void doDispatch(HttpServletRequest request, HttpServletResponse respon
 为了节省本文篇幅，这部分内容独立到单独文章中：
 https://nimbusk.cc/post/b18da5cf.html
 
+### SpringAOP
+为了节省本文篇幅，这部分内容独立到单独文章中：
+https://nimbusk.cc/post/a46a5ca9.html
+
+### Spring事务
+为了节省本文篇幅，这部分内容独立到单独文章中：
+https://nimbusk.cc/post/18702fe9.html
+
 ---
 ## SpringBoot
 为了节省本文篇幅，这部分内容独立到单独文章中：
