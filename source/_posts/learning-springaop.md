@@ -2,7 +2,7 @@
 title: SpringAOP细探
 abbrlink: a46a5ca9
 date: 2024-11-19 10:18:26
-updated: 2024-11-19 10:18:26
+updated: 2024-11-20 14:27:05
 tags:
   - Spring
   - Spring AOP
@@ -69,7 +69,8 @@ AOP 代理是 AOP 框架中 AOP 的实现，主要分为静态代理和动态代
 - **动态代理**：不会修改字节码，而是**在 JVM 内存中根据目标对象新生成一个 Class 对象**，这个对象包含了被代理对象的全部方法，并且在其中进行了增强。
 	- JDK 动态代理
 	- 字节码提升，例如 CGLIB
-	
+
+
 ### JDK 动态代理
 **基于接口代理，通过反射机制生成一个实现代理接口的类，在调用具体方法时会调用 InvocationHandler 来处理。**
 
@@ -522,7 +523,7 @@ public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, St
 上面这个过程在 Bean 初始化后，提供一个扩展点允许对这个 Bean 进行后置处理，此时 Bean 进入一个 “成熟态”，在这里则可以进行 AOP 代理对象的创建
 
 #### wrapIfNecessary 方法
-`wrapIfNecessary(Object bean, String beanName, Object cacheKey)`，该方法用于创建 AOP 代理对象，如果有必要的话上面的 `getEarlyBeanReference(..)` 和 `postProcessAfterInitialization(..) `方法都会调用这个方法，如下：
+`wrapIfNecessary(Object bean, String beanName, Object cacheKey)`，**该方法用于创建 AOP 代理对象，如果有必要的话**上面的 `getEarlyBeanReference(..)` 和 `postProcessAfterInitialization(..) `方法都会调用这个方法，如下：
 ```java
 protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
     /*
@@ -580,14 +581,63 @@ protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) 
 
 ### 筛选合适的通知器
 接着上文来接着分析筛选合适的通知器的处理过程，包含 @AspectJ 等 AspectJ 注解的解析过程。**这里的“通知器”指的是 Advisor 对象。**
+上文中wrapIfNecessary 方法中的第4步，调用 `getAdvicesAndAdvisorsForBean(..)` 方法，**获取能够应用到当前 Bean 的所有 Advisor（已根据 @Order 排序）**
+而`getAdvicesAndAdvisorsForBean(..)`是一个抽象方法，具体实现交付于子类实现的
+```java
+	// org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator#getAdvicesAndAdvisorsForBean
+	@Nullable
+	protected abstract Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName,
+			@Nullable TargetSource customTargetSource) throws BeansException;
+```
 
+#### 筛选出合适的 Advisor 的流程
+1. 解析出当前 IoC 容器所有 Advisor 对象
+	1. 获取当前 IoC 容器所有 Advisor 类型的 Bean
+	2. 解析当前 IoC 容器中所有带有 @AspectJ 注解的 Bean，具体如下：
+		- `@Before|@After|@Around|@AfterReturning|@AfterThrowing `注解的方法解析出对应的 PointcutAdvisor 对象，
+		- 带有 `@DeclareParents` 注解的字段解析出 `IntroductionAdvisor` 对象
+		- `@Around` -> `AspectJAroundAdvice`，实现了 `MethodInterceptor`
+		- `@Before` -> `AspectJMethodBeforeAdvice`
+		- `@After` -> `AspectJAfterAdvice`，实现了 `MethodInterceptor`
+		- `@AfterReturning` -> `AspectJAfterAdvice`
+		- `@AfterThrowing` -> `AspectJAfterThrowingAdvice`，实现了 `MethodInterceptor`
+2. 筛选出能够应用于这个 Bean 的 Advisor 们，主要**通过 ClassFilter 类过滤器和 MethodMatcher 方法匹配器进行匹配**
+3. 对筛选出来的 Advisor 进行扩展，例如子类会往首部添加一个 PointcutAdvisor 对象
+4. 对筛选出来的 Advisor 进行排序
+	- 不同的 AspectJ 根据 @Order 排序
+	- 同一个 AspectJ 中不同 Advisor 的排序，优先级是：
+		**`AspectJAfterThrowingAdvice > AspectJAfterReturningAdvice > AspectJAfterAdvice > AspectJAroundAdvice > AspectJMethodBeforeAdvice`**
 
+主要涉及下面几个类：
+- **AbstractAdvisorAutoProxyCreator**：支持从当前 Spring 上下文获取所有 Advisor 对象
+- **AnnotationAwareAspectJAutoProxyCreator**：支持从带有 @AspectJ 注解 Bean 中解析 Advisor 对象
+- **BeanFactoryAspectJAdvisorsBuilder**：Advisor 构建器，用于解析出当前 BeanFactory 中所有带有 @AspectJ 注解的 Bean 中的 Advisor
+- **ReflectiveAspectJAdvisorFactory**：Advisor 工厂，用于解析 @AspectJ 注解的 Bean 中的 Advisor
+
+#### AbstractAdvisorAutoProxyCreator
+AbstractAdvisorAutoProxyCreator：**支持从当前 Spring 上下文获取所有 Advisor 对象，存在能应用与 Bean 的 Advisor 则创建代理对象**
+
+#### AnnotationAwareAspectJAutoProxyCreator
+AnnotationAwareAspectJAutoProxyCreator：支持从带有 @AspectJ 注解 Bean 中解析 Advisor 对象
+
+#### BeanFactoryAspectJAdvisorsBuilder
+BeanFactoryAspectJAdvisorsBuilder，Advisor 构建器，用于解析出当前 BeanFactory 中所有带有 @AspectJ 注解的 Bean 中的 Advisor
+
+#### ReflectiveAspectJAdvisorFactory
+ReflectiveAspectJAdvisorFactory，Advisor 工厂，用于解析 @AspectJ 注解的 Bean 中的 Advisor
 
 ### 创建代理对象
+#### 创建代理对象的流程
+1. 创建一个 ProxyFactory 代理工厂对象，设置需要创建的代理类的配置信息，例如 Advisor 数组和 TargetSource 目标类来源
+2. 借助 DefaultAopProxyFactory 选择 JdkDynamicAopProxy（JDK 动态代理）还是 ObjenesisCglibAopProxy（CGLIB 动态代理）
+	- 当 proxy-target-class 为 false 时，优先使用 JDK 动态代理，如果目标类没有实现可代理的接口，那么还是使用 CGLIB 动态代理
+	- 如果为 true，优先使用 CGLIB 动态代理，如果目标类本身是一个接口，那么还是使用 JDK 动态代理
+3. 通过 JdkDynamicAopProxy 或者 ObjenesisCglibAopProxy 创建一个代理对象
+	- JdkDynamicAopProxy 本身是一个 InvocationHandler 实现类，通过 JDK 的 Proxy.newProxyInstance(..) 创建代理对象
+	- ObjenesisCglibAopProxy 借助 CGLIB 的 Enhancer 创建代理对象，会设置 Callback 数组和 CallbackFilter 筛选器（选择合适 Callback 处理对应的方法），整个过程相比于 JDK 动态代理更复杂点，主要的实现在 DynamicAdvisedInterceptor 方法拦截器中
 
 ## AOP 两种代理对象的拦截处理
 
 ## AOP 注解驱动与XML配置
 
-## AOP 事务详解【引子】
 
