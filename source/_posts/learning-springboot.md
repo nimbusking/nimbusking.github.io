@@ -669,9 +669,634 @@ public @interface SpringBootApplication {
 }
 ```
 
+### @SpringBootConfiguration 注解
+SpringBootConfiguration 注解，Spring Boot 自定义注解
+```java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Configuration
+public @interface SpringBootConfiguration {
 
+    /**
+   * 被标记的 Bean 是否进行 CGLIB 提升
+   */
+  @AliasFor(annotation = Configuration.class)
+  boolean proxyBeanMethods() default true;
+}
+
+```
+该注解很简单，上面标注了 @Configuration 元注解，所以作用相同，**同样是将一个类标注为配置类，能够作为一个 Bean 被 Spring IoC 容器管理**
+
+### @ComponentScan 注解
+ComponentScan 注解，Spring 注解，扫描指定路径下的标有 @Component 注解的类，解析成 Bean 被 Spring IoC 容器管理
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Documented
+@Repeatable(ComponentScans.class)
+public @interface ComponentScan {
+
+    /**
+     * 指定的扫描的路径
+     */
+  @AliasFor("basePackages")
+  String[] value() default {};
+
+    /**
+     * 指定的扫描的路径
+     */
+  @AliasFor("value")
+  String[] basePackages() default {};
+
+    /**
+     * 指定的扫描的 Class 对象
+     */
+  Class<?>[] basePackageClasses() default {};
+
+  Class<? extends BeanNameGenerator> nameGenerator() default BeanNameGenerator.class;
+
+  Class<? extends ScopeMetadataResolver> scopeResolver() default AnnotationScopeMetadataResolver.class;
+
+  ScopedProxyMode scopedProxy() default ScopedProxyMode.DEFAULT;
+
+  String resourcePattern() default ClassPathScanningCandidateComponentProvider.DEFAULT_RESOURCE_PATTERN;
+
+  boolean useDefaultFilters() default true;
+
+    /**
+     * 扫描时的包含过滤器
+     */
+  Filter[] includeFilters() default {};
+  /**
+     * 扫描时的排除过滤器
+     */
+  Filter[] excludeFilters() default {};
+
+  boolean lazyInit() default false;
+}
+```
+该注解通常需要和 @Configuration 注解一起使用，因为需要 **先被当做一个配置类，然后解析到上面有 @ComponentScan** 注解后则处理该注解，通过 `ClassPathBeanDefinitionScanner` 扫描器去扫描指定路径下标注了 @Component 注解的类，将他们解析成 BeanDefinition（Bean 的前身），后续则会生成对应的 Bean 被 Spring IoC 容器管理
+
+当然，如果该注解没有通过 basePackages 指定路径，**Spring 会选在以该注解标注的类所在的包作为基础路径**，然后扫描包下面的这些类
+
+### @EnableAutoConfiguration 注解
+EnableAutoConfiguration 注解，Spring Boot 自定义注解，**用于驱动 Spring Boot 自动配置模块，这个也是SpringBoot能够实现自动装配的核心注解**
+```java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@AutoConfigurationPackage // 注册一个 Bean 保存当前注解标注的类所在包路径
+@Import(AutoConfigurationImportSelector.class) // Spring Boot 自动配置的实现
+public @interface EnableAutoConfiguration {
+  /**
+   * 可通过这个配置关闭 Spring Boot 的自动配置功能
+   */
+  String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
+
+  /**
+   * 指定需要排除的自动配置类的 Class 对象
+   */
+  Class<?>[] exclude() default {};
+
+  /**
+   * 指定需要排除的自动配置类的名称
+   */
+  String[] excludeName() default {};
+}
+
+```
+**对于 Spring 中的模块驱动注解的实现都是通过 @Import 注解来实现的**
+模块驱动注解通常需要结合 @Configuration 注解一起使用，因为需要先被当做一个配置类，然后解析到上面有 @Import 注解后则进行处理，对于 @Import 注解的值有三种情况：
+1. 该 Class 对象实现了 `ImportSelector` 接口，调用它的 `selectImports(..)` 方法获取需要被处理的 Class 对象的名称，也就是可以将它们作为一个 Bean 被 Spring IoC 管理
+    - *该 Class 对象实现了 DeferredImportSelector 接口，和上者的执行时机不同，在所有配置类处理完后再执行，且支持 @Order 排序*
+2. 该 Class 对象实现了 `ImportBeanDefinitionRegistrar` 接口，会调用它的 `registerBeanDefinitions(..)` 方法，自定义地往 `BeanDefinitionRegistry` 注册中心注册 BeanDefinition（Bean 的前身）
+3. 该 Class 对象是一个 @Configuration 配置类，会将这个类作为一个 Bean 被 Spring IoC 管理
+
+这里的 @EnableAutoConfiguration 自动配置模块驱动注解，通过 @Import 导入 **AutoConfigurationImportSelector** 这个类（实现了 DeferredImportSelector 接口）来驱动 Spring Boot 的自动配置模块，下面会进行分析
+
+### @AutoConfigurationPackage 注解
+@EnableAutoConfiguration 注解上面还有一个 @AutoConfigurationPackage 元注解，它的作用就是**注册一个 Bean，保存了当前注解标注的类所在包路径**
+```java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+/**
+ * 将当前注解所标注的类所在包名封装成一个 {@link org.springframework.boot.autoconfigure.AutoConfigurationPackages.BasePackages} 进行注册
+ * 例如 JPA 模块的会使用到这个对象（JPA entity scanner）
+ */
+@Import(AutoConfigurationPackages.Registrar.class)
+public @interface AutoConfigurationPackage { }
+
+```
+同样这里使用了 @Import 注解来实现的，对应的是一个 AutoConfigurationPackages.Registrar 内部类，如下：
+```java
+static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImports {
+
+    @Override
+    public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
+        // 注册一个 BasePackages 类的 BeanDefinition，角色为内部角色，名称为 `org.springframework.boot.autoconfigure.AutoConfigurationPackages`
+        register(registry, new PackageImport(metadata).getPackageName());
+    }
+
+    @Override
+    public Set<Object> determineImports(AnnotationMetadata metadata) {
+        // 将注解元信息封装成 PackageImport 对象，对注解所在的包名进行封装
+        return Collections.singleton(new PackageImport(metadata));
+    }
+}
+
+```
+
+### AutoConfigurationImportSelector类
+AutoConfigurationImportSelector，实现了 DeferredImportSelector 接口，是 @EnableAutoConfiguration 注解驱动自动配置模块的核心类
+#### selectImports 方法
+selectImports(AnnotationMetadata) 方法，返回需要注入的 Bean 的类名称
+```java
+@Override
+public String[] selectImports(AnnotationMetadata annotationMetadata) {
+    // <1> 如果通过 `spring.boot.enableautoconfiguration` 配置关闭了自动配置功能
+    if (!isEnabled(annotationMetadata)) {
+        // 返回一个空数组
+        return NO_IMPORTS;
+    }
+    /**
+     * <2> 解析 `META-INF/spring-autoconfigure-metadata.properties` 文件，生成一个 AutoConfigurationMetadata 自动配置类元数据对象
+     *
+     * 说明：引入 `spring-boot-autoconfigure-processor` 工具模块依赖后，其中会通过 Java SPI 机制引入 {@link AutoConfigureAnnotationProcessor} 注解处理器在编译阶段进行相关处理
+     * 其中 `spring-boot-autoconfigure` 模块会引入该工具模块（不具有传递性），那么 Spring Boot 在编译 `spring-boot-autoconfigure` 这个 `jar` 包的时候，
+     * 在编译阶段会扫描到带有 `@ConditionalOnClass` 等注解的 `.class` 文件，也就是自动配置类，将自动配置类的信息保存至 `META-INF/spring-autoconfigure-metadata.properties` 文件中
+     * 例如保存类 `自动配置类类名.注解简称` => `注解中的值(逗号分隔)` 和 `自动配置类类名` => `空字符串`
+     *
+     * 当然，你自己写的 Spring Boot Starter 中的自动配置模块也可以引入这个 Spring Boot 提供的插件
+     */
+    AutoConfigurationMetadata autoConfigurationMetadata = AutoConfigurationMetadataLoader.loadMetadata(this.beanClassLoader);
+    // <3> 从所有的 `META-INF/spring.factories` 文件中找到 `@EnableAutoConfiguration` 注解对应的类（需要自动配置的类）
+    // 会进行过滤处理，然后封装在一个对象中
+    AutoConfigurationEntry autoConfigurationEntry = getAutoConfigurationEntry(autoConfigurationMetadata, annotationMetadata);
+    // <4> 返回所有需要自动配置的类
+    return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
+}
+
+```
+
+上面第 2 步调用的方法：
+```java
+final class AutoConfigurationMetadataLoader {
+
+  protected static final String PATH = "META-INF/spring-autoconfigure-metadata.properties";
+
+  private AutoConfigurationMetadataLoader() {
+  }
+
+  static AutoConfigurationMetadata loadMetadata(ClassLoader classLoader) {
+    return loadMetadata(classLoader, PATH);
+  }
+
+  static AutoConfigurationMetadata loadMetadata(ClassLoader classLoader, String path) {
+    try {
+      // <1> 获取所有 `META-INF/spring-autoconfigure-metadata.properties` 文件 URL
+      Enumeration<URL> urls = (classLoader != null) ? classLoader.getResources(path)
+          : ClassLoader.getSystemResources(path);
+      Properties properties = new Properties();
+      // <2> 加载这些文件并将他们的属性添加到 Properties 中
+      while (urls.hasMoreElements()) {
+        properties.putAll(PropertiesLoaderUtils.loadProperties(new UrlResource(urls.nextElement())));
+      }
+      // <3> 将这个 Properties 封装到 PropertiesAutoConfigurationMetadata 对象中并返回
+      return loadMetadata(properties);
+    }
+    catch (IOException ex) {
+      throw new IllegalArgumentException("Unable to load @ConditionalOnClass location [" + path + "]", ex);
+    }
+  }
+
+  static AutoConfigurationMetadata loadMetadata(Properties properties) {
+    return new PropertiesAutoConfigurationMetadata(properties);
+  }
+}
+```
+这里补充解释一下spring-autoconfigure-metadata.properties作用：
+Spring Boot 做了一个优化，通过自己提供的工具，**在编译阶段将自动配置类的一些注解信息保存在一个 properties**文件中，这样一来，在你启动应用的过程中，就可以直接读取该文件中的信息，提前过滤掉一些自动配置类，相比于每次都去解析它们所有的注解，性能提升不少
+
+#### getAutoConfigurationEntry 方法
+getAutoConfigurationEntry(AutoConfigurationMetadata, AnnotationMetadata) 方法，返回符合条件的自动配置类，如下：
+```java
+protected AutoConfigurationEntry getAutoConfigurationEntry(AutoConfigurationMetadata autoConfigurationMetadata,
+        AnnotationMetadata annotationMetadata) {
+    // <1> 如果通过 `spring.boot.enableautoconfiguration` 配置关闭了自动配置功能
+    if (!isEnabled(annotationMetadata)) {
+        // 则返回一个“空”的对象
+        return EMPTY_ENTRY;
+    }
+    // <2> 获取 `@EnableAutoConfiguration` 注解的配置信息
+    AnnotationAttributes attributes = getAttributes(annotationMetadata);
+    // <3> 从所有的 `META-INF/spring.factories` 文件中找到 `@EnableAutoConfiguration` 注解对应的类（需要自动配置的类）
+    List<String> configurations = getCandidateConfigurations(annotationMetadata, attributes);
+    // <4> 对所有的自动配置类进行去重
+    configurations = removeDuplicates(configurations);
+    // <5> 获取需要排除的自动配置类
+    // 可通过 `@EnableAutoConfiguration` 注解的 `exclude` 和 `excludeName` 配置
+    // 也可以通过 `spring.autoconfigure.exclude` 配置
+    Set<String> exclusions = getExclusions(annotationMetadata, attributes);
+    // <6> 处理 `exclusions` 中特殊的类名称，保证能够排除它
+    checkExcludedClasses(configurations, exclusions);
+    // <7> 从 `configurations` 中将 `exclusions` 需要排除的自动配置类移除
+    configurations.removeAll(exclusions);
+    /**
+     * <8> 从 `META-INF/spring.factories` 找到所有的 {@link AutoConfigurationImportFilter} 对 `configurations` 进行过滤处理
+     * 例如 Spring Boot 中配置了 {@link org.springframework.boot.autoconfigure.condition.OnClassCondition}
+     * 在这里提前过滤掉一些不满足条件的自动配置类，在 Spring 注入 Bean 的时候也会判断哦~
+     */
+    configurations = filter(configurations, autoConfigurationMetadata);
+    /**
+     * <9> 从 `META-INF/spring.factories` 找到所有的 {@link AutoConfigurationImportListener} 事件监听器
+     * 触发每个监听器去处理 {@link AutoConfigurationImportEvent} 事件，该事件中包含了 `configurations` 和 `exclusions`
+     * Spring Boot 中配置了一个 {@link org.springframework.boot.autoconfigure.condition.ConditionEvaluationReportAutoConfigurationImportListener}
+     * 目的就是将 `configurations` 和 `exclusions` 保存至 {@link AutoConfigurationImportEvent} 对象中，并注册到 IoC 容器中，名称为 `autoConfigurationReport`
+     * 这样一来我们可以注入这个 Bean 获取到自动配置类信息
+     */
+    fireAutoConfigurationImportEvents(configurations, exclusions);
+    // <10> 将所有的自动配置类封装成一个 AutoConfigurationEntry 对象，并返回
+    return new AutoConfigurationEntry(configurations, exclusions);
+}
+
+```
+这个过程解释如下：
+1. 如果通过 spring.boot.enableautoconfiguration 配置关闭了自动配置功能，则返回一个“空”的对象
+2. 获取 @EnableAutoConfiguration 注解的配置信息
+3. 从所有的 **META-INF/spring.factories** 文件中找到 **@EnableAutoConfiguration 注解对应的类**（需要自动配置的类），保存在 configurations 集合中
+    ```java
+    protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+        // 从所有的 `META-INF/spring.factories` 文件中找到 `@EnableAutoConfiguration` 注解对应的类（需要自动配置的类）
+        List<String> configurations = SpringFactoriesLoader.loadFactoryNames(getSpringFactoriesLoaderFactoryClass(), getBeanClassLoader());
+        // 如果为空则抛出异常
+        Assert.notEmpty(configurations, "No auto configuration classes found in META-INF/spring.factories. If you "
+                + "are using a custom packaging, make sure that file is correct.");
+        return configurations;
+    }
+    ```
+4. 对所有的自动配置类进行去重
+    ```java
+    protected final <T> List<T> removeDuplicates(List<T> list) {
+        return new ArrayList<>(new LinkedHashSet<>(list));
+    }
+    ```
+5. 获取需要排除的自动配置类，可通过 @EnableAutoConfiguration 注解的 exclude 和 excludeName 配置，也可以通过 spring.autoconfigure.exclude 配置
+6. 处理 exclusions 中特殊的类名称，保证能够排除它
+7. 从 configurations 中将 exclusions 需要排除的自动配置类移除
+8. 调用 filter(..) 方法， 目的就是过滤掉一些不符合 Condition 条件的自动配置类，和在 1. selectImports 方法 小节中讲到的性能优化有关哦
+9. 从 META-INF/spring.factories 找到所有的 AutoConfigurationImportListener 事件监听器，触发每个监听器去处理 AutoConfigurationImportEvent 事件，该事件中包含了 configurations 和 exclusions
+    Spring Boot 中配置了一个监听器，**目的就是将 configurations 和 exclusions 保存至 AutoConfigurationImportEvent 对象中，并注册到 IoC 容器中**，名称为 autoConfigurationReport，这样一来我们可以注入这个 Bean 获取到自动配置类信息
+10. 将所有的自动配置类封装成一个 AutoConfigurationEntry 对象，并返回
+
+
+
+### AutoConfigureAnnotationProcessor
+AutoConfigureAnnotationProcessor，Spring Boot 的 spring-boot-autoconfigure-processor 工具模块中的自动配置类的注解处理器，在编译阶段扫描自动配置类的注解元信息，并将他们保存至一个 properties 文件中
+```java
+@SupportedAnnotationTypes({ "org.springframework.boot.autoconfigure.condition.ConditionalOnClass",
+    "org.springframework.boot.autoconfigure.condition.ConditionalOnBean",
+    "org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate",
+    "org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication",
+    "org.springframework.boot.autoconfigure.AutoConfigureBefore",
+    "org.springframework.boot.autoconfigure.AutoConfigureAfter",
+    "org.springframework.boot.autoconfigure.AutoConfigureOrder" })
+public class AutoConfigureAnnotationProcessor extends AbstractProcessor {
+  /**
+   * 生成的文件
+   */
+  protected static final String PROPERTIES_PATH = "META-INF/spring-autoconfigure-metadata.properties";
+  /**
+   * 保存指定注解的简称和注解全称之间的对应关系（不可修改）
+   */
+  private final Map<String, String> annotations;
+
+  private final Map<String, ValueExtractor> valueExtractors;
+
+  private final Properties properties = new Properties();
+
+  public AutoConfigureAnnotationProcessor() {
+    // <1> 创建一个 Map 集合
+    Map<String, String> annotations = new LinkedHashMap<>();
+    // <1.1> 将指定注解的简称和全称之间的对应关系保存至第 `1` 步创建的 Map 中
+    addAnnotations(annotations);
+    // <1.2> 将 `1.1` 的 Map 转换成不可修改的 UnmodifiableMap 集合，赋值给 `annotations`
+    this.annotations = Collections.unmodifiableMap(annotations);
+    // <2> 创建一个 Map 集合
+    Map<String, ValueExtractor> valueExtractors = new LinkedHashMap<>();
+    // <2.1> 将指定注解的简称和对应的 ValueExtractor 对象保存至第 `2` 步创建的 Map 中
+    addValueExtractors(valueExtractors);
+    // <2.2> 将 `2.1` 的 Map 转换成不可修改的 UnmodifiableMap 集合，赋值给 `valueExtractors`
+    this.valueExtractors = Collections.unmodifiableMap(valueExtractors);
+  }
+}
+```
+其中：
+AbstractProcessor 是 JDK 1.6 引入的一个抽象类，支持在编译阶段进行处理，在构造器中做了以下事情：
+1. 创建一个 Map 集合
+  1. 将指定注解的简称和全称之间的对应关系保存至第 1 步创建的 Map 中
+    ```java
+    protected void addAnnotations(Map<String, String> annotations) {
+        annotations.put("ConditionalOnClass", "org.springframework.boot.autoconfigure.condition.ConditionalOnClass");
+        annotations.put("ConditionalOnBean", "org.springframework.boot.autoconfigure.condition.ConditionalOnBean");
+        annotations.put("ConditionalOnSingleCandidate", "org.springframework.boot.autoconfigure.condition.ConditionalOnSingleCandidate");
+        annotations.put("ConditionalOnWebApplication", "org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication");
+        annotations.put("AutoConfigureBefore", "org.springframework.boot.autoconfigure.AutoConfigureBefore");
+        annotations.put("AutoConfigureAfter", "org.springframework.boot.autoconfigure.AutoConfigureAfter");
+        annotations.put("AutoConfigureOrder", "org.springframework.boot.autoconfigure.AutoConfigureOrder");
+    }
+    ```
+  2. 将 1.1 的 Map 转换成不可修改的 UnmodifiableMap 集合，赋值给 annotations
+2. 创建一个 Map 集合
+  1. 将指定注解的简称和对应的 ValueExtractor 对象保存至第 2 步创建的 Map 中
+    ```java
+    private void addValueExtractors(Map<String, ValueExtractor> attributes) {
+        attributes.put("ConditionalOnClass", new OnClassConditionValueExtractor());
+        attributes.put("ConditionalOnBean", new OnBeanConditionValueExtractor());
+        attributes.put("ConditionalOnSingleCandidate", new OnBeanConditionValueExtractor());
+        attributes.put("ConditionalOnWebApplication", ValueExtractor.allFrom("type"));
+        attributes.put("AutoConfigureBefore", ValueExtractor.allFrom("value", "name"));
+        attributes.put("AutoConfigureAfter", ValueExtractor.allFrom("value", "name"));
+        attributes.put("AutoConfigureOrder", ValueExtractor.allFrom("value"));
+    }
+    ```
+  2. 将 2.1 的 Map 转换成不可修改的 UnmodifiableMap 集合，赋值给 valueExtractors
+
+#### process 方法
+```java
+@Override
+public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    // <1> 遍历上面的几个 `@Conditional` 注解和几个定义自动配置类顺序的注解，依次进行处理
+    for (Map.Entry<String, String> entry : this.annotations.entrySet()) {
+        // <1.1> 对支持的注解进行处理，也就是找到所有标注了该注解的类，然后解析出该注解的值，保存至 Properties
+        // 例如 `类名.注解简称` => `注解中的值(逗号分隔)` 和 `类名` => `空字符串`，将自动配置类的信息已经对应注解的信息都保存起来
+        // 避免你每次启动 Spring Boot 应用都要去解析自动配置类上面的注解，是引入 `spring-boot-autoconfigure` 后可以从 `META-INF/spring-autoconfigure-metadata.properties` 文件中直接获取
+        // 这么一想，Spring Boot 设计的太棒了，所以你自己写的 Spring Boot Starter 中的自动配置模块也可以引入这个 Spring Boot 提供的插件
+        process(roundEnv, entry.getKey(), entry.getValue());
+    }
+    // <2> 如果处理完成
+    if (roundEnv.processingOver()) {
+        try {
+            // <2.1> 将 Properties 写入 `META-INF/spring-autoconfigure-metadata.properties` 文件
+            writeProperties();
+        }
+        catch (Exception ex) {
+            throw new IllegalStateException("Failed to write metadata", ex);
+        }
+    }
+    // <3> 返回 `false`
+    return false;
+}
+
+```
+
+#### process 重载方法
+```java
+private void process(RoundEnvironment roundEnv, String propertyKey, String annotationName) {
+    // <1> 获取到这个注解名称对应的 Java 类型
+    TypeElement annotationType = this.processingEnv.getElementUtils().getTypeElement(annotationName);
+    if (annotationType != null) {
+        // <2> 如果存在该注解，则从 RoundEnvironment 中获取标注了该注解的所有 Element 元素，进行遍历
+        for (Element element : roundEnv.getElementsAnnotatedWith(annotationType)) {
+            // <2.1> 获取这个 Element 元素 innermost 最深处的 Element
+            Element enclosingElement = element.getEnclosingElement();
+            // <2.2> 如果最深处的 Element 的类型是 PACKAGE 包，那么表示这个元素是一个类，则进行处理
+            if (enclosingElement != null && enclosingElement.getKind() == ElementKind.PACKAGE) {
+                // <2.2.1> 解析这个类上面 `annotationName` 注解的信息，并保存至 `properties` 中
+                processElement(element, propertyKey, annotationName);
+            }
+        }
+    }
+}
+```
+
+#### processElement 方法
+```java
+private void processElement(Element element, String propertyKey, String annotationName) {
+    try {
+        // <1> 获取这个类的名称
+        String qualifiedName = Elements.getQualifiedName(element);
+        // <2> 获取这个类上面的 `annotationName` 类型的注解信息
+        AnnotationMirror annotation = getAnnotation(element, annotationName);
+        if (qualifiedName != null && annotation != null) {
+            // <3> 获取这个注解中的值
+            List<Object> values = getValues(propertyKey, annotation);
+            // <4> 往 `properties` 中添加 `类名.注解简称` => `注解中的值(逗号分隔)`
+            this.properties.put(qualifiedName + "." + propertyKey, toCommaDelimitedString(values));
+            // <5> 往 `properties` 中添加 `类名` => `空字符串`
+            this.properties.put(qualifiedName, "");
+        }
+    }
+    catch (Exception ex) {
+        throw new IllegalStateException("Error processing configuration meta-data on " + element, ex);
+    }
+}
+
+```
+
+### 小结
+@EnableAutoConfiguration 注解的实现原理并不复杂，借助于 @Import 注解，从所有 META-INF/spring.factories 文件中找到 org.springframework.boot.autoconfigure.EnableAutoConfiguration 对应的值。
+会将这些自动配置类作为一个 Bean 尝试注入到 Spring IoC 容器中，注入的时候 Spring 会通过 @Conditional 注解判断是否符合条件，因为并不是所有的自动配置类都满足条件。当然，Spring Boot 对 @Conditional 注解进行了扩展，例如 @ConditionalOnClass 可以指定必须存在哪些 Class 对象才注入这个 Bean。
+Spring Boot 会借助 spring-boot-autoconfigure-processor 工具模块在编译阶段将自己的自动配置类的注解元信息保存至一个 properties 文件中，避免每次启动应用都要去解析这么多自动配置类上面的注解。同时会通过几个过滤器根据这个 properties 文件过滤掉一些自动配置类。
 
 ## Condition接口扩展
+### Condition 演进史-先从Profile看起
+在 Spring 3.1 的版本，为了满足不同环境注册不同的 Bean ，引入了 @Profile 注解。例如：
+```java
+@Configuration
+public class DataSourceConfiguration {
+
+    @Bean
+    @Profile("DEV")
+    public DataSource devDataSource() {
+        // ... 单机 MySQL
+    }
+
+    @Bean
+    @Profile("PROD")
+    public DataSource prodDataSource() {
+        // ... 集群 MySQL
+    }
+}
+
+```
+Spring 3.1.x 的 @Profile 注解如下：
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Profile {
+
+  /**
+   * The set of profiles for which this component should be registered.
+   */
+  String[] value();
+}
+
+```
+最开始 @Profile 注解并没有结合 @Conditional 注解一起使用，而是在后续版本才引入的
+
+### Condition 的出现
+在 Spring 4.0 的版本，出现了 Condition 功能，体现在 org.springframework.context.annotation.Condition 接口，如下：
+```java
+@FunctionalInterface
+public interface Condition {
+
+  /**
+   * Determine if the condition matches.
+   * @param context the condition context
+   * @param metadata the metadata of the {@link org.springframework.core.type.AnnotationMetadata class}
+   * or {@link org.springframework.core.type.MethodMetadata method} being checked
+   * @return {@code true} if the condition matches and the component can be registered,
+   * or {@code false} to veto the annotated component's registration
+   */
+  boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata);
+}
+```
+函数式接口，**只有一个 matches(..) 方法，判断是否匹配**，从入参中可以知道，它是和注解配合一起实现 Condition 功能的，也就是 @Conditional 注解，如下：
+```java
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Conditional {
+
+  /**
+   * All {@link Condition} classes that must {@linkplain Condition#matches match}
+   * in order for the component to be registered.
+   */
+  Class<? extends Condition>[] value();
+}
+```
+随之 @Profile 注解也进行了修改，和 @Conditional 注解配合使用
+Spring 5.1.x 的 @Profile 注解如下：
+```java
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Conditional(ProfileCondition.class)
+public @interface Profile {
+
+  /**
+   * The set of profiles for which the annotated component should be registered.
+   */
+  String[] value();
+}
+```
+这里指定的的 Condition 实现类是 ProfileCondition，如下：
+```java
+class ProfileCondition implements Condition {
+
+  @Override
+  public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+    MultiValueMap<String, Object> attrs = metadata.getAllAnnotationAttributes(Profile.class.getName());
+    if (attrs != null) {
+      for (Object value : attrs.get("value")) {
+        if (context.getEnvironment().acceptsProfiles(Profiles.of((String[]) value))) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return true;
+  }
+}
+```
+逻辑很简单，**从当前 Spring 应用上下文的 Environment 中判断 @Profile 指定的环境是否被激活，被激活了表示匹配成功，则注入对应的 Bean，否则，不进行操作**
+但是 Spring 本身提供的 Condition 实现类不多，只有一个 ProfileCondition 对象
+
+### SpringBootCondition 的完善
+Spring Boot 为了满足更加丰富的 Condition 场景，对 Spring 的 Condition 接口进行了扩展，提供更多的实现类，如下：
+![SpringBootCondition](f52b8ac8/SpringBootCondition.jpg)
+上面仅列出了部分 SpringBootCondition 的子类，同时这些子类与对应的注解配置一起使用
+- @ConditionalOnClass：必须都存在指定的 Class 对象们
+- @ConditionalOnMissingClass：指定的 Class 对象们必须都不存在
+- @ConditionalOnBean：必须都存在指定的 Bean 们
+- @ConditionalOnMissingBean：指定的 Bean 们必须都不存在
+- @ConditionalOnSingleCandidate：必须存在指定的 Bean
+- @ConditionalOnProperty：指定的属性是否有指定的值
+- @ConditionalOnWebApplication：当前的 WEB 应用类型是否在指定的范围内（ANY、SERVLET、REACTIVE）
+- @ConditionalOnNotWebApplication：不是 WEB 应用类型
+
+上面列出了 Spring Boot 中常见的几种 @ConditionXxx 注解，**他们都配合 @Conditional 注解与对应的 Condition 实现类一起使用，提供了非常丰富的 Condition 场景**
+
+### Condition 在哪生效？
+- 通过 @Component 注解（及派生注解）标注的 Bean
+- @Configuration 标注的配置类中的 @Bean 标注的方法 Bean
+
+#### 普通 Bean
+第一种情况是在 **Spring 扫描指定路径下的 .class 文件解析成对应的 BeanDefinition（Bean 的前身）时，会根据 @Conditional 注解判断是否符合条件**，如下：
+```java
+// ClassPathBeanDefinitionScanner.java
+public int scan(String... basePackages) {
+    // <1> 获取扫描前的 BeanDefinition 数量
+    int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
+
+    // <2> 进行扫描，将过滤出来的所有的 .class 文件生成对应的 BeanDefinition 并注册
+    doScan(basePackages);
+
+    // Register annotation config processors, if necessary.
+    // <3> 如果 `includeAnnotationConfig` 为 `true`（默认），则注册几个关于注解的 PostProcessor 处理器（关键）
+    // 在其他地方也会注册，内部会进行判断，已注册的处理器不会再注册
+    if (this.includeAnnotationConfig) {
+        AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
+    }
+
+    // <4> 返回本次扫描注册的 BeanDefinition 数量
+    return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
+}
+// ClassPathScanningCandidateComponentProvider.java
+private boolean isConditionMatch(MetadataReader metadataReader) {
+    if (this.conditionEvaluator == null) {
+        this.conditionEvaluator =
+                new ConditionEvaluator(getRegistry(), this.environment, this.resourcePatternResolver);
+    }
+    return !this.conditionEvaluator.shouldSkip(metadataReader.getAnnotationMetadata());
+}
+```
+
+#### 配置类
+第二种情况是 Spring 会对 配置类进行处理，扫描到带有 @Bean 注解的方法，尝试解析成 BeanDefinition（Bean 的前身）时，会根据 @Conditional 注解判断是否符合条件，如下：
+```java
+// ConfigurationClassBeanDefinitionReader.java
+private void loadBeanDefinitionsForConfigurationClass(
+        ConfigurationClass configClass, TrackedConditionEvaluator trackedConditionEvaluator) {
+
+    // <1> 如果不符合 @Conditional 注解的条件，则跳过
+    if (trackedConditionEvaluator.shouldSkip(configClass)) {
+        String beanName = configClass.getBeanName();
+        if (StringUtils.hasLength(beanName) && this.registry.containsBeanDefinition(beanName)) {
+            this.registry.removeBeanDefinition(beanName);
+        }
+        this.importRegistry.removeImportingClass(configClass.getMetadata().getClassName());
+        return;
+    }
+
+    // <2> 如果当前 ConfigurationClass 是通过 @Import 注解被导入的
+    if (configClass.isImported()) {
+        // <2.1> 根据该 ConfigurationClass 对象生成一个 BeanDefinition 并注册
+        registerBeanDefinitionForImportedConfigurationClass(configClass);
+    }
+    // <3> 遍历当前 ConfigurationClass 中所有的 @Bean 注解标注的方法
+    for (BeanMethod beanMethod : configClass.getBeanMethods()) {
+        // <3.1> 根据该 BeanMethod 对象生成一个 BeanDefinition 并注册（注意这里有无 static 修饰会有不同的配置）
+        loadBeanDefinitionsForBeanMethod(beanMethod);
+    }
+
+    // <4> 对 @ImportResource 注解配置的资源进行处理，对里面的配置进行解析并注册 BeanDefinition
+    loadBeanDefinitionsFromImportedResources(configClass.getImportedResources());
+    // <5> 通过 @Import 注解导入的 ImportBeanDefinitionRegistrar 实现类往 BeanDefinitionRegistry 注册 BeanDefinition
+    // Mybatis 集成 Spring 就是基于这个实现的，可查看 Mybatis-Spring 项目中的 MapperScannerRegistrar 这个类
+    // https://github.com/liu844869663/mybatis-spring/blob/master/src/main/java/org/mybatis/spring/annotation/MapperScannerRegistrar.java
+    loadBeanDefinitionsFromRegistrars(configClass.getImportBeanDefinitionRegistrars());
+}
+
+```
+上面只是简单的提一下，可以看到会通过 TrackedConditionEvaluator 计算器进行计算，判断是否满足条件
+这里提一下，**对于 @Bean 标注的方法，会得到 CGLIB 的提升，也就是返回的是一个代理对象**，设置一个拦截器专门对 @Bean 方法进行拦截处理，通过依赖查找的方式从 IoC 容器中获取 Bean 对象，如果是单例 Bean，那么每次都是返回同一个对象，所以当主动调用这个方法时获取到的都是同一个对象。
+
+
 
 ## 配置加载
 
