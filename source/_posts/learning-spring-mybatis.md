@@ -354,7 +354,92 @@ MyBatis支持三种数据源配置，分别为`UNPOOLED、POOLED和JNDI`。内�
 至于 JNDI，MyBatis 提供这种数据源的目的是为了让其能够运行在 EJB 或应用服务器等容器中，这一点官方文档中有所说明。由于 JNDI 数据源在日常开发中使用甚少，因此，本篇文章不打算分析 JNDI 数据源相关实现。大家若有兴趣，可自行分析。
 
 ## MyBatis初始化
+在MyBatis初始化过程中，大致会有以下几个步骤：
+1. 创建Configuration全局配置对象，会往TypeAliasRegistry别名注册中心添加Mybatis需要用到的相关类，并设置默认的语言驱动类为XMLLanguageDriver
+2. 加载mybatis-config.xml配置文件、Mapper接口中的注解信息和XML映射文件，解析后的配置信息会形成相应的对象并保存到Configuration全局配置对象中
+3. 构建DefaultSqlSessionFactory对象，通过它可以创建DefaultSqlSession对象，MyBatis中SqlSession的默认实现类
 
+### 加载mybatis-config.xml
+初始化入口在**org.apache.ibatis.session.SqlSessionFactoryBuilder**构造器中，因为需要通过mybatis-config.xml配置文件构建一个SqlSessionFactory工厂，用于创建SqlSession会话
+主要涉及到以下几个类：
+- **org.apache.ibatis.session.SqlSessionFactoryBuilder**：用于构建SqlSessionFactory工厂
+- **org.apache.ibatis.builder.xml.XMLConfigBuilder**：根据配置文件进行解析，开始Mapper接口与XML映射文件的初始化，生成Configuration全局配置对象
+- **org.apache.ibatis.builder.xml.XMLMapperBuilder**：继承BaseBuilder抽象类，用于解析XML映射文件内的标签
+- **org.apache.ibatis.session.Configuration**：MyBatis的全局配置对象，保存所有的配置与初始化过程所产生的对象。上面解析mybatis-config.xml后的配置属性会存到这个类相关属性中去。
+
+解析的过程就不用过多贴出来了，总结就是：
+**MyBatis会在SqlSessionFactoryBuilder构造器中根据mybatis-config.xml配置文件初始化Configuration全局配置对象，然后创建对应的DefaultSqlSessionFactory工厂**
+
+### 加载Mapper接口与映射文件
+我们先看看一个示例的mapper文件
+![mybatis-mapper-xml-sample](35e49e17/mybatis-mapper-xml-sample.jpg)
+这个过程里面主要涉及下面一些类：
+- **org.apache.ibatis.builder.xml.XMLConfigBuilder**：根据配置文件进行解析，开始Mapper接口与XML映射文件的初始化，生成Configuration全局配置对象
+- **org.apache.ibatis.binding.MapperRegistry**：Mapper接口注册中心，将Mapper接口与其动态代理对象工厂进行保存，这里我们解析到的Mapper接口需要往其进行注册
+- **org.apache.ibatis.builder.annotation.MapperAnnotationBuilder**：解析Mapper接口，主要是解析接口上面注解，其中加载XML映射文件内部会调用XMLMapperBuilder类进行解析
+- **org.apache.ibatis.builder.xml.XMLMapperBuilder**：解析XML映射文件
+- **org.apache.ibatis.builder.xml.XMLStatementBuilder**：解析XML映射文件中的Statement配置（`<select /> <update /> <delete /> <insert />`标签）
+- **org.apache.ibatis.builder.MapperBuilderAssistant**：Mapper构造器小助手，用于创建ResultMapping、ResultMap和MappedStatement对象
+- **org.apache.ibatis.mapping.ResultMapping**：保存`<resultMap />`标签的子标签相关信息，也就是 Java Type 与 Jdbc Type 的映射信息
+- **org.apache.ibatis.mapping.ResultMap**：保存了`<resultMap />`标签的配置信息以及子标签的所有信息
+- **org.apache.ibatis.mapping.MappedStatement**：保存了解析`<select /> <update /> <delete /> <insert />`标签内的SQL语句所生成的所有信息
+
+#### 解析入口
+在org.apache.ibatis.builder.xml.XMLConfigBuilder中会解析mybatis-config.xml配置文件中的`<mapper />`标签，调用其`parse()->parseConfiguration(XNode root)->mappersElement(XNode parent)`方法，那么我们来看看这个方法，代码如下：
+```java
+private void mappersElement(XNode context) throws Exception {
+        if (context == null) {
+            return;
+        }
+        // <0> 遍历子节点
+        for (XNode child : context.getChildren()) {
+            // <1> 如果是 package 标签，则扫描该包
+            if ("package".equals(child.getName())) {
+                // 获得包名
+                String mapperPackage = child.getStringAttribute("name");
+                // 添加到 configuration 中
+                configuration.addMappers(mapperPackage);
+            } else { // 如果是 mapper 标签
+                // 获得 resource、url、class 属性
+                String resource = child.getStringAttribute("resource");
+                String url = child.getStringAttribute("url");
+                String mapperClass = child.getStringAttribute("class");
+                // <2> 使用相对于类路径的资源引用
+                if (resource != null && url == null && mapperClass == null) {
+                    ErrorContext.instance().resource(resource);
+                    // 获得 resource 的 InputStream 对象
+                    try (InputStream inputStream = Resources.getResourceAsStream(resource)) {
+                        // 创建 XMLMapperBuilder 对象
+                        XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource,
+                                configuration.getSqlFragments());
+                        // 执行解析
+                        mapperParser.parse();
+                    }
+                    // <3> 使用完全限定资源定位符（URL）
+                } else if (resource == null && url != null && mapperClass == null) {
+                    ErrorContext.instance().resource(url);
+                    // 获得 url 的 InputStream 对象
+                    try (InputStream inputStream = Resources.getUrlAsStream(url)) {
+                        // 创建 XMLMapperBuilder 对象
+                        XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url,
+                                configuration.getSqlFragments());
+                        // 执行解析
+                        mapperParser.parse();
+                    }
+                    // <4> 使用映射器接口实现类的完全限定类名
+                } else if (resource == null && url == null && mapperClass != null) {
+                    // 获得 Mapper 接口
+                    Class<?> mapperInterface = Resources.classForName(mapperClass);
+                    // 添加到 configuration 中
+                    configuration.addMapper(mapperInterface);
+                } else {
+                    throw new BuilderException(
+                            "A mapper element may only specify a url, resource or class, but not more than one.");
+                }
+            }
+        }
+    }
+```
 
 ## MyBatis-SQL执行过程
 
