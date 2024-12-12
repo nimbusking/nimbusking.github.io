@@ -12,11 +12,12 @@ categories: MyBatis
 
 ## 前言
 项目fork注释地址：https://github.com/nimbusking/mybatis-3
-【备注】：MyBatis的源码注释非常上，如仔细研究的话，需要花点功夫。
-
+【备注】：
+- MyBatis的源码注释非常上，如仔细研究的话，需要花点功夫。
+- 项目注释里面，如看过的部分源码，会格式化代码（原始代码缩进2空格，看起来不是很舒服，原谅强迫症~）
+<!-- more -->
 ## 一些概念
 ### MyBatis的实现逻辑
-<!-- more -->
 1. 在 MyBatis 的初始化过程中，会生成一个 `Configuration` 全局配置对象，里面包含了所有初始化过程中生成对象
 2. 根据 `Configuration` 创建一个 `SqlSessionFactory` 对象，用于创建 `SqlSession` “会话”
 3. 通过 `SqlSession` 可以获取到 `Mapper` 接口对应的**动态代理对象**，去执行数据库的相关操作
@@ -384,7 +385,7 @@ MyBatis支持三种数据源配置，分别为`UNPOOLED、POOLED和JNDI`。内�
 - **org.apache.ibatis.mapping.ResultMap**：保存了`<resultMap />`标签的配置信息以及子标签的所有信息
 - **org.apache.ibatis.mapping.MappedStatement**：保存了解析`<select /> <update /> <delete /> <insert />`标签内的SQL语句所生成的所有信息
 
-#### 解析入口
+#### XMLConfigBuilder-解析入口
 在org.apache.ibatis.builder.xml.XMLConfigBuilder中会解析mybatis-config.xml配置文件中的`<mapper />`标签，调用其`parse()->parseConfiguration(XNode root)->mappersElement(XNode parent)`方法，那么我们来看看这个方法，代码如下：
 ```java
 private void mappersElement(XNode context) throws Exception {
@@ -440,6 +441,339 @@ private void mappersElement(XNode context) throws Exception {
         }
     }
 ```
+上述的`configuration.addMappers(mapperPackage)`方法，底层是通过调用它的**MapperRegistry的addMappers(String packageName)方法**进行注册的。
+看一下MapperRegistry中addMapper方法：
+```java
+// org.apache.ibatis.binding.MapperRegistry#addMapper
+public <T> void addMapper(Class<T> type) {
+        // <1> 判断，必须是接口。
+        if (type.isInterface()) {
+            // <2> 已经添加过，则抛出 BindingException 异常
+            if (hasMapper(type)) {
+                throw new BindingException("Type " + type + " is already known to the MapperRegistry.");
+            }
+            boolean loadCompleted = false;
+            try {
+                // <3> 将Mapper接口对应的代理工厂添加到 knownMappers 中
+                knownMappers.put(type, new MapperProxyFactory<>(type));
+                // It's important that the type is added before the parser is run
+                // otherwise the binding may automatically be attempted by the
+                // mapper parser. If the type is already known, it won't try.
+                // <4> 解析 Mapper 的注解配置
+                MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type);
+                // 解析 Mapper 接口上面的注解和 Mapper 接口对应的 XML 文件
+                parser.parse();
+                // <5> 标记加载完成
+                loadCompleted = true;
+            } finally {
+                // <6> 若加载未完成，从 knownMappers 中移除
+                if (!loadCompleted) {
+                    knownMappers.remove(type);
+                }
+            }
+        }
+    }
+```
+注意上面第4步，通过new了一个`MapperAnnotationBuilder`对象，完了调用parse方法解析。而**这个对象就是解析该Mapper接口与对应XML映射文件的重要类**。
+##### MapperAnnotationBuilder类
+MapperAnnotationBuilder：解析Mapper接口，主要是解析接口上面注解，加载XML文件会调用XMLMapperBuilder类进行解析
+```java
+// org.apache.ibatis.builder.annotation.MapperAnnotationBuilder#parse
+public void parse() {
+        String resource = type.toString();
+        if (!configuration.isResourceLoaded(resource)) {
+            // 加载该接口对应的 XML 文件
+            loadXmlResource();
+            configuration.addLoadedResource(resource);
+            assistant.setCurrentNamespace(type.getName());
+            // 解析 Mapper 接口的 @CacheNamespace 注解，创建缓存
+            parseCache();
+            // 解析 Mapper 接口的 @CacheNamespaceRef 注解，引用其他命名空间
+            parseCacheRef();
+            for (Method method : type.getMethods()) {
+                // 先判断前置条件：不是桥接方法（泛型擦除时虚拟机生成的）且不是default方法
+                if (!canHaveStatement(method)) {
+                    continue;
+                }
+                // 处理ResultMap
+                if (getAnnotationWrapper(method, false, Select.class, SelectProvider.class).isPresent()
+                        && method.getAnnotation(ResultMap.class) == null) {
+                    parseResultMap(method);
+                }
+                try {
+                    // 解析方法上面的注解
+                    parseStatement(method);
+                } catch (IncompleteElementException e) {
+                    configuration.addIncompleteMethod(new MethodResolver(this, method));
+                }
+            }
+        }
+        configuration.parsePendingMethods(false);
+    }
+
+// org.apache.ibatis.builder.annotation.MapperAnnotationBuilder#loadXmlResource
+private void loadXmlResource() {
+        // Spring may not know the real resource name so we check a flag
+        // to prevent loading again a resource twice
+        // this flag is set at XMLMapperBuilder#bindMapperForNamespace
+        // 检查一下类型放置有问题
+        if (!configuration.isResourceLoaded("namespace:" + type.getName())) {
+            String xmlResource = type.getName().replace('.', '/') + ".xml";
+            // #1347
+            InputStream inputStream = type.getResourceAsStream("/" + xmlResource);
+            if (inputStream == null) {
+                // Search XML mapper that is not in the module but in the classpath.
+                try {
+                    inputStream = Resources.getResourceAsStream(type.getClassLoader(), xmlResource);
+                } catch (IOException e2) {
+                    // ignore, resource is not required
+                }
+            }
+            if (inputStream != null) {
+                // 创建 XMLMapperBuilder 对象
+                XMLMapperBuilder xmlParser = new XMLMapperBuilder(inputStream, assistant.getConfiguration(), xmlResource,
+                        configuration.getSqlFragments(), type.getName());
+                // 解析该 XML 文件
+                xmlParser.parse();
+            }
+        }
+    }
+```
+上述loadXmlResource()方法中是通过，**XMLMapperBuilder类**来具体进行解析的，我们直接看看对应的parse方法
+```java
+public void parse() {
+        // <1> 判断当前 Mapper 是否已经加载过
+        if (!configuration.isResourceLoaded(resource)) {
+            // <2> 解析 `<mapper />` 节点
+            configurationElement(parser.evalNode("/mapper"));
+            // <3> 标记该 Mapper 已经加载过
+            configuration.addLoadedResource(resource);
+            // <4> 绑定 Mapper
+            bindMapperForNamespace();
+        }
+        // <5> 解析待定的 <resultMap /> 节点
+        configuration.parsePendingResultMaps(false);
+        // <6> 解析待定的 <cache-ref /> 节点
+        configuration.parsePendingCacheRefs(false);
+        // <7> 解析待定的 SQL 语句的节点
+        configuration.parsePendingStatements(false);
+    }
+```
+这里面的执行步骤是：
+1. 根据Configuration全局配置判断当前XML映射文件是否已经加载过，例如resource为：xxx/xxx/xxx.xml
+2. 解析 `<mapper />` 节点，也就是解析整个的XML映射文件，在下面的configurationElement方法中讲解
+3. 标记该XML映射文件已经加载过，往Configuration全局配置添加该字段文件，例如添加：xxx/xxx/xxx.xml
+4. 绑定 Mapper 到该命名空间，避免在`MapperAnnotationBuilder#loadXmlResource`方法中重复加载该XML映射文件
+5. 解析待定的 `<resultMap />、<cache-ref />`节点以及 `Statement` 对象，因为我们配置的这些对象可能还依赖的其他对象，在解析的过程中这些依赖可能还没解析出来，导致这个对象解析失败，所以先保存在Configuration全局配置对象中，待整个XML映射文件解析完后，再遍历之前解析失败的对象进行初始化，这里就不做详细的讲述了，感兴趣的小伙伴可以看一下
+
+我们接着上面，看几个特定的方法：
+- 第2步的：configurationElement(parser.evalNode("/mapper"))
+  ```java
+  private void configurationElement(XNode context) {
+        try {
+            // <1> 获得 namespace 属性
+            String namespace = context.getStringAttribute("namespace");
+            if (namespace == null || namespace.isEmpty()) {
+                throw new BuilderException("Mapper's namespace cannot be empty");
+            }
+            builderAssistant.setCurrentNamespace(namespace);
+            // <2> 解析 <cache-ref /> 节点
+            cacheRefElement(context.evalNode("cache-ref"));
+            // <3> 解析 <cache /> 节点
+            cacheElement(context.evalNode("cache"));
+            // 已废弃！老式风格的参数映射。内联参数是首选,这个元素可能在将来被移除，这里不会记录。
+            parameterMapElement(context.evalNodes("/mapper/parameterMap"));
+            // <4> 解析 <resultMap /> 节点
+            resultMapElements(context.evalNodes("/mapper/resultMap"));
+            // <5> 解析 <sql /> 节点们
+            sqlElement(context.evalNodes("/mapper/sql"));
+            // <6> 解析 <select /> <insert /> <update /> <delete /> 节点
+            buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
+        } catch (Exception e) {
+            throw new BuilderException("Error parsing Mapper XML. The XML location is '" + resource + "'. Cause: " + e, e);
+        }
+    }
+  ```
+  这里面呢，就是处理mapper文件的具体步骤。对应的功能也非常清楚，我们就挑常见的继续看看。
+  `resultMapElements(List<XNode> list)`方法用于解析`<resultMap />`节点，最后会调用`resultMapElement()`方法逐个解析生成`ResultMap`对象
+  ![XMLMapperBuilder解析mapper文件时序流程](35e49e17/XMLMapperBuilder解析mapper文件时序流程.jpg)
+  看看resultMapElements方法：
+  ```java
+  private ResultMap resultMapElement(XNode resultMapNode, List<ResultMapping> additionalResultMappings,
+                                       Class<?> enclosingType) {
+        // 获取当前线程的上下文
+        ErrorContext.instance().activity("processing " + resultMapNode.getValueBasedIdentifier());
+        // <1> 获得 type 属性
+        String type = resultMapNode.getStringAttribute("type", resultMapNode.getStringAttribute("ofType",
+                resultMapNode.getStringAttribute("resultType", resultMapNode.getStringAttribute("javaType"))));
+        // 获得 type 对应的类
+        Class<?> typeClass = resolveClass(type);
+        if (typeClass == null) {
+            // 从 enclosingType Class 对象获取该 property 属性的 Class 对象
+            typeClass = inheritEnclosingType(resultMapNode, enclosingType);
+        }
+        Discriminator discriminator = null;
+        // 创建 ResultMapping 集合
+        List<ResultMapping> resultMappings = new ArrayList<>(additionalResultMappings);
+        // 添加父 ResultMap 的 ResultMapping 集合
+        List<XNode> resultChildren = resultMapNode.getChildren();
+        // <2> 遍历 <resultMap /> 的子节点
+        for (XNode resultChild : resultChildren) {
+            if ("constructor".equals(resultChild.getName())) { // <2.1> 处理 <constructor /> 节点
+                processConstructorElement(resultChild, typeClass, resultMappings);
+            } else if ("discriminator".equals(resultChild.getName())) { // <2.2> 处理 <discriminator /> 节点
+                discriminator = processDiscriminatorElement(resultChild, typeClass, resultMappings);
+            } else {
+                // <2.3> 处理其它节点
+                List<ResultFlag> flags = new ArrayList<>();
+                if ("id".equals(resultChild.getName())) {
+                    // 为添加该 ResultMapping 添加一个 Id 标志
+                    flags.add(ResultFlag.ID);
+                }
+                // 生成对应的 ResultMapping 对象
+                resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
+            }
+        }
+        // 获得 id 属性，没有的话自动生成
+        String id = resultMapNode.getStringAttribute("id", resultMapNode.getValueBasedIdentifier());
+        // 获得 extends 属性
+        String extend = resultMapNode.getStringAttribute("extends");
+        // 获得 autoMapping 属性
+        Boolean autoMapping = resultMapNode.getBooleanAttribute("autoMapping");
+        // <3> 创建 ResultMapResolver 对象，执行解析
+        ResultMapResolver resultMapResolver = new ResultMapResolver(builderAssistant, id, typeClass, extend, discriminator,
+                resultMappings, autoMapping);
+        try {
+            // 处理 ResultMap 并添加到 Configuration 全局配置中
+            return resultMapResolver.resolve();
+        } catch (IncompleteElementException e) {
+            configuration.addIncompleteResultMap(resultMapResolver);
+            throw e;
+        }
+    }
+  ```
+  
+- sqlElement方法
+  `sqlElement(List<XNode> list)`方法用于解析所有的`<sql />`节点，内部调用
+  ```java
+  public class XMLMapperBuilder extends BaseBuilder {
+      private void sqlElement(List<XNode> list, String requiredDatabaseId) {
+      // <1> 遍历所有 <sql /> 节点
+      for (XNode context : list) {
+        // <2> 获得 databaseId 属性
+        String databaseId = context.getStringAttribute("databaseId");
+        // <3> 获得完整的 id 属性
+        String id = context.getStringAttribute("id");
+        // 设置为 `${namespace}.${id}` 格式
+        id = builderAssistant.applyCurrentNamespace(id, false);
+        // <4> 判断 databaseId 是否匹配
+        if (databaseIdMatchesCurrent(id, databaseId, requiredDatabaseId)) {
+          // <5> 添加到 sqlFragments 中
+          sqlFragments.put(id, context);
+        }
+      }
+    }
+  }
+  ```
+
+#### XMLStatementBuilder类-Statement配置
+XMLStatementBuilder：解析XML映射文件中的Statement配置
+也就是解析`<select /> <insert /> <update /> <delete /> `节点，**解析过程在parseStatementNode()方法中**
+```java
+public void parseStatementNode() {
+        // 获得 id 属性，编号。
+        String id = context.getStringAttribute("id");
+        // 获得 databaseId ， 判断 databaseId 是否匹配
+        String databaseId = context.getStringAttribute("databaseId");
+
+        if (!databaseIdMatchesCurrent(id, databaseId, this.requiredDatabaseId)) {
+            return;
+        }
+        // 获取当前节点名称
+        String nodeName = context.getNode().getNodeName();
+        // <1> 根据节点名称判断 SQL 类型
+        SqlCommandType sqlCommandType = SqlCommandType.valueOf(nodeName.toUpperCase(Locale.ENGLISH));
+        // 是否为 Select 语句
+        boolean isSelect = sqlCommandType == SqlCommandType.SELECT;
+        // <2> 是否清空缓存
+        boolean flushCache = context.getBooleanAttribute("flushCache", !isSelect);
+        // <3> 是否使用缓存
+        boolean useCache = context.getBooleanAttribute("useCache", isSelect);
+        // <4> 是否按照查询结果集的顺序来处理数据
+        boolean resultOrdered = context.getBooleanAttribute("resultOrdered", false);
+
+        // Include Fragments before parsing
+        XMLIncludeTransformer includeParser = new XMLIncludeTransformer(configuration, builderAssistant);
+        // <5> 将该节点的子节点 <include /> 转换成 <sql /> 节点
+        includeParser.applyIncludes(context.getNode());
+
+        // 获取参数类型名称
+        String parameterType = context.getStringAttribute("parameterType");
+        // <6> 参数类型名称转换成 Java Type
+        Class<?> parameterTypeClass = resolveClass(parameterType);
+
+        // <7> 获得 lang 对应的 LanguageDriver 对象
+        String lang = context.getStringAttribute("lang");
+        LanguageDriver langDriver = getLanguageDriver(lang);
+
+        // Parse selectKey after includes and remove them.
+        // <8> 将该节点的子节点 <selectKey /> 解析成 SelectKeyGenerator 生成器
+        processSelectKeyNodes(id, parameterTypeClass, langDriver);
+
+        // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
+        KeyGenerator keyGenerator;
+        String keyStatementId = id + SelectKeyGenerator.SELECT_KEY_SUFFIX;
+        keyStatementId = builderAssistant.applyCurrentNamespace(keyStatementId, true);
+        /*
+         * <9> 1. 如果上面存在 <selectKey /> 子节点，则获取上面对其解析后生成的 SelectKeyGenerator 2. 否则判断该节点是否配置了 useGeneratedKeys 属性为 true 并且是
+         * 插入语句，则使用 Jdbc3KeyGenerator
+         */
+        if (configuration.hasKeyGenerator(keyStatementId)) {
+            keyGenerator = configuration.getKeyGenerator(keyStatementId);
+        } else {
+            keyGenerator = context.getBooleanAttribute("useGeneratedKeys",
+                    configuration.isUseGeneratedKeys() && SqlCommandType.INSERT.equals(sqlCommandType))
+                    ? Jdbc3KeyGenerator.INSTANCE : NoKeyGenerator.INSTANCE;
+        }
+
+        // <10> 创建对应的 SqlSource 对象，保存了该节点下 SQL 相关信息
+        SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
+        // <11> 获得 Statement 类型，默认 PREPARED
+        StatementType statementType = StatementType
+                .valueOf(context.getStringAttribute("statementType", StatementType.PREPARED.toString()));
+        Integer fetchSize = context.getIntAttribute("fetchSize");
+        Integer timeout = context.getIntAttribute("timeout");
+        String parameterMap = context.getStringAttribute("parameterMap");
+        // <12> 获得返回结果类型名称
+        String resultType = context.getStringAttribute("resultType");
+        // 获取返回结果的 Java Type
+        Class<?> resultTypeClass = resolveClass(resultType);
+        // 获取 resultMap
+        String resultMap = context.getStringAttribute("resultMap");
+        if (resultTypeClass == null && resultMap == null) {
+            resultTypeClass = MapperAnnotationBuilder.getMethodReturnType(builderAssistant.getCurrentNamespace(), id);
+        }
+        String resultSetType = context.getStringAttribute("resultSetType");
+        ResultSetType resultSetTypeEnum = resolveResultSetType(resultSetType);
+        if (resultSetTypeEnum == null) {
+            resultSetTypeEnum = configuration.getDefaultResultSetType();
+        }
+        // 对应的 java 属性，结合 useGeneratedKeys 使用
+        String keyProperty = context.getStringAttribute("keyProperty");
+        // 对应的 column 列名，结合 useGeneratedKeys 使用
+        String keyColumn = context.getStringAttribute("keyColumn");
+        String resultSets = context.getStringAttribute("resultSets");
+        boolean dirtySelect = context.getBooleanAttribute("affectData", Boolean.FALSE);
+        // <13> 通过MapperBuilderAssistant构造器根据这些属性信息构建一个MappedStatement对象
+        // PS: 一个有点奇葩的方法，21个参数
+        builderAssistant.addMappedStatement(id, sqlSource, statementType, sqlCommandType, fetchSize, timeout, parameterMap,
+                parameterTypeClass, resultMap, resultTypeClass, resultSetTypeEnum, flushCache, useCache, resultOrdered,
+                keyGenerator, keyProperty, keyColumn, databaseId, langDriver, resultSets, dirtySelect);
+    }
+```
+
+### SQL初始化过程
+
 
 ## MyBatis-SQL执行过程
 
