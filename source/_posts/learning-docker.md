@@ -104,8 +104,9 @@ docker利用改技术，为容器提供构建层，使得容器可以实现写�
 ### 核心概念
 docker核心围绕：镜像、容器、仓库来构建的
 #### 镜像
-通俗的讲，镜像是一个只读的文件和文件夹组合，是Docker容器启动的先决条件。
+通俗的讲，**镜像是一个只读的文件和文件夹组合，是Docker容器启动的先决条件。**
 镜像是一个只读的文件和文件夹组合，包含了容器运行时所需要的所有基础文件和配置信息，是容器启动的基础。
+镜像不包括任何动态数据。
 
 通常情况下，可以通过下面两种方式创建镜像：
 - 基于centos镜像制作自己的业务镜像
@@ -115,10 +116,72 @@ docker核心围绕：镜像、容器、仓库来构建的
 - 从功能镜像仓库拉取别人制作好的镜像
   - 常用的软件或者系统，例如nginx、ubuntu、centos、mysql等，可以到Docker Hub搜索并下载。
 
+##### 镜像构建
+直接看图，有下面几种：
+![镜像操作](4f507556/镜像操作.jpg)
+
+```shell
+# Docker镜像的拉取使用docker pull命令
+docker pull [Registry]/[Repository]/[Image]:[Tag]
+# 使用docker tag命令将镜像重命名，这种只是建了一个别名，底层指向的还是同一个imageid
+docker tag busybox:latest mybusybox:latest
+# 使用docker rmi 或者 docker image rm 命令删除镜像
+```
+
+构建方法：
+- 使用docker commit命令从运行中的容器提交为镜像
+- 使用docker build命令从Dockerfile构建镜像：主要的构建方式
+
+##### Dockerfile文件
+- Dockerfile的每一行命令都会生成一个对立的镜像层，并且拥有唯一的ID
+- Dockerfile的命令是完全透明的，通过查看Dockerfile的内容，可以知道镜像是如何创建的
+- Dockerfile是纯文本的，方便跟随代码一起存放在代码仓库并管理
+
+**相关指令简介：**
+| Dockerfile指令        | 指令说明           |
+| ------------- |:-------------:|
+|  FROM      | Dockerfile除了注释第一行必须是FROM，FROM后面跟镜像名称，代码我们要基于哪个基础镜像构建我们的容器 |
+| RUN      | RUN后面跟一个具体的命令，类似于Linux命令行执行命令      |
+| ADD      | 拷贝本机文件或者远程文件到镜像内      |
+| COPY      | 拷贝本机文件的到镜像内      |
+| USER      | 指定容器启动用户      |
+| ENTRYPOINT      | 容器的启动命令      |
+| CMD      | CMD为ENTRYPOINT指令提供默认参数，也可以单独使用CMD指定容器启动参数      |
+| ENV      | 指定容器运行时的环境变量，格式为key=value      |
+| ARG      | 定义外部变量，构建镜像时可以使用build-arg <varname>=<value>的格式传递参数用于构建      |
+| EXPOSE      | 指定容器监听的端口，格式为[port]/tcp或者[port]/udp      |
+| WORKDIR      | 为Dockerfile中跟在其后的所有RUN、CMD、ENTRYPOINT、COPY和ADD命令设置工作目录      |
+
+示例：
+```shell
+FROM centos:7
+COPY nginx.repo /etc/yum.repos.d/nginx.repo
+RUN yum install -y nginx
+EXPOSE 80
+ENV HOST=mynginx
+CMD ["nginx", "-g", "daemon off"]
+```
+
+##### 实现原理
+Docker镜像是由一系列镜像层（layer）组成的，每一层代表了镜像构建过程中的一次提交。
+一个示例：
+![一个镜像分层的示例](4f507556/镜像分层的示例.jpg)
+
 #### 容器
 通俗的讲，容器是镜像的运行实体，而镜像是静态的只读文件，容器带有运行时，即容器运行着真正的应用进程。
 容器有初建、运行、停止、暂停和删除五种状态
 在容器内部，无法看到主机上的进程、环境变量、网络等信息
+![容器组成示意图](4f507556/容器组成示意图.jpg)
+
+##### 容器的生命周期
+1. created: 初建状态
+2. running: 运行状态
+3. stopped: 停止状态
+4. paused: 暂停状态
+5. deleted: 删除状态
+
+![容器的生命周期](4f507556/容器的生命周期.jpg)
+
 
 #### 仓库
 类似于代码仓库，Docker的镜像仓库用来存储和分发Docker镜像，其中可以分为公共镜像仓库和私有镜像仓库。
