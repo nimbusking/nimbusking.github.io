@@ -2,7 +2,7 @@
 title: Spring Mybatis细磕
 abbrlink: 35e49e17
 date: 2024-11-23 18:12:55
-updated: 2024-11-25 10:24:27
+updated: 2024-12-26 13:26:49
 tags:
   - Spring
   - MyBatis
@@ -355,7 +355,7 @@ MyBatis支持三种数据源配置，分别为`UNPOOLED、POOLED和JNDI`。内�
 至于 JNDI，MyBatis 提供这种数据源的目的是为了让其能够运行在 EJB 或应用服务器等容器中，这一点官方文档中有所说明。由于 JNDI 数据源在日常开发中使用甚少，因此，本篇文章不打算分析 JNDI 数据源相关实现。大家若有兴趣，可自行分析。
 
 ## MyBatis初始化
-在MyBatis初始化过程中，大致会有以下几个步骤：
+在MyBatis初始化过程中，**大致会有以下几个步骤**：
 1. 创建Configuration全局配置对象，会往TypeAliasRegistry别名注册中心添加Mybatis需要用到的相关类，并设置默认的语言驱动类为XMLLanguageDriver
 2. 加载mybatis-config.xml配置文件、Mapper接口中的注解信息和XML映射文件，解析后的配置信息会形成相应的对象并保存到Configuration全局配置对象中
 3. 构建DefaultSqlSessionFactory对象，通过它可以创建DefaultSqlSession对象，MyBatis中SqlSession的默认实现类
@@ -773,9 +773,24 @@ public void parseStatementNode() {
 ```
 
 ### SQL初始化过程
+在解析`<select /> <insert /> <update /> <delete />`节点的过程中，是如何解析SQL语句，如何实现动态SQL语句，最终会生成一个o`rg.apache.ibatis.mapping.SqlSource`对象的，对于这烦琐且易出错的过程，我们来看看MyBatis如何实现的？
 
+整体解析过程：
+- 在XMLLanguageDriver语言驱动类中，通过XMLScriptBuilder对该到节点的内容进行解析，创建相应的SqlSource资源对象
+- 在其解析的过程会根据不同的NodeHandler节点处理器对MyBatis自定义的标签（`<if /> <foreach />`等）进行处理，生成相应的SqlNode对象，
+- 最后将所有的SqlNode对象存放在MixedSqlNode中
+
+其中解析的过程中会判断是否为动态的SQL语句，包含了MyBatis自定义的标签或者使用了${}都是动态的SQL语句，动态的SQL语句创建DynamicSqlSource对象，否则创建RawSqlSource对象
+而通过SqlSource这个对象根据入参可以获取到对应的BoundSql对象，BoundSql对象中包含了数据库需要执行的SQL语句、ParameterMapping参数信息、入参对象和附加的参数（通过`<bind />`标签生成的，或者`<foreach />`标签中的集合的元素等等）
 
 ## MyBatis-SQL执行过程
+MyBatis中SQL执行的整体过程如下图所示：
+![MyBatis的SQL执行过程](35e49e17/MyBatis的SQL执行过程.jpg)
+在 SqlSession 中，会将执行 SQL 的过程交由Executor执行器去执行，过程大致如下：
+1. 通过DefaultSqlSessionFactory创建与数据库交互的 SqlSession “会话”，其内部会创建一个Executor执行器对象
+2. 然后Executor执行器通过StatementHandler创建对应的java.sql.Statement对象，并通过ParameterHandler设置参数，然后执行数据库相关操作
+3. 如果是数据库更新操作，则可能需要通过KeyGenerator先设置自增键，然后返回受影响的行数
+4. 如果是数据库查询操作，则需要将数据库返回的ResultSet结果集对象包装成ResultSetWrapper，然后通过DefaultResultSetHandler对结果集进行映射，最后返回 Java 对象
 
 ## SqlSession会话与SQL执行入口
 

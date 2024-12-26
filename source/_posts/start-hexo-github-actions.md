@@ -12,7 +12,7 @@ categories: 站点
 ---
 
 ## 背景
-以前本博客是借助Travis来进行CI的，配置NodeJs及Hexo环境自动编译等。有兴趣，可以看看，该文章：https://nimbik.cc/post/e62993b1.html
+以前本博客是借助Travis来进行CI的，配置NodeJs及Hexo环境自动编译等。有兴趣，可以看看，该文章：https://nimbusk.cc/post/e62993b1.html
 （也是惭愧，有1年有余没有跟新博客了，导致Travis收费都不知道，今天开始更新的时候，发现远端编译失败了。。。。提示要收费）
 遂，果断弃之并迁移之GitHub Actions。
 
