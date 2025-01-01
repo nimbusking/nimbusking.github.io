@@ -78,6 +78,61 @@ Ctrl + F 打开查找控制面板，输入：
    "line_padding_top": 2
 ```
 
+##### 一个自动插入的插件
+**需求：**编写hexo博客的时候，需要经常插入abbrlink风格的图片。
+类似于这种：
+```![](a4b1030a/)```
+文章写多了，避免需要来回去复制a4b1030a，因此可以基于sublime text的插件功能来实现。
+原文请教地址：https://forum.sublimetext.com/t/how-to-match-string-and-autofill-in-sublime-text-snippet/74163/3
+PS：是我向官方论坛请教，得到一个大佬提供的思路之后完成的。之前原本以为，只通过snippet能够实现的，后来发现实现不了。
+
+**思路：** 不是很复杂，就是扫描当前光标所打开的页面，匹配abbrlink前缀的行字符串，完了分割提取之后拿到16进制的字符串，之后在拼接markdown图片字符串插入到当前光标所在位置即可。
+直接贴代码，注意class名称，Command结尾是必须的，前面的直接全小写。Command前面的名称就是你的命令名称，我建的就是：autoinsertpictag
+```python
+import sublime
+import sublime_plugin
+import re
+
+class autoinsertpictagCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        # get all text
+        all_text_region = self.view.substr(sublime.Region(0, self.view.size()))
+        try:
+            # match str with 'abbrlink: '
+            match = re.findall(r'abbrlink: \w+', all_text_region)
+            if match:
+                # split
+                target_abbrlink = match[0].split(" ")[1]
+                selections = self.view.sel()
+                self.view.insert(edit, selections[0].b, "![](" + target_abbrlink + "/)")
+                sublime.status_message("auto insert successfully!")
+            else:
+                print("Can't find any abbrlink str!!")
+        except Exception as e:
+            print("Error auto insert: " + str(e))
+```
+
+使用的具体函数什么意思，上面简短的注释写明了，具体的请去官网手册中查阅。
+接下来还需要做一件事情，绑定菜单和快捷键：
+在你的脚本目录，一般默认是：```C:\Users\[username]\AppData\Roaming\Sublime Text\Packages\User```下面
+- 绑定菜单：新建名为：```Context.sublime-menu```文件，内容如下：
+   ```json
+   [
+      { "caption": "-", "id": "autoinsertpictag" }, // 再建一个右键菜单中的分段。可以没有。id是唯一标识，用上面的命令名称就是
+      { "command": "autoinsertpictag", "caption": "autoinsertpictag" }, // command就是具体要执行的命令，caption是显示的名称
+   ]
+   ```
+- 绑定快捷键：新建名为 ```Default (Windows).sublime-keymap``` 内容如下：
+   ```json
+   [
+      { "keys": ["ctrl+1"], "command": "autoinsertpictag"},
+   ]
+   ```
+
+这样以来，就可以通过右键菜单和快捷键来快速插入了
+![一个插件示意图](a4b1030a/a_plugin.png)
+
+
 ### 办公相关
 
 ### Windows相关
