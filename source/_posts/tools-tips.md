@@ -44,6 +44,7 @@ date: 2018-04-15 10:37:03
 "word_wrap": true,      // 自动换行
 "wrap_width": "auto",    // 换行的宽度,默认80会造成左侧大量留白
 "mde.keep_centered": true,  // 可以保持你正在编辑的行始终处于屏幕的中间
+"color_scheme": "Packages/ayu/ayu-light.tmTheme", // ayu主题下设置编辑页面为纯白色
 ```
 
 ##### 打开文件新打开标签页，而不是不替换当前标签页
