@@ -134,6 +134,38 @@ class autoinsertpictagCommand(sublime_plugin.TextCommand):
 ![一个插件示意图](a4b1030a/a_plugin.png)
 
 
+#### NodeJS
+windows环境下面配置
+1. 在node.exe安装目录下新建两个文件夹，node_cache和node_global
+    命令行输入下面命令，配置环境，路径换成你的安装环境
+    ```shell
+    npm config set prefix "G:\programs\nodejs\node_global"　　//修改 npm 的全局安装模块路径
+    npm config set cache "G:\programs\nodejs\node_cache"　　　//修改 npm 的缓存路径
+    ```
+2. 打开环境变量：【计算机】->【右键】->【属性】->【高级】->【环境变量】
+    - 系统变量：新建【NODE_PATH】系统变量，指向【G:\programs\nodejs\node_global\node_modules】
+        ![nodejs系统环境变量配置](a4b1030a/nodejs_config1.jpg)
+    - 用户变量：选择【PATH】后点击【编辑】按钮，将默认路径【C:\Users\admin\AppData\Roaming\npm】改为【G:\Program Files\nodejs\node_global】
+        ![nodejs用户环境变量配置](a4b1030a/nodejs_config2.jpg)
+3. 更换镜像源：
+    ```shell
+    # 查询当前使用的镜像源
+    npm get registry
+
+    # 设置为淘宝镜像源
+    npm config set registry https://registry.npmmirror.com/
+
+    # 还原为官方镜像源
+    npm config set registry https://registry.npmjs.org/
+    ```
+4. 测试：
+    ```shell
+    # 看看上面配置的G:\Program Files\nodejs\node_global\node_modules路径里面有没有express
+    npm install -g express
+    ```
+    
+
+
 ### 办公相关
 
 ### Windows相关
