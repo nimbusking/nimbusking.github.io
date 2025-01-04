@@ -178,6 +178,7 @@ windows蓝屏之后，通常都会在C:\Windows\Minidump该目录下面转存储
 [Windows SKD Tool Kits](https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk)
 点击页面中的“DOWNLOAD THE INSTALLER”
 下载一个约1.29MB大小的安装文件
+PS: 防止失效，也可以 ![直接下载](a4b1030a/winsdksetup.exe) 文件MD5:93A956CB0A05A0EB38BB056F7B5864F2
 双击运行之后，前面的安装路径自行填写，其中在“Select the Features you want to download”页面，如下图所示：
 ![Select the Features you want to download](a4b1030a/selectthefutures.jpg)
 当中，特别注意“Debuging Tools for Windows”，这个便是我们想要的工具
