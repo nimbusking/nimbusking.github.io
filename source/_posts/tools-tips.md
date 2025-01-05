@@ -163,7 +163,15 @@ windows环境下面配置
     # 看看上面配置的G:\Program Files\nodejs\node_global\node_modules路径里面有没有express
     npm install -g express
     ```
-    
+
+#### JavaHome
+1. 打开系统环境变量
+2. 新建系统变量 ```JAVA_HOME``` 和 `CLASSPATH`
+    - JAVA_HOME: `G:\Program Files\Java\jdk-1.8`
+    - CLASSPATH: `.;%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar;`
+3. Path变量中新增：
+    - `%JAVA_HOME%\bin`
+    - `%JAVA_HOME%\jre\bin`
 
 
 ### 办公相关
