@@ -522,8 +522,11 @@ public class LockEliminationTest {
 ```
 属于一个局部变量，不可能从该方法中逃逸出去，因此其实这过程是线程安全的，可以将锁消除。
 测试结果：开启锁消除：1903 ms；关闭锁消除：2833 ms
+
+---
+
 ### AQS
-#### 什么是AQS
+#### 什么是AQS-AQS原理相关
 java.util.concurrent包中的大多数同步器实现都是围绕着共同的基础行为，比如等待队列、条件队列、独占获取、共享获取等，而这些行为的抽象就是基于**AbstractQueuedSynchronizer（简称AQS）**实现的，AQS是一个抽象同步框架，可以用来实现一个依赖状态的同步器。
 JDK中提供的大多数的同步器如Lock, Latch, Barrier等，都是基于AQS框架来实现的：
 - 一般是通过一个内部类Sync继承 AQS
@@ -609,7 +612,10 @@ ReentrantLock是一种基于AQS框架的应用实现，是JDK中的一种线程�
 **使用场景特别要注意的**：一定要处理好异常情况，即释放锁的时候不能出现因为异常而导致释放锁失败的情况。
 - **可中断**：线程协作时的一个典型用法，在A线程中调用lockInterruptibly()后，在B线程中调用interrupt()时会影响A线程中的后续执行逻辑，直接抛出异常。
 - **超时失败**：tryLock中传入时间参数
-- **公平锁**：默认是非公平的，创建的时候传入ture标志的时候创建的就是公平锁。默认非公平的原因是效率高。
+- **公平锁**：默认是非公平的，创建的时候传入ture标志的时候创建的就是公平锁。（默认是非公平锁）
+    - **公平锁与非公平锁的实现主要差异在于**：公平锁会严格按照请求锁的顺序来分配锁，即先到先得；非公平锁允许插队，即新请求锁的线程可以优先获取锁，而无需进入等待队列等待。
+    - 公平锁用于需要维护请求顺序，适合顺序敏感的场景，性能较低；
+    - 非公平锁，性能较高，适合高并发场景，但可能导致线程饥饿。
 
 ##### 相关源码实现
 1. ReentrantLock加锁解锁的逻辑
@@ -719,7 +725,7 @@ deactivate NonfairSync
 public final void acquire(int arg) {
 	// 这一行调用了三个方法：tryAcquire(arg)-尝试获取锁
 	// addWaiter(Node.EXCLUSIVE) - 首次调用构建双向队列
-	// acquireQueued(Node) - 入队列
+	// acquireQueued(Node) - 入队列，并且在其中自旋阻塞，并等待唤醒（看下文代码备注）
         if (!tryAcquire(arg) && acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
         	// 调用复位中断标记位
             selfInterrupt();
@@ -889,7 +895,9 @@ private void unparkSuccessor(Node node) {
 
 ###### 总结-整体流程
 调用流程大致如下：
-*PS：整整画了我2小时 :(*
+*PS：整整画了我2小时 :(* 
+这个图中结合上面非公平锁代码示例，完了结合等待队列，演示了一下未出现竞争场景下的非公平锁的实现流程。（图中演示的是一个个顺序获取锁的）
+往往高并发场景中，可能新进来的阻塞线程，可能立马获取到锁的。这点注意一下。
 ![完整调用流程](181e5700/ReentrantLock执行流程图.jpg)
 
 #### Semaphore
