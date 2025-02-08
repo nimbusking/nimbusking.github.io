@@ -5,7 +5,7 @@ date: 2024-10-25 16:35:56
 tags:
     - 并发编程
     - 并发原理
-updated: 2024-11-02 18:09:06                                 
+updated: 2025-02-08 09:43:17                              
 categories: Java系列
 top: true
 ---
@@ -87,6 +87,7 @@ class Pointer {
 2. 为什么说创建Java线程的本质上只有一种？Java线程和go语言的协程有什么区别？
 3. 如何优雅的终止线程？
 4. Java线程之间如何通信的，有那些方式？
+5. ForkJoinPool与ForkJoinTask工作原理
 
 ### 线程和进程的区别
 - **进程**：操作系统会以进程为单位，分配系统资源（CPU时间片、内存等资源），进程是资源分配的最小单位
@@ -144,7 +145,7 @@ class Pointer {
 	2. 调用本地方法start0()，去调用JVM中的JVM_StartThread方法进行线程创建和启动
 	3. 调用new JavaThread(&thread_entry, sz)进行线程的创建，并根据不同的操作系统平台调用对应的os::create_thread方法进行线程的创建
 	4. 新创建的线程状态为Initialized，调用sync->wait()的方法进行等待，等待被唤醒才会继续执行thread->run()
-	5. 调用Thread::start(native_thread)方法进行线程启动，此时将线程状态设置为RSUNNABLE，接着调用os::start_thread(thread)，根据不同的操作系统选择不同的线程启动方式
+	5. 调用Thread::start(native_thread)方法进行线程启动，此时将线程状态设置为RUNNABLE，接着调用os::start_thread(thread)，根据不同的操作系统选择不同的线程启动方式
 	6. 线程启动之后状态设置为RUNNABLE，并唤醒第4步中等待的线程，接着执行thread->run()的方法
 	7. JavaThread::run()方法会回调第1步new Thread中复写的run方法
 
@@ -251,7 +252,7 @@ if (value == expectedValue) {
 ```
 **CAS操作天然能够保持内存可见性，硬件底层指令**
 #### CAS应用
-在 Java 中，CAS 操作是由 Unsafe 类提供支持的，该类定义了三种针对不同类型变量的 CAS 操作，
+在 Java 中，CAS 操作是由 `Unsafe` 类提供支持的，该类定义了三种针对不同类型变量的 CAS 操作，
 ```java
 // sun.misc.Unsafe
     public final native boolean compareAndSwapObject(Object var1, long var2, Object var4, Object var5);
@@ -535,21 +536,21 @@ JDK中提供的大多数的同步器如Lock, Latch, Barrier等，都是基于AQS
 - 可重入
 - 允许中断
 
-AQS内部维护的属性 ```volatile int state``` 解释：state表示资源的可用状态。
+AQS内部维护的属性 ```volatile int state``` 其中：state表示资源的可用状态。
 **访问该state有三种方式**
 1. getState()
 2. setState()
 3. compareAndSetState()
 
-AQS定义两种资源共享方式：
+**AQS定义两种资源共享方式：**
 1. **Exclusive-独占**：只有一个线程能执行，如ReentrantLock
 2. **Share-共享**：多个线程可以同时执行，如Semaphore/CountDownLatch
 
-AQS定义两种队列（MESA实现）:
+**AQS定义两种队列（MESA实现）:**
 1. **同步等待队列**： 主要用于维护获取锁失败时入队的线程
-2. **条件等待队列**： 调用**await()**的时候会释放锁，然后线程会加入到条件队列，调用**signal()**唤醒的时候会把条件队列中的线程节点移动到同步队列中，等待再次获得锁
+2. **条件等待队列**： 调用 **await()** 的时候会释放锁，然后线程会加入到条件队列，调用 **signal()**唤醒的时候会把条件队列中的线程节点移动到同步队列中，等待再次获得锁
 
-AQS 定义了5个队列中节点状态（竞争失败后进行处理的内容，在队列节点Node中实现的）：
+**AQS 定义了5个队列中节点状态**（竞争失败后进行处理的内容，在队列节点Node中实现的）：
 1. **初始化状态**：值为0，，表示当前节点在sync队列中，等待着获取锁。
 2. **CANCELLED**：值为1，表示当前的线程被取消；
 3. **SIGNAL**：值为-1，表示当前节点的后继节点包含的线程需要运行，也就是unpark；
