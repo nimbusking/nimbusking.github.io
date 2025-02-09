@@ -1090,7 +1090,214 @@ private void doAcquireSharedInterruptibly(int arg)
     }
 ```
 释放资源，重新累加state的同时需要唤醒队列线程
+##### 总结-使用场景
+`Semaphore` 是 Java 并发包 (`java.util.concurrent`) 中的一个同步工具，用于控制对共享资源的访问。它通过维护一组许可证（permits）来实现资源的限制访问。`Semaphore` 的核心思想是：**通过许可证的数量来控制同时访问资源的线程数量**。
 
+以下是 `Semaphore` 的典型使用场景：
+
+###### 1. **限流控制**
+`Semaphore` 可以用于限制同时访问某个资源的线程数量，常用于高并发场景下的限流。
+
+场景示例：
+- **API 限流**：限制同时调用某个接口的线程数量。
+- **数据库连接池**：限制同时获取数据库连接的线程数量。
+
+代码示例：
+```java
+Semaphore semaphore = new Semaphore(10); // 允许 10 个线程同时访问
+
+public void accessResource() {
+    try {
+        semaphore.acquire(); // 获取许可证
+        // 访问共享资源
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    } finally {
+        semaphore.release(); // 释放许可证
+    }
+}
+```
+
+###### 2. **资源池管理**
+`Semaphore` 可以用于管理有限的资源池，例如数据库连接池、线程池等。
+
+场景示例：
+- **数据库连接池**：控制同时获取连接的线程数量。
+- **线程池任务队列**：限制同时执行的任务数量。
+
+代码示例：
+```java
+Semaphore semaphore = new Semaphore(5); // 资源池大小为 5
+
+public void useResource() {
+    try {
+        semaphore.acquire(); // 获取资源
+        // 使用资源
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    } finally {
+        semaphore.release(); // 释放资源
+    }
+}
+```
+
+###### 3. **生产者-消费者模型**
+`Semaphore` 可以用于实现生产者-消费者模型，通过两个信号量分别控制生产者和消费者的行为。
+
+场景示例：
+- **任务队列**：生产者生成任务，消费者消费任务，限制队列的最大容量。
+
+代码示例：
+```java
+Semaphore producerSemaphore = new Semaphore(10); // 生产者最多生产 10 个任务
+Semaphore consumerSemaphore = new Semaphore(0);  // 初始时没有任务可消费
+
+public void produce() {
+    try {
+        producerSemaphore.acquire(); // 获取生产者许可证
+        // 生产任务
+        consumerSemaphore.release(); // 释放消费者许可证
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+
+public void consume() {
+    try {
+        consumerSemaphore.acquire(); // 获取消费者许可证
+        // 消费任务
+        producerSemaphore.release(); // 释放生产者许可证
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+###### 4. **并发任务控制**
+`Semaphore` 可以用于控制并发任务的数量，例如限制同时执行的任务数量。
+
+场景示例：
+- **批量任务处理**：限制同时执行的任务数量，避免资源耗尽。
+
+代码示例：
+```java
+Semaphore semaphore = new Semaphore(5); // 允许 5 个任务同时执行
+
+public void executeTask(Runnable task) {
+    try {
+        semaphore.acquire(); // 获取许可证
+        new Thread(() -> {
+            try {
+                task.run();
+            } finally {
+                semaphore.release(); // 释放许可证
+            }
+        }).start();
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    }
+}
+```
+
+###### 5. **线程间协作**
+`Semaphore` 可以用于线程间的协作，例如实现屏障（Barrier）或等待通知机制。
+
+场景示例：
+- **多阶段任务**：多个线程需要分阶段完成任务，每个阶段需要等待其他线程完成。
+
+代码示例：
+```java
+Semaphore phase1 = new Semaphore(0);
+Semaphore phase2 = new Semaphore(0);
+
+public void task() {
+    // 阶段 1
+    phase1.release(); // 完成阶段 1
+    phase2.acquire(); // 等待其他线程完成阶段 1
+
+    // 阶段 2
+    phase2.release(); // 完成阶段 2
+}
+```
+
+---
+
+###### 6. **流量整形**
+`Semaphore` 可以用于流量整形，控制请求的速率。
+
+场景示例：
+- **网络请求限速**：限制每秒发送的请求数量。
+
+代码示例：
+```java
+Semaphore semaphore = new Semaphore(10); // 每秒最多 10 个请求
+
+public void sendRequest() {
+    try {
+        semaphore.acquire(); // 获取许可证
+        // 发送请求
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    } finally {
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                semaphore.release(); // 1 秒后释放许可证
+            }
+        }, 1000);
+    }
+}
+```
+
+###### 7. **死锁预防**
+`Semaphore` 可以用于预防死锁，通过限制资源的获取顺序来避免死锁。
+
+场景示例：
+- **资源有序获取**：通过信号量控制资源的获取顺序。
+
+代码示例：
+```java
+Semaphore semaphore1 = new Semaphore(1);
+Semaphore semaphore2 = new Semaphore(1);
+
+public void task1() {
+    try {
+        semaphore1.acquire();
+        semaphore2.acquire();
+        // 访问资源 1 和资源 2
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    } finally {
+        semaphore2.release();
+        semaphore1.release();
+    }
+}
+
+public void task2() {
+    try {
+        semaphore1.acquire();
+        semaphore2.acquire();
+        // 访问资源 1 和资源 2
+    } catch (InterruptedException e) {
+        e.printStackTrace();
+    } finally {
+        semaphore2.release();
+        semaphore1.release();
+    }
+}
+```
+
+###### 总结
+`Semaphore` 的使用场景非常广泛，主要集中在以下几个方面：
+1. **限流控制**：限制同时访问资源的线程数量。
+2. **资源池管理**：管理有限的资源池。
+3. **生产者-消费者模型**：控制生产者和消费者的行为。
+4. **并发任务控制**：限制同时执行的任务数量。
+5. **线程间协作**：实现屏障或等待通知机制。
+6. **流量整形**：控制请求的速率。
+7. **死锁预防**：通过有序获取资源避免死锁。
+
+`Semaphore` 是一个强大的工具，适用于需要精细控制并发访问的场景。
 
 #### CountDownLatch
 CountDownLatch（闭锁）是一个**同步协助类，允许一个或多个线程等待，直到其他线程完成操作集**。
@@ -1102,6 +1309,15 @@ await方法会阻塞直到当前的计数值（count）由于countDown方法的�
 
 ##### 应用场景
 CountDownLatch一般用作多线程倒计时计数器，强制它们等待其他一组（CountDownLatch的初始化决定）任务执行完成
+1. **主线程等待多个子线程完成任务后再继续执行**：
+   - 例如，主线程需要等待多个子线程完成数据加载、初始化等操作后再继续执行后续逻辑。
+2. **并行任务的同步**：
+   - 当多个线程并行执行任务时，可以使用 `CountDownLatch` 来确保所有线程都完成任务后再进行下一步操作。
+3. **测试并发场景**：
+   - 在单元测试中，可以使用 `CountDownLatch` 来模拟并发场景，确保所有线程同时开始执行。
+4. **资源初始化**：
+   - 在系统启动时，可能需要等待多个资源（如数据库连接、缓存加载等）初始化完成后再启动服务。
+
 ##### 实现原理
 底层基于 AbstractQueuedSynchronizer 实现：
 CountDownLatch 构造函数中**指定的count直接赋给AQS的state**；每次countDown()则都是release(1)减1，最后减到0时unpark阻塞线程；这一步是由最后一个执行countdown方法的线程执行的。
@@ -1391,13 +1607,32 @@ final boolean transferForSignal(Node node) {
 
 
 ##### 读写锁使用
-一个经典的使用场景就是缓存，读多写少。
+1. **读多写少的并发场景**：
+   - 当共享资源的读操作远多于写操作时，使用 `ReentrantReadWriteLock` 可以提高并发性能。多个读线程可以同时访问资源，而写线程会独占锁。
+2. **缓存系统**：
+   - 在缓存系统中，读取缓存的操作非常频繁，而更新缓存的操作相对较少。使用读写锁可以允许多个线程同时读取缓存，而在更新缓存时确保线程安全。
+3. **数据结构的并发访问**：
+   - 例如，在并发环境下操作一个共享的 `Map` 或 `List`，读操作可以并发执行，而写操作需要独占锁。
+4. **资源池管理**：
+   - 在资源池（如数据库连接池、线程池）中，获取资源的操作通常是读操作，而释放或创建资源的操作是写操作。读写锁可以提高资源池的并发性能。
+5. **配置管理**：
+   - 在动态配置管理中，读取配置的操作非常频繁，而更新配置的操作较少。使用读写锁可以优化配置读取的性能。
 
-##### 锁降级
-**锁降级指的是写锁降级成为读锁。**
-**如果当前线程拥有写锁，然后将其释放，最后再获取读锁，这种分段完成的过程不能称之为锁降级。**
-**降级的目的是为了内存可见性问题**。
-锁降级是指把持住（当前拥有的）写锁，再获取到读锁，随后释放（先前拥有的）写锁的过程。锁降级可以帮助我们拿到当前线程修改后的结果而不被其他线程所破坏，防止更新丢失。
+##### 注意事项
+1. **避免锁升级**：
+   - 锁升级是指线程在持有读锁的情况下尝试获取写锁。`ReentrantReadWriteLock` 不支持锁升级，会导致死锁。
+2. **避免锁降级**：
+   - 锁降级是指线程在持有写锁的情况下尝试获取读锁。虽然 `ReentrantReadWriteLock` 支持锁降级，但需要谨慎使用，确保逻辑正确。
+   - **锁降级指的是写锁降级成为读锁。**
+   - **如果当前线程拥有写锁，然后将其释放，最后再获取读锁，这种分段完成的过程不能称之为锁降级。**
+   - **降级的目的是为了内存可见性问题**。
+   - 锁降级是指把持住（当前拥有的）写锁，再获取到读锁，随后释放（先前拥有的）写锁的过程。锁降级可以帮助我们拿到当前线程修改后的结果而不被其他线程所破坏，防止更新丢失。
+3. **公平性问题**：
+   - 非公平锁可能会导致写线程饥饿（长时间无法获取锁），因此在写操作较多的情况下，建议使用公平锁。
+4. **性能开销**：
+   - 读写锁的实现比普通的 `ReentrantLock` 更复杂，因此在写操作非常频繁的场景中，可能不如 `ReentrantLock` 高效。
+
+---
 
 ## 并发编程相关
 ### 阻塞队列相关
