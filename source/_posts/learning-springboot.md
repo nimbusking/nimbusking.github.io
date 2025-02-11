@@ -12,6 +12,7 @@ categories: Spring
 项目注释代码：https://github.com/nimbusking/spring-boot/tree/2.3.x
 
 ## 与传统Web架构比较
+<!-- more -->
 1. **简化配置**
    - **优势**：Spring Boot 采用“约定优于配置”的理念，提供了大量的默认配置，开发者无需手动配置大量的 XML 或注解。
    - **传统架构**：传统的 Spring MVC 或 Java EE 需要手动配置大量的 XML 文件（如 `web.xml`、`dispatcher-servlet.xml` 等），开发效率较低。
@@ -67,7 +68,7 @@ categories: Spring
 ## 从怎么运行Jar包开始
 Spring Boot 提供了 Maven 插件 **spring-boot-maven-plugin**，可以很方便的将我们的 Spring Boot 项目打成 jar 包或者 war 包。
 考虑到部署的便利性，我们绝大多数（99.99%）的场景下，都会选择打成 jar 包，这样一来，我们就无需将项目部署于 Tomcat、Jetty 等 Servlet 容器中。
-<!-- more -->
+
 通过 Spring Boot 插件生成的 jar 包是如何运行，并启动 Spring Boot 应用的呢？
 先来看一个SpringBoot打包出来的jar包，我们来看看内部结构
 ![ABootJarFile](f52b8ac8/ABootJarFile.jpg)
