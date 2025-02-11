@@ -37,7 +37,8 @@ categories: 分布式
 
 ## Dubbo服务注册与发现过程
 Dubbo 的启动与注册流程是服务提供者和消费者在分布式系统中协同工作的关键步骤。
-
+注册发现整体流程如下图所示：
+![dubbo-architecture](8f9cfb6c/dubbo-architecture.webp)
 以下是 Dubbo 启动与注册的详细流程：
 ### **1. 服务提供者启动与注册流程**
 
