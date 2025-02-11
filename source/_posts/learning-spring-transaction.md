@@ -11,7 +11,9 @@ categories: Spring
 
 ## Spring 事务详解
 Spring 事务里面分为“物理事务”和“逻辑事务”：
+
 <!-- more -->
+
 - 所谓的“物理事务”是：**指 JDBC 的事务**，上一次事务和本次事务之间是没有其他事务的，在执行一条命令（默认行为自动提交）都会产生一个事务，如果把 autocommit 设置为 false，需要主动 commit 才完成一个事务。
 - 所谓的“逻辑事务”是：**Spring 对 JDBC 的一个抽象**，例如 Spring 默认的事务传播行为是 REQUIRED，当执行 @Transactional 注解标注的方法时，如果此时正处于一个事务（物理事务）中，那么加入到这个事务中，你可以理解为创建了一个“逻辑事务”，进行提交的时候不会执行 Connection 的 commit 方法，而是在外面的“物理事务”中进行 commit 时一并完成本次事务。
  
@@ -1183,3 +1185,26 @@ private void processRollback(DefaultTransactionStatus status, boolean unexpected
 Spring 缓存（Caching）的底层实现和 Spirng 事务（Transactions）整体上差不多，当你对 Spirng 事务（Transactions）的底层了解后，你会发现 **Spring 缓存（Caching）的实现基本是照搬过来的。**
 
 **Spring 异步处理（Async）的底层实现和上面两者类似（原理差不多）**，不过它没有直接注入一个 PointcutAdvisor 切面，**而是注入了一个 `AbstractAdvisingBeanPostProcessor` 对象**，继承 ProxyProcessorSupport（AOP 代理配置类），且实现 BeanPostProcessor 接口；在这个对象里面会关联一个 AsyncAnnotationAdvisor 切面对象，然后通过实现 BeanPostProcessor 接口在 Spring Bean 的生命周期中的初始化后进行扩展，对于符合条件的 Bean 会通过 ProxyFactory 创建一个代理对象；AsyncAnnotationAdvisor 关联的 Advice 会对方法进行拦截处理，也就是将方法的执行放入一个 Executor 线程池中执行，会返回一个 Future 可用于获取执行结果。
+
+## 几种会导致Spring事务失效的场景
+在Spring中，事务失效可能由以下场景引起：
+1. **非public方法**  
+   Spring事务默认只对public方法生效，非public方法上的`@Transactional`注解会被忽略。
+2. **自调用**  
+   类内部方法调用另一个带有`@Transactional`注解的方法时，事务不会生效，因为代理无法拦截自调用。
+3. **异常处理不当**  
+   默认情况下，Spring只对未检查异常（RuntimeException）回滚。如果捕获了异常且未重新抛出，或抛出了检查异常，事务不会回滚。
+4. **事务传播配置错误**  
+   如果事务传播行为配置为`Propagation.NOT_SUPPORTED`或`Propagation.NEVER`，事务将不会生效。
+5. **多线程调用**  
+   新线程中的操作不在原事务管理范围内，导致事务失效。
+6. **数据库引擎不支持事务**  
+   如MySQL的MyISAM引擎不支持事务，即使使用`@Transactional`注解也不会生效。
+7. **未启用事务管理**  
+   如果未在配置中启用事务管理（如未配置`@EnableTransactionManagement`），事务注解不会生效。
+8. **错误的代理模式**  
+   如果使用基于类的代理（CGLIB）且类为final，或使用基于接口的代理（JDK动态代理）但方法未在接口中声明，事务可能失效。
+9. **手动回滚未处理**  
+   如果在代码中手动调用了`setRollbackOnly()`但未正确处理，事务可能不会按预期回滚。
+10. **事务管理器配置错误**  
+    如未正确配置事务管理器，或使用了错误的事务管理器，事务将无法生效。
