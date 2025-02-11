@@ -62,9 +62,9 @@ MyBatis 提供了以下几种动态 SQL 的标签：`<if />、<choose />、<when
 ### 在Spring中Mapper接口是如何被注入的？
 通过 SqlSession 的 `getMapper(Class<T> type)` 方法，可以获取到 Mapper 接口的动态代理对象，那么在 Spring 中是如何将 Mapper 接口注入到其他 Spring Bean 中的呢？
 
-在 MyBatis 的 MyBatis-Spring 集成 Spring 子项目中，通过实现 Spring 的 BeanDefinitionRegistryPostProcessor 接口，实现它的 postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) 方法，也就是在 Spring 完成 BeanDefinition 的初始化工作后，**会将 Mapper 接口也解析成 BeanDefinition 对象注册到 registry 注册表中**，并且会修改其 beanClass 为 MapperFactoryBean 类型，还添加了一个入参为 Mapper 接口的 Class 对象的名称
+在 MyBatis 的 MyBatis-Spring 集成 Spring 子项目中，通过实现 Spring 的 BeanDefinitionRegistryPostProcessor 接口，实现它的 postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) 方法，也就是**在 Spring 完成 BeanDefinition 的初始化工作后，会将 Mapper 接口也解析成 BeanDefinition 对象注册到 registry 注册表中**，并且会修改其 beanClass 为 MapperFactoryBean 类型，还添加了一个入参为 Mapper 接口的 Class 对象的名称
 
-这样 Mapper 接口会对应一个 MapperFactoryBean 对象，由于这个对象实现了 FactoryBean 接口，实现它的 getObject() 方法，该方法会通过 SqlSession 的 `getMapper(Class<T> type) `方法，返回该 Mapper 接口的动态代理对象，所以在 Spring Bean 中注入的 Mapper 接口时，调用其 getObeject() 方法，拿到的是 Mapper 接口的动态代理对象
+这样 Mapper 接口会对应一个 MapperFactoryBean 对象，由于这个对象实现了 FactoryBean 接口，实现它的 getObject() 方法，该方法会通过 SqlSession 的 `getMapper(Class<T> type) `方法，返回该 Mapper 接口的动态代理对象，所以**在 Spring Bean 中注入的 Mapper 接口时，调用其 getObeject() 方法，拿到的是 Mapper 接口的动态代理对象**
 
 ### Mybatis有哪些Executor执行器
 - **SimpleExecutor（默认）**：每执行一次数据库的操作，就创建一个 Statement 对象，用完立刻关闭 Statement 对象。
@@ -170,6 +170,8 @@ Mybatis 使用 **RowBounds** 对象进行分页，**它是针对 ResultSet 结�
 1. 有接口绑定，包括注解绑定 SQL 和 XML 绑定 SQL 。
 2. 动态 SQL 由原来的节点配置变成 OGNL 表达式。
 3. 在一对一或一对多的时候，引进了 `<association />` 标签，在一对多的时候，引入了 `<collection />`标签，不过都是在 `<resultMap /> `里面配置
+
+---
 
 ## 使用手册
 ### 一个示例的mybatis-config.xml
@@ -802,4 +804,155 @@ MyBatis中SQL执行的整体过程如下图所示：
 
 ## Spring-Boot-Starter相关
 
-## 其它细节
+## 常见的使用MyBatis遇到的错误
+在使用 MyBatis 的过程中，开发者可能会遇到一些常见的错误。以下是这些错误的分类、原因分析以及解决方法：
+
+### 1. **配置错误**
+#### **1.1 数据源配置错误**
+- **错误现象**：
+  - 数据库连接失败。
+  - 提示 `Cannot get connection` 或 `DataSource not configured`。
+- **原因**：
+  - 数据源配置不正确（如 URL、用户名、密码错误）。
+  - 数据库驱动未正确加载。
+- **解决方法**：
+  - 检查数据源配置（如 `jdbc.url`、`jdbc.username`、`jdbc.password`）。
+  - 确保数据库驱动已正确添加到项目中。
+
+#### **1.2 MyBatis 配置文件错误**
+- **错误现象**：
+  - 启动时提示 `Invalid configuration` 或 `Cannot find configuration file`。
+- **原因**：
+  - `mybatis-config.xml` 文件路径错误或格式不正确。
+  - XML 文件中有语法错误。
+- **解决方法**：
+  - 检查 `mybatis-config.xml` 文件路径是否正确。
+  - 使用 XML 校验工具检查文件格式。
+
+### 2. **SQL 映射错误**
+#### **2.1 SQL 语句错误**
+- **错误现象**：
+  - 执行 SQL 时提示语法错误。
+  - 查询结果不符合预期。
+- **原因**：
+  - SQL 语句编写错误（如缺少逗号、关键字拼写错误）。
+  - 动态 SQL 拼接错误（如 `<if>` 标签使用不当）。
+- **解决方法**：
+  - 检查 SQL 语句的正确性。
+  - 使用日志打印最终执行的 SQL 语句（开启 MyBatis 的 SQL 日志）。
+
+#### **2.2 参数绑定错误**
+- **错误现象**：
+  - 提示 `Parameter not found` 或 `BindingException`。
+- **原因**：
+  - SQL 中的参数名与 Java 方法参数名不一致。
+  - 参数类型不匹配。
+- **解决方法**：
+  - 确保 SQL 中的参数名与方法参数名一致。
+  - 使用 `@Param` 注解显式指定参数名。
+
+#### **2.3 结果映射错误**
+- **错误现象**：
+  - 查询结果无法映射到 Java 对象。
+  - 提示 `ResultMap not found` 或 `Unknown column`。
+- **原因**：
+  - 数据库字段名与 Java 对象属性名不一致。
+  - `resultMap` 配置错误。
+- **解决方法**：
+  - 检查 `resultMap` 配置，确保字段名与属性名一致。
+  - 使用别名或 `@Results` 注解显式映射字段。
+
+### 3. **事务管理错误**
+#### **3.1 事务未生效**
+- **错误现象**：
+  - 数据库操作未回滚。
+- **原因**：
+  - 未配置 Spring 事务管理器。
+  - 事务注解 `@Transactional` 未正确使用。
+- **解决方法**：
+  - 配置 `DataSourceTransactionManager`。
+  - 确保 `@Transactional` 注解添加到 Service 层方法上。
+
+#### **3.2 事务传播行为错误**
+- **错误现象**：
+  - 嵌套事务未按预期执行。
+- **原因**：
+  - 未正确配置事务传播行为（如 `REQUIRED`、`REQUIRES_NEW`）。
+- **解决方法**：
+  - 根据业务需求配置事务传播行为。
+
+### 4. **动态 SQL 错误**
+#### **4.1 动态 SQL 拼接错误**
+- **错误现象**：
+  - 动态 SQL 拼接结果不符合预期。
+- **原因**：
+  - `<if>`、`<choose>` 等标签使用错误。
+  - 参数为空时未正确处理。
+- **解决方法**：
+  - 检查动态 SQL 标签的使用。
+  - 使用 `OGNL` 表达式处理空值。
+
+#### **4.2 SQL 注入风险**
+- **错误现象**：
+  - SQL 语句被恶意注入。
+- **原因**：
+  - 直接拼接用户输入的参数。
+- **解决方法**：
+  - 使用 `#{}` 代替 `${}` 进行参数绑定。
+  - 避免直接拼接 SQL。
+
+### 5. **缓存错误**
+#### **5.1 缓存未生效**
+- **错误现象**：
+  - 查询结果未缓存。
+- **原因**：
+  - 未启用 MyBatis 二级缓存。
+  - 缓存配置错误。
+- **解决方法**：
+  - 在 `mybatis-config.xml` 中启用二级缓存。
+  - 在 Mapper 接口或 XML 文件中配置缓存。
+
+#### **5.2 缓存脏数据**
+- **错误现象**：
+  - 查询结果与数据库不一致。
+- **原因**：
+  - 缓存未及时更新。
+- **解决方法**：
+  - 在更新操作后清除缓存。
+  - 配置缓存的刷新策略。
+
+### 6. **其他常见错误**
+#### **6.1 类型转换错误**
+- **错误现象**：
+  - 提示 `TypeHandler not found` 或 `Cannot convert type`。
+- **原因**：
+  - 数据库字段类型与 Java 类型不匹配。
+- **解决方法**：
+  - 使用合适的类型处理器（`TypeHandler`）。
+  - 在 SQL 中显式转换类型。
+
+#### **6.2 懒加载错误**
+- **错误现象**：
+  - 提示 `LazyInitializationException`。
+- **原因**：
+  - 在 Session 关闭后尝试加载懒加载数据。
+- **解决方法**：
+  - 在 Session 关闭前加载数据。
+  - 使用 `@Transactional` 注解确保 Session 未关闭。
+
+#### **6.3 分页错误**
+- **错误现象**：
+  - 分页查询结果不正确。
+- **原因**：
+  - 分页参数传递错误。
+  - 分页插件（如 PageHelper）配置错误。
+- **解决方法**：
+  - 检查分页参数是否正确传递。
+  - 确保分页插件配置正确。
+
+### 总结
+在使用 MyBatis 时，常见的错误主要集中在配置、SQL 映射、事务管理、动态 SQL 和缓存等方面。通过仔细检查配置、日志和代码逻辑，可以快速定位并解决这些问题。以下是一些通用的排查建议：
+1. 开启 MyBatis 的 SQL 日志，检查实际执行的 SQL。
+2. 使用单元测试验证 Mapper 方法。
+3. 确保 Spring 和 MyBatis 的版本兼容。
+4. 参考官方文档和社区资源解决问题。
