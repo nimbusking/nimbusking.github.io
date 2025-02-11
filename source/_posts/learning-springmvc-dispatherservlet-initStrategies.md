@@ -1348,13 +1348,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 有许多的属性，不着急理解，先列几个主要的属性对象：
 - **HandlerMethodArgumentResolverComposite argumentResolvers**：参数处理器组合对象
 - **HandlerMethodReturnValueHandlerComposite returnValueHandlers**：返回值处理器组合对象
-- **List<HttpMessageConverter<?>> messageConverters**：HTTP 消息转换器集合对象
+- **List<HttpMessageConverter> messageConverters**：HTTP 消息转换器集合对象
 - **List<Object> requestResponseBodyAdvice**： RequestResponseAdvice 集合对象
 
-在构造方法中默认会添加了四个 HttpMessageConverter 对象，当然，默认还会添加其他的，*例如 MappingJackson2HttpMessageConverter 为 JSON 消息格式的转换器*
+在构造方法中默认会添加了四个 HttpMessageConverter 对象，当然，默认还会添加其他的，**例如 MappingJackson2HttpMessageConverter 为 JSON 消息格式的转换器**
 
 ##### afterPropertiesSet 初始化方法
 因为 RequestMappingHandlerAdapter 实现了 InitializingBean 接口，在 Sping 初始化该 Bean 的时候，会调用该方法，完成一些初始化工作，方法如下
+
 ```java
 @Override
 public void afterPropertiesSet() {
@@ -1382,6 +1383,7 @@ public void afterPropertiesSet() {
 ```
 
 ###### initControllerAdviceCache
+
 ```java
 private void initControllerAdviceCache() {
     if (getApplicationContext() == null) {
@@ -1440,6 +1442,7 @@ private void initControllerAdviceCache() {
 }
 
 ```
+
 其中：
 1. 从 Spring 上下文扫描 @ControllerAdvice 注解的 Bean 们，生成对应的 ControllerAdviceBean 对象，并将进行排序，方法如下：
     ```java
@@ -1454,6 +1457,7 @@ private void initControllerAdviceCache() {
                 .collect(Collectors.toList());
     }
     ```
+
     @ControllerAdvice 注解：用于 Controller 类的增强类，其中可定义多种增强的方法，例如 @ExceptionHandler 注解的方法用于处理器 Controller 抛出的异常
 2. 遍历 1 中生成 ControllerAdviceBean 数组
   1. 扫描有 @ModelAttribute ，无 @RequestMapping 注解的方法，添加到 modelAttributeAdviceCache 属性中，该类方法用于在执行方法前修改 Model 对象
@@ -1657,6 +1661,7 @@ protected ModelAndView invokeHandlerMethod(HttpServletRequest request, HttpServl
     }
 }
 ```
+
 因为，Spring MVC 提供了大量的特性，所以 HandlerAdapter 又涉及许多组件。😈 
 我们主要先梳理好主流程，所以涉及的组件，还是先不详细解析。
 **我们的目的是，看到怎么调用 HandlerMethod 方法的，即调用 Controller 的 @RequestMapping 注解的方法。**
@@ -1749,6 +1754,7 @@ protected ModelAndView invokeHandlerMethod(HttpServletRequest request, HttpServl
 
     ```
     可以大致过一下上面的执行逻辑，解析参数，通过反射执行方法，解析执行结果
+    
 10. 异步处理，并发结果相关，暂时忽略
 11. 调用 getModelAndView() 方法，获得 ModelAndView 对象，方法如下：
     ```java
