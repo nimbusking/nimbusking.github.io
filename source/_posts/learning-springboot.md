@@ -155,6 +155,7 @@ public abstract class Launcher {
   }
 }
 ```
+
 会做下面几件事情：
 1. **调用 JarFile#registerUrlProtocolHandler() 方法**：注册 URL（jar）协议的处理器，主要是使用自定义的 URLStreamHandler 处理器处理 jar 包
 2. **调用 getClassPathArchivesIterator() 方法**：先从 archive（当前 jar 包应用）解析出所有的 JarFileArchive，这个 archive 就是在上面创建 JarLauncher 实例对象过程中创建的
@@ -225,6 +226,39 @@ public class DemoApplication extends SpringBootServletInitializer {
 ```
 其中：**方式一和方式二本质上都是通过调用 SpringApplication#run(..) 方法来启动应用**，不同的是方式二通过构建器模式，先构建一个 SpringApplication 实例对象，然后调用其 run(..) 方法启动应用，这种方式可以对 SpringApplication 进行配置，更加的灵活。
 **方式三**，它和方式一差不多，不同的是它继承了 SpringBootServletInitializer 这个类，**作用就是当你的 Spring Boot 项目打成 war 包时能够放入外部的 Tomcat 容器中运行**，如果是 war 包，那上面的 main(...) 方法自然是不需要的，当然，configure(..) 方法也可以不要
+
+### 启动流程概括
+1. **启动应用**  
+   - 执行`main`方法，调用`SpringApplication.run()`。
+
+2. **初始化SpringApplication**  
+   - 设置应用类型（Servlet、Reactive等）。
+   - 加载`ApplicationContextInitializer`和`ApplicationListener`。
+   - 读取`spring.factories`中的配置。
+
+3. **准备环境**  
+   - 创建并配置`Environment`（加载配置文件如`application.properties`）。
+
+4. **创建应用上下文**  
+   - 根据应用类型创建`ApplicationContext`（如`AnnotationConfigServletWebServerApplicationContext`，实际持有的是ServletWebServerApplicationContext对象）。
+
+5. **刷新应用上下文**  
+   调用`refresh()`方法，执行以下步骤：
+   - 准备上下文。
+   - 加载Bean定义。
+   - 调用BeanFactoryPostProcessor。
+   - 注册BeanPostProcessor。
+   - 初始化MessageSource。
+   - 初始化事件广播器。
+   - 注册监听器。
+   - 实例化单例Bean。
+   - 完成上下文刷新。
+
+6. **执行Runners**  
+   - 执行`CommandLineRunner`和`ApplicationRunner`。
+
+7. **启动完成**  
+   - 应用启动完成，开始处理请求。
 
 ### SpringApplication类
 Spring 应用启动器。正如其代码上所添加的注释，它来提供启动 Spring 应用的功能。
