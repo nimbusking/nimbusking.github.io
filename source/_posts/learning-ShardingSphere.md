@@ -46,3 +46,6 @@ ShardingSphere 是一个开源的分布式数据库中间件，主要用于数�
    - **ShardingSphere-Proxy**：以独立代理服务形式提供数据库中间件功能，支持多语言客户端。
    - **ShardingSphere-Sidecar**：基于云原生的数据库治理方案（目前仍在开发中）。
 
+---
+
+## 使用遇到的常见问题
