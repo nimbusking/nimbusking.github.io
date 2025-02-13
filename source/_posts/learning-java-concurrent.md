@@ -5,7 +5,7 @@ date: 2024-10-25 16:35:56
 tags:
     - 并发编程
     - 并发原理
-updated: 2025-02-08 09:43:17                              
+updated: 2025-02-13 22:04:48                             
 categories: Java系列
 top: true
 ---
@@ -15,6 +15,12 @@ top: true
 整体并发体系可以参考下图知识图谱所示，未来一些边边角角持续更新中
 <!-- more -->
 ![Java并发知识体系](181e5700/Java并发知识体系.jpg)
+
+## 知识点概括
+
+
+
+---
 
 ## 理论相关
 ### 并发三大特性
@@ -79,6 +85,8 @@ class Pointer {
 
 3. **使用OpenMP的归约子句（reduction）**：在并行编程中使用OpenMP的归约子句（reduction），可以将多个线程的变量合并到一个共享变量中，从而减少缓存行的冲突。这种方法不同于数据填充进行边界对齐的方式，代码中不再将结果声明为数组而是声明为普通变量，使用reduction子句会使得每个线程都有一个变量，通过指定的运算符进行归约计算。
 **注：这个只作为了解即可**，有这么个设计泛型，目前支持OpenMP的只有：C、C++和Fortran。有兴趣的可以去看看该模型的specification，[地址](https://www.openmp.org/wp-content/uploads/OpenMP-API-Specification-5-2.pdf)。在Java中，有前面两个功能即可。
+
+---
 
 ## Java线程模型相关
 ### 有几个主题问题

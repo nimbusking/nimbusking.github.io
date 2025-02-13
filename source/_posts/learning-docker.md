@@ -14,6 +14,78 @@ categories: 云原生
 <!-- more -->
 
 ## 基础概念相关
+### 一、核心概念与原理
+1. Docker与虚拟机的区别
+  - 隔离级别：Docker是进程级隔离，共享宿主机内核；虚拟机是硬件级隔离，需运行完整操作系统
+  - 资源消耗：Docker启动秒级、资源占用低（MB级）；虚拟机启动分钟级、资源消耗高（GB级）
+  - 性能：Docker接近原生性能，虚拟机存在额外虚拟化开销
+2. Docker安全性
+  - 依赖Linux内核安全特性（命名空间、cgroups、AppArmor/SELinux）实现隔离
+  - 镜像签名机制保障镜像来源可信
+  - 生产环境验证表明隔离性弱于虚拟机但安全性仍较高
+
+### 二、容器与镜像管理
+1. 容器生命周期
+  状态：运行(Running)、暂停(Paused)、重启(Restarting)、退出(Exited)
+  常用命令：
+  ```shell
+  docker start/stop/restart <容器ID>  # 启停容器 
+  docker rm $(docker ps -aq)        # 清理停止的容器
+  docker logs <容器ID>              # 查看日志
+  ```
+
+2. **数据持久化**  
+  - 使用卷(Volume)实现数据持久化：`docker run -v /宿主机路径:/容器路径`  
+  - 容器退出后数据保留，需手动删除容器才会清除  
+
+### 镜像管理
+1. **镜像构建原则**  
+  - 精简层级，避免冗余依赖  
+  - 使用.dockerignore过滤无关文件  
+  - 指定明确版本号（如`FROM ubuntu:20.04`）  
+2. **Dockerfile指令**  
+  - 高频指令：`FROM`、`RUN`、`COPY`、`ADD`、`EXPOSE`、`CMD`  
+  - **COPY vs ADD**：  
+    - COPY直接复制文件  
+    - ADD支持自动解压压缩包和远程URL下载  
+
+---
+
+## 三、高级特性与工具
+1. **Docker Compose**  
+  - 用途：通过YAML文件定义多容器应用  
+  - 启动命令：`docker-compose up -d`  
+2. **Docker Swarm**  
+  - 集群管理工具，支持服务弹性伸缩  
+  - 节点类型：Manager（管理集群）、Worker（运行容器）  
+3. **网络模式**  
+  - **bridge**：默认桥接网络  
+  - **host**：共享宿主机网络栈  
+  - **overlay**：跨主机容器通信  
+
+---
+
+## 四、生产环境实践
+1. **资源控制**  
+  - 通过`--cpus`限制CPU，`--memory`限制内存  
+  - 使用cgroups实现资源隔离  
+2. **监控方案**  
+  - 基础命令：`docker stats`实时监控资源使用  
+  - 日志收集：`docker logs`结合ELK等工具  
+3. **环境迁移**  
+  - 步骤：停止Docker服务→复制/var/lib/docker目录→调整新宿主机配置  
+
+---
+
+## 五、进阶问题
+1. **容器化应用类型**  
+  - 优先无状态应用（如Web服务），有状态应用需配合持久化存储  
+2. **非Linux系统运行原理**  
+  - Mac/Windows通过Linux虚拟机运行容器（如Hyper-V、VirtualBox）  
+3. **CI/CD集成**  
+  - 镜像作为标准化交付物，实现开发/测试/生产环境一致性  
+
+
 ### Docker能做什么
 
 ### Docker安装

@@ -28,6 +28,12 @@ top: true
 
 ## Spring IOC
 
+### 核心知识点
+
+
+---
+
+
 ### Spring上下文生命周期
 
 ### SpringBean生命周期
