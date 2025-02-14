@@ -19,10 +19,176 @@ categories: 网络编程
 
 ---
 
-## 相关知识点
+## 网络编程相关知识点
+
+
+涵盖 **TCP/IP 协议**、**Socket 编程**、**IO 模型**、**网络框架** 等核心知识点，帮助深入理解网络通信原理与实践：
+
+---
+
+### **一、基础概念与协议**
+1. **TCP 与 UDP 的区别？适用场景？**  
+   | **TCP**                      | **UDP**                      |  
+   |-----------------------------|-----------------------------|  
+   | 面向连接，可靠传输                | 无连接，不可靠传输             |  
+   | 流量控制、拥塞控制、重传机制        | 无控制，传输速度快            |  
+   | 适用于文件传输、HTTP、数据库连接   | 适用于实时视频、语音、DNS 查询 |  
+
+2. **TCP 三次握手与四次挥手的详细过程？**  
+   - **三次握手**（建立连接）：  
+     1. 客户端 → SYN=1, seq=x → 服务端。  
+     2. 服务端 → SYN=1, ACK=1, seq=y, ack=x+1 → 客户端。  
+     3. 客户端 → ACK=1, seq=x+1, ack=y+1 → 服务端。  
+   - **四次挥手**（关闭连接）：  
+     1. A → FIN=1, seq=u → B。  
+     2. B → ACK=1, seq=v, ack=u+1 → A。  
+     3. B → FIN=1, seq=w, ack=u+1 → A。  
+     4. A → ACK=1, seq=u+1, ack=w+1 → B。  
+
+3. **什么是粘包/拆包？如何解决？**  
+   - **原因**：TCP 是字节流协议，无消息边界。  
+   - **解决方案**：  
+     - 固定消息长度（如每个消息 100 字节）。  
+     - 分隔符（如 `\n` 或自定义结束符）。  
+     - 消息头声明消息长度（如前 4 字节表示长度）。  
+
+---
+
+### **二、Socket 编程**
+4. **Socket 编程的基本流程（TCP 服务端/客户端）？**  
+   - **服务端**：  
+     ```python
+     # 创建 Socket → 绑定地址 → 监听 → 接受连接 → 收发数据 → 关闭
+     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     sock.bind(('0.0.0.0', 8080))
+     sock.listen(5)
+     conn, addr = sock.accept()
+     data = conn.recv(1024)
+     conn.send(b'Response')
+     conn.close()
+     ```
+   - **客户端**：  
+     ```python
+     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+     sock.connect(('127.0.0.1', 8080))
+     sock.send(b'Request')
+     data = sock.recv(1024)
+     sock.close()
+     ```
+
+5. **如何实现多线程/多进程处理并发连接？**  
+   - **多线程**：每个连接分配一个线程（注意线程数限制）。  
+   - **线程池**：预先创建线程池复用资源。  
+   - **多进程**：每个连接 fork 一个子进程（资源消耗大，适合 CPU 密集型）。  
+
+6. **select/poll/epoll 的区别？**  
+   | **模型**   | **底层机制**               | **时间复杂度** | **最大连接数**       |  
+   |----------|--------------------------|------------|------------------|  
+   | select    | 轮询文件描述符集合             | O(n)       | 1024（FD_SETSIZE） |  
+   | poll      | 链表存储文件描述符              | O(n)       | 无限制             |  
+   | epoll     | 事件驱动，回调通知              | O(1)       | 无限制             |  
+
+---
+
+### **三、IO 模型与高性能网络**
+7. **阻塞 IO、非阻塞 IO、IO 多路复用、异步 IO 的区别？**  
+   - **阻塞 IO**：调用 recv() 时线程阻塞，直到数据到达。  
+   - **非阻塞 IO**：调用 recv() 立即返回，需轮询检查数据是否就绪。  
+   - **IO 多路复用**：通过 select/epoll 监听多个 Socket，统一处理就绪事件。  
+   - **异步 IO**：数据就绪后由操作系统通知应用（如 Windows IOCP）。  
+
+8. **Reactor 与 Proactor 模式的区别？**  
+   - **Reactor**：基于事件循环，处理 IO 就绪事件（同步非阻塞，epoll + 回调）。  
+   - **Proactor**：异步 IO，由操作系统完成 IO 操作后通知应用（如 Windows IOCP）。  
+
+9. **什么是水平触发（LT）和边缘触发（ET）？**  
+   - **水平触发（LT）**：只要 Socket 可读/可写，epoll 会持续通知（epoll 默认模式）。  
+   - **边缘触发（ET）**：仅在 Socket 状态变化时通知一次，需一次性处理完数据。  
+
+---
+
+### **四、网络框架与协议**
+10. **HTTP 协议的特点？HTTP/1.1 与 HTTP/2 的区别？**  
+    - **特点**：无状态、基于请求-响应模型、支持持久连接（HTTP/1.1）。  
+    - **HTTP/2**：二进制分帧、多路复用、头部压缩、服务器推送。  
+
+11. **WebSocket 协议如何实现全双工通信？**  
+    - 基于 HTTP 协议升级（`Upgrade: websocket`），建立持久连接，支持服务端主动推送数据。  
+
+12. **RPC 框架的核心设计要点？**  
+    - 序列化（Protobuf/JSON）、网络传输（TCP/HTTP）、服务发现、负载均衡、超时重试。  
+
+---
+
+### **五、网络问题与优化**
+13. **如何检测和解决网络拥塞？**  
+    - **检测**：观察丢包率、延迟增长。  
+    - **解决**：TCP 拥塞控制（慢启动、拥塞避免、快速重传）。  
+
+14. **如何实现心跳机制？**  
+    - 客户端定期发送空数据包（心跳包），服务端超时未收到则关闭连接。  
+    ```python
+    # 服务端设置超时
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+    ```
+
+15. **NAT 穿透的原理？**  
+    - **STUN**：通过公网服务器获取 NAT 后的地址和端口。  
+    - **TURN**：通过中继服务器转发数据。  
+    - **ICE**：结合 STUN 和 TURN 选择最佳路径。  
+
+---
+
+### **六、代码与场景题**
+16. **用非阻塞 Socket 实现 Echo 服务器（伪代码）？**  
+    ```python
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.setblocking(False)  # 非阻塞模式
+    sock.bind(('0.0.0.0', 8080))
+    sock.listen(5)
+    connections = []
+    while True:
+        try:
+            conn, addr = sock.accept()  # 非阻塞，可能抛异常
+            conn.setblocking(False)
+            connections.append(conn)
+        except BlockingIOError:
+            pass
+        for conn in connections:
+            try:
+                data = conn.recv(1024)
+                if data:
+                    conn.send(data)
+                else:
+                    conn.close()
+                    connections.remove(conn)
+            except BlockingIOError:
+                pass
+    ```
+
+17. **TCP 服务端如何处理 10 万并发连接？**  
+    - 使用 IO 多路复用（epoll）。  
+    - 非阻塞 Socket + 事件驱动模型（如 Reactor）。  
+    - 优化系统参数（`ulimit -n` 调整文件描述符限制）。  
+
+---
+
+### **七、工具与调试**
+18. **如何用 Wireshark 抓取 TCP 握手过程？**  
+    - 过滤条件：`tcp.port == 8080 && tcp.flags.syn == 1`。  
+
+19. **如何模拟网络延迟或丢包？**  
+    - **Linux**：使用 `tc` 命令（Traffic Control）。  
+      ```bash
+      tc qdisc add dev eth0 root netem delay 100ms  # 延迟 100ms
+      tc qdisc add dev eth0 root netem loss 10%     # 丢包率 10%
+      ```
 
 
 ---
+
+## netty相关知识点
+
 
 ### **Netty知识点总结**
 
