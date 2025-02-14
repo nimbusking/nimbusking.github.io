@@ -5,7 +5,7 @@ date: 2019-11-25 01:28:43
 tags:
     - CentOS7
     - Linux
-updated: 2024-10-28 20:30:21
+updated: 2025-02-14 20:07:53
 categories: 操作系统
 ---
 
@@ -439,7 +439,16 @@ cluster_stats_messages_meet_received:5
 cluster_stats_messages_received:915
 ```
 
-##### 查看节点信息
+##### 停止
+直接自己见个shell，直接一次性通过下面方式停止，**不要随意kill进程！不要随意kill进程！不要随意kill进程！**不然很蛮烦，会遇到下面小结的`some key in database 0`错误
+```shell
+redis-cli -h 192.168.51.221 -p 7001 shutdown
+redis-cli -h 192.168.51.221 -p 7002 shutdown
+redis-cli -h 192.168.51.221 -p 7003 shutdown
+redis-cli -h 192.168.51.221 -p 7004 shutdown
+redis-cli -h 192.168.51.221 -p 7005 shutdown
+redis-cli -h 192.168.51.221 -p 7006 shutdown
+```
 
 
 ##### 遇到redis-cli集群加载失败
@@ -455,6 +464,76 @@ Node 192.168.31.49:7001 is not empty. Either the node already knows other nodes 
 >> flushdb
 ```
 如果在清空之后仍然无效，尝试将当前启动的所有节点重新kill调，重新运行后再执行创建集群命令看看
+
+#### 创建集群自启动脚本
+**注意：**在创建这个自启动服务之前，**建议**你按照前面步骤先手工通过`redis-cli --cluster create `命令，将节点都加入到集群中，成功之后再创建这个脚本。
+##### 建启动运行脚本
+在上面的基础上，建一个一次性启动的脚本，姑且命名为：`redis-cluster-start.sh`
+```shell
+#!/bin/bash
+
+# Redis 节点目录列表
+NODES=("/etc/redis-cluster/redis-7001.conf" "/etc/redis-cluster/redis-7002.conf" "/etc/redis-cluster/redis-7003.conf"
+       "/etc/redis-cluster/redis-7004.conf" "/etc/redis-cluster/redis-7005.conf" "/etc/redis-cluster/redis-7006.conf")
+
+# 启动所有节点
+for NODE_DIR in "${NODES[@]}"; do
+  /usr/local/redis/bin/redis-server "$NODE_DIR"
+done
+```
+
+脚本执行权限更改什么的，相信你会的。
+
+##### 创建systemd服务单元
+1. vim创建服务文件 `/etc/systemd/system/redis-cluster.service`
+2. 服务文件内容
+   ```ini
+   [Unit]
+   Description=Redis Cluster Service
+   After=network.target
+
+   [Service]
+   Type=forking
+   User=root
+   Group=root
+   ExecStart=/root/redis/redis-cluster-start.sh
+   ExecStop=/root/redis/redis-cluster-stop.sh
+   Restart=on-failure
+   RestartSec=10
+   TimeoutStartSec=30
+   TimeoutStopSec=30
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+##### 启动服务测试
+###### 1. 重载 systemd 配置
+```bash
+sudo systemctl daemon-reload
+```
+
+###### 2. 启用开机自启
+```bash
+sudo systemctl enable redis-cluster.service
+```
+
+###### 3. 启动服务
+这一步无报错，则说明服务创建成功，如有报错单独看系统日志`journalctl -xe`一步步排查。
+```bash
+sudo systemctl start redis-cluster.service
+```
+###### 4. 验证状态
+```bash
+sudo systemctl status redis-cluster.service
+# 检查节点是否运行
+ps aux | grep redis-server
+# 检查集群状态
+/usr/local/bin/redis-cli -p 7000 cluster nodes
+```
+
+---
+
 
 #### zookeeper安装
 ##### 下载zk
