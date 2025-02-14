@@ -284,7 +284,7 @@ daemonize yes
 redis-server redis.conf
 ```
 
-#### redis伪集群安装
+#### Redis伪集群安装
 顾名思义，伪集群安装，实际集群应该分布在不同的redis服务器上的，这里个人使用，就在单服务器上实现了
 ##### 准备配置文件
 配置文件目录随意，这里我就在redis编译好的路径下配置了
@@ -583,39 +583,59 @@ clientPort=2181
 #metricsProvider.exportJvmInfo=true
 ```
 
-##### 配置service开机启动
-cd 到 /etc/init.d/目录下
-新建名为zookeeper文件，文件内容如下，注意ZK_PATH和JAVA_HOME填写实际路径
-```shell
-[root@localhost init.d]# vim zookeeper
-#!/bin/bash
-#chkconfig:2345 20 90
-#description:zookeeper
-#processname:zookeeper
-ZK_PATH=/etc/apache-zookeeper-3.6.2
-export JAVA_HOME=/etc/java/jdk1.8.0_211
-case $1 in
-         start) sh  $ZK_PATH/bin/zkServer.sh start;;
-         stop)  sh  $ZK_PATH/bin/zkServer.sh stop;;
-         status) sh  $ZK_PATH/bin/zkServer.sh status;;
-         restart) sh $ZK_PATH/bin/zkServer.sh restart;;
-         *)  echo "require start|stop|status|restart"  ;;
-esac
-```
+##### 配置systemd开机启动
+1. **创建服务单元文件**  
+   在 `/etc/systemd/system/` 下新建 `zookeeper.service`：
+   ```bash
+   sudo vi /etc/systemd/system/zookeeper.service
+   ```
+2. **输入以下内容**（根据实际路径修改）：  
+   ```ini
+   [Unit]
+   Description=ZooKeeper Service
+   After=network.target
 
-检查服务：
-```shell
-# 添加服务
-chkconfig --add zookeeper
-# 修改执行权限
-chmod 755 zookeeper
-# 先停止服务
-service zookeeper stop
-# 在启动服务
-service zookeeper start
-# 查询服务状态
-service zookeeper status
-```
+   [Service]
+   Type=forking
+   User=zookeeper
+   Group=zookeeper
+   Environment="ZOOCFG=/etc/apache-zookeeper-3.6.2/conf/zoo.cfg"
+   ExecStart=/etc/apache-zookeeper-3.6.2/bin/zkServer.sh start
+   ExecStop=/etc/apache-zookeeper-3.6.2/bin/zkServer.sh stop
+   ExecReload=/etc/apache-zookeeper-3.6.2/bin/zkServer.sh restart
+   ExecStatus=/etc/apache-zookeeper-3.6.2/bin/zkServer.sh status
+   Restart=on-failure
+   RestartSec=10
+   TimeoutStartSec=25
+   TimeoutStopSec=30
+   SyslogIdentifier=zookeeper
+
+   [Install]
+   WantedBy=multi-user.target
+
+   ```
+
+**启用并启动服务**
+1. **重载 systemd 配置**  
+   ```bash
+   sudo systemctl daemon-reload
+   ```
+2. **设置开机自启**  
+   ```bash
+   sudo systemctl enable zookeeper
+   ```
+3. **启动服务**  
+   ```bash
+   sudo systemctl start zookeeper
+   ```
+4. **验证状态**  
+   ```bash
+   sudo systemctl status zookeeper
+   # 查看进程是否运行
+   jps | grep QuorumPeerMain
+   ```
+
+---
 
 #### kafka伪集群部署
 ##### 准备
@@ -631,6 +651,7 @@ vim /etc/profile
 export KAFKA_HOME=/usr/kafka/kafka_2.11-2.4.1
 export PATH=$PATH:$KAFKA_HOME/bin
 ```
+
 
 ###### 配置KAFKA集群文件
 直接cd到config目录下，复制三个**server.properties**文件
