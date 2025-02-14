@@ -237,80 +237,74 @@ Redis 与 MySQL 的核心区别主要体现在 **数据模型、设计目标、�
 #### 3. Redis 支持哪些数据类型？分别举一个实际应用场景。
 Redis 支持多种核心数据类型，每种类型针对特定场景设计。以下是常见数据类型及其典型应用场景：
 
-##### **1. String（字符串）**
-- **特点**：二进制安全，可存储文本、数字或序列化数据。
-- **场景**：**缓存用户会话信息**。  
-  ```redis
-  SET user:1001 "{name: 'Alice', last_login: 1620000000}" EX 3600
-  ```
-  - 通过 `EX` 设置过期时间，自动清理无效会话。
-
-##### **2. List（列表）**
-- **特点**：双向链表，支持快速头尾操作。
-- **场景**：**消息队列**（简易版）。  
-  ```redis
-  LPUSH orders "order:2023"  # 生产者入队
-  BRPOP orders 30            # 消费者阻塞式出队
-  ```
-  - 注意：更复杂的消息队列建议使用 **Streams**（支持多消费者组）。
-
-##### **3. Hash（哈希表）**
-- **特点**：键值对集合，适合存储对象。
-- **场景**：**存储商品信息**。  
-  ```redis
-  HSET product:1001 name "Laptop" price 999 stock 50
-  HINCRBY product:1001 stock -1  # 扣减库存
-  ```
-  - 直接操作字段，避免序列化整个对象。
-
-##### **4. Set（集合）**
-- **特点**：无序唯一集合，支持交并差运算。
-- **场景**：**用户标签系统**。  
-  ```redis
-  SADD user:1001:tags "tech" "gaming"  # 添加标签
-  SINTER user:1001:tags user:1002:tags  # 共同兴趣标签
-  ```
-  - 快速实现共同好友、兴趣匹配等功能。
-
-##### **5. Sorted Set（有序集合）**
-- **特点**：元素按 `score` 排序，支持范围查询。
-- **场景**：**实时排行榜**。  
-  ```redis
-  ZADD leaderboard 1000 "user:A"  # 添加分数
-  ZREVRANGE leaderboard 0 9 WITHSCORES  # 获取 Top 10
-  ```
-  - 适用于游戏积分、热搜榜单等场景。
-
-##### **6. Streams（流）**
-- **特点**：日志结构数据，支持多消费者组。
-- **场景**：**消息队列（支持回溯）**。  
-  ```redis
-  XADD orders * product_id 1001 user_id 2001  # 发布订单
-  XREADGROUP GROUP order_group consumer1 COUNT 1 STREAMS orders >
-  ```
-  - 替代 Kafka 的轻量级方案，适合事件溯源。
+##### 常规应用
+- **1. String（字符串）**
+   - **特点**：二进制安全，可存储文本、数字或序列化数据。
+   - **场景**：**缓存用户会话信息**。  
+     ```redis
+     SET user:1001 "{name: 'Alice', last_login: 1620000000}" EX 3600
+     ```
+     - 通过 `EX` 设置过期时间，自动清理无效会话。
+- **2. List（列表）**
+   - **特点**：双向链表，支持快速头尾操作。
+   - **场景**：**消息队列**（简易版）。  
+     ```redis
+     LPUSH orders "order:2023"  # 生产者入队
+     BRPOP orders 30            # 消费者阻塞式出队
+     ```
+     - 注意：更复杂的消息队列建议使用 **Streams**（支持多消费者组）。
+- **3. Hash（哈希表）**
+   - **特点**：键值对集合，适合存储对象。
+   - **场景**：**存储商品信息**。  
+     ```redis
+     HSET product:1001 name "Laptop" price 999 stock 50
+     HINCRBY product:1001 stock -1  # 扣减库存
+     ```
+     - 直接操作字段，避免序列化整个对象。
+- **4. Set（集合）**
+   - **特点**：无序唯一集合，支持交并差运算。
+   - **场景**：**用户标签系统**。  
+     ```redis
+     SADD user:1001:tags "tech" "gaming"  # 添加标签
+     SINTER user:1001:tags user:1002:tags  # 共同兴趣标签
+     ```
+     - 快速实现共同好友、兴趣匹配等功能。
+- **5. Sorted Set（有序集合）**
+   - **特点**：元素按 `score` 排序，支持范围查询。
+   - **场景**：**实时排行榜**。  
+     ```redis
+     ZADD leaderboard 1000 "user:A"  # 添加分数
+     ZREVRANGE leaderboard 0 9 WITHSCORES  # 获取 Top 10
+     ```
+     - 适用于游戏积分、热搜榜单等场景。
+- **6. Streams（流）**
+   - **特点**：日志结构数据，支持多消费者组。
+   - **场景**：**消息队列（支持回溯）**。  
+     ```redis
+     XADD orders * product_id 1001 user_id 2001  # 发布订单
+     XREADGROUP GROUP order_group consumer1 COUNT 1 STREAMS orders >
+     ```
+     - 替代 Kafka 的轻量级方案，适合事件溯源。
 
 ##### **其他高级类型**
-###### **Bitmaps（位图）**
-- **场景**：**用户签到统计**。  
-  ```redis
-  SETBIT signin:202302 1001 1  # 用户 1001 在 2023-02 签到
-  BITCOUNT signin:202302       # 统计当月签到人数
+- **Bitmaps（位图）**
+   - **场景**：**用户签到统计**。  
+     ```redis
+     SETBIT signin:202302 1001 1  # 用户 1001 在 2023-02 签到
+     BITCOUNT signin:202302       # 统计当月签到人数
   ```
-
-##### **HyperLogLog（基数统计）**
-- **场景**：**统计独立 IP 访问量**。  
-  ```redis
-  PFADD daily_ips "192.168.1.1" "10.0.0.1"
-  PFCOUNT daily_ips  # 估算独立 IP 数（误差约 0.81%）
-  ```
-
-##### **Geospatial（地理空间）**
-- **场景**：**附近的人查询**。  
-  ```redis
-  GEOADD locations 116.40 39.90 "user:A"  # 添加坐标
-  GEORADIUS locations 116.41 39.91 10 km  # 查找 10km 内用户
-  ```
+- **HyperLogLog（基数统计）**
+   - **场景**：**统计独立 IP 访问量**。  
+     ```redis
+     PFADD daily_ips "192.168.1.1" "10.0.0.1"
+     PFCOUNT daily_ips  # 估算独立 IP 数（误差约 0.81%）
+     ```
+- **Geospatial（地理空间）**
+   - **场景**：**附近的人查询**。  
+     ```redis
+     GEOADD locations 116.40 39.90 "user:A"  # 添加坐标
+     GEORADIUS locations 116.41 39.91 10 km  # 查找 10km 内用户
+     ```
 
 ##### **总结：如何选择数据类型？**
 | **需求**                   | **推荐类型**       |
