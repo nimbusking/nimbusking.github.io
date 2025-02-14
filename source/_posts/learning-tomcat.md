@@ -17,6 +17,123 @@ categories: Java系列
 
 <!-- more -->
 
+---
+## 知识点总结
+
+### **一、Tomcat 核心概念**
+1. **Tomcat 的核心组件及其作用？**  
+   - **Connector**：处理网络连接（HTTP/HTTPS/AJP），将请求交给 Container。  
+   - **Container**：包含 Engine（虚拟主机）、Host（域名）、Context（Web 应用）、Wrapper（Servlet）。  
+   - **Service**：组合 Connector 和 Container，一个 Tomcat 实例可包含多个 Service。  
+
+2. **Tomcat 的请求处理流程是什么？**  
+   - 客户端请求 → Connector 接收 → 解析生成 `Request`/`Response` → 传递给 Engine → 匹配 Host/Context/Wrapper → 调用 Servlet 的 `service()` 方法。
+
+3. **Tomcat 的类加载机制有什么特点？**  
+   - 自定义类加载器（`WebappClassLoader`），每个 Web 应用独立加载类，隔离不同应用的类库，防止冲突。  
+   - 加载顺序：`WEB-INF/classes` → `WEB-INF/lib` → Common → Shared → System 类加载器。
+
+---
+
+### **二、Tomcat 源码实现**
+4. **Tomcat 的启动流程（源码层面）？**  
+   - 入口类 `Bootstrap.main()` → 初始化 Catalina → 加载 `server.xml` → 创建 Server/Service/Connector/Container → 启动组件（Lifecycle 接口）。  
+   - **关键类**：`Catalina`（主控类）、`StandardServer`、`StandardService`、`Connector`（协议处理）。
+
+5. **Connector 的底层实现（BIO/NIO/APR）？**  
+   - **BIO**：阻塞式 IO，每个请求分配一个线程（`org.apache.tomcat.util.net.JIoEndpoint`）。  
+   - **NIO**：非阻塞 IO，基于 Java NIO（`org.apache.tomcat.util.net.NioEndpoint`），Tomcat 8.5+ 默认使用 NIO。  
+   - **APR**：基于本地库（Apache Portable Runtime），性能更高，但依赖本地环境。
+
+6. **Tomcat 如何处理一个 HTTP 请求（源码流程）？**  
+   - `NioEndpoint` 接收 Socket → 封装为 `SocketWrapper` → 交给 `Http11Processor` 解析 HTTP 报文 → 生成 `Request` → 调用 `CoyoteAdapter.service()` → 路由到对应 Servlet。
+
+7. **Wrapper 如何关联到具体的 Servlet？**  
+   - 在 `web.xml` 或注解中定义 Servlet 映射，Tomcat 解析后生成 `Wrapper` 实例，通过 `Wrapper.allocate()` 创建或复用 Servlet 实例。
+
+---
+
+### **三、Spring Boot 内嵌 Tomcat**
+8. **Spring Boot 如何内嵌 Tomcat？**  
+   - 通过 `spring-boot-starter-web` 引入 `tomcat-embed-core` 依赖，启动时自动创建 `Tomcat` 实例，替代传统 WAR 包部署。  
+   - **关键类**：`TomcatServletWebServerFactory`（创建 Tomcat 实例）、`TomcatWebServer`（启动 Tomcat）。
+
+9. **内嵌 Tomcat 的启动流程？**  
+   - Spring Boot 启动 → `ServletWebServerApplicationContext` 初始化 → 调用 `TomcatServletWebServerFactory.getWebServer()` → 创建 `Tomcat` 实例并配置 Connector/Context → 启动 Tomcat。
+
+10. **如何自定义内嵌 Tomcat 的参数？**  
+    - 通过 `application.properties` 配置（如 `server.tomcat.max-threads=200`）。  
+    - 自定义 `TomcatConnectorCustomizer` 或 `TomcatContextCustomizer` Bean。
+
+11. **Spring Boot 中如何注册 Servlet/Filter？**  
+    - 方式1：通过 `ServletRegistrationBean` 或 `FilterRegistrationBean`。  
+    - 方式2：使用 `@WebServlet` 或 `@WebFilter` 注解，并添加 `@ServletComponentScan` 扫描。
+
+---
+
+### **四、性能调优与高级特性**
+12. **Tomcat 的调优参数有哪些？**  
+    - `maxThreads`：处理请求的最大线程数。  
+    - `acceptCount`：等待队列长度（队列满时拒绝连接）。  
+    - `connectionTimeout`：连接超时时间。  
+    - `enableLookups`：禁用 DNS 查询（设为 `false` 提升性能）。
+
+13. **Tomcat 的 Session 管理机制？**  
+    - 默认使用 `StandardManager` 将 Session 序列化到磁盘（`SESSION.ser`），集群环境下可配置 `DeltaManager` 或 `PersistentManager`。
+
+14. **Tomcat 的 Valve 是什么？**  
+    - 类似 Servlet Filter 的组件，用于在请求处理链中插入逻辑（如日志、权限），实现类为 `AccessLogValve`、`RemoteIpValve` 等。
+
+---
+
+### **五、源码与设计思想**
+15. **Tomcat 的 Lifecycle 设计模式？**  
+    - 组件（如 Server、Service）实现 `Lifecycle` 接口，通过 `LifecycleBase` 抽象类管理状态（INIT、START、STOP），支持事件监听。
+
+16. **Pipeline 和 Valve 的设计原理？**  
+    - 每个 Container（如 Engine、Host）有一个 Pipeline，按顺序执行 Valve 链，最后一个 Valve 调用下层 Container 的 Pipeline。
+
+17. **Tomcat 的类加载为何打破双亲委派？**  
+    - 为了实现应用隔离：Web 应用的类优先由 `WebappClassLoader` 加载，而不是父加载器，避免不同应用的同名类冲突。
+
+---
+
+### **六、Spring Boot 内嵌 Tomcat 底层原理**
+18. **内嵌 Tomcat 与独立 Tomcat 的区别？**  
+    - 内嵌 Tomcat 由 Spring Boot 通过代码启动，无需 `server.xml`；独立 Tomcat 通过脚本启动，依赖外部配置。
+
+19. **如何替换内嵌 Tomcat 为 Jetty 或 Undertow？**  
+    - 排除 `spring-boot-starter-tomcat`，引入 `spring-boot-starter-jetty` 或 `spring-boot-starter-undertow`。
+
+20. **Spring Boot 如何初始化内嵌 Tomcat 的 Context？**  
+    - 通过 `TomcatServletWebServerFactory` 创建 `StandardContext`，加载 `META-INF/resources`（静态资源）和 `WEB-INF`（Servlet 相关）。
+
+---
+
+### **附：Tomcat 核心组件对比**
+| 组件                | 作用                              | 实现类                 |
+|---------------------|-----------------------------------|------------------------|
+| Connector           | 处理网络请求                      | `NioEndpoint`          |
+| Engine              | 虚拟主机容器                      | `StandardEngine`       |
+| Host                | 代表一个域名                      | `StandardHost`         |
+| Context             | 对应一个 Web 应用                 | `StandardContext`      |
+| Wrapper             | 封装 Servlet 实例                 | `StandardWrapper`      |
+
+---
+
+### **附：Spring Boot 内嵌 Tomcat 启动流程**
+1. `SpringApplication.run()` → 创建 `AnnotationConfigServletWebServerApplicationContext`。  
+2. 调用 `refreshContext()` → 触发 `ServletWebServerApplicationContext.onRefresh()`。  
+3. 通过 `TomcatServletWebServerFactory` 创建 `TomcatWebServer` 实例。  
+4. 初始化 Connector 并绑定端口，启动 Tomcat。  
+
+---
+
+掌握这些内容后，建议结合 Tomcat 源码（如 `Connector`、`NioEndpoint` 类）和 Spring Boot 自动配置（`ServletWebServerFactoryAutoConfiguration`）深入理解。
+
+
+---
+
 ## Tomcat架构相关
 **Tomcat核心： Http服务器+Servlet容器**
 ![Tomcat请求调用链](2f453177/Tomcat请求调用链.png)

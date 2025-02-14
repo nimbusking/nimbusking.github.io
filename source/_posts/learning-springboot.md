@@ -11,8 +11,10 @@ categories: Spring
 ## 前言
 项目注释代码：https://github.com/nimbusking/spring-boot/tree/2.3.x
 
-## 与传统Web架构比较
+
 <!-- more -->
+## 与传统Web架构比较
+
 1. **简化配置**
    - **优势**：Spring Boot 采用“约定优于配置”的理念，提供了大量的默认配置，开发者无需手动配置大量的 XML 或注解。
    - **传统架构**：传统的 Spring MVC 或 Java EE 需要手动配置大量的 XML 文件（如 `web.xml`、`dispatcher-servlet.xml` 等），开发效率较低。
@@ -62,6 +64,102 @@ categories: Spring
 ### 适用场景
 - **Spring Boot**：适合快速开发、微服务架构、云原生应用等场景。
 - **传统 Web 架构**：适合传统单体应用或对现有系统进行维护的场景。
+
+
+---
+
+
+## 知识点总结
+
+### **一、Spring Boot 基本原理**
+1. **Spring Boot 的核心目标是什么？**  
+   *简化 Spring 应用的初始搭建和开发流程*，通过自动配置、内嵌容器（Tomcat/Jetty）和 Starter 依赖实现“约定优于配置”。
+2. **Spring Boot 自动配置是如何工作的？**  
+   - 基于 `@EnableAutoConfiguration` 触发，通过 `spring-boot-autoconfigure` 下的 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 加载配置类。  
+   - 使用条件注解（如 `@ConditionalOnClass`, `@ConditionalOnMissingBean`）按需生效配置。
+3. **什么是 Starter 依赖？举例说明其作用。**  
+   Starter 是一组预定义的依赖集合（如 `spring-boot-starter-web` 包含 Web MVC、Tomcat、JSON 支持），简化依赖管理和版本兼容。
+4. **如何覆盖默认的自动配置？**  
+   - 自定义同名 Bean 覆盖自动配置类中的 Bean。  
+   - 通过 `@EnableAutoConfiguration(exclude={DataSourceAutoConfiguration.class})` 排除特定配置。
+5. **Spring Boot 如何简化配置管理？**  
+   - 支持多环境配置（`application-{profile}.properties`）。  
+   - 外化配置优先级：命令行参数 > 系统变量 > 配置文件 > 默认值。
+
+---
+
+### **二、Spring Boot 启动流程**
+1. **SpringApplication.run() 方法的核心流程是什么？**  
+   1. 创建 `SpringApplication` 实例，加载 `META-INF/spring.factories` 中的初始化器和监听器。  
+   2. 执行 `ApplicationContextInitializer`。  
+   3. 创建并刷新 `ApplicationContext`（如 `AnnotationConfigServletWebServerApplicationContext`）。  
+   4. 执行 `CommandLineRunner` 和 `ApplicationRunner`。
+2. **@SpringBootApplication 注解的作用是什么？**  
+   组合注解，包含：  
+   - `@SpringBootConfiguration`：标记主配置类。  
+   - `@EnableAutoConfiguration`：启用自动配置。  
+   - `@ComponentScan`：扫描当前包及子包的组件。
+3. **Spring Boot 如何启动内嵌 Tomcat？**  
+   - 通过 `ServletWebServerFactory` 接口实现类（如 `TomcatServletWebServerFactory`）创建 Web 服务器实例。  
+   - 自动配置类 `ServletWebServerFactoryAutoConfiguration` 触发。
+
+---
+
+### **三、应用设计**
+1. **如何读取自定义配置？**  
+   - `@Value("${property.key}")` 注解注入单个值。  
+   - `@ConfigurationProperties(prefix="my.app")` 绑定配置到 Java 对象。
+2. **Spring Boot 如何实现多环境配置？**  
+   - 使用 `application-{dev|prod}.properties` 文件。  
+   - 激活方式：命令行 `--spring.profiles.active=dev` 或配置 `spring.profiles.active`。
+3. **如何设计 RESTful API 并统一异常处理？**  
+   - 使用 `@RestController` 定义接口。  
+   - 全局异常处理：`@ControllerAdvice` + `@ExceptionHandler`。
+4. **Spring Boot 中的事务管理如何实现？**  
+   - 添加 `@Transactional` 注解，依赖 `spring-boot-starter-jdbc` 或 `spring-boot-starter-data-jpa`。  
+   - 配置 `PlatformTransactionManager` Bean（自动配置默认提供）。
+---
+
+### **四、进阶场景**
+1. **如何扩展 Spring Boot 的自动配置？**  
+   - 创建自定义 Starter：  
+     1. 编写 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 文件。  
+     2. 使用条件注解控制 Bean 的加载。
+2. **Spring Boot Actuator 的作用是什么？**  
+   提供生产级监控端点（如 `/health`, `/metrics`），需引入 `spring-boot-starter-actuator`，通过 `management.endpoints.web.exposure.include=*` 暴露。
+3. **如何优化 Spring Boot 应用的启动速度？**  
+   - 开启懒加载（`spring.main.lazy-initialization=true`）。  
+   - 减少不必要的自动配置（`@SpringBootApplication(exclude=...)`）。  
+   - 使用 AOT（提前编译）技术（Spring Native）。
+4. **Spring Boot 如何支持响应式编程？**  
+   - 使用 `spring-boot-starter-webflux` 替代 `spring-boot-starter-web`。  
+   - 核心组件：`RouterFunction`、`HandlerFilterFunction`、响应式仓库（如 `ReactiveMongoRepository`）。
+5. **如何实现分布式配置中心？**  
+   - 结合 Spring Cloud Config Server，通过 `@EnableConfigServer` 注解启动配置服务器。  
+   - 客户端通过 `spring-cloud-starter-config` 读取远程配置。
+
+---
+
+### **五、源码与原理深入**
+1. **自动配置类的加载顺序如何控制？**  
+   - 使用 `@AutoConfigureOrder` 或 `@AutoConfigureBefore`/`@AutoConfigureAfter` 注解。
+2. **SpringApplication 的生命周期事件有哪些？**  
+   - `ApplicationStartingEvent`（启动前）  
+   - `ApplicationPreparedEvent`（上下文已创建但未刷新）  
+   - `ApplicationReadyEvent`（应用已就绪）
+3. **嵌入式容器的启动流程源码分析？**  
+   核心类：`ServletWebServerApplicationContext`，在 `refresh()` 阶段调用 `createWebServer()` 创建并启动容器。
+
+---
+
+**附：高频追问**  
+- Spring Boot 2.x 和 3.x 的主要区别？  
+- 如何实现多数据源和动态数据源？  
+- 如何集成 Spring Security？  
+- 如何实现接口幂等性？  
+
+---
+
 
 下面就开始看看SpringBoot的启动
 

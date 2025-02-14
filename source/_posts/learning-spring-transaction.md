@@ -16,7 +16,104 @@ Spring 事务里面分为“物理事务”和“逻辑事务”：
 
 - 所谓的“物理事务”是：**指 JDBC 的事务**，上一次事务和本次事务之间是没有其他事务的，在执行一条命令（默认行为自动提交）都会产生一个事务，如果把 autocommit 设置为 false，需要主动 commit 才完成一个事务。
 - 所谓的“逻辑事务”是：**Spring 对 JDBC 的一个抽象**，例如 Spring 默认的事务传播行为是 REQUIRED，当执行 @Transactional 注解标注的方法时，如果此时正处于一个事务（物理事务）中，那么加入到这个事务中，你可以理解为创建了一个“逻辑事务”，进行提交的时候不会执行 Connection 的 commit 方法，而是在外面的“物理事务”中进行 commit 时一并完成本次事务。
- 
+
+
+---
+以下是一份关于 **Spring事务** 的高频面试题总结，涵盖核心概念、使用场景及常见问题：
+
+---
+
+### **一、基础概念**
+1. **Spring事务的作用是什么？**  
+   - 确保一组数据库操作要么全部成功（提交），要么全部失败（回滚），保障数据一致性与完整性。
+
+2. **Spring事务管理的两种方式？**  
+   - **编程式事务**：通过 `TransactionTemplate` 或 `PlatformTransactionManager` 手动管理事务。
+   - **声明式事务**：通过 `@Transactional` 注解或 XML 配置自动管理事务（推荐）。
+
+3. **Spring事务的ACID特性如何实现？**  
+   - 依赖底层数据库的ACID支持，Spring通过事务管理器协调资源（如数据库连接）实现事务控制。
+
+---
+
+### **二、事务传播行为（Propagation）**
+1. **列举常见的事务传播行为并解释**  
+   - `REQUIRED`（默认）：当前有事务则加入，无则新建。  
+   - `REQUIRES_NEW`：新建事务，挂起当前事务（独立提交/回滚）。  
+   - `SUPPORTS`：有事务则加入，无则以非事务执行。  
+   - `NOT_SUPPORTED`：以非事务执行，挂起当前事务。  
+   - `MANDATORY`：必须在事务中调用，否则抛异常。  
+   - `NEVER`：必须在非事务中调用，否则抛异常。  
+   - `NESTED`：嵌套事务（依赖保存点机制，如JDBC 3.0）。
+2. **`REQUIRED` vs `REQUIRES_NEW` 的区别？**  
+   - `REQUIRED` 是同一事务，回滚会影响外层；`REQUIRES_NEW` 是独立事务，回滚不影响外层。
+
+---
+
+### **三、事务隔离级别（Isolation）**
+1. **Spring支持的隔离级别有哪些？**  
+   - `DEFAULT`（数据库默认）  
+   - `READ_UNCOMMITTED`（可能脏读）  
+   - `READ_COMMITTED`（避免脏读）  
+   - `REPEATABLE_READ`（避免不可重复读）  
+   - `SERIALIZABLE`（完全串行化）
+2. **脏读、不可重复读、幻读的区别？**  
+   - **脏读**：读到未提交的数据。  
+   - **不可重复读**：同一事务内多次读取同一数据结果不同（针对更新）。  
+   - **幻读**：同一事务内多次查询结果集不同（针对插入/删除）。
+
+---
+
+### **四、事务管理方式**
+1. **`PlatformTransactionManager` 的核心实现类有哪些？**  
+   - `DataSourceTransactionManager`（JDBC、MyBatis）  
+   - `HibernateTransactionManager`  
+   - `JpaTransactionManager`  
+   - `JtaTransactionManager`（分布式事务）
+2. **声明式事务的底层原理？**  
+   - 基于AOP（动态代理），通过拦截 `@Transactional` 注解方法，在方法前后开启/提交/回滚事务。
+
+---
+
+### **五、@Transactional注解**
+1. **`@Transactional` 注解的常用属性？**  
+    - `propagation`、`isolation`、`timeout`、`readOnly`、`rollbackFor`/`noRollbackFor`。
+2. **默认回滚的异常类型是什么？**  
+    - 默认回滚 **RuntimeException** 和 **Error**，受检异常（Checked Exception）不触发回滚。需通过 `rollbackFor` 指定。
+3. **`@Transactional` 注解在类和方法上的优先级？**  
+    - 方法上的注解优先级高于类上的注解。
+
+---
+
+### **六、事务失效场景**
+1. **哪些情况会导致事务失效？**  
+    - 方法非 `public`（CGLIB代理要求）。  
+    - 自调用（未通过代理对象调用，如 `this.method()`）。  
+    - 异常被捕获未抛出或抛出的异常类型不匹配 `rollbackFor`。  
+    - 数据库引擎不支持事务（如MyISAM）。  
+    - 未启用事务管理（如缺少 `@EnableTransactionManagement`）。
+
+---
+
+### **七、高级问题**
+1. **Spring事务与分布式事务（JTA）的关系？**  
+    - Spring支持JTA管理多资源（如多个数据库、消息队列），需配合Atomikos等事务管理器。
+2. **嵌套事务（NESTED）如何实现？**  
+    - 基于保存点（Savepoint），子事务回滚不影响外层事务，但外层回滚会连带子事务。
+3. **如何监控事务的提交和回滚？**  
+    - 通过 `TransactionSynchronizationManager` 注册回调方法（如 `afterCommit`）。
+
+---
+
+### **八、实战场景题**
+1. **方法A调用方法B，B抛异常，如何让A和B一起回滚？**  
+    - B的事务传播行为设为 `REQUIRED`（默认），异常向上传播，A和B同一事务。
+2. **如何实现事务中的异步操作？**  
+    - 异步方法需开启新事务（如 `@Async` + `@Transactional(propagation=REQUIRES_NEW)`），注意线程隔离问题。
+
+
+---
+
 ### Spring 事务的传播级别
 - **REQUIRED**：默认传播级别，如果正处于一个事务中，则加入；否则，创建一个事务
 - **SUPPORTS**：如果正处于一个事务中，则加入；否则，不使用事务

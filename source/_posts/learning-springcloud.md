@@ -74,6 +74,129 @@ Spring Cloud 是一个基于 Spring Boot 的微服务架构工具集，旨在简
 - **云原生友好**：兼容 Spring Cloud Kubernetes，适应容器化部署。
 
 ---
+## 其它知识点总结
+
+### **一、Spring Cloud 基础概念**
+1. **Spring Cloud 与 Spring Boot 的关系是什么？**  
+   - Spring Boot 是快速开发微服务的框架，Spring Cloud 是基于 Spring Boot 的微服务治理工具集（如服务发现、配置中心、熔断器等）。
+
+2. **Spring Cloud 的核心功能有哪些？**  
+   - 服务注册与发现、配置中心、服务网关、负载均衡、熔断器、分布式链路追踪等。
+
+3. **什么是微服务架构？Spring Cloud 如何支持微服务架构？**  
+   - 微服务架构将单体应用拆分为独立的小服务，通过轻量级通信协同工作。Spring Cloud 提供 Netflix/Alibaba 等组件解决分布式系统问题（如服务治理、容错）。
+
+---
+
+### **二、服务注册与发现**
+4. **Eureka 的工作原理是什么？与 Zookeeper 的区别？**  
+   - Eureka 采用 AP 模型（高可用、最终一致性），服务启动时注册到 Eureka Server，客户端通过心跳检测服务状态。  
+   - Zookeeper 是 CP 模型（强一致性），适用于需要强一致性的场景（如分布式锁）。
+
+5. **Eureka 如何实现服务发现的高可用？**  
+   - 多个 Eureka Server 相互注册组成集群，服务提供者和消费者向所有 Server 注册并拉取服务列表。
+
+6. **Nacos 与 Eureka 的区别？**  
+   - Nacos 支持服务发现与配置中心，提供 CP/AP 模式切换；Eureka 仅支持 AP 模式。
+
+---
+
+### **三、服务调用与负载均衡**
+7. **Ribbon 的负载均衡策略有哪些？如何自定义策略？**  
+   - 轮询、随机、权重、最小响应时间等。通过 `IRule` 接口实现自定义策略。
+
+8. **Feign 与 RestTemplate 的区别？**  
+   - Feign 是声明式的 HTTP 客户端，通过接口和注解简化调用；RestTemplate 需要手动拼接 URL 和参数。
+
+9. **如何实现服务调用的超时控制？**  
+   - Ribbon：`ribbon.ReadTimeout`；Feign：`feign.client.config.default.readTimeout`；Hystrix：`hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds`。
+
+---
+
+### **四、服务熔断与降级**
+10. **Hystrix 的熔断机制是如何工作的？**  
+    - 当失败率超过阈值，熔断器打开，后续请求快速失败；熔断器半开状态允许部分请求尝试恢复。
+
+11. **Sentinel 与 Hystrix 的区别？**  
+    - Sentinel 支持流量控制、熔断降级、系统保护，配置更灵活；Hystrix 侧重熔断和线程隔离。
+
+12. **什么是服务雪崩？如何避免？**  
+    - 服务雪崩指一个服务故障引发连锁故障。解决方案：熔断、降级、限流、异步调用。
+
+---
+
+### **五、服务网关**
+13. **Zuul 和 Spring Cloud Gateway 的区别？**  
+    - Zuul 1.x 基于 Servlet 阻塞模型，Gateway 基于 Reactor 非阻塞模型，支持更灵活的路由配置（如 Predicate、Filter）。
+
+14. **如何在网关中实现鉴权？**  
+    - 通过自定义全局过滤器（如 `GlobalFilter`）验证 Token 或权限。
+
+15. **网关如何实现限流？**  
+    - 使用 Sentinel 或 Redis + Lua 脚本实现令牌桶/漏桶算法。
+
+---
+
+### **六、配置中心**
+16. **Spring Cloud Config 的工作原理？**  
+    - 将配置文件存储在 Git/SVN 等仓库，客户端启动时从 Config Server 拉取配置。
+
+17. **如何实现配置的热更新？**  
+    - 结合 Spring Cloud Bus 和消息队列（如 RabbitMQ），通过 `/actuator/refresh` 或 `@RefreshScope` 刷新配置。
+
+18. **Nacos 作为配置中心的优势？**  
+    - 支持动态配置、版本管理、监听机制，且与注册中心集成。
+
+---
+
+### **七、分布式链路追踪**
+19. **Sleuth + Zipkin 的作用是什么？**  
+    - Sleuth 生成请求链路 ID（Trace ID、Span ID），Zipkin 收集并可视化链路数据，用于性能分析和故障排查。
+
+20. **如何自定义 Sleuth 的采样率？**  
+    - 配置 `spring.sleuth.sampler.probability` 控制采样比例（如 1.0 表示全采样）。
+
+---
+
+### **八、分布式事务**
+21. **Seata 的 AT 模式原理是什么？**  
+    - 通过全局事务 ID 协调分支事务，执行 SQL 解析生成前后镜像，实现回滚（基于 undo_log 表）。
+
+22. **如何避免分布式事务？**  
+    - 最终一致性方案：消息队列（如 RocketMQ 事务消息）、补偿机制（TCC）、Saga 模式。
+
+---
+
+### **九、Spring Cloud Alibaba**
+23. **Nacos 的核心功能？**  
+    - 服务注册发现、动态配置管理、命名服务。
+
+24. **Sentinel 如何实现熔断和限流？**  
+    - 熔断：基于异常比例/响应时间；限流：QPS/线程数控制，支持预热、排队等待。
+
+---
+
+### **十、综合场景**
+25. **如何设计一个高可用的微服务架构？**  
+    - 服务注册集群、熔断降级、冗余部署、分布式配置、监控告警、自动化运维。
+
+26. **Spring Cloud 如何与 Docker/K8s 集成？**  
+    - 将服务打包为 Docker 镜像，通过 K8s 进行服务发现、负载均衡、自动扩缩容。
+
+---
+
+**附：常见组件对比表**
+
+| 组件          | 作用                   | 替代方案          |
+|---------------|------------------------|-------------------|
+| Eureka        | 服务注册与发现         | Nacos, Consul     |
+| Ribbon        | 客户端负载均衡         | Spring Cloud LoadBalancer |
+| Hystrix       | 熔断降级               | Sentinel          |
+| Zuul          | 服务网关               | Spring Cloud Gateway |
+| Config        | 配置中心               | Nacos, Apollo     |
+
+
+---
 
 ## 关于Eureka
 Eureka 是 Netflix 开源的**服务发现组件**，主要用于实现微服务架构中的服务注册与发现功能。它是 Spring Cloud 生态中的核心组件之一，帮助服务提供者和消费者动态感知彼此的存在。以下是 Eureka 的工作原理总结：

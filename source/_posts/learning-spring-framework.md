@@ -28,8 +28,83 @@ top: true
 
 ## Spring IOC
 
-### 核心知识点
+### **1. 核心概念**
+1. **什么是 Spring IOC？**  
+   解释控制反转（Inversion of Control）的思想，以及 Spring 如何通过容器管理对象的生命周期和依赖关系。
 
+2. **IOC 和 DI 的区别与联系？**  
+   - IOC 是设计思想，DI 是实现方式（依赖注入）。  
+   - Spring 通过 DI（构造器注入、Setter 注入、字段注入）实现 IOC。
+
+3. **BeanFactory 和 ApplicationContext 的区别？**  
+   - `BeanFactory` 是基础容器，提供基本功能；  
+   - `ApplicationContext` 是扩展容器，支持国际化、事件、AOP 等高级功能，默认预初始化单例 Bean。
+
+---
+
+### **2. 配置与依赖注入**
+4. **Spring 配置 Bean 的方式有哪些？**  
+   - XML 配置（`<bean>` 标签）  
+   - 注解驱动（`@Component`, `@Service`, `@Autowired`）  
+   - Java 配置（`@Configuration` + `@Bean`）
+
+5. **@Autowired 和 @Resource 的区别？**  
+   - `@Autowired` 按类型注入，结合 `@Qualifier` 指定名称；  
+   - `@Resource` 默认按名称注入，支持 `name` 属性。
+
+6. **构造器注入 vs Setter 注入？**  
+   - 构造器注入适合强制依赖，保证对象不可变；  
+   - Setter 注入适合可选依赖，灵活性更高。
+
+---
+
+### **3. Bean 的作用域与生命周期**
+7. **Bean 的作用域（Scope）有哪些？**  
+   - `singleton`（默认）、`prototype`、`request`、`session`、`application`、`websocket`。
+
+8. **描述 Bean 的生命周期流程？**  
+   实例化 → 属性填充 → 初始化（`@PostConstruct`、`InitializingBean`、`init-method`）→ 使用 → 销毁（`@PreDestroy`、`DisposableBean`、`destroy-method`）。
+
+9. **Bean 后置处理器（BeanPostProcessor）的作用？**  
+   在 Bean 初始化前后插入自定义逻辑（如 `postProcessBeforeInitialization` 和 `postProcessAfterInitialization`）。
+
+---
+
+### **4. 高级特性**
+10. **Spring 如何解决循环依赖？**  
+    通过三级缓存：  
+    - 一级缓存（单例池）  
+    - 二级缓存（早期暴露对象）  
+    - 三级缓存（Bean 工厂的 Lambda 表达式）。  
+    **仅支持单例 Bean 的构造器循环依赖**。
+
+11. **延迟初始化（Lazy-init）的作用？**  
+    延迟 Bean 的创建到首次使用时，减少启动时间，但可能隐藏配置错误。
+
+12. **如何实现条件化注册 Bean？**  
+    使用 `@Conditional` 注解结合自定义条件类（实现 `Condition` 接口）。
+
+---
+
+### **5. 常见扩展问题**
+13. **Spring 容器的启动流程？**  
+    加载配置 → 解析 Bean 定义 → 初始化 BeanFactory → 执行 BeanPostProcessor → 初始化单例 Bean。
+
+14. **@Component 和 @Bean 的区别？**  
+    - `@Component` 用于类，由组件扫描自动注册；  
+    - `@Bean` 用于配置类方法，手动定义 Bean。
+
+15. **如何管理不同环境的配置？**  
+    使用 `@Profile` 注解或 `Environment` API 区分开发、测试、生产环境。
+
+---
+
+### **6. 实战场景**
+16. **单例 Bean 中注入原型 Bean 的问题？**  
+    原型 Bean 在单例中只会初始化一次，需结合 `@Lookup` 或 `ObjectFactory` 实现每次获取新实例。
+
+17. **如何动态注册 Bean？**  
+    通过 `BeanDefinitionRegistry` 或 `DefaultListableBeanFactory` 动态添加 Bean 定义。
 
 ---
 
@@ -1240,6 +1315,104 @@ Spring MVC 拦截器有三个增强处理的地方：
 - **容器不同**：拦截器构建在 Spring MVC 体系中；Filter 构建在 Servlet 容器之上
 - **使用便利性不同**：拦截器提供了三个方法，分别在不同的时机执行；过滤器仅提供一个方法，当然也能实现拦截器的执行时机的效果，就是麻烦一些
 一般拓展性好的框架，都会提供相应的拦截器或过滤器机制，方便的开发人员做一些拓展
+
+
+---
+**一些其它的总结**
+以下是关于 Spring MVC 的高频面试题整理，涵盖核心概念、工作流程、常用注解及实际应用场景：
+
+---
+
+### **一、基础概念**
+1. **什么是 Spring MVC？**  
+   Spring MVC 是基于 Java 的轻量级 Web 框架，实现了 Model-View-Controller 设计模式，用于构建灵活、松耦合的 Web 应用。核心围绕 `DispatcherServlet` 设计，负责请求分发和处理。
+
+2. **Spring MVC 的优点**  
+   - 松耦合的模块化设计  
+   - 强大的注解驱动开发  
+   - 无缝集成 Spring 生态（如 AOP、事务管理）  
+   - 支持 RESTful 风格和多种视图技术（JSP、Thymeleaf 等）
+
+---
+
+### **二、核心组件**
+1. **DispatcherServlet 的作用**  
+   作为前端控制器，接收所有 HTTP 请求并协调各组件处理：调用 HandlerMapping 确定处理请求的 Controller，通过 HandlerAdapter 执行 Controller 方法，最后通过 ViewResolver 解析视图。
+2. **HandlerMapping 的作用**  
+   根据请求的 URL 找到对应的 Controller 或处理方法（如 `@RequestMapping` 注解匹配）。
+3. **ViewResolver 的作用**  
+   将逻辑视图名（如 `"home"`）解析为实际视图（如 `/WEB-INF/views/home.jsp`）。
+
+---
+
+### **三、请求处理流程**
+1. **Spring MVC 处理请求的流程**  
+   1. 用户发送请求 → `DispatcherServlet` 接收。  
+   2. `DispatcherServlet` 调用 `HandlerMapping` 查找对应的 Handler（Controller 方法）。  
+   3. `HandlerAdapter` 执行 Handler，处理业务逻辑，返回 `ModelAndView`。  
+   4. `ViewResolver` 解析视图，渲染模型数据，返回响应给客户端。
+
+---
+
+### **四、常用注解**
+1. **@Controller vs @RestController**  
+   - `@Controller`：标识为 Spring MVC 控制器，返回视图名称。  
+   - `@RestController`：组合了 `@Controller` 和 `@ResponseBody`，直接返回 JSON/XML 数据（用于 RESTful API）。
+2. **@RequestMapping 的属性和作用**  
+   - 定义请求映射路径，支持 `value`（URL）、`method`（HTTP 方法）、`produces`（响应类型）等属性。  
+   - 衍生注解：`@GetMapping`、`@PostMapping` 等。
+3. **@RequestParam vs @PathVariable**  
+   - `@RequestParam`：获取 URL 查询参数（如 `/user?id=1`）。  
+   - `@PathVariable`：获取 URL 路径中的参数（如 `/user/{id}`）。
+
+---
+
+### **五、数据绑定与验证**
+1. **@ModelAttribute 的作用**  
+    - 将请求参数绑定到模型对象（如表单提交的数据）。  
+    - 在方法级别预加载模型数据（如在下拉框中填充数据）。
+2. **如何实现数据验证？**  
+    使用 JSR-303/JSR-349 规范（如 `@NotNull`、`@Size`）结合 `Hibernate Validator`，并在 Controller 方法参数添加 `@Valid` 注解。
+
+---
+
+### **六、异常处理**
+1. **如何全局处理异常？**  
+    使用 `@ControllerAdvice` 注解的类配合 `@ExceptionHandler` 方法，捕获特定异常并返回统一响应。
+
+---
+
+### **七、RESTful 支持**
+1. **设计 RESTful API 的注意事项**  
+    - 使用 HTTP 方法（GET/POST/PUT/DELETE）表示操作类型。  
+    - URL 路径用名词（如 `/users`），状态码（200/201/404）明确结果。  
+    - 支持 JSON/XML 数据格式。
+
+---
+
+### **八、其他高频问题**
+1. **文件上传配置**  
+    需配置 `MultipartResolver`（如 `CommonsMultipartResolver`），并在 Controller 方法中使用 `@RequestParam("file") MultipartFile file` 接收文件。
+2. **拦截器（Interceptor）的作用**  
+    实现 `HandlerInterceptor` 接口，在请求处理前后执行逻辑（如权限检查、日志记录）。主要方法：`preHandle()`, `postHandle()`, `afterCompletion()`。
+3. **如何解决中文乱码？**  
+    配置 CharacterEncodingFilter，设置编码为 UTF-8，并强制应用到请求和响应。
+
+---
+
+### **九、高级问题**
+1. **Spring MVC 如何支持异步请求？**  
+    使用 `@Async` 或返回 `Callable`/`DeferredResult`，配合 `AsyncTaskExecutor` 实现异步处理。
+2. **Spring MVC 与 Spring Boot 的关系**  
+    Spring Boot 简化了 Spring MVC 的配置（如自动配置 DispatcherServlet、内嵌 Tomcat），通过 Starter 依赖快速搭建 Web 应用。
+
+---
+
+### **十、实战场景**
+1. **如何测试 Spring MVC 应用？**  
+    使用 `MockMvc` 模拟 HTTP 请求，验证响应状态、视图或 JSON 内容。
+
+---
 
 ### web.xml的生命之旅
 #### Servlet3.0之前

@@ -18,6 +18,101 @@ top: true
 
 ## 知识点概括
 
+### **一、线程基础**
+1. **线程和进程的区别**  
+   - 进程是操作系统资源分配的基本单位，线程是CPU调度的基本单位。
+   - 进程间资源独立，线程共享进程资源（如内存、文件句柄）。
+2. **创建线程的几种方式**  
+   - 继承 `Thread` 类，重写 `run()` 方法。
+   - 实现 `Runnable` 接口，作为参数传给 `Thread`。
+   - 实现 `Callable` 接口，结合 `FutureTask` 获取返回值。
+   - 使用线程池（如 `ExecutorService`）。
+3. **线程的生命周期和状态转换**  
+   - 新建（New）、就绪（Runnable）、运行（Running）、阻塞（Blocked）、等待（Waiting）、超时等待（Timed Waiting）、终止（Terminated）。
+
+---
+
+### **二、线程安全与同步**
+1. **什么是线程安全？如何保证线程安全？**  
+   - 线程安全：多线程环境下，共享资源被正确访问和修改。
+   - 实现方式：`synchronized` 关键字、`ReentrantLock`、原子类（如 `AtomicInteger`）、`volatile`、不可变对象等。
+2. **synchronized 和 ReentrantLock 的区别**  
+   - `synchronized` 是 JVM 实现的隐式锁，自动释放；`ReentrantLock` 是 API 级别的显式锁，需手动释放。
+   - `ReentrantLock` 支持公平锁、可中断、超时等待、多条件变量（`Condition`）。
+3. **volatile 的作用和原理**  
+   - 保证可见性：修改后立即同步到主内存，其他线程可见。
+   - 禁止指令重排序（通过内存屏障）。
+   - 不保证原子性（如 `i++` 仍需同步）。
+4. **CAS（Compare And Swap）原理及问题**  
+   - 通过 CPU 原子指令（如 `cmpxchg`）实现无锁更新。
+   - 问题：ABA 问题（用 `AtomicStampedReference` 解决）、自旋开销。
+
+---
+
+### **三、锁与并发工具类**
+1. **乐观锁与悲观锁的区别**  
+   - 悲观锁：假定竞争存在，直接加锁（如 `synchronized`）。
+   - 乐观锁：假定无竞争，通过版本号/CAS 实现（如 `AtomicInteger`）。
+2. **AQS（AbstractQueuedSynchronizer）原理**  
+   - 核心：通过 CLH 队列管理线程阻塞和唤醒，用 `state` 变量表示资源状态。
+   - 实现类：`ReentrantLock`、`Semaphore`、`CountDownLatch` 等。
+3. **CountDownLatch、CyclicBarrier、Semaphore 的区别**  
+    - `CountDownLatch`：一次性，等待多个任务完成（计数器减到0）。
+    - `CyclicBarrier`：可重复使用，线程互相等待到屏障点。
+    - `Semaphore`：控制并发线程数（许可证机制）。
+
+---
+
+### **四、线程池**
+1. **线程池的7个核心参数**  
+    - `corePoolSize`、`maxPoolSize`、`keepAliveTime`、`workQueue`、`threadFactory`、`handler`（拒绝策略）。
+2. **线程池的工作流程**  
+    - 提交任务 → 核心线程未满则创建线程 → 核心满则入队 → 队列满则创建非核心线程 → 超过 `maxPoolSize` 则触发拒绝策略。
+3. **常见的拒绝策略**  
+    - `AbortPolicy`（抛异常）、`CallerRunsPolicy`（调用者执行）、`DiscardPolicy`（静默丢弃）、`DiscardOldestPolicy`（丢弃最老任务）。
+4. **为什么推荐使用线程池？**  
+    - 降低资源消耗（复用线程）、提高响应速度、统一管理任务、避免 OOM。
+
+---
+
+### **五、并发容器**
+1. **ConcurrentHashMap 的实现原理**  
+    - JDK 8 前：分段锁（Segment + HashEntry）。
+    - JDK 8+：数组 + 链表/红黑树，CAS + `synchronized` 锁桶头节点。
+2. **CopyOnWriteArrayList 适用场景**  
+    - 读多写少，通过写时复制（复制新数组）保证线程安全，读无锁。
+
+---
+
+### **六、内存模型与可见性**
+1. **JMM（Java 内存模型）**  
+    - 主内存与工作内存：线程操作的是工作内存中的副本，需通过 `volatile` 或锁保证可见性。
+2. **happens-before 原则**  
+    - 程序顺序规则、锁规则、volatile 规则、传递性等，确保指令重排序不破坏逻辑。
+
+---
+
+### **七、死锁与排查**
+1. **死锁产生的条件及避免方法**  
+    - 条件：互斥、持有并等待、不可剥夺、环路等待。
+    - 避免：破坏任一条件（如按顺序获取锁、超时机制）。
+2. **如何排查死锁？**  
+    - `jstack` 查看线程堆栈，或使用 VisualVM、Arthas 等工具检测。
+
+---
+
+### **八、进阶问题**
+1. **ThreadLocal 原理及内存泄漏问题**  
+    - 每个线程有独立的 `ThreadLocalMap`，Key 是弱引用，Value 需手动 `remove()` 避免泄漏。
+2. **Fork/Join 框架原理**  
+    - 分治思想，将任务拆分为子任务并行执行，通过工作窃取（Work-Stealing）提高效率。
+
+---
+
+### **高频场景题**
+1. 手写生产者-消费者模型（使用 `BlockingQueue` 或 `wait()/notify()`）。
+2. 如何实现线程安全的单例模式（双重检查锁 + volatile）？
+3. 多个线程交替打印数字（如三个线程按顺序打印 1-100）。
 
 
 ---

@@ -4,7 +4,8 @@ abbrlink: b54134d3
 date: 2024-10-14 23:33:55
 tags:
     - JVM参数
-updated: 2024-10-28 20:30:21categories: Java系列
+updated: 2024-10-28 20:30:21
+categories: Java系列
 ---
 
 参考《深入理解Java虚拟机  第三版》一书中关于启动参数的相关描述表格，并补充了相关日志打印描述参数
@@ -750,4 +751,40 @@ ccstrlist OnOutOfMemoryError                        =                           
     uintx YoungPLABSize                             = 4096                                {product}
      bool ZeroTLAB                                  = false                               {product}
      intx hashCode                                  = 5                                   {product}
+```
+
+
+### 线上运行环境参数
+列举一下之前工作中线上的运行参数相关，供后续快速翻阅查看
+```text
+java
+-Xmx2048m
+-Xms2048m
+-Xmn768m
+
+-XX:MetaspaceSize=384m
+-XX:MaxMetaspaceSize=384m
+-XX:+UseConcMarkSweepGC
+-XX:+UseParNewGC
+-XX:+CMSClassUnloadingEnabled
+-XX:+UseCMSInitiatingOccupancyOnly
+-XX:CMSInitiatingOccupancyFraction=68
+-XX:+UseGCLogFileRotation
+-XX:GCLogFileSize=100M
+-XX:NumberOfGCLogFiles=10
+-XX:+HeapDumpOnOutOfMemoryError
+
+
+-XX:+PrintTenuringDistribution
+-XX:+PrintGCDetails
+-XX:+PrintGCDateStamps
+-XX:+PrintHeapAtGC
+-XX:+PrintGCApplicationConcurrentTime
+-XX:+PrintGCApplicationStoppedTime
+
+-verbose:gc
+
+-Xloggc:/xxx/rtlog/server/gc.log
+-XX:HeapDumpPath=/xxx/rtlog/server
+-XX:ErrorFile=/xxx/rtlog/server/hs_err_pid%p.log
 ```

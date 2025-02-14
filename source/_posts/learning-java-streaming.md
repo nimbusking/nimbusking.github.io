@@ -12,9 +12,103 @@ categories: Java系列
 
 ## 关于Lambda表达式
 本质上，在java中的lambda表达式就是对匿名函数的一种简化实现
+
 <!-- more -->
+
 底层，需要知道，Lambda表达式由虚拟机指令InvokeDynamic实现方法调用。而InvokeDynamic是JVM的一条字节码指令，其通过运行时动态解析出调用的方法，然后去执行该方法。
 Java8中支持Lambda表达式的，通常会以```@FunctionalInterface```来进行修饰，用来检查是否符合函数接口规范。
+
+## 知识点总结
+
+
+以下是关于Java流式编程（Stream API）的高频面试题总结，涵盖底层原理和核心知识点：
+
+---
+
+### **一、基础概念**
+1. **什么是Java Stream？它与集合（Collection）的区别？**  
+   - Stream是Java 8引入的API，用于对数据集合进行函数式操作（过滤、映射、聚合等）。  
+   - **区别**：  
+     - 集合存储数据，Stream不存储数据，仅通过操作管道处理数据。  
+     - Stream操作是延迟执行（Lazy）的，需终端操作触发。  
+     - Stream支持并行处理，集合默认是串行的。
+
+2. **Stream的操作类型有哪些？**  
+   - **中间操作（Intermediate Operations）**：返回新的Stream（如`filter`, `map`, `sorted`）。  
+   - **终端操作（Terminal Operations）**：触发实际计算并关闭Stream（如`collect`, `forEach`, `reduce`）。  
+
+3. **什么是惰性求值（Lazy Evaluation）？**  
+   - 中间操作不会立即执行，而是记录操作链，直到终端操作触发时才一次性执行所有操作，避免不必要的计算。
+
+---
+
+### **二、底层原理**
+4. **Stream的流水线（Pipeline）是如何构建的？**  
+   - Stream操作链通过`AbstractPipeline`类实现，分为三个阶段：  
+     1. **源（Source）**：如集合、数组生成`Head`节点。  
+     2. **中间操作节点**：每个操作生成新的`StatelessOp`或`StatefulOp`节点。  
+     3. **终端操作**：触发流水线执行，生成结果或副作用。
+
+5. **Spliterator的作用是什么？**  
+   - Spliterator（可分割迭代器）是Stream的底层数据源分割工具，负责：  
+     - 遍历数据（`tryAdvance`）。  
+     - 分割数据为更小的块供并行处理（`trySplit`）。  
+     - 优化遍历（如批量遍历`forEachRemaining`）。
+
+6. **并行流（Parallel Stream）的底层实现原理？**  
+   - 并行流使用`ForkJoinPool`（默认共用`commonPool`）分割任务，通过`Spliterator`将数据拆分为子任务并行处理，最终合并结果。  
+   - **注意**：线程安全问题需自行处理，并行不总是更快（需数据量大且无竞争）。
+
+7. **Stream的中间操作如何叠加？**  
+   - 中间操作通过`ReferencePipeline`链式调用，每个操作生成一个新的`Stage`节点，保存操作函数（如`Predicate`, `Function`），最终形成双向链表结构。
+
+---
+
+### **三、性能与优化**
+8. **`Stream.forEach`和`for`循环的性能差异？**  
+   - 简单操作下，`for`循环通常更快（无函数调用开销）；复杂链式操作时Stream可能更高效（如并行处理）。  
+   - **注意**：Stream的优势在于代码简洁和并行能力，而非绝对性能。
+
+9. **如何避免Stream的自动装箱开销？**  
+   - 使用原始类型特化流：`IntStream`、`LongStream`、`DoubleStream`。
+
+10. **Stateful和Stateless中间操作的区别？**  
+    - **Stateless**：无状态，操作独立处理每个元素（如`filter`, `map`）。  
+    - **Stateful**：需维护状态，可能影响并行性能（如`distinct`, `sorted`, `limit`）。
+
+---
+
+### **四、高频扩展问题**
+11. **`Stream.peek`和`Stream.map`的区别？**  
+    - `peek`是中间操作，用于调试（无返回值），`map`将元素转换为新值。
+
+12. **`Stream.reduce`和`Stream.collect`的区别？**  
+    - `reduce`用于不可变聚合（如求和），`collect`用于可变聚合（如收集到集合）。
+
+13. **如何实现自定义收集器（Collector）？**  
+    - 实现`Collector`接口，定义`supplier`（容器）、`accumulator`（累加）、`combiner`（合并）、`finisher`（转换）和`characteristics`（特性）。
+
+14. **并行流的线程池如何配置？**  
+    - 默认使用`ForkJoinPool.commonPool()`，可通过系统属性`java.util.concurrent.ForkJoinPool.common.parallelism`调整线程数，或提交任务到自定义线程池。
+
+---
+
+### **五、底层源码分析（加分项）**
+- **流水线执行流程**：终端操作触发`AbstractPipeline.evaluate`方法，根据并行标志选择`TerminalOp`（如`ForEachOp`）执行。  
+- **短路操作优化**：`findFirst`、`limit`等操作通过`Sink.cancellationRequested`提前终止计算。  
+- **并行流合并策略**：`ReduceOps`中通过`combiner`函数合并子任务结果。
+
+---
+
+### **六、注意事项**
+- **避免副作用**：Stream操作应是无状态的，禁止在`forEach`中修改外部变量。  
+- **并行流慎用**：数据量小或操作简单时，并行可能更慢；共享变量需同步。  
+- **关闭资源**：`BaseStream.onClose()`可注册关闭钩子（如文件流）。
+
+---
+
+掌握以上内容，可覆盖90%的Java流式编程面试考点，重点关注底层原理（如Spliterator、ForkJoinPool）和性能优化点。
+
 ### 示例代码
 本文用到的所有示例代码，位于：[Github:CoreJavaSample](https://github.com/nimbusking/CoreJavaSample/tree/main/src/main/java/cc/nimbusk/stream)
 

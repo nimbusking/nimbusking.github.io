@@ -21,6 +21,109 @@ Java OOP 存在哪些局限性
 
 <!-- more -->
 
+---
+
+### **一、核心概念与基础**
+1. **什么是 AOP？**  
+   - AOP（面向切面编程）是一种编程范式，通过**横向抽取**公共逻辑（如日志、事务、安全等），以非侵入式的方式增强代码复用性和可维护性。
+2. **Spring AOP 的主要应用场景？**  
+   - 日志记录、事务管理、权限校验、性能监控、异常处理等**横切关注点**（Cross-Cutting Concerns）。
+3. **AOP 的核心术语**  
+   - **Aspect（切面）**：封装横切逻辑的模块（如 `@Aspect` 注解的类）。  
+   - **Join Point（连接点）**：程序执行中的某个点（如方法调用、异常抛出）。  
+   - **Pointcut（切入点）**：定义哪些连接点会被切面拦截（通过表达式或注解）。  
+   - **Advice（通知）**：切面在连接点执行的具体动作（如 `@Before`, `@Around`）。  
+   - **Target Object（目标对象）**：被代理的原始对象。  
+   - **Weaving（织入）**：将切面应用到目标对象生成代理对象的过程。
+
+---
+
+### **二、实现原理**
+1. **Spring AOP 的底层实现原理？**  
+   - 基于**动态代理**：  
+     - **JDK 动态代理**：针对实现了接口的类（通过 `InvocationHandler`）。  
+     - **CGLIB 代理**：针对未实现接口的类（通过继承生成子类）。  
+   - **默认策略**：Spring 优先使用 JDK 动态代理，若无接口则使用 CGLIB。  
+   - **Spring Boot 2.x+ 默认使用 CGLIB**（需配置 `spring.aop.proxy-target-class=true`）。
+2. **JDK 动态代理 vs CGLIB 代理的区别？**  
+   | **特性**       | **JDK 动态代理**          | **CGLIB**                |  
+   |----------------|--------------------------|--------------------------|  
+   | 依赖           | 需要接口                | 无需接口                 |  
+   | 性能           | 生成代理较快，调用稍慢  | 生成代理较慢，调用较快   |  
+   | 限制           | 只能代理接口方法        | 无法代理 `final` 方法/类 |  
+
+---
+
+### **三、通知（Advice）与切入点（Pointcut）**
+1. **Spring AOP 支持的通知类型？**  
+   - `@Before`：方法执行前。  
+   - `@AfterReturning`：方法正常返回后。  
+   - `@AfterThrowing`：方法抛出异常后。  
+   - `@After`（`finally`）：方法执行后（无论是否异常）。  
+   - `@Around`：包围方法执行，需手动调用 `ProceedingJoinPoint.proceed()`。
+2. **`@Around` 和 `@Before` + `@After` 的区别？**  
+   - `@Around` 可以完全控制目标方法的执行，甚至阻止其执行；而 `@Before`/`@After` 仅能在方法前后插入逻辑。
+3. **如何定义切入点（Pointcut）表达式？**  
+   - **表达式语法**：  
+     ```java  
+     @Pointcut("execution(修饰符 返回类型 包.类.方法(参数))")  
+     ```  
+   - **通配符示例**：  
+     ```java  
+     @Pointcut("execution(* com.example.service.*.*(..))") // 拦截 service 包下所有方法  
+     @Pointcut("@annotation(com.example.Log)")              // 拦截带有 @Log 注解的方法  
+     ```
+
+---
+
+### **四、常见问题与解决方案**
+1. **多个切面的执行顺序如何控制？**  
+   - 通过 `@Order` 注解或实现 `Ordered` 接口，值越小优先级越高（`@Before` 按升序执行，`@After` 按降序）。
+
+2. **如何解决同类内部方法调用导致 AOP 失效？**  
+    - **原因**：内部调用不走代理对象。  
+    - **解决方案**：  
+      1. 通过 `AopContext.currentProxy()` 获取代理对象（需配置 `@EnableAspectJAutoProxy(exposeProxy = true)`）。  
+      2. 将方法拆分到不同类中。
+3. **Spring AOP 的局限性？**  
+    - 只能拦截 `public` 方法（除非配置 CGLIB）。  
+    - 无法拦截静态方法、私有方法、final 类/方法。  
+    - 不适用于非 Spring 管理的对象。
+
+---
+
+### **五、扩展与高级话题**
+1. **Spring AOP 与 AspectJ 的区别？**  
+    | **特性**          | **Spring AOP**                     | **AspectJ**                |  
+    |-------------------|------------------------------------|----------------------------|  
+    | 实现方式          | 动态代理                          | 编译时/类加载时织入         |  
+    | 性能              | 运行时开销较高                    | 编译时优化，性能更高        |  
+    | 功能              | 仅支持方法级别的拦截              | 支持字段、构造方法等拦截    |  
+    | 依赖              | 轻量，集成于 Spring               | 需要额外编译器/织入器       |  
+2. **如何结合自定义注解实现 AOP？**  
+    - 定义注解：  
+      ```java  
+      @Target(ElementType.METHOD)  
+      @Retention(RetentionPolicy.RUNTIME)  
+      public @interface Log {}  
+      ```  
+    - 切面中通过 `@annotation(Log)` 拦截：  
+      ```java  
+      @Around("@annotation(com.example.Log)")  
+      public Object logAround(ProceedingJoinPoint joinPoint) { ... }  
+      ```
+3. **Spring AOP 如何与事务管理（@Transactional）协作？**  
+    - `@Transactional` 基于 Spring AOP 实现，通过代理对象管理事务的开启、提交/回滚。
+
+---
+
+### **六、实战技巧**
+- **调试切入点表达式**：使用 `AopUtils` 工具类判断方法是否被代理。  
+- **性能优化**：避免在频繁调用的方法上使用复杂的 AOP 逻辑。  
+- **结合 Spring Boot**：通过 `@EnableAspectJAutoProxy` 自动启用 AOP。
+
+---
+
 ### AOP 的使用场景
 日志场景：
 - 诊断上下文，如：log4j 或 logback 中的MDC
