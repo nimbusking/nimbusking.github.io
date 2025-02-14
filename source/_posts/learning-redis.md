@@ -2743,10 +2743,172 @@ C 字符串和 SDS 之间的区别
 | 只能保存文本数据      | 可以保存文本或者二进制数据      |
 | 可以使用所有`<string.h>`库中的函数      | 可以使用一部分`<string.h>`库中的函数      |
 
-### 链表
 
+---
 
 ## 其它知识点
+这里面补充一些关于redis底层相关结构的特性
+### Redis Streams
+Redis Streams 是 Redis 5.0 引入的专为消息流设计的数据结构，支持 **多消费者组**、**消息回溯**、**ACK 确认** 等特性，适合构建高可靠的消息队列系统。以下从核心原理、使用场景及完整示例进行解析：
+
+#### **一、核心工作原理**
+- **1. 消息结构**
+   - **消息 ID**：格式为 `<时间戳-序号>`（如 `1629450000000-0`），支持自定义或自动生成。
+   - **字段值对**：消息内容以键值对形式存储（最多支持 1GB）。
+     ```redis
+     XADD orders * user_id 1001 product_id 2002 status "pending"  # * 表示自动生成ID
+     ```
+     - 输出示例：`"1629450000000-0"`
+- **2. 消息存储**
+   - **内存存储**：所有消息按 ID 顺序存储在内存中。
+   - **持久化**：通过 RDB/AOF 机制持久化到磁盘。
+   - **容量控制**：使用 `MAXLEN` 限制流长度（自动淘汰旧消息）。
+     ```redis
+     XADD temperature_stream MAXLEN ~ 1000 * value 25.3  # 保留约1000条最新数据
+     ```
+- **3. 消费者组（Consumer Group）**
+   - **角色划分**：
+     - **生产者**：通过 `XADD` 发布消息。
+     - **消费者组**：多个消费者共享消息处理负载。
+     - **消费者**：组内独立处理消息的实例。
+   - **关键机制**：
+     - **Pending Entries List (PEL)**：记录已分配给消费者但未确认的消息。
+     - **ACK 确认**：消费者处理完成后发送 `XACK` 移除 PEL 条目。
+     - **消息重投**：若消费者超时未确认，消息将重新分配给其他消费者。
+
+#### **二、核心操作命令与示例**
+- **1. 创建消费者组**
+   ```redis
+   XGROUP CREATE orders order_group $ MKSTREAM  # 创建流及消费者组，$ 表示从最新消息开始消费
+   ```
+- **2. 生产消息**
+   ```redis
+   XADD orders * user_id 1001 action "create_order"
+   XADD orders * user_id 1002 action "cancel_order"
+   ```
+- **3. 消费者读取消息**
+   - **独立消费者读取**：
+     ```redis
+     XREAD COUNT 2 STREAMS orders 0  # 从ID 0开始读取2条消息
+     ```
+   - **消费者组内消费**：
+     ```redis
+     XREADGROUP GROUP order_group consumer1 COUNT 1 STREAMS orders >  # 读取未分配给其他消费者的消息
+     ```
+     - `>` 表示获取新消息，若需重试处理旧消息，可指定具体 ID。
+- **4. 消息确认**
+   ```redis
+   XACK orders order_group 1629450000000-0  # 确认处理完成
+   ```
+- **5. 查看待处理消息**
+   ```redis
+   XPENDING orders order_group  # 显示未确认消息数量、最早/最晚ID等
+   ```
+- **6. 重新分配失败消息**
+   ```redis
+   XCLAIM orders order_group consumer2 3600000 1629450000000-0  # 将消息转移给consumer2，最小空闲时间1小时
+   ```
+
+#### **三、高级特性**
+- **1. 消息阻塞消费**
+   ```redis
+   XREADGROUP GROUP order_group consumer1 BLOCK 5000 COUNT 1 STREAMS orders >  # 阻塞5秒等待新消息
+   ```
+- **2. 消息范围查询**
+   ```redis
+   XRANGE orders 1629450000000 1629450060000  # 查询时间范围内的消息
+   XREVRANGE orders + - COUNT 10  # 逆序获取最近10条消息
+   ```
+- **3. 监控指标**
+   - **查看流信息**：
+     ```redis
+     XLEN orders  # 消息总数
+     XINFO STREAM orders  # 详细信息（长度、消费者组等）
+     ```
+   - **消费者组状态**：
+     ```redis
+     XINFO GROUPS orders  # 列出所有消费者组
+     XINFO CONSUMERS orders order_group  # 查看组内消费者状态
+     ```
+
+#### **四、典型应用场景**
+- **1. 订单事件流**
+   - **生产者**（订单服务）：
+     ```redis
+     XADD orders * order_id 3001 user_id 1001 status "created"
+     XADD orders * order_id 3001 user_id 1001 status "paid"
+     ```
+   - **消费者组**（库存服务、物流服务）：
+     ```redis
+     # 库存服务消费扣减库存
+     XREADGROUP GROUP order_group inventory_worker COUNT 1 STREAMS orders >
+   
+     # 物流服务消费生成运单
+     XREADGROUP GROUP order_group logistics_worker COUNT 1 STREAMS orders >
+     ```
+- **2. IoT 设备数据收集**
+   - **生产者**（设备端）：
+     ```redis
+     XADD sensor_data MAXLEN ~ 10000 * device_id 1 temperature 25.3 humidity 60
+     ```
+   - **消费者组**（数据分析服务）：
+     ```redis
+     XGROUP CREATE sensor_data analytics_group $ MKSTREAM
+     XREADGROUP GROUP analytics_group spark_consumer COUNT 100 STREAMS sensor_data >
+     ```
+- **3. 实时日志处理**
+   - **生产者**（应用服务）：
+     ```redis
+     XADD logs * level "ERROR" message "DB connection failed" service "payment"
+     ```
+   - **消费者组**（报警服务、日志存档服务）：
+     ```redis
+     # 报警服务实时过滤ERROR日志
+     XREADGROUP GROUP log_group alert_consumer COUNT 10 STREAMS logs >
+   
+     # 存档服务批量消费日志到HDFS
+     XREADGROUP GROUP log_group archive_consumer COUNT 100 STREAMS logs >
+     ```
+
+#### **五、对比其他消息队列**
+| **特性**         | **Redis Streams**                  | **Kafka**                          | **RabbitMQ**               |
+|------------------|------------------------------------|-------------------------------------|----------------------------|
+| **消息持久化**    | 支持（RDB/AOF）                   | 支持（磁盘持久化）                 | 支持（内存/磁盘）          |
+| **消费者组**      | 原生支持                          | 原生支持                           | 需要插件（如Quorum Queues）|
+| **吞吐量**        | 10万+/秒（依赖内存和网络）        | 百万+/秒                           | 万+/秒                     |
+| **顺序保证**      | 严格按ID顺序                      | 分区内有序                         | 队列有序                   |
+| **适用场景**      | 轻量级实时消息、简单事件溯源      | 高吞吐日志流、复杂事件处理         | 复杂路由、企业级消息协议   |
+
+
+#### **六、生产环境最佳实践**
+1. **合理设置消费者组参数**：
+   ```redis
+   XGROUP CREATE orders order_group $ MKSTREAM ENTRIESREAD 1000  # 跟踪最近1000条消息
+   ```
+2. **批量处理优化性能**：
+   ```redis
+   XREADGROUP GROUP order_group consumer1 COUNT 100 STREAMS orders >  # 一次读取100条
+   ```
+3. **异常处理机制**：
+   - **重试策略**：消息处理失败时，记录错误并重新放回队列。
+   - **死信队列**：将多次重试失败的消息转移到独立 Stream 人工处理。
+4. **内存监控**：
+   ```redis
+   MEMORY USAGE orders  # 查看流内存占用
+   ```
+
+#### **总结**
+Redis Streams 通过 **消息持久化**、**消费者组** 和 **ACK 机制** 实现了高可靠的消息队列功能，适用于实时事件处理、日志收集等场景。其优势在于：
+- **低延迟**：内存操作实现微秒级响应。
+- **灵活消费**：支持多消费者组、消息回溯、阻塞等待。
+- **无缝集成**：复用 Redis 基础设施，无需额外部署中间件。
+
+**注意事项**：
+- 内存容量限制大规模历史数据存储（需设置 `MAXLEN` 或定期归档）。
+- 复杂路由需求（如 Topic 路由）需结合其他数据结构（如 Hash）实现。
+
+---
+
 ### Redis中的红锁(Read Lock)
 Redis 红锁（RedLock）是一种分布式锁算法，旨在通过多个独立的 Redis 节点提供高可靠的锁机制。其核心原理如下：
 
