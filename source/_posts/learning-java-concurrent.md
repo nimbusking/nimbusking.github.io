@@ -110,10 +110,100 @@ top: true
 ---
 
 ### **高频场景题**
-1. 手写生产者-消费者模型（使用 `BlockingQueue` 或 `wait()/notify()`）。
-2. 如何实现线程安全的单例模式（双重检查锁 + volatile）？
-3. 多个线程交替打印数字（如三个线程按顺序打印 1-100）。
+#### 1. 手写生产者-消费者模型（使用 `BlockingQueue` 或 `wait()/notify()`）。
 
+#### 2. 如何实现线程安全的单例模式（双重检查锁 + volatile）？
+
+#### 3. 多个线程交替打印数字（如三个线程按顺序打印 1-100）。
+代码
+```java
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+class SharedData {
+    private int number = 1;
+    private final Lock lock = new ReentrantLock();
+    private final Condition[] conditions = new Condition[3];
+    private int currentId = 1; // 当前应执行的线程ID
+
+    public SharedData() {
+        for (int i = 0; i < conditions.length; i++) {
+            conditions[i] = lock.newCondition();
+        }
+    }
+
+    public void print(int threadId) throws InterruptedException {
+        lock.lock();
+        try {
+            while (number <= 100) {
+                // 检查是否轮到当前线程执行
+                while (currentId != threadId) {
+                    conditions[threadId - 1].await();
+                }
+                if (number > 100) break;
+                System.out.println(Thread.currentThread().getName() + " : " + number);
+                number++;
+                // 轮转至下一个线程
+                currentId = (currentId % 3) + 1;
+                // 唤醒下一个线程
+                conditions[currentId - 1].signal();
+            }
+            // 确保所有线程最终都能退出
+            for (Condition cond : conditions) cond.signal();
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+
+class PrintThread extends Thread {
+    private final SharedData sharedData;
+    private final int threadId;
+
+    public PrintThread(SharedData sharedData, int threadId) {
+        this.sharedData = sharedData;
+        this.threadId = threadId;
+    }
+
+    @Override
+    public void run() {
+        try {
+            sharedData.print(threadId);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+public class SeqPrintWithMultiThread {
+    public static void main(String[] args) {
+        SharedData sharedData = new SharedData();
+        new PrintThread(sharedData, 1).start();
+        new PrintThread(sharedData, 2).start();
+        new PrintThread(sharedData, 3).start();
+    }
+}
+```
+
+**实现说明：**
+
+1. **锁与条件变量：**
+   - 使用 `ReentrantLock` 保证线程互斥访问共享资源。
+   - 三个 `Condition` 对象分别对应三个线程，用于精确唤醒下一个线程。
+
+2. **共享状态：**
+   - `number` 记录当前应打印的数字。
+   - `currentId` 表示当前应执行的线程ID（1、2、3循环）。
+
+3. **线程执行逻辑：**
+   - 每个线程在获得锁后，检查是否轮到自己执行（`currentId == threadId`）。
+   - 若未轮到，调用对应条件变量的 `await()` 进入等待。
+   - 若轮到，打印当前数字，更新 `number` 和 `currentId`，并唤醒下一个线程。
+
+4. **终止条件：**
+   - 当 `number > 100` 时，所有线程退出循环。
+   - 最后唤醒所有线程确保它们能检测到终止条件。
 
 ---
 
@@ -686,12 +776,199 @@ AQS中条件队列是使用单向链表保存的，用nextWaiter来连接：
 - 调用await方法阻塞线程；
 - 当前线程存在于同步队列的头结点，调用await方法进行阻塞（从同步队列转化到条件队列）
 
+---
+
+
 #### Condition接口详解
+在Java并发编程中，`java.util.concurrent.locks.Condition` 类是与 `Lock` 配合使用的线程协调机制，它提供了比传统 `Object.wait/notify` 更细粒度的线程控制能力。
+
 ![Condition接口](181e5700/structure_of_condition.png)
 - 调用**Condition#await**方法会释放当前持有的锁，然后**阻塞当前线程**，同时向Condition队列尾部添加一个节点，所以调用Condition#await方法的时候必须持有锁。
 - 调用**Condition#signal**方法会将Condition队列的首节点移动到阻塞队列尾部，然后唤醒因调用Condition#await方法而阻塞的线程(唤醒之后这个线程就可以去竞争锁了)，所以调用Condition#signal方法的时候必须持有锁，持有锁的线程唤醒被因调用Condition#await方法而阻塞的线程。
 
 **Condition结合ReentrantLock，在阻塞队列中使用的非常多。**
+
+##### Condition 的核心原理
+- 1. **底层数据结构**
+    - 每个 `Condition` 对象内部维护一个 **等待队列**（单向链表结构）
+    - 队列节点类型与 AQS（AbstractQueuedSynchronizer）共享相同的 `Node` 类型
+    - 与 `synchronized` 的等待池不同，Condition 的等待队列是显式分离的
+- 2. **关键操作流程**
+    ```java
+    // 示例代码中的关键调用
+    condition.await();   // 线程进入等待队列
+    condition.signal();  // 转移节点到同步队列
+    ```
+    - **await() 执行流程**：
+        1. 将当前线程包装为 Node 节点加入 Condition 等待队列
+        2. 完全释放关联的锁（必须持有锁才能调用 await）
+        3. 进入阻塞状态（通过 `LockSupport.park`）
+    - **signal() 执行流程**：
+        1. 将等待队列中的第一个节点转移到 AQS 同步队列
+        2. 唤醒该节点的线程（此时线程仍在等待获取锁）
+- 3. 状态转换示意图
+    ```
+    [线程调用 await()]
+    持有锁 → 释放锁 → 进入等待队列 → 阻塞
+    
+    [其他线程调用 signal()]
+    等待队列头节点 → 移动到同步队列 → 竞争锁 → 被唤醒后继续执行
+    ```
+
+##### **二、Condition 的使用范式**
+
+###### 1. 基础模板
+```java
+Lock lock = new ReentrantLock();
+Condition condition = lock.newCondition();
+
+// 等待方
+lock.lock();
+try {
+    while (条件不满足) {  // 必须用循环检查
+        condition.await();
+    }
+    // 执行操作
+} finally {
+    lock.unlock();
+}
+
+// 通知方
+lock.lock();
+try {
+    // 改变条件
+    condition.signalAll(); // 或 signal()
+} finally {
+    lock.unlock();
+}
+```
+
+###### 2. 关键使用要点
+
+**（1）绑定关系**
+- 每个 `Condition` 必须与一个 `Lock` 实例绑定
+- 可通过 `lock.newCondition()` 创建多个不同条件的等待队列
+
+**（2）经典应用场景**
+- 生产者消费者模式（不同条件区分满/空）
+- 线程交替执行（如题目中的顺序打印）
+- 超时等待（`awaitNanos(long)`）
+
+**（3）对比 Object 监视器方法**
+| 特性                | Condition          | Object 监视器      |
+|---------------------|--------------------|-------------------|
+| 多等待队列           | ✅ 支持多个条件     | ❌ 单一等待池      |
+| 超时控制            | ✅ 提供多种超时方法 | ❌ 只有无限等待    |
+| 中断响应            | ✅ 可响应中断       | ✅ 同样支持        |
+| 条件谓词检查         | 必须显式检查       | 必须显式检查      |
+
+###### 3. 多条件优化示例
+```java
+class BoundedBuffer {
+    final Lock lock = new ReentrantLock();
+    final Condition notFull  = lock.newCondition(); 
+    final Condition notEmpty = lock.newCondition();
+
+    void put(Object x) throws InterruptedException {
+        lock.lock();
+        try {
+            while (count == items.length) 
+                notFull.await();  // 等待"非满"条件
+            // 存数据...
+            notEmpty.signal();    // 唤醒"非空"条件
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    Object take() throws InterruptedException {
+        lock.lock();
+        try {
+            while (count == 0) 
+                notEmpty.await(); // 等待"非空"条件
+            // 取数据...
+            notFull.signal();     // 唤醒"非满"条件
+            return item;
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+##### **三、实现原理深度解析**
+
+###### 1. 等待队列结构
+- **FIFO 队列**：保证公平性
+- **Node 状态**：`CONDITION`（-2）表示节点在条件队列中
+- **转移机制**：signal() 时将节点从条件队列移动到锁的同步队列
+
+###### 2. 源码级关键实现
+```java
+// AbstractQueuedSynchronizer.ConditionObject
+public final void await() throws InterruptedException {
+    if (Thread.interrupted())
+        throw new InterruptedException();
+    Node node = addConditionWaiter();  // 加入条件队列
+    int savedState = fullyRelease(node); // 完全释放锁
+    while (!isOnSyncQueue(node)) {     // 检查是否被转移到同步队列
+        LockSupport.park(this);
+        if ((interruptMode = checkInterruptWhileWaiting(node)) != 0)
+            break;
+    }
+    // ...后续获取锁的逻辑
+}
+
+public final void signal() {
+    if (!isHeldExclusively())
+        throw new IllegalMonitorStateException();
+    Node first = firstWaiter;
+    if (first != null)
+        doSignal(first);  // 转移第一个等待节点到同步队列
+}
+```
+
+##### **四、最佳实践与陷阱规避**
+
+###### 1. **必须遵循的规则**
+- 调用 await/signal 前必须持有对应的锁
+- 条件检查必须使用 while 循环（防止虚假唤醒）
+```java
+// 错误写法：使用 if 判断
+if (条件不满足) {
+    condition.await(); // 可能错过条件变化
+}
+
+// 正确写法：
+while (条件不满足) {
+    condition.await();
+}
+```
+
+###### 2. **性能优化技巧**
+- 优先使用 signal() 而非 signalAll()（减少不必要的唤醒）
+- 对不同条件使用不同 Condition 实例（如生产者-消费者的满/空条件分离）
+
+###### 3. **常见问题排查**
+- **死锁场景**：忘记调用 signal() 或 signalAll()
+- **状态不一致**：修改条件后未及时通知
+- **非法监视器状态**：未先获取锁直接调用 Condition 方法
+
+
+##### **五、与 synchronized 的对比选择**
+
+| 场景                      | 推荐方案             |
+|--------------------------|---------------------|
+| 需要多个等待条件          | Condition           |
+| 需要超时控制              | Condition           |
+| 简单同步场景              | synchronized        |
+| 需要非块状结构锁          | Lock + Condition    |
+| 需要公平锁机制            | ReentrantLock       |
+
+通过合理使用 Condition 的精确通知机制，可以显著提升并发程序的性能和可维护性，典型场景下的吞吐量相比 `synchronized` 可提升 20%-30%。
+
+---
+
 
 #### ReentrantLock(独占锁)
 ReentrantLock是一种基于AQS框架的应用实现，是JDK中的一种线程并发访问的同步手段，它的功能**类似于synchronized是一种互斥锁，可以保证线程安全。**

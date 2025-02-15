@@ -82,6 +82,8 @@ Environment=INSTALL4J_JAVA_HOME=/etc/java/jdk1.8.0_211
 ExecStart=/usr/local/bin/nexus start
 ExecStop=/usr/local/bin/nexus stop 
 Restart=on-failure
+# 通过systemd方式来启动服务的，需要加上文件句柄描述，不然会读取默认的systemd配置，导致全局的ulimit设置不生效
+LimitNOFILE=65536
 
 [Install]
 WantedBy=multi-user.target
