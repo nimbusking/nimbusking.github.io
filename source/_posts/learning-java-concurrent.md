@@ -20,7 +20,7 @@ top: true
 
 ### **一、线程基础**
 1. **线程和进程的区别**  
-   - 进程是操作系统资源分配的基本单位，线程是CPU调度的基本单位。
+   - 进程是{% label success@操作系统 %}资源分配的基本单位，线程是{% label primary@CPU调度 %}的基本单位。
    - 进程间资源独立，线程共享进程资源（如内存、文件句柄）。
 2. **创建线程的几种方式**  
    - 继承 `Thread` 类，重写 `run()` 方法。
@@ -152,8 +152,8 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
 
 ### **三、锁与并发工具类**
 1. **乐观锁与悲观锁的区别**  
-   - 悲观锁：假定竞争存在，直接加锁（如 `synchronized`）。
-   - 乐观锁：假定无竞争，通过版本号/CAS 实现（如 `AtomicInteger`）。
+   - **悲观锁**：假定竞争存在，直接加锁（如 `synchronized`）。
+   - **乐观锁**：假定无竞争，通过版本号/CAS 实现（如 `AtomicInteger`）。
 2. **AQS（AbstractQueuedSynchronizer）原理**  
    - 核心：通过 CLH 队列管理线程阻塞和唤醒，用 `state` 变量表示资源状态。
    - 实现类：`ReentrantLock`、`Semaphore`、`CountDownLatch` 等。
@@ -421,6 +421,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
 1. **ConcurrentHashMap 的实现原理**  
     - JDK 8 前：分段锁（Segment + HashEntry）。
     - JDK 8+：数组 + 链表/红黑树，CAS + `synchronized` 锁桶头节点。
+    - 
 2. **CopyOnWriteArrayList 适用场景**  
     - 读多写少，通过写时复制（复制新数组）保证线程安全，读无锁。
 
