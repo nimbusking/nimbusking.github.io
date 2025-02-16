@@ -25,10 +25,10 @@
     "hexo-renderer-marked": "^3.3.0",
     "hexo-renderer-stylus": "^3.0.1",
     "hexo-server": "^3.0.0",
+    "hexo-tag-plantuml": "^1.0.0",
     "hexo-theme-landscape": "^1.0.0",
     "hexo-theme-next": "^8.21.0",
     "hexo-word-counter": "^0.2.0",
-    "lozad": "^1.16.0",
-    "hexo-tag-plantuml": "^1.0.0"
+    "lozad": "^1.16.0"
   }
 }
