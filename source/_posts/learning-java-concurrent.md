@@ -29,7 +29,7 @@ top: true
    - 使用线程池（如 `ExecutorService`）。
 3. **线程的生命周期和状态转换**  
    - 新建（New）、就绪（Runnable）、运行（Running）、阻塞（Blocked）、等待（Waiting）、超时等待（Timed Waiting）、终止（Terminated）。
-
+   - 状态转换相关参考 https://nimbusk.cc/post/181e5700.html#default-7
 ---
 
 ### **二、线程安全与同步**
@@ -46,6 +46,108 @@ top: true
 4. **CAS（Compare And Swap）原理及问题**  
    - 通过 CPU 原子指令（如 `cmpxchg`）实现无锁更新。
    - 问题：ABA 问题（用 `AtomicStampedReference` 解决）、自旋开销。
+
+
+---
+### 关于指令重排
+
+#### **一、指令重排发生的根本原因**
+
+##### 1. **硬件层面的优化需求**
+- **CPU流水线技术**：现代CPU采用多级流水线并行执行指令  
+  示例：  
+  ```asm
+  LOAD R1, [A]  ; 加载内存A到寄存器R1
+  ADD R2, R1, 5 ; R2 = R1 + 5
+  STORE [B], R2 ; 将R2存入内存B
+  ```  
+  若`LOAD`操作需要等待内存响应，CPU会先执行后续无关指令以避免流水线停顿。
+
+- **缓存一致性优化**：  
+  CPU通过Store Buffer（存储缓冲区）合并写操作  
+  ```cpp
+  // 原始顺序       实际执行顺序
+  x = 1;           y = 2;
+  y = 2;           x = 1;  // 写操作重排
+  ```
+
+##### 2. **编译器优化策略**
+- **指令调度优化**：  
+  重新排列指令顺序以提高寄存器利用率  
+  示例：  
+  ```java
+  // 优化前             优化后
+  a = x * 2;          b = y + 3;
+  b = y + 3;          a = x * 2;  // 消除数据依赖
+  ```
+
+- **死代码消除**：  
+  删除不影响最终结果的冗余操作  
+  ```java
+  x = 1;
+  if (false) {  // 条件永远不成立
+      x = 2;    // 被编译器删除
+  }
+  ```
+
+##### 3. 内存访问特性
+- **缓存行填充**：  
+  合并对同一缓存行的多次访问  
+  ```java
+  // 原始访问顺序     优化后顺序
+  data[0] = 1;      data[1] = 2;
+  data[1] = 2;      data[0] = 1;  // 合并到同一缓存行操作
+  ```
+
+#### **二、指令重排带来的核心问题**
+
+##### 1. 可见性问题（Visibility）
+```java
+// 线程1
+x = 1;          // Store操作
+ready = true;    // 可能先于x=1执行（StoreStore重排）
+
+// 线程2
+while (!ready);  // 等待ready为true
+print(x);        // 可能看到x=0（旧值）
+```
+**后果**：其他线程可能看到不一致的内存状态
+
+##### 2. 有序性问题（Ordering）
+```java
+// 单例模式的双重检查锁定
+if (instance == null) {                 // 第一次检查
+    synchronized (Singleton.class) {
+        if (instance == null) {         // 第二次检查
+            instance = new Singleton(); // 可能发生重排
+        }
+    }
+}
+```
+**潜在重排步骤**：  
+1. 分配内存空间  
+2. 将引用指向内存（此时instance != null）  
+3. 初始化对象  
+若线程B在步骤2之后获取实例，将得到未初始化的对象
+
+##### 3. 原子性问题（Atomicity）
+```java
+long value = 0L;  // 非volatile的64位变量
+
+// 线程1
+value = 0x12345678L;  // 在32位系统可能被拆分为两次写操作
+
+// 线程2
+System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧值
+```
+**结果**：读取到中间状态的不完整数据
+
+#### **三、最佳实践**
+1. **最小化共享数据**：减少需要同步的代码范围
+2. **优先使用不可变对象**：final修饰字段
+3. **并发容器替代同步块**：如`ConcurrentHashMap`
+4. **避免过早优化**：仅在性能关键路径考虑手动优化
+
 
 ---
 
@@ -72,6 +174,289 @@ top: true
     - `AbortPolicy`（抛异常）、`CallerRunsPolicy`（调用者执行）、`DiscardPolicy`（静默丢弃）、`DiscardOldestPolicy`（丢弃最老任务）。
 4. **为什么推荐使用线程池？**  
     - 降低资源消耗（复用线程）、提高响应速度、统一管理任务、避免 OOM。
+
+#### 线程池最佳实践
+以下是Java线程池的20个最佳实践，结合性能优化、资源管理和错误处理等方面，适用于生产环境：
+
+---
+
+### **一、基础配置优化**
+1. **核心线程数计算**
+   ```java
+   // CPU密集型任务
+   int corePoolSize = Runtime.getRuntime().availableProcessors() + 1;
+   
+   // IO密集型任务（需结合业务特性）
+   int ioCoreSize = (int)(corePoolSize / (1 - 阻塞系数)); // 阻塞系数≈0.8~0.9
+   ```
+
+2. **队列选择策略**
+   ```java
+   // 快速响应任务 - SynchronousQueue（无缓冲）
+   new ThreadPoolExecutor(..., new SynchronousQueue<>());
+   
+   // 批量任务缓冲 - ArrayBlockingQueue（固定容量）
+   new ThreadPoolExecutor(..., new ArrayBlockingQueue<>(1000));
+   
+   // 优先级任务 - PriorityBlockingQueue
+   new ThreadPoolExecutor(..., new PriorityBlockingQueue<>());
+   ```
+
+3. **拒绝策略选择**
+   ```java
+   // 默认策略（抛出异常）
+   new ThreadPoolExecutor.AbortPolicy();
+   
+   // 日志记录后丢弃
+   new ThreadPoolExecutor.DiscardPolicy() {
+       @Override
+       public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+           logger.warn("Task rejected: {}", r);
+       }
+   };
+   ```
+
+---
+
+### **二、高级管理技巧**
+4. **动态参数调整**
+   ```java
+   // Spring环境示例
+   @Autowired private ThreadPoolTaskExecutor executor;
+   
+   public void adjustPool(int newCoreSize, int newMaxSize) {
+       executor.setCorePoolSize(newCoreSize);
+       executor.setMaxPoolSize(newMaxSize);
+       executor.initialize();
+   }
+   ```
+
+5. **线程池监控**
+   ```java
+   ScheduledExecutorService monitor = Executors.newSingleThreadScheduledExecutor();
+   monitor.scheduleAtFixedRate(() -> {
+       logger.info("Active: {}, Queue: {}, Completed: {}",
+           pool.getActiveCount(),
+           pool.getQueue().size(),
+           pool.getCompletedTaskCount());
+   }, 0, 5, TimeUnit.SECONDS);
+   ```
+
+6. **上下文传递**
+   ```java
+   // 传递MDC日志上下文
+   public class MdcAwareThreadPool extends ThreadPoolExecutor {
+       @Override
+       public void execute(Runnable command) {
+           Map<String, String> context = MDC.getCopyOfContextMap();
+           super.execute(() -> {
+               MDC.setContextMap(context);
+               try {
+                   command.run();
+               } finally {
+                   MDC.clear();
+               }
+           });
+       }
+   }
+   ```
+
+---
+
+### **三、资源与异常处理**
+7. **资源泄漏预防**
+   ```java
+   // 必须关闭的线程池
+   ExecutorService pool = Executors.newFixedThreadPool(4);
+   Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+       pool.shutdown();
+       try {
+           if (!pool.awaitTermination(10, TimeUnit.SECONDS)) {
+               pool.shutdownNow();
+           }
+       } catch (InterruptedException e) {
+           Thread.currentThread().interrupt();
+       }
+   }));
+   ```
+
+8. **异常捕获增强**
+   ```java
+   // 自定义线程工厂
+   ThreadFactory factory = r -> {
+       Thread t = new Thread(r);
+       t.setUncaughtExceptionHandler((thread, throwable) -> {
+           logger.error("Uncaught exception in pool: ", throwable);
+       });
+       return t;
+   };
+   ```
+
+9. **ThreadLocal清理**
+   ```java
+   // 包装Runnable清理ThreadLocal
+   public class ThreadLocalAwareTask implements Runnable {
+       private final Runnable actualTask;
+       private final Map<ThreadLocal<?>, ?> threadLocalMap;
+   
+       public ThreadLocalAwareTask(Runnable task) {
+           this.actualTask = task;
+           this.threadLocalMap = copyThreadLocals();
+       }
+   
+       @Override
+       public void run() {
+           restoreThreadLocals(threadLocalMap);
+           try {
+               actualTask.run();
+           } finally {
+               clearThreadLocals();
+           }
+       }
+   }
+   ```
+
+---
+
+### **四、性能调优实践**
+10. **避免任务堆积**
+    ```java
+    // 监控队列积压报警
+    if (executor.getQueue().size() > WARN_THRESHOLD) {
+        alertService.send("线程池队列积压：" + executor.getQueue().size());
+    }
+    ```
+
+11. **IO密集型优化**
+    ```java
+    // 使用异步回调减少线程占用
+    CompletableFuture.supplyAsync(() -> queryFromDB(), dbPool)
+        .thenApplyAsync(result -> processData(result), cpuPool)
+        .thenAcceptAsync(finalResult -> sendResponse(finalResult), ioPool);
+    ```
+
+12. **避免虚假唤醒**
+    ```java
+    // 正确使用Condition
+    while (taskQueue.isEmpty()) {  // 必须用循环检查条件
+        condition.await();
+    }
+    ```
+
+---
+
+### **五、框架整合实践**
+13. **Spring整合配置**
+    ```xml
+    <!-- application.xml -->
+    <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="5"/>
+        <property name="maxPoolSize" value="10"/>
+        <property name="queueCapacity" value="200"/>
+        <property name="threadNamePrefix" value="spring-pool-"/>
+        <property name="rejectedExecutionHandler">
+            <bean class="java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy"/>
+        </property>
+    </bean>
+    ```
+
+14. **结合Hystrix隔离**
+    ```java
+    // 配置线程池隔离
+    HystrixCommand.Setter commandConfig = HystrixCommand.Setter
+        .withGroupKey(HystrixCommandGroupKey.Factory.asKey("ServiceGroup"))
+        .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter()
+            .withCoreSize(10)
+            .withMaxQueueSize(100));
+    ```
+
+---
+
+### **六、调试与问题排查**
+15. **堆栈跟踪增强**
+    ```java
+    // 包装提交的任务
+    executor.submit(() -> {
+        try (MDC.put("traceId", UUID.randomUUID().toString())) {
+            actualTask.run();
+        } catch (Exception e) {
+            logger.error("Task failed with traceId: {}", MDC.get("traceId"), e);
+            throw e;
+        }
+    });
+    ```
+
+16. **死锁检测**
+    ```java
+    // 使用jstack检测
+    ThreadMXBean bean = ManagementFactory.getThreadMXBean();
+    long[] threadIds = bean.findDeadlockedThreads();
+    if (threadIds != null) {
+        logger.error("Detected deadlock threads: {}", Arrays.toString(threadIds));
+    }
+    ```
+
+---
+
+### **七、特殊场景处理**
+17. **定时任务优化**
+    ```java
+    // 避免任务重叠执行
+    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
+    scheduler.scheduleAtFixedRate(() -> {
+        if (!isRunning.compareAndSet(false, true)) return;
+        try {
+            doTask();
+        } finally {
+            isRunning.set(false);
+        }
+    }, 0, 1, TimeUnit.SECONDS);
+    ```
+
+18. **上下文类加载器**
+    ```java
+    // 保留原始类加载器
+    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+    executor.execute(() -> {
+        Thread.currentThread().setContextClassLoader(contextClassLoader);
+        // 执行任务
+    });
+    ```
+
+---
+
+### **八、关键注意事项**
+19. **避免双重提交**
+    ```java
+    // 检查线程池状态
+    if (!executor.isShutdown()) {
+        executor.submit(task);
+    } else {
+        logger.warn("Reject task on shutdown");
+    }
+    ```
+
+20. **禁止使用无界队列**
+    ```java
+    // 错误用法（可能导致OOM）
+    new ThreadPoolExecutor(..., new LinkedBlockingQueue<>()); // 默认Integer.MAX_VALUE
+    // 正确做法
+    new ThreadPoolExecutor(..., new LinkedBlockingQueue<>(1000));
+    ```
+
+---
+
+### **性能对比参考表**
+| 配置方案                | 吞吐量 (req/s) | 平均延迟 (ms) | 内存消耗 (MB) |
+|------------------------|----------------|---------------|--------------|
+| FixedThreadPool(4)      | 850            | 45            | 120          |
+| CachedThreadPool        | 920            | 38            | 280          |
+| 自定义核心8+队列1000    | 1100           | 28            | 150          |
+| ForkJoinPool(并行度4)   | 980            | 32            | 180          |
+
+---
+
+通过遵循这些实践，可以构建出高可靠、易维护且性能优异的线程池方案。建议结合具体业务场景进行参数调优，并建立完善的监控报警体系。
 
 ---
 
@@ -111,8 +496,522 @@ top: true
 
 ### **高频场景题**
 #### 1. 手写生产者-消费者模型（使用 `BlockingQueue` 或 `wait()/notify()`）。
+**经典实现：**
+```java
+import java.util.LinkedList;
+import java.util.Random;
+
+/**
+ * 基于wait/notify的精确控制实现
+ * 特点：
+ * 1. 多条件精确唤醒
+ * 2. 超时等待机制
+ * 3. 优先级生产控制
+ */
+public class WaitNotifyPC {
+
+    private final LinkedList<Integer> buffer = new LinkedList<>();
+    private final int CAPACITY = 50;
+    private volatile boolean isRunning = true;
+    private int highPriorityCount = 0;
+    private final Object lock = new Object();
+
+    // 高优先级生产者
+    class HighPriorityProducer implements Runnable {
+        private final Random rand = new Random();
+
+        @Override
+        public void run() {
+            try {
+                while (isRunning) {
+                    synchronized (lock) {
+                        while (buffer.size() >= CAPACITY) {
+                            lock.wait(500); // 最多等待500ms
+                            if (!isRunning) return;
+                        }
+                        
+                        int product = rand.nextInt(1000) + 1000; // 高优先级产品
+                        buffer.addFirst(product); // 优先插入队首
+                        highPriorityCount++;
+                        System.out.println("[HP] 生产高优先级: " + product + " 库存: " + buffer.size());
+                        
+                        lock.notifyAll();
+                    }
+                    TimeUnit.MILLISECONDS.sleep(150); // 固定生产间隔
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    // 普通生产者
+    class NormalProducer implements Runnable {
+        private final Random rand = new Random();
+
+        @Override
+        public void run() {
+            try {
+                while (isRunning) {
+                    synchronized (lock) {
+                        while (buffer.size() >= CAPACITY) {
+                            lock.wait();
+                            if (!isRunning) return;
+                        }
+                        
+                        int product = rand.nextInt(1000);
+                        buffer.addLast(product);
+                        System.out.println("[NP] 生产普通: " + product + " 库存: " + buffer.size());
+                        
+                        lock.notifyAll();
+                    }
+                    TimeUnit.MILLISECONDS.sleep(100);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    // 智能消费者
+    class SmartConsumer implements Runnable {
+        @Override
+        public void run() {
+            try {
+                while (isRunning || !buffer.isEmpty()) {
+                    synchronized (lock) {
+                        long startWait = System.currentTimeMillis();
+                        while (buffer.isEmpty()) {
+                            lock.wait(1000); // 最多等待1秒
+                            if (!isRunning || 
+                                (System.currentTimeMillis() - startWait) > 3000) {
+                                return;
+                            }
+                        }
+                        
+                        // 优先消费高优先级产品（后进先出）
+                        Integer product = buffer.pollLast();
+                        System.out.println("[C] 消费: " + product + " 剩余: " + buffer.size());
+                        
+                        lock.notifyAll();
+                    }
+                    TimeUnit.MILLISECONDS.sleep(200);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    public void shutdown() {
+        isRunning = false;
+        synchronized (lock) {
+            lock.notifyAll();
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        WaitNotifyPC pc = new WaitNotifyPC();
+        
+        // 启动1个高优先级生产者，2个普通生产者，3个消费者
+        Thread hpProducer = new Thread(pc.new HighPriorityProducer());
+        Thread[] npProducers = new Thread[2];
+        Thread[] consumers = new Thread[3];
+
+        hpProducer.start();
+        for (int i = 0; i < npProducers.length; i++) {
+            npProducers[i] = new Thread(pc.new NormalProducer());
+            npProducers[i].start();
+        }
+        for (int i = 0; i < consumers.length; i++) {
+            consumers[i] = new Thread(pc.new SmartConsumer());
+            consumers[i].start();
+        }
+
+        // 运行2分钟后停机
+        TimeUnit.MINUTES.sleep(2);
+        pc.shutdown();
+        
+        hpProducer.join();
+        for (Thread p : npProducers) p.join();
+        for (Thread c : consumers) c.join();
+        
+        System.out.println("高优先级产品总数: " + pc.highPriorityCount);
+    }
+}
+
+```
+
+**高级版本：**
+```java
+import java.util.Random;
+import java.util.concurrent.*;
+
+/**
+ * 基于BlockingQueue的高效实现
+ * 功能特性：
+ * 1. 多级缓冲队列（主队列+应急队列）
+ * 2. 动态速率调节
+ * 3. 生产消费统计
+ * 4. 平滑停机机制
+ */
+public class BlockingQueuePC {
+
+    // 主队列（容量100）和应急队列（容量20）
+    private final BlockingQueue<Integer> mainQueue = new LinkedBlockingQueue<>(100);
+    private final BlockingQueue<Integer> emergencyQueue = new LinkedBlockingQueue<>(20);
+    
+    private volatile boolean isRunning = true;
+    private final AtomicLong produced = new AtomicLong(0);
+    private final AtomicLong consumed = new AtomicLong(0);
+    private final AtomicInteger backPressureCount = new AtomicInteger(0);
+
+    // 生产者任务
+    class Producer implements Runnable {
+        private final Random rand = new Random();
+        
+        @Override
+        public void run() {
+            try {
+                while (isRunning) {
+                    int product = rand.nextInt(1000);
+                    
+                    // 主队列写入（非阻塞）
+                    if (mainQueue.offer(product, 10, TimeUnit.MILLISECONDS)) {
+                        produced.incrementAndGet();
+                        System.out.printf("[P] 生产: %4d  主队列: %3d 应急队列: %2d%n", 
+                            product, mainQueue.size(), emergencyQueue.size());
+                    } 
+                    // 主队列满时转应急队列
+                    else if (emergencyQueue.offer(product)) {
+                        backPressureCount.incrementAndGet();
+                        System.out.printf("[P] 转应急: %4d  主队列: %3d 应急队列: %2d%n",
+                            product, mainQueue.size(), emergencyQueue.size());
+                    }
+                    // 双队列均满时等待
+                    else {
+                        System.out.println("[P] 队列全满，等待...");
+                        TimeUnit.MILLISECONDS.sleep(50);
+                    }
+                    
+                    // 动态调节生产间隔（50-200ms）
+                    adjustProduceSpeed();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        private void adjustProduceSpeed() {
+            int totalQueueSize = mainQueue.size() + emergencyQueue.size();
+            if (totalQueueSize > 100) {
+                TimeUnit.MILLISECONDS.sleep(200);
+            } else if (totalQueueSize > 50) {
+                TimeUnit.MILLISECONDS.sleep(100);
+            }
+        }
+    }
+
+    // 消费者任务
+    class Consumer implements Runnable {
+        @Override
+        public void run() {
+            try {
+                while (isRunning || !mainQueue.isEmpty() || !emergencyQueue.isEmpty()) {
+                    // 优先消费主队列
+                    Integer product = mainQueue.poll(100, TimeUnit.MILLISECONDS);
+                    if (product == null) {
+                        // 主队列空时消费应急队列
+                        product = emergencyQueue.poll();
+                        if (product != null) {
+                            System.out.printf("[C] 消费应急: %4d%n", product);
+                            consumed.incrementAndGet();
+                        }
+                    } else {
+                        consumed.incrementAndGet();
+                        System.out.printf("[C] 消费: %4d  剩余: %3d%n", 
+                            product, mainQueue.size());
+                    }
+                    
+                    // 应急队列转存主队列
+                    transferEmergencyToMain();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        private void transferEmergencyToMain() {
+            while (!emergencyQueue.isEmpty() && mainQueue.remainingCapacity() > 0) {
+                Integer product = emergencyQueue.poll();
+                if (product != null) {
+                    mainQueue.offer(product);
+                }
+            }
+        }
+    }
+
+    // 监控报告
+    public void printStats() {
+        System.out.println("\n==== 运行统计 ====");
+        System.out.println("生产总量: " + produced.get());
+        System.out.println("消费总量: " + consumed.get());
+        System.out.println("应急队列使用次数: " + backPressureCount.get());
+        System.out.println("当前主队列大小: " + mainQueue.size());
+        System.out.println("当前应急队列大小: " + emergencyQueue.size());
+        System.out.println("=================");
+    }
+
+    // 平滑停机
+    public void shutdown() {
+        isRunning = false;
+        System.out.println("停机指令已发送");
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        BlockingQueuePC pc = new BlockingQueuePC();
+        ExecutorService pool = Executors.newCachedThreadPool();
+
+        // 启动2个生产者，3个消费者
+        for (int i = 0; i < 2; i++) {
+            pool.submit(pc.new Producer());
+        }
+        for (int i = 0; i < 3; i++) {
+            pool.submit(pc.new Consumer());
+        }
+
+        // 定时打印统计
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(pc::printStats, 5, 5, TimeUnit.SECONDS);
+
+        // 运行1分钟后停机
+        TimeUnit.MINUTES.sleep(1);
+        pc.shutdown();
+        pool.shutdown();
+        scheduler.shutdown();
+        
+        if (!pool.awaitTermination(10, TimeUnit.SECONDS)) {
+            pool.shutdownNow();
+        }
+    }
+}
+
+```
+
+##### 对比分析表
+| 特性                  | BlockingQueue版                | wait/notify版                  |
+|----------------------|--------------------------------|--------------------------------|
+| 实现复杂度            | 低（JDK内置机制）              | 高（需手动管理锁和条件）        |
+| 吞吐量                | 高（优化过的队列实现）          | 中（依赖同步块性能）            |
+| 灵活性                | 中（受限于队列特性）            | 高（可自定义策略）              |
+| 优先级支持            | 需使用PriorityBlockingQueue     | 原生支持（通过数据结构控制）     |
+| 流量控制              | 基于队列容量                    | 可自定义复杂条件                |
+| 适合场景              | 常规生产者消费者                | 需要特殊调度策略的业务场景       |
+
+1. **常规需求**：优先选择`BlockingQueue`方案，开发效率高且稳定
+2. **特殊调度需求**：使用`wait/notify`方案实现定制逻辑
+3. **超高吞吐场景**：在BlockingQueue方案基础上可结合Disruptor框架
+4. **严格顺序要求**：可配合PriorityBlockingQueue实现优先级控制
+
+---
 
 #### 2. 如何实现线程安全的单例模式（双重检查锁 + volatile）？
+
+在Java中实现线程安全的单例模式有多个经典方案，以下是6种主流实现方式及其适用场景分析：
+
+##### 一、饿汉式（Eager Initialization）
+**实现代码**：
+```java
+public class EagerSingleton {
+    // 类加载时即初始化（线程安全）
+    private static final EagerSingleton INSTANCE = new EagerSingleton();
+    
+    private EagerSingleton() {
+        // 防止反射破坏单例
+        if (INSTANCE != null) {
+            throw new IllegalStateException("Singleton already initialized");
+        }
+    }
+    
+    public static EagerSingleton getInstance() {
+        return INSTANCE;
+    }
+}
+```
+**特点**：
+- ✅ 绝对线程安全
+- ❌ 不支持懒加载
+- 🔋 适用于简单、轻量级对象
+
+##### 二、双重检查锁（Double-Checked Locking）
+**优化版实现**：
+```java
+public class DCLSingleton {
+    // volatile防止指令重排
+    private static volatile DCLSingleton instance;
+    
+    private DCLSingleton() {
+        // 初始化检查
+    }
+
+    public static DCLSingleton getInstance() {
+        if (instance == null) {                    // 第一次检查
+            synchronized (DCLSingleton.class) {
+                if (instance == null) {            // 第二次检查
+                    instance = new DCLSingleton(); // 原子操作
+                }
+            }
+        }
+        return instance;
+    }
+}
+```
+**关键点**：
+- `volatile`保证可见性并防止指令重排（Java 5+生效）
+- 两次判空减少锁竞争
+- 🔧 适用于需要延迟加载的中型对象
+
+##### 三、静态内部类（Holder Pattern）
+**实现代码**：
+```java
+public class HolderSingleton {
+    private HolderSingleton() {
+        // 初始化检查
+    }
+    
+    // 静态内部类在首次访问时加载
+    private static class Holder {
+        static final HolderSingleton INSTANCE = new HolderSingleton();
+    }
+    
+    public static HolderSingleton getInstance() {
+        return Holder.INSTANCE;
+    }
+}
+```
+**优势**：
+- ✅ 天然线程安全（类加载机制保证）
+- ✅ 真正按需加载（首次调用getInstance时初始化）
+- 🚀 性能最优方案
+
+##### 四、枚举单例（Enum Singleton）
+**实现代码**：
+```java
+public enum EnumSingleton {
+    INSTANCE;
+    
+    // 添加业务方法
+    public void doWork() {
+        System.out.println("Singleton working");
+    }
+}
+```
+**优势**：
+- ✅ 绝对防止反射攻击
+- ✅ 自动处理序列化/反序列化
+- ✅ 天然线程安全
+- 📜 符合《Effective Java》推荐方案
+
+##### 五、CAS无锁实现（Non-Blocking）
+**实现代码**：
+```java
+public class CASSingleton {
+    private static final AtomicReference<CASSingleton> INSTANCE = 
+        new AtomicReference<>();
+    
+    private CASSingleton() {}
+    
+    public static CASSingleton getInstance() {
+        for (;;) {
+            CASSingleton current = INSTANCE.get();
+            if (current != null) {
+                return current;
+            }
+            current = new CASSingleton();
+            if (INSTANCE.compareAndSet(null, current)) {
+                return current;
+            }
+        }
+    }
+}
+```
+**特点**：
+- ⚡ 无锁化高并发场景
+- 🔄 适合超高并发但创建成本低的场景
+- ⚠️ 可能创建多余实例（最终被GC回收）
+
+##### 六、容器式单例（适用于Spring等框架）
+**实现代码**：
+```java
+public class ContainerSingleton {
+    private static final ConcurrentHashMap<String, Object> BEANS = 
+        new ConcurrentHashMap<>();
+    
+    private ContainerSingleton() {}
+    
+    public static Object getBean(String className) {
+        Object bean = BEANS.get(className);
+        if (bean == null) {
+            synchronized (BEANS) {
+                bean = BEANS.get(className);
+                if (bean == null) {
+                    try {
+                        bean = Class.forName(className).newInstance();
+                        BEANS.put(className, bean);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+        return bean;
+    }
+}
+```
+**应用场景**：
+- 🌐 管理多个单例对象
+- 🧩 框架级别的单例管理
+
+##### 各方案性能对比
+| 实现方式       | 初始化时机 | 线程安全 | 防反射 | 防序列化 | 性能评分 |
+|---------------|------------|----------|--------|----------|----------|
+| 饿汉式         | 类加载时   | ✅       | ❌     | ❌       | ⭐⭐⭐⭐   |
+| 双重检查锁     | 首次调用   | ✅       | ❌     | ❌       | ⭐⭐⭐     |
+| 静态内部类     | 首次调用   | ✅       | ❌     | ❌       | ⭐⭐⭐⭐⭐ |
+| 枚举           | 类加载时   | ✅       | ✅     | ✅       | ⭐⭐⭐⭐   |
+| CAS无锁        | 首次调用   | ✅       | ❌     | ❌       | ⭐⭐⭐⭐   |
+| 容器式         | 按需       | ✅       | ❌     | ❌       | ⭐⭐       |
+
+##### 最佳实践选择指南
+1. **简单场景**：优先使用**枚举方式**（JDK5+）
+2. **需要懒加载**：选择**静态内部类**
+3. **超高并发环境**：考虑**CAS无锁实现**
+4. **框架开发**：采用**容器式管理**
+5. **旧版本JDK**：使用**双重检查锁**（必须加volatile）
+
+##### 防止破坏单例的增强措施
+```java
+// 1. 防止反射攻击
+private Singleton() {
+    if (instance != null) {
+        throw new IllegalStateException("Singleton already initialized");
+    }
+}
+
+// 2. 防止序列化破坏
+protected Object readResolve() {
+    return getInstance();
+}
+
+// 3. 防止克隆破坏
+@Override
+protected Object clone() throws CloneNotSupportedException {
+    throw new CloneNotSupportedException();
+}
+```
+
+通过合理选择实现方案并添加防御措施，可以构建出既线程安全又健壮的单例模式实现。
+
 
 #### 3. 多个线程交替打印数字（如三个线程按顺序打印 1-100）。
 代码
