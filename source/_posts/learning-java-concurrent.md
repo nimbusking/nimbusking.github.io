@@ -121,10 +121,12 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static cc.nimbusk.corejava.concurent.SeqPrint.TOTAL_NUMS;
+
 class SharedData {
-    private int number = 1;
-    private final Lock lock = new ReentrantLock();
-    private final Condition[] conditions = new Condition[3];
+    private int number = 1; // 起始数字
+    private final Lock lock = new ReentrantLock(); // 独占锁控制打印资源访问
+    private final Condition[] conditions = new Condition[3]; // Condition精准唤醒对应线程
     private int currentId = 1; // 当前应执行的线程ID
 
     public SharedData() {
@@ -136,21 +138,29 @@ class SharedData {
     public void print(int threadId) throws InterruptedException {
         lock.lock();
         try {
-            while (number <= 100) {
+            while (number <= TOTAL_NUMS) {
                 // 检查是否轮到当前线程执行
                 while (currentId != threadId) {
+                    // 不是直接阻塞
                     conditions[threadId - 1].await();
                 }
-                if (number > 100) break;
+                if (number > TOTAL_NUMS) {
+                    // 轮转至下一个线程，计算下一个线程号
+                    currentId = (currentId % 3) + 1;
+                    // 唤醒下一个线程
+                    conditions[currentId - 1].signal();
+                    break;
+                }
+
                 System.out.println(Thread.currentThread().getName() + " : " + number);
                 number++;
-                // 轮转至下一个线程
+                // 轮转至下一个线程，计算下一个线程号
                 currentId = (currentId % 3) + 1;
                 // 唤醒下一个线程
                 conditions[currentId - 1].signal();
             }
-            // 确保所有线程最终都能退出
-            for (Condition cond : conditions) cond.signal();
+            // 确保所有线程最终都能退出，这种直接唤醒会存在异常
+//            for (Condition cond : conditions) cond.signal();
         } finally {
             lock.unlock();
         }
@@ -176,7 +186,8 @@ class PrintThread extends Thread {
     }
 }
 
-public class SeqPrintWithMultiThread {
+public class SeqPrint {
+    public static final int TOTAL_NUMS = 5;
     public static void main(String[] args) {
         SharedData sharedData = new SharedData();
         new PrintThread(sharedData, 1).start();
@@ -202,8 +213,251 @@ public class SeqPrintWithMultiThread {
    - 若轮到，打印当前数字，更新 `number` 和 `currentId`，并唤醒下一个线程。
 
 4. **终止条件：**
-   - 当 `number > 100` 时，所有线程退出循环。
+   - 当 `number > 100` 时，所有线程退出循环。同时保证唤醒线程的currentId保持跟唤醒次序保持一致。
    - 最后唤醒所有线程确保它们能检测到终止条件。
+
+#### 4. 2线程分别读取2个变量场景之顺序打印。
+**基础版本**，给定俩数组，分别存放`1,3,5,7,9`，`2,4,6,8,10`这俩组数据，分别启用俩线程，怎么保证最终按照自然数顺序打印结果？
+这个场景有三种方式解决：
+- 传统的`wait()/notify()`
+- 信号量：Semaphore
+- 独占锁：ReentrantLock + Condition
+
+**传统：**
+```java
+public class OrderedPrintingWithWaitNotify {
+    private static final Object lock = new Object();
+    private static boolean isOddTurn = true;
+
+    public static void main(String[] args) {
+        int[] odds = {1, 3, 5, 7, 9};
+        int[] evens = {2, 4, 6, 8, 10};
+
+        Thread oddThread = new Thread(() -> {
+            for (int num : odds) {
+                synchronized (lock) {
+                    while (!isOddTurn) { // 检查是否轮到自己
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    System.out.println(num);
+                    isOddTurn = false;
+                    lock.notifyAll(); // 唤醒偶数线程
+                }
+            }
+        });
+
+        Thread evenThread = new Thread(() -> {
+            for (int num : evens) {
+                synchronized (lock) {
+                    while (isOddTurn) { // 检查是否轮到自己
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    System.out.println(num);
+                    isOddTurn = true;
+                    lock.notifyAll(); // 唤醒奇数线程
+                }
+            }
+        });
+
+        oddThread.start();
+        evenThread.start();
+    }
+}
+```
+
+**信号量：**
+```java
+package cc.nimbusk.corejava.concurent;
+
+import java.util.concurrent.Semaphore;
+
+public class OrderedPrinting {
+    public static void main(String[] args) {
+        // 初始化信号量，奇数先执行
+        Semaphore semOdd = new Semaphore(1);
+        Semaphore semEven = new Semaphore(0);
+
+        int[] odds = {1, 3, 5, 7, 9};
+        int[] evens = {2, 4, 6, 8, 10};
+
+        Thread oddThread = new Thread(() -> {
+            for (int num : odds) {
+                try {
+                    semOdd.acquire(); // 等待奇数信号量
+                    System.out.println(num);
+                    semEven.release(); // 释放偶数信号量
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Thread evenThread = new Thread(() -> {
+            for (int num : evens) {
+                try {
+                    semEven.acquire(); // 等待偶数信号量
+                    System.out.println(num);
+                    semOdd.release(); // 释放奇数信号量
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        oddThread.start();
+        evenThread.start();
+    }
+}
+
+```
+
+**ReentrantLock+Condition**
+与上面那种场景解决类似
+```java
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+
+class OrderedData {
+    private final Lock lock = new ReentrantLock();
+    private final Condition[] conditions = new Condition[2];
+    private final int[] odds = {1, 3, 5, 7, 9};
+    private int oddIndex = 0;
+    private final int[] evens = {2, 4, 6, 8, 10};
+    private int evenIndex = 0;
+    private int currentId = 1;
+
+    public OrderedData() {
+        for (int i = 0; i < conditions.length; i++) {
+            conditions[i] = lock.newCondition();
+        }
+    }
+
+    public void print(int threadId) throws InterruptedException {
+        lock.lock();
+        try {
+            for (int i = 0; i < odds.length + evens.length; i++) {
+                while (currentId != threadId) {
+                    // 不是直接阻塞
+                    conditions[threadId - 1].await();
+                }
+                if (threadId == 1 && oddIndex < odds.length) {
+                    System.out.println(Thread.currentThread().getName() + " : " + odds[oddIndex]);
+                    oddIndex++;
+
+                } else if (threadId == 2 && evenIndex < evens.length) {
+                    System.out.println(Thread.currentThread().getName() + " : " + evens[evenIndex]);
+                    evenIndex++;
+                }
+                // 轮转至下一个线程，计算下一个线程号
+                currentId = (currentId % 2) + 1;
+                // 唤醒下一个线程
+                conditions[currentId - 1].signal();
+            }
+            for (Condition cond : conditions) cond.signal();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+}
+
+class TestPrintThread extends Thread {
+    private final OrderedData orderedData;
+    private final int threadId;
+
+    public TestPrintThread(OrderedData orderedData, int threadId) {
+        this.orderedData = orderedData;
+        this.threadId = threadId;
+    }
+
+    @Override
+    public void run() {
+        try {
+            orderedData.print(threadId);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+public class OrderedPrintingWithLock {
+    public static void main(String[] args) {
+        OrderedData orderedData = new OrderedData();
+        new TestPrintThread(orderedData, 1).start();
+        new TestPrintThread(orderedData, 2).start();
+    }
+}
+```
+
+##### 变种场景
+如果两个数组长度不相等，还是分别，一个寸基数，一个寸偶数，但是这两个数组，一个多一个少。当一个数组打印完成之后，另外一个数组元素紧接着打印完成即可。
+只拿信号量场景来说，这时就要引入额外的条件判断因子，判断当前是否打印完成，打印完成就无需再通过信号量来获取锁阻塞了。
+```java
+public class OrderedPrinting {
+    public static void main(String[] args) {
+        // 初始化信号量，奇数先执行
+        Semaphore semOdd = new Semaphore(1);
+        Semaphore semEven = new Semaphore(0);
+        AtomicBoolean oddEnd = new AtomicBoolean(false);
+        AtomicBoolean evenEnd = new AtomicBoolean(false);
+
+        int[] odds = {1, 3, 5, 7, 9, 11, 13};
+        int[] evens = {2, 4, 6, 8, 10, 12, 14, 16};
+
+        Thread oddThread = new Thread(() -> {
+            for (int num : odds) {
+                try {
+                    if (!evenEnd.get()) {
+                        semOdd.acquire(); // 等待奇数信号量
+                    }
+                    System.out.println(num);
+                    if (!evenEnd.get()) {
+                        semEven.release(); // 释放偶数信号量
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (oddEnd.compareAndSet(false, true)) {
+                // 确保最终释放
+                semOdd.release();
+            }
+        });
+
+        Thread evenThread = new Thread(() -> {
+            for (int num : evens) {
+                try {
+                    if (!oddEnd.get()) {
+                        semEven.acquire(); // 等待偶数信号量
+                    }
+                    System.out.println(num);
+                    if (!oddEnd.get()) {
+                        semOdd.release(); // 释放奇数信号量
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (evenEnd.compareAndSet(false, true)) {
+                semEven.release();
+            }
+        });
+
+        oddThread.start();
+        evenThread.start();
+    }
+}
+```
 
 ---
 
