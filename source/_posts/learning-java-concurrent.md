@@ -62,7 +62,6 @@ top: true
   STORE [B], R2 ; 将R2存入内存B
   ```  
   若`LOAD`操作需要等待内存响应，CPU会先执行后续无关指令以避免流水线停顿。
-
 - **缓存一致性优化**：  
   CPU通过Store Buffer（存储缓冲区）合并写操作  
   ```cpp
@@ -80,7 +79,6 @@ top: true
   a = x * 2;          b = y + 3;
   b = y + 3;          a = x * 2;  // 消除数据依赖
   ```
-
 - **死代码消除**：  
   删除不影响最终结果的冗余操作  
   ```java
@@ -91,7 +89,7 @@ top: true
   ```
 
 ##### 3. 内存访问特性
-- **缓存行填充**：  
+**缓存行填充**：  
   合并对同一缓存行的多次访问  
   ```java
   // 原始访问顺序     优化后顺序
@@ -178,10 +176,8 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
 #### 线程池最佳实践
 以下是Java线程池的20个最佳实践，结合性能优化、资源管理和错误处理等方面，适用于生产环境：
 
----
-
-### **一、基础配置优化**
-1. **核心线程数计算**
+##### **一、基础配置优化**
+- **核心线程数计算**
    ```java
    // CPU密集型任务
    int corePoolSize = Runtime.getRuntime().availableProcessors() + 1;
@@ -189,8 +185,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
    // IO密集型任务（需结合业务特性）
    int ioCoreSize = (int)(corePoolSize / (1 - 阻塞系数)); // 阻塞系数≈0.8~0.9
    ```
-
-2. **队列选择策略**
+- **队列选择策略**
    ```java
    // 快速响应任务 - SynchronousQueue（无缓冲）
    new ThreadPoolExecutor(..., new SynchronousQueue<>());
@@ -201,8 +196,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
    // 优先级任务 - PriorityBlockingQueue
    new ThreadPoolExecutor(..., new PriorityBlockingQueue<>());
    ```
-
-3. **拒绝策略选择**
+- **拒绝策略选择**
    ```java
    // 默认策略（抛出异常）
    new ThreadPoolExecutor.AbortPolicy();
@@ -216,10 +210,8 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
    };
    ```
 
----
-
-### **二、高级管理技巧**
-4. **动态参数调整**
+##### **二、高级管理技巧**
+- **动态参数调整**
    ```java
    // Spring环境示例
    @Autowired private ThreadPoolTaskExecutor executor;
@@ -230,8 +222,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
        executor.initialize();
    }
    ```
-
-5. **线程池监控**
+- **线程池监控**
    ```java
    ScheduledExecutorService monitor = Executors.newSingleThreadScheduledExecutor();
    monitor.scheduleAtFixedRate(() -> {
@@ -241,8 +232,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
            pool.getCompletedTaskCount());
    }, 0, 5, TimeUnit.SECONDS);
    ```
-
-6. **上下文传递**
+- **上下文传递**
    ```java
    // 传递MDC日志上下文
    public class MdcAwareThreadPool extends ThreadPoolExecutor {
@@ -261,10 +251,8 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
    }
    ```
 
----
-
-### **三、资源与异常处理**
-7. **资源泄漏预防**
+##### **三、资源与异常处理**
+- **资源泄漏预防**
    ```java
    // 必须关闭的线程池
    ExecutorService pool = Executors.newFixedThreadPool(4);
@@ -279,8 +267,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
        }
    }));
    ```
-
-8. **异常捕获增强**
+- **异常捕获增强**
    ```java
    // 自定义线程工厂
    ThreadFactory factory = r -> {
@@ -291,8 +278,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
        return t;
    };
    ```
-
-9. **ThreadLocal清理**
+- **ThreadLocal清理**
    ```java
    // 包装Runnable清理ThreadLocal
    public class ThreadLocalAwareTask implements Runnable {
@@ -316,26 +302,22 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
    }
    ```
 
----
-
-### **四、性能调优实践**
-10. **避免任务堆积**
+##### **四、性能调优实践**
+- **避免任务堆积**
     ```java
     // 监控队列积压报警
     if (executor.getQueue().size() > WARN_THRESHOLD) {
         alertService.send("线程池队列积压：" + executor.getQueue().size());
     }
     ```
-
-11. **IO密集型优化**
+- **IO密集型优化**
     ```java
     // 使用异步回调减少线程占用
     CompletableFuture.supplyAsync(() -> queryFromDB(), dbPool)
         .thenApplyAsync(result -> processData(result), cpuPool)
         .thenAcceptAsync(finalResult -> sendResponse(finalResult), ioPool);
     ```
-
-12. **避免虚假唤醒**
+- **避免虚假唤醒**
     ```java
     // 正确使用Condition
     while (taskQueue.isEmpty()) {  // 必须用循环检查条件
@@ -343,10 +325,8 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
     }
     ```
 
----
-
-### **五、框架整合实践**
-13. **Spring整合配置**
+##### **五、框架整合实践**
+- **Spring整合配置**
     ```xml
     <!-- application.xml -->
     <bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
@@ -359,8 +339,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
         </property>
     </bean>
     ```
-
-14. **结合Hystrix隔离**
+- **结合Hystrix隔离**
     ```java
     // 配置线程池隔离
     HystrixCommand.Setter commandConfig = HystrixCommand.Setter
@@ -370,10 +349,8 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
             .withMaxQueueSize(100));
     ```
 
----
-
-### **六、调试与问题排查**
-15. **堆栈跟踪增强**
+##### **六、调试与问题排查**
+- **堆栈跟踪增强**
     ```java
     // 包装提交的任务
     executor.submit(() -> {
@@ -385,8 +362,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
         }
     });
     ```
-
-16. **死锁检测**
+- **死锁检测**
     ```java
     // 使用jstack检测
     ThreadMXBean bean = ManagementFactory.getThreadMXBean();
@@ -396,10 +372,8 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
     }
     ```
 
----
-
-### **七、特殊场景处理**
-17. **定时任务优化**
+##### **七、特殊场景处理**
+- **定时任务优化**
     ```java
     // 避免任务重叠执行
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
@@ -412,8 +386,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
         }
     }, 0, 1, TimeUnit.SECONDS);
     ```
-
-18. **上下文类加载器**
+- **上下文类加载器**
     ```java
     // 保留原始类加载器
     ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -423,10 +396,8 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
     });
     ```
 
----
-
-### **八、关键注意事项**
-19. **避免双重提交**
+##### **八、关键注意事项**
+- **避免双重提交**
     ```java
     // 检查线程池状态
     if (!executor.isShutdown()) {
@@ -435,8 +406,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
         logger.warn("Reject task on shutdown");
     }
     ```
-
-20. **禁止使用无界队列**
+- **禁止使用无界队列**
     ```java
     // 错误用法（可能导致OOM）
     new ThreadPoolExecutor(..., new LinkedBlockingQueue<>()); // 默认Integer.MAX_VALUE
@@ -444,9 +414,7 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
     new ThreadPoolExecutor(..., new LinkedBlockingQueue<>(1000));
     ```
 
----
-
-### **性能对比参考表**
+##### **性能对比参考表**
 | 配置方案                | 吞吐量 (req/s) | 平均延迟 (ms) | 内存消耗 (MB) |
 |------------------------|----------------|---------------|--------------|
 | FixedThreadPool(4)      | 850            | 45            | 120          |
@@ -454,7 +422,6 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
 | 自定义核心8+队列1000    | 1100           | 28            | 150          |
 | ForkJoinPool(并行度4)   | 980            | 32            | 180          |
 
----
 
 通过遵循这些实践，可以构建出高可靠、易维护且性能优异的线程池方案。建议结合具体业务场景进行参数调优，并建立完善的监控报警体系。
 
