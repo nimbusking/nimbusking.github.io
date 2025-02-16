@@ -261,7 +261,7 @@ WHERE user_id = 'UserA' AND version = 当前查询到的版本号;
 
 ##### 一、核心模型设计
 - 1. **账户体系分层**
-  ```mermaid
+{% mermaid graph TD %}
   graph TD
       A[主账户] --> B[币种维度]
       A --> C[场景维度]
@@ -269,7 +269,7 @@ WHERE user_id = 'UserA' AND version = 当前查询到的版本号;
       B --> B2[美元子账户]
       C --> C1[红包子账户]
       C --> C2[优惠券子账户]
-  ```
+{% endmermaid %}
   
   - **主账户**：用户唯一标识，记录基础信息（用户ID、状态等）
   - **子账户**：
@@ -355,8 +355,7 @@ WHERE user_id = 'UserA' AND version = 当前查询到的版本号;
   - **积分**：有效期、可兑换比例
 
 ##### 四、核心交易流程
-```mermaid
-sequenceDiagram
+{% mermaid sequenceDiagram %}
     participant Client
     participant API
     participant AccountService
@@ -371,7 +370,7 @@ sequenceDiagram
     AccountService->>AccountService: 5. 更新账户余额（CAS乐观锁）
     AccountService->>API: 返回处理结果
     API->>Client: 返回最终状态
-```
+{% endmermaid %}
 
 ##### 五、关键问题解决方案
 - 1. 资金安全
