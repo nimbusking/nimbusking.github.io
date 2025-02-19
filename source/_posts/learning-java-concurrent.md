@@ -3123,6 +3123,32 @@ final boolean transferForSignal(Node node) {
 4. **性能开销**：
    - 读写锁的实现比普通的 `ReentrantLock` 更复杂，因此在写操作非常频繁的场景中，可能不如 `ReentrantLock` 高效。
 
+#### AQS实现差异总结
+| 特性                | ReentrantLock      | Semaphore         | CountDownLatch    | ReadWriteLock     |
+|--------------------|--------------------|-------------------|-------------------|-------------------|
+| 同步模式            | 独占               | 共享              | 共享              | 读共享/写独占     |
+| state含义           | 重入次数           | 可用许可数         | 剩余计数           | 读/写锁状态组合   |
+| 公平策略            | 支持               | 支持              | 不支持            | 支持              |
+| 可重入性            | 支持               | 不支持            | 不支持            | 支持              |
+| 条件变量            | 支持               | 不支持            | 不支持            | 支持              |
+| 资源释放方式        | 显式unlock         | release()         | countDown()       | 显式unlock        |
+| CLH队列节点类型     | 独占               | 共享              | 共享              | 混合              |
+
+
+**应用场景决策树**
+1. **需要互斥访问**：
+   - 无竞争优化 → `ReentrantLock`（非公平）
+   - 公平性要求 → `ReentrantLock`（公平）
+2. **资源数量控制**：
+   - 固定资源池 → `Semaphore`
+   - 动态扩缩容 → `ThreadPoolExecutor`
+3. **线程协同**：
+   - 一次性等待 → `CountDownLatch`
+   - 可重复屏障 → `CyclicBarrier`
+4. **读写分离**：
+   - 读多写少 → `ReentrantReadWriteLock`
+   - 数据一致性 → `StampedLock`（乐观读）
+
 ---
 
 ## 并发编程相关
