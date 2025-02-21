@@ -154,6 +154,8 @@ top: true
    - `BeanFactory` 是容器，`FactoryBean` 是创建复杂对象的工厂接口。
 
 
+---
+
 ## SpringBean生命周期
 以下是 Spring Bean 初始化的底层实现和流程的详细总结，结合源码关键节点和核心类：
 
@@ -262,54 +264,135 @@ Spring Bean 的初始化流程围绕 `AbstractApplicationContext.refresh()` 方�
     - AOP 代理创建：`AbstractAutoProxyCreator` 在此阶段生成代理对象。
     - 事务管理的代理增强。
 
-### **关键设计细节**
-1. **三级缓存解决循环依赖**（`DefaultSingletonBeanRegistry`）：
-   - **一级缓存** `singletonObjects`：完整 Bean。
-   - **二级缓存** `earlySingletonObjects`：半成品 Bean（已实例化，未初始化）。
-   - **三级缓存** `singletonFactories`：ObjectFactory，用于提前暴露 Bean 引用。
 
-2. **BeanPostProcessor 的执行顺序**：
-   - 按注册顺序执行，可通过 `Ordered` 接口或 `@Order` 注解调整优先级。
+---
 
-3. **原型（Prototype）Bean 的初始化**：
-   - 每次请求时重新执行完整初始化流程，不缓存 Bean 实例。
+## IOC相关核心类
 
-4. **延迟初始化（Lazy Init）**：
-   - 通过 `@Lazy` 或 `lazy-init="true"` 延迟到首次访问时初始化。
+### Spring IOC 阶段核心类及其工作原理总结
 
-### **流程图解**
-```
-容器启动
-  │
-  ▼
-refresh() → 加载 Bean 定义
-  │
-  ▼
-getBean() → 触发实例化
-  │
-  ▼
-doCreateBean()
-  ├─ 实例化（createBeanInstance()）
-  ├─ 暴露早期引用（addSingletonFactory()）
-  ├─ 属性填充（populateBean()）
-  ├─ 初始化前处理（BeanPostProcessor）
-  ├─ 初始化（invokeInitMethods()）
-  └─ 初始化后处理（BeanPostProcessor）
-```
+#### **1. BeanFactory**
+- **职责**：IOC 的基础容器，负责 Bean 的实例化、配置和管理。
+- **核心实现类**：`DefaultListableBeanFactory`
+- **工作原理**：
+  - **BeanDefinition 存储**：维护 `BeanDefinition` 的注册表（`beanDefinitionMap`），存储 Bean 的元数据（类名、作用域、属性等）。
+  - **Bean 生命周期管理**：通过 `getBean()` 触发 Bean 的实例化、属性注入、初始化及销毁。
+  - **依赖解析**：处理 Bean 之间的依赖关系，支持构造器注入、Setter 注入等。
+- **关键方法**：
+  ```java
+  Object getBean(String name); // 获取 Bean 实例
+  void registerBeanDefinition(String name, BeanDefinition bd); // 注册 Bean 定义
+  ```
 
-### **高频考点**
-1. **为什么构造器注入能解决循环依赖？**  
-   - 构造器注入在实例化阶段完成依赖注入，而 Setter/字段注入在属性填充阶段进行，若存在循环依赖，构造器注入无法通过三级缓存解决。
-2. **@PostConstruct 的执行时机？**  
-   - 在 `BeanPostProcessor.postProcessBeforeInitialization()` 阶段由 `CommonAnnotationBeanPostProcessor` 触发。
-3. **AOP 代理对象的生成阶段？**  
-   - 在 `BeanPostProcessor.postProcessAfterInitialization()` 阶段生成代理对象。
+#### **2. ApplicationContext**
+- **职责**：扩展 `BeanFactory`，提供企业级功能（事件发布、资源加载、国际化等）。
+- **核心实现类**：
+  - `ClassPathXmlApplicationContext`（XML 配置）
+  - `AnnotationConfigApplicationContext`（注解配置）
+- **工作原理**：
+  - **容器初始化**：在 `refresh()` 方法中完成 Bean 定义的加载、解析和注册。
+  - **扩展功能**：
+    - **事件发布**：通过 `ApplicationEventPublisher` 发布事件（如 `ContextRefreshedEvent`）。
+    - **资源访问**：支持 `ResourceLoader` 加载文件、类路径资源等。
+    - **AOP 集成**：自动识别 `BeanPostProcessor` 实现（如 AOP 代理创建）。
+- **关键流程**：
+  ```java
+  // AbstractApplicationContext.refresh()
+  refresh() {
+      loadBeanDefinitions(); // 加载 Bean 定义
+      finishBeanFactoryInitialization(); // 初始化所有单例 Bean
+      publishEvent(new ContextRefreshedEvent(this)); // 发布容器刷新事件
+  }
+  ```
 
+#### **3. BeanDefinition**
+- **职责**：定义 Bean 的元数据，包括类名、作用域、属性值、初始化方法等。
+- **核心实现类**：`RootBeanDefinition`、`GenericBeanDefinition`
+- **关键属性**：
+  - `beanClass`：Bean 的类类型。
+  - `scope`：作用域（如 singleton、prototype）。
+  - `propertyValues`：需要注入的属性值。
+  - `initMethodName` / `destroyMethodName`：初始化和销毁方法名。
+- **来源**：
+  - XML 配置解析（`XmlBeanDefinitionReader`）。
+  - 注解扫描（如 `@Component`、`@Bean`，由 `ClassPathBeanDefinitionScanner` 处理）。
+
+#### **4. BeanPostProcessor**
+- **职责**：在 Bean 初始化前后插入自定义逻辑（如代理生成、属性修改）。
+- **核心实现类**：
+  - `AutowiredAnnotationBeanPostProcessor`：处理 `@Autowired` 注入。
+  - `CommonAnnotationBeanPostProcessor`：处理 `@PostConstruct`、`@PreDestroy`。
+  - `AbstractAutoProxyCreator`：AOP 代理生成。
+- **工作原理**：
+  - **前置处理**：`postProcessBeforeInitialization()` 在 Bean 初始化方法前调用。
+  - **后置处理**：`postProcessAfterInitialization()` 在初始化方法后调用。
+- **示例流程**：
+  ```java
+  // AbstractAutowireCapableBeanFactory.initializeBean()
+  Object bean = ...;
+  // 1. 执行前置处理
+  bean = applyBeanPostProcessorsBeforeInitialization(bean, beanName);
+  // 2. 执行初始化方法（如 afterPropertiesSet()）
+  invokeInitMethods(beanName, bean);
+  // 3. 执行后置处理
+  bean = applyBeanPostProcessorsAfterInitialization(bean, beanName);
+  ```
+
+#### **5. BeanFactoryPostProcessor**
+- **职责**：在容器启动时修改 `BeanDefinition`（如修改属性值、调整作用域）。
+- **核心实现类**：`PropertySourcesPlaceholderConfigurer`（解析 `${}` 占位符）。
+- **工作原理**：
+  - 在 `BeanFactory` 初始化后、Bean 实例化前执行。
+  - 通过 `postProcessBeanFactory()` 方法修改 Bean 定义。
+- **示例**：
+  ```java
+  public class CustomBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+      @Override
+      public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+          BeanDefinition bd = beanFactory.getBeanDefinition("myBean");
+          bd.setScope(BeanDefinition.SCOPE_PROTOTYPE);
+      }
+  }
+  ```
+
+### **核心类协作流程**
+1. **容器启动**：  
+   - `ApplicationContext` 调用 `refresh()`，触发 `BeanDefinition` 的加载和注册。
+2. **Bean 定义解析**：  
+   - `BeanDefinitionReader`（如 `XmlBeanDefinitionReader`）解析配置，生成 `BeanDefinition` 并注册到 `BeanFactory`。
+3. **BeanFactoryPostProcessor 处理**：  
+   - 所有 `BeanFactoryPostProcessor` 修改 `BeanDefinition`（如占位符替换）。
+4. **Bean 实例化**：  
+   - 调用 `getBean()` 时，`DefaultListableBeanFactory` 根据 `BeanDefinition` 实例化 Bean。
+5. **依赖注入**：  
+   - 通过反射或 `BeanPostProcessor`（如 `AutowiredAnnotationBeanPostProcessor`）注入属性。
+6. **BeanPostProcessor 处理**：  
+   - 执行初始化前后的增强逻辑（如生成 AOP 代理）。
+7. **Bean 就绪**：  
+   - Bean 被放入单例缓存池，供应用程序使用。
+
+### **解决循环依赖的三级缓存机制**
+1. **三级缓存结构**（`DefaultSingletonBeanRegistry`）：
+   - **一级缓存** `singletonObjects`：存储完全初始化的单例 Bean。
+   - **二级缓存** `earlySingletonObjects`：存储提前暴露的半成品 Bean（已实例化但未初始化）。
+   - **三级缓存** `singletonFactories`：存储 `ObjectFactory`，用于生成半成品 Bean 的引用。
+2. **流程示例**（BeanA 依赖 BeanB，BeanB 依赖 BeanA）：
+   - **步骤 1**：实例化 BeanA → 将其 `ObjectFactory` 放入三级缓存。
+   - **步骤 2**：注入 BeanA 依赖时发现需要 BeanB → 实例化 BeanB。
+   - **步骤 3**：注入 BeanB 依赖时从三级缓存获取 BeanA 的早期引用 → BeanB 初始化完成。
+   - **步骤 4**：BeanA 完成属性注入和初始化 → 移入一级缓存。
+
+### **总结**
+- **BeanFactory**：IOC 基础容器，管理 Bean 的生命周期。
+- **ApplicationContext**：扩展容器，集成企业级功能。
+- **BeanDefinition**：存储 Bean 的元数据。
+- **BeanPostProcessor**：在 Bean 初始化前后插入逻辑。
+- **BeanFactoryPostProcessor**：修改 Bean 定义。
 
 ---
 
 
-### Spring上下文生命周期
+## Spring上下文生命周期(细)
 
 ### SpringBean生命周期
 大体分为5个大的步骤，如下图所示：
