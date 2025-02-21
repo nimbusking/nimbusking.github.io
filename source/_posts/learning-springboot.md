@@ -152,11 +152,97 @@ categories: Spring
 
 ---
 
-**附：高频追问**  
 - Spring Boot 2.x 和 3.x 的主要区别？  
 - 如何实现多数据源和动态数据源？  
 - 如何集成 Spring Security？  
 - 如何实现接口幂等性？  
+
+---
+
+## 启动流程总结归纳
+
+### Spring Boot可执行JAR启动流程详解
+
+#### **1. JAR结构与启动入口**
+- **可执行JAR结构**：
+  ```
+  BOOT-INF/
+    ├── classes/        # 应用类文件（含主类）
+    └── lib/            # 依赖的第三方库JAR
+  META-INF/
+    └── MANIFEST.MF     # 指定Main-Class为JarLauncher
+  org/springframework/boot/loader/ # Spring Boot Loader类
+  ```
+- **启动入口**：`java -jar`执行时，根据`MANIFEST.MF`中的`Main-Class`调用`JarLauncher`。
+
+#### **2. Launcher类加载机制**
+- **`JarLauncher`作用**：
+  - 初始化自定义类加载器`LaunchedURLClassLoader`，加载`BOOT-INF/lib`和`BOOT-INF/classes`下的资源。
+  - 反射调用应用主类的`main`方法。
+- **嵌套JAR处理**：通过`JarFile`扩展处理嵌套JAR条目，支持直接读取嵌套依赖。
+
+#### **3. 应用主类启动**
+- **主类执行**：调用`SpringApplication.run(主类.class, args)`。
+- **SpringApplication阶段**：
+  - **初始化阶段**：
+    - 推断应用类型（Servlet/Reactive/None）。
+    - 加载`META-INF/spring.factories`中的`ApplicationContextInitializer`和`ApplicationListener`。
+  - **配置环境**：
+    - 读取`application.properties`/`application.yml`及环境变量。
+    - 发布`ApplicationEnvironmentPreparedEvent`事件。
+
+#### **4. 应用上下文刷新**
+- **创建上下文**：根据应用类型创建`AnnotationConfigServletWebServerApplicationContext`等实例。
+- **`refresh()`核心流程**：
+  1. **准备BeanFactory**：注册主类（`@SpringBootApplication`标注类）为配置类。
+  2. **加载Bean定义**：
+     - 解析`@ComponentScan`、`@Import`（如`@EnableAutoConfiguration`）。
+     - 加载`spring.factories`中的`AutoConfiguration`类，按条件装配Bean。
+  3. **初始化Web服务器**：
+     - 检测类路径存在`Servlet`类时，创建`TomcatServletWebServerFactory`。
+     - 启动嵌入式Tomcat并绑定端口。
+  4. **完成刷新**：发布`ApplicationStartedEvent`，启动完成。
+
+#### **5. 自动配置原理**
+- **条件化装配**：通过`@ConditionalOnClass`、`@ConditionalOnMissingBean`等条件注解按需加载配置。
+- **配置加载顺序**：`AutoConfiguration`类在用户自定义Bean之后加载，允许用户覆盖默认配置。
+
+#### **6. 嵌入式服务器启动**
+- **Web服务器初始化**：
+  - `ServletWebServerApplicationContext`创建`WebServer`实例。
+  - 注册`DispatcherServlet`并映射到根路径（`"/"`）。
+- **端口监听**：从`Environment`获取`server.port`配置（默认8080）。
+
+#### **7. 流程图解**
+```plaintext
+java -jar → JarLauncher.main()
+    │
+    ├─ 初始化LaunchedURLClassLoader → 加载BOOT-INF/lib和classes
+    │
+    └─ 反射调用应用主类的main()
+        │
+        ▼
+SpringApplication.run()
+    │
+    ├─ 推断应用类型 → 创建ApplicationContext
+    ├─ 加载ApplicationListeners和Initializers
+    ├─ 准备Environment → 发布环境准备事件
+    ├─ 刷新ApplicationContext（Bean加载、自动配置、Web服务器启动）
+    └─ 发布应用启动完成事件
+```
+
+#### **8. 关键组件说明**
+- **`LaunchedURLClassLoader`**：负责从嵌套JAR中加载类，突破传统类加载器限制。
+- **`SpringApplication`**：协调启动流程，处理事件监听与上下文配置。
+- **`AutoConfigurationImportSelector`**：自动加载`spring.factories`中的配置类。
+
+#### **9. 扩展：启动事件与监听器**
+- **核心事件**：
+  - `ApplicationStartingEvent`：启动开始，环境未准备。
+  - `ApplicationEnvironmentPreparedEvent`：环境就绪，配置加载完毕。
+  - `ApplicationStartedEvent`：上下文刷新完成，应用运行。
+- **自定义监听器**：实现`ApplicationListener`接口，监听特定事件执行初始化逻辑。
+
 
 ---
 
