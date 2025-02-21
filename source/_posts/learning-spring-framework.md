@@ -2,7 +2,7 @@
 title: 细磕Spring点滴
 abbrlink: f5eb228d
 date: 2024-11-07 08:33:54
-updated: 2024-11-17 18:53:12
+updated: 2025-02-21 10:38:15
 tags:
   - Spring全家桶
   - Java
@@ -26,85 +26,285 @@ top: true
 - Gradle：5.6.4
 - IDE：IntelliJ IDEA 2024.3
 
+---
+
 ## Spring IOC
 
-### **1. 核心概念**
-1. **什么是 Spring IOC？**  
-   解释控制反转（Inversion of Control）的思想，以及 Spring 如何通过容器管理对象的生命周期和依赖关系。
+### **1. 什么是 Spring IOC？**
+- **核心概念**：IOC（控制反转）是一种设计思想，将对象的创建和依赖管理交给 Spring 容器处理，而非由开发者手动控制。
+- **作用**：解耦组件依赖关系，提升代码可维护性和可测试性。
+- **实现方式**：通过依赖注入（DI）和依赖查找实现。
 
-2. **IOC 和 DI 的区别与联系？**  
-   - IOC 是设计思想，DI 是实现方式（依赖注入）。  
-   - Spring 通过 DI（构造器注入、Setter 注入、字段注入）实现 IOC。
 
-3. **BeanFactory 和 ApplicationContext 的区别？**  
-   - `BeanFactory` 是基础容器，提供基本功能；  
-   - `ApplicationContext` 是扩展容器，支持国际化、事件、AOP 等高级功能，默认预初始化单例 Bean。
+### **2. 什么是 Bean？如何定义 Bean？**
+- **Bean**：Spring 容器管理的对象，称为 Bean。
+- **定义方式**：
+  - XML 配置：`<bean id="..." class="..."/>`
+  - 注解：`@Component`、`@Service`、`@Repository`、`@Controller`
+  - Java 配置类：`@Bean` 注解标记方法。
 
----
+### **3. Bean 的作用域（Scope）有哪些？**
+- **Singleton（默认）**：单例模式，容器中仅存在一个 Bean 实例。
+- **Prototype**：每次请求都创建一个新实例。
+- **Request**：每个 HTTP 请求创建一个实例（Web 应用）。
+- **Session**：每个 HTTP Session 一个实例（Web 应用）。
+- **Application**：ServletContext 生命周期内一个实例（Web 应用）。
+- **WebSocket**：每个 WebSocket 会话一个实例。
 
-### **2. 配置与依赖注入**
-4. **Spring 配置 Bean 的方式有哪些？**  
-   - XML 配置（`<bean>` 标签）  
-   - 注解驱动（`@Component`, `@Service`, `@Autowired`）  
-   - Java 配置（`@Configuration` + `@Bean`）
+### **4. 依赖注入（DI）的几种方式**
+1. **构造器注入**：通过构造函数传递依赖。
+   ```java
+   public class UserService {
+       private final UserDao userDao;
+       public UserService(UserDao userDao) {
+           this.userDao = userDao;
+       }
+   }
+   ```
+2. **Setter 注入**：通过 Setter 方法注入依赖。
+   ```xml
+   <bean id="userService" class="com.example.UserService">
+       <property name="userDao" ref="userDao"/>
+   </bean>
+   ```
+3. **字段注入（不推荐）**：通过 `@Autowired` 直接注入字段。
+   ```java
+   public class UserService {
+       @Autowired
+       private UserDao userDao;
+   }
+   ```
 
-5. **@Autowired 和 @Resource 的区别？**  
-   - `@Autowired` 按类型注入，结合 `@Qualifier` 指定名称；  
-   - `@Resource` 默认按名称注入，支持 `name` 属性。
+### **5. 自动装配（Autowiring）的模式**
+- **byType**：根据类型自动装配（需确保容器中只有一个该类型的 Bean）。
+- **byName**：根据 Bean 名称匹配属性名自动装配。
+- **constructor**：通过构造器参数类型自动装配。
+- **@Autowired 注解**：默认按类型注入，可配合 `@Qualifier` 指定名称。
 
-6. **构造器注入 vs Setter 注入？**  
-   - 构造器注入适合强制依赖，保证对象不可变；  
-   - Setter 注入适合可选依赖，灵活性更高。
+### **6. BeanFactory 和 ApplicationContext 的区别**
+| **BeanFactory**                | **ApplicationContext**               |
+|-------------------------------|---------------------------------------|
+| 基础 IOC 容器，提供基本功能      | 继承 BeanFactory，扩展更多企业级功能   |
+| 延迟加载 Bean（Lazy Loading）   | 支持预加载（启动时初始化单例 Bean）    |
+| 无集成事件、AOP 等高级功能       | 支持事件发布、国际化、资源访问等       |
 
----
+### **7. Bean 的生命周期**
+1. **实例化**：通过构造器或工厂方法创建 Bean 实例。
+2. **属性注入**：填充 Bean 的依赖（通过 Setter 或字段注入）。
+3. **BeanPostProcessor 前置处理**：调用 `postProcessBeforeInitialization`。
+4. **初始化**：
+   - 实现 `InitializingBean` 接口的 `afterPropertiesSet()`。
+   - 自定义 `init-method` 方法。
+5. **BeanPostProcessor 后置处理**：调用 `postProcessAfterInitialization`。
+6. **使用**：Bean 就绪，可被应用使用。
+7. **销毁**：
+   - 实现 `DisposableBean` 接口的 `destroy()`。
+   - 自定义 `destroy-method` 方法。
 
-### **3. Bean 的作用域与生命周期**
-7. **Bean 的作用域（Scope）有哪些？**  
-   - `singleton`（默认）、`prototype`、`request`、`session`、`application`、`websocket`。
+### **8. 如何解决循环依赖？**
+- **问题场景**：BeanA 依赖 BeanB，BeanB 也依赖 BeanA。
+- **解决方案**：Spring 通过三级缓存解决单例 Bean 的循环依赖：
+  1. **一级缓存（Singleton Objects）**：存放完全初始化好的 Bean。
+  2. **二级缓存（EarlySingleton Objects）**：存放半成品 Bean（已实例化但未初始化）。
+  3. **三级缓存（Singleton Factories）**：存放 Bean 的工厂对象，用于提前暴露 Bean 引用。
+- **仅支持单例作用域的循环依赖**，原型（Prototype）作用域无法解决。
 
-8. **描述 Bean 的生命周期流程？**  
-   实例化 → 属性填充 → 初始化（`@PostConstruct`、`InitializingBean`、`init-method`）→ 使用 → 销毁（`@PreDestroy`、`DisposableBean`、`destroy-method`）。
+### **9. @Autowired 和 @Resource 的区别**
+| **@Autowired**                  | **@Resource**                   |
+|---------------------------------|----------------------------------|
+| Spring 框架提供的注解            | JSR-250 标准注解                 |
+| 默认按类型注入                   | 默认按名称注入（可指定 `name`）  |
+| 支持 `required=false`           | 无此属性                         |
+| 需配合 `@Qualifier` 指定名称     | 直接通过 `name` 属性指定         |
 
-9. **Bean 后置处理器（BeanPostProcessor）的作用？**  
-   在 Bean 初始化前后插入自定义逻辑（如 `postProcessBeforeInitialization` 和 `postProcessAfterInitialization`）。
+### **10. 常见的 IOC 容器实现**
+1. **ClassPathXmlApplicationContext**：从类路径加载 XML 配置文件。
+2. **FileSystemXmlApplicationContext**：从文件系统加载 XML 配置文件。
+3. **AnnotationConfigApplicationContext**：基于注解或 Java 配置类初始化容器。
 
----
+### **11. 如何自定义 Bean 的初始化与销毁方法？**
+- **XML 配置**：`init-method` 和 `destroy-method` 属性。
+  ```xml
+  <bean id="demoBean" class="com.example.DemoBean" 
+        init-method="init" destroy-method="destroy"/>
+  ```
+- **注解**：`@PostConstruct` 和 `@PreDestroy`。
+  ```java
+  public class DemoBean {
+      @PostConstruct
+      public void init() { /* 初始化逻辑 */ }
+      
+      @PreDestroy
+      public void destroy() { /* 销毁逻辑 */ }
+  }
+  ```
 
-### **4. 高级特性**
-10. **Spring 如何解决循环依赖？**  
-    通过三级缓存：  
-    - 一级缓存（单例池）  
-    - 二级缓存（早期暴露对象）  
-    - 三级缓存（Bean 工厂的 Lambda 表达式）。  
-    **仅支持单例 Bean 的构造器循环依赖**。
+### **12. Spring 中使用了哪些设计模式？**
+- **工厂模式**：`BeanFactory` 管理 Bean 的创建。
+- **单例模式**：默认作用域的 Bean 为单例。
+- **代理模式**：AOP 基于动态代理实现。
+- **模板方法模式**：`BeanPostProcessor` 的初始化回调。
 
-11. **延迟初始化（Lazy-init）的作用？**  
-    延迟 Bean 的创建到首次使用时，减少启动时间，但可能隐藏配置错误。
+### **高频扩展问题**
+1. **什么是延迟初始化（Lazy Initialization）？如何配置？**
+   - 通过 `@Lazy` 注解或 XML 的 `lazy-init="true"` 实现。
+2. **如何通过编程方式获取 Bean？**
+   - 实现 `ApplicationContextAware` 接口或使用 `context.getBean()`。
+3. **BeanFactory 和 FactoryBean 的区别？**
+   - `BeanFactory` 是容器，`FactoryBean` 是创建复杂对象的工厂接口。
 
-12. **如何实现条件化注册 Bean？**  
-    使用 `@Conditional` 注解结合自定义条件类（实现 `Condition` 接口）。
 
----
+## SpringBean生命周期
+以下是 Spring Bean 初始化的底层实现和流程的详细总结，结合源码关键节点和核心类：
 
-### **5. 常见扩展问题**
-13. **Spring 容器的启动流程？**  
-    加载配置 → 解析 Bean 定义 → 初始化 BeanFactory → 执行 BeanPostProcessor → 初始化单例 Bean。
+### **核心流程概览**
+Spring Bean 的初始化流程围绕 `AbstractApplicationContext.refresh()` 方法展开，核心步骤如下：  
+1. **Bean 实例化** → 2. **属性填充** → 3. **初始化前处理** → 4. **初始化** → 5. **初始化后处理**
 
-14. **@Component 和 @Bean 的区别？**  
-    - `@Component` 用于类，由组件扫描自动注册；  
-    - `@Bean` 用于配置类方法，手动定义 Bean。
+### **底层源码核心类与方法**
+- **`AbstractApplicationContext`**：容器刷新入口（`refresh()` 方法）。
+- **`DefaultListableBeanFactory`**：Bean 定义注册与实例化的核心实现。
+- **`AbstractAutowireCapableBeanFactory`**：负责 Bean 的创建、属性注入和初始化。
+  - `createBean()` → `doCreateBean()`：核心创建逻辑。
+  - `initializeBean()`：初始化入口。
+- **`BeanPostProcessor`**：初始化前后的扩展点。
 
-15. **如何管理不同环境的配置？**  
-    使用 `@Profile` 注解或 `Environment` API 区分开发、测试、生产环境。
+### **详细流程及源码解析**
 
----
+#### **1. Bean 实例化（Instantiation）**
+- **触发时机**：容器启动时（单例 Bean 默认预加载）或首次请求时（原型 Bean）。
+- **源码入口**：  
+  ```java
+  // AbstractAutowireCapableBeanFactory.java
+  protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args) {
+      // 1. 实例化：通过反射或工厂方法创建 Bean 实例
+      BeanWrapper instanceWrapper = createBeanInstance(beanName, mbd, args);
+      Object bean = instanceWrapper.getWrappedInstance();
 
-### **6. 实战场景**
-16. **单例 Bean 中注入原型 Bean 的问题？**  
-    原型 Bean 在单例中只会初始化一次，需结合 `@Lookup` 或 `ObjectFactory` 实现每次获取新实例。
+      // 2. 提前暴露 Bean 引用（解决循环依赖）
+      if (earlySingletonExposure) {
+          addSingletonFactory(beanName, () -> getEarlyBeanReference(beanName, mbd, bean));
+      }
 
-17. **如何动态注册 Bean？**  
-    通过 `BeanDefinitionRegistry` 或 `DefaultListableBeanFactory` 动态添加 Bean 定义。
+      // 后续流程...
+  }
+  ```
+  - **实例化策略**：优先使用构造器注入的解析结果，默认使用无参构造器。
+  - **循环依赖处理**：通过三级缓存（`singletonFactories`）提前暴露半成品 Bean。
+
+#### **2. 属性填充（Population）**
+- **源码入口**：`populateBean()` 方法。
+  ```java
+  protected void populateBean(String beanName, RootBeanDefinition mbd, @Nullable BeanWrapper bw) {
+      // 1. 按名称/类型自动装配（Autowired）
+      if (mbd.getResolvedAutowireMode() == AUTOWIRE_BY_NAME || AUTOWIRE_BY_TYPE) {
+          autowireByName(beanName, mbd, bw, newPvs);
+          autowireByType(beanName, mbd, bw, newPvs);
+      }
+
+      // 2. 应用属性值（XML/注解配置的属性）
+      applyPropertyValues(beanName, mbd, bw, pvs);
+  }
+  ```
+  - **依赖注入**：通过反射（`Field.set()` 或 `Method.invoke()`）赋值。
+
+#### **3. 初始化前处理（Before Initialization）**
+- **扩展点**：`BeanPostProcessor.postProcessBeforeInitialization()`  
+  **源码入口**：`applyBeanPostProcessorsBeforeInitialization()`
+  ```java
+  protected Object applyBeanPostProcessorsBeforeInitialization(Object bean, String beanName) {
+      for (BeanPostProcessor bp : getBeanPostProcessors()) {
+          Object current = bp.postProcessBeforeInitialization(bean, beanName);
+          if (current == null) return bean;
+          bean = current;
+      }
+      return bean;
+  }
+  ```
+  - **典型应用**：  
+    - `CommonAnnotationBeanPostProcessor`：处理 `@PostConstruct` 注解。
+    - `AutowiredAnnotationBeanPostProcessor`：处理 `@Autowired` 注入。
+
+#### **4. 初始化（Initialization）**
+- **执行顺序**（源码入口：`invokeInitMethods()`）：
+  1. **`InitializingBean.afterPropertiesSet()`**：实现该接口的 Bean 调用此方法。
+  2. **自定义 `init-method`**：通过 XML 或 `@Bean(initMethod = "...")` 指定的方法。
+  ```java
+  protected void invokeInitMethods(String beanName, Object bean, @Nullable RootBeanDefinition mbd) {
+      // 1. 调用 InitializingBean 接口
+      if (bean instanceof InitializingBean) {
+          ((InitializingBean) bean).afterPropertiesSet();
+      }
+
+      // 2. 调用自定义 init-method
+      String initMethodName = mbd.getInitMethodName();
+      if (StringUtils.hasLength(initMethodName)) {
+          Method initMethod = ClassUtils.getMethod(bean.getClass(), initMethodName);
+          initMethod.invoke(bean);
+      }
+  }
+  ```
+
+#### **5. 初始化后处理（After Initialization）**
+- **扩展点**：`BeanPostProcessor.postProcessAfterInitialization()`  
+  **源码入口**：`applyBeanPostProcessorsAfterInitialization()`
+  ```java
+  protected Object applyBeanPostProcessorsAfterInitialization(Object bean, String beanName) {
+      for (BeanPostProcessor bp : getBeanPostProcessors()) {
+          Object current = bp.postProcessAfterInitialization(bean, beanName);
+          if (current == null) return bean;
+          bean = current;
+      }
+      return bean;
+  }
+  ```
+  - **典型应用**：  
+    - AOP 代理创建：`AbstractAutoProxyCreator` 在此阶段生成代理对象。
+    - 事务管理的代理增强。
+
+### **关键设计细节**
+1. **三级缓存解决循环依赖**（`DefaultSingletonBeanRegistry`）：
+   - **一级缓存** `singletonObjects`：完整 Bean。
+   - **二级缓存** `earlySingletonObjects`：半成品 Bean（已实例化，未初始化）。
+   - **三级缓存** `singletonFactories`：ObjectFactory，用于提前暴露 Bean 引用。
+
+2. **BeanPostProcessor 的执行顺序**：
+   - 按注册顺序执行，可通过 `Ordered` 接口或 `@Order` 注解调整优先级。
+
+3. **原型（Prototype）Bean 的初始化**：
+   - 每次请求时重新执行完整初始化流程，不缓存 Bean 实例。
+
+4. **延迟初始化（Lazy Init）**：
+   - 通过 `@Lazy` 或 `lazy-init="true"` 延迟到首次访问时初始化。
+
+### **流程图解**
+```
+容器启动
+  │
+  ▼
+refresh() → 加载 Bean 定义
+  │
+  ▼
+getBean() → 触发实例化
+  │
+  ▼
+doCreateBean()
+  ├─ 实例化（createBeanInstance()）
+  ├─ 暴露早期引用（addSingletonFactory()）
+  ├─ 属性填充（populateBean()）
+  ├─ 初始化前处理（BeanPostProcessor）
+  ├─ 初始化（invokeInitMethods()）
+  └─ 初始化后处理（BeanPostProcessor）
+```
+
+### **高频考点**
+1. **为什么构造器注入能解决循环依赖？**  
+   - 构造器注入在实例化阶段完成依赖注入，而 Setter/字段注入在属性填充阶段进行，若存在循环依赖，构造器注入无法通过三级缓存解决。
+2. **@PostConstruct 的执行时机？**  
+   - 在 `BeanPostProcessor.postProcessBeforeInitialization()` 阶段由 `CommonAnnotationBeanPostProcessor` 触发。
+3. **AOP 代理对象的生成阶段？**  
+   - 在 `BeanPostProcessor.postProcessAfterInitialization()` 阶段生成代理对象。
+
 
 ---
 
