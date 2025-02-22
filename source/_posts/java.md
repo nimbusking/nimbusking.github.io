@@ -19,10 +19,173 @@ Java系列目录：
 - JavaFX
 
 
+## Java版本版本特性归纳
+
+<!-- more -->
+
+
+以下是自 **JDK 8 (2014)** 起至 **JDK 21 (2023)** 的主要特性演进总结，按版本分类：
+
+---
+
+### **JDK 8 (LTS)**
+**语言特性**  
+- **Lambda表达式**：简化函数式编程  
+  ```java
+  list.forEach(s -> System.out.println(s));
+  ```
+- **Stream API**：支持链式数据操作（过滤、映射、归约）  
+- **方法引用**：`Class::method` 简化Lambda  
+- **接口默认方法与静态方法**：支持接口中定义实现方法  
+
+**库/API**  
+- `java.time` 日期时间 API  
+- `Optional<T>` 空值安全容器  
+- `CompletableFuture` 异步编程增强  
+
+**JVM**  
+- 移除永久代（PermGen），引入元空间（Metaspace）  
+
+---
+
+### **JDK 9 (2017)**
+**语言特性**  
+- **模块系统（Project Jigsaw）**：模块化代码依赖  
+- 接口支持私有方法  
+
+**库/API**  
+- 集合工厂方法：`List.of()`, `Set.of()`  
+- Reactive Streams API（`java.util.concurrent.Flow`）  
+- HTTP/2 Client（孵化）  
+
+**工具**  
+- **JShell**：交互式编程工具  
+
+---
+
+### **JDK 10 (2018)**
+**语言特性**  
+- **局部变量类型推断（var）**  
+  ```java
+  var list = new ArrayList<String>();
+  ```
+
+**JVM**  
+- 并行 Full GC 的 G1 垃圾收集器  
+
+---
+
+### **JDK 11 (LTS, 2018)**
+**语言特性**  
+- `var` 支持 Lambda 参数注解  
+
+**库/API**  
+- **HTTP Client 正式发布**（替代 `HttpURLConnection`）  
+- `String` 新增方法：`strip()`, `isBlank()`  
+- 单文件源码直接运行：`java HelloWorld.java`  
+
+**JVM**  
+- ZGC（低延迟垃圾收集器，实验性）  
+
+---
+
+### **JDK 12-17 (非LTS版本亮点)**
+#### **JDK 12 (2019)**  
+- Switch 表达式（预览）  
+- Shenandoah GC（低暂停时间收集器）  
+
+#### **JDK 13 (2019)**
+- 文本块（预览）：简化多行字符串  
+  ```java
+  String json = """
+                { "name": "Java" }
+                """;
+  ```
+
+#### **JDK 14 (2020)**
+- `record` 类（预览）：不可变数据载体  
+  ```java
+  record Point(int x, int y) {}
+  ```
+- Switch 表达式正式发布  
+
+#### **JDK 15 (2020)**
+- 密封类（Sealed Classes，预览）：限制类继承  
+  ```java
+  public sealed class Shape permits Circle, Square {}
+  ```
+
+#### **JDK 16 (2021)**
+- `record` 类、密封类正式发布  
+- 向量 API（孵化）：SIMD 指令优化  
+
+#### **JDK 17 (LTS, 2021)**
+- 密封类正式发布  
+- 移除 Applet API  
+- 模式匹配 `instanceof`（正式）  
+  ```java
+  if (obj instanceof String s) {
+      System.out.println(s.length());
+  }
+  ```
+
+---
+
+### **JDK 18-21 (最新演进)**
+#### **JDK 18 (2022)**  
+- 简单 Web 服务器（`jwebserver`）  
+- UTF-8 作为默认字符集  
+
+#### **JDK 19 (2022)**
+- **虚拟线程（预览）**：轻量级并发模型  
+  ```java
+  Thread.startVirtualThread(() -> System.out.println("Hello"));
+  ```
+- 结构化并发（孵化）  
+
+#### **JDK 20 (2023)**
+- Scoped Values（作用域值，孵化）  
+- Record 模式（预览）  
+
+#### **JDK 21 (LTS, 2023)**
+- **虚拟线程正式发布**  
+- 分代 ZGC（提高内存利用率）  
+- 序列集合（Sequenced Collections）  
+  ```java
+  List<Integer> list = new SequencedArrayList<>();
+  ```
+
+---
+
+### **核心演进方向**
+1. **现代化语法**  
+   - 简化代码：`var`、`record`、Lambda  
+   - 模式匹配：`instanceof`、Switch 表达式  
+
+2. **并发模型革新**  
+   - 虚拟线程（Project Loom）：支持百万级轻量级线程  
+
+3. **性能优化**  
+   - ZGC/Shenandoah：低延迟垃圾回收  
+   - 向量 API：硬件加速计算  
+
+4. **模块化与安全**  
+   - 模块系统隔离代码  
+   - 移除过时 API（如 Applet）  
+
+5. **云原生支持**  
+   - 轻量级 HTTP 客户端和服务端工具  
+
+---
+
+### **版本选择建议**
+- **企业生产**：JDK 11/17/21（LTS 版本）  
+- **尝鲜特性**：最新非 LTS 版本（如 JDK 21）  
+- **历史项目**：JDK 8 仍广泛使用，但建议逐步升级  
+
+---
+
 ## 相关知识点
-
-
-以下是关于 **Java 核心** 的高频面试题总结，涵盖 **Java 基础**、**集合类**、**多线程**、**JVM** 等核心知识点，帮助快速复习关键概念：
 
 ---
 
@@ -178,4 +341,3 @@ Java系列目录：
     - 避免 `NullPointerException`，明确处理可能为空的值。  
 
 ---
-

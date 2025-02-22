@@ -150,13 +150,414 @@ categories: Spring
 3. **嵌入式容器的启动流程源码分析？**  
    核心类：`ServletWebServerApplicationContext`，在 `refresh()` 阶段调用 `createWebServer()` 创建并启动容器。
 
+### 其它问题
+#### Spring Boot 2.x 和 3.x 的主要区别？
+#### 如何实现多数据源和动态数据源？
+##### **一、多数据源配置**
+
+- **1. 添加依赖**
+   确保包含JDBC和数据库驱动依赖：
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-jdbc</artifactId>
+   </dependency>
+   <dependency>
+       <groupId>com.mysql</groupId>
+       <artifactId>mysql-connector-j</artifactId>
+   </dependency>
+   ```
+- **2. 配置数据源信息**
+   在`application.yml`中配置多个数据源：
+   ```yaml
+   spring:
+     datasource:
+       primary:
+         jdbc-url: jdbc:mysql://localhost:3306/db1
+         username: root
+         password: 123456
+         driver-class-name: com.mysql.cj.jdbc.Driver
+       secondary:
+         jdbc-url: jdbc:mysql://localhost:3306/db2
+         username: root
+         password: 123456
+         driver-class-name: com.mysql.cj.jdbc.Driver
+   ```
+- **3. 配置主数据源**
+   ```java
+   @Configuration
+   public class DataSourceConfig {
+   
+       // 主数据源
+       @Bean
+       @ConfigurationProperties(prefix = "spring.datasource.primary")
+       @Primary
+       public DataSource primaryDataSource() {
+           return DataSourceBuilder.create().build();
+       }
+   
+       // 次数据源
+       @Bean
+       @ConfigurationProperties(prefix = "spring.datasource.secondary")
+       public DataSource secondaryDataSource() {
+           return DataSourceBuilder.create().build();
+       }
+   }
+   ```
+- **4. 配置事务管理器**
+   为每个数据源单独配置事务管理器：
+   ```java
+   @Configuration
+   public class TransactionManagerConfig {
+   
+       @Bean
+       @Primary
+       public PlatformTransactionManager primaryTransactionManager(
+               @Qualifier("primaryDataSource") DataSource dataSource) {
+           return new DataSourceTransactionManager(dataSource);
+       }
+   
+       @Bean
+       public PlatformTransactionManager secondaryTransactionManager(
+               @Qualifier("secondaryDataSource") DataSource dataSource) {
+           return new DataSourceTransactionManager(dataSource);
+       }
+   }
+   ```
+- **5. 使用不同数据源**
+   在DAO层通过`@Qualifier`指定数据源：
+   ```java
+   @Repository
+   public class UserDao {
+   
+       private final JdbcTemplate jdbcTemplate;
+   
+       @Autowired
+       public UserDao(@Qualifier("primaryDataSource") DataSource dataSource) {
+           this.jdbcTemplate = new JdbcTemplate(dataSource);
+       }
+   
+       // 使用主数据源操作数据库
+   }
+   ```
+
+##### **二、动态数据源切换**
+- **1. 定义动态数据源路由类**
+   继承`AbstractRoutingDataSource`实现动态路由：
+   ```java
+   public class DynamicDataSource extends AbstractRoutingDataSource {
+   
+       @Override
+       protected Object determineCurrentLookupKey() {
+           // 从ThreadLocal中获取数据源标识
+           return DataSourceContextHolder.getDataSourceKey();
+       }
+   }
+   ```
+- **2. 数据源上下文管理**
+   使用`ThreadLocal`存储当前线程的数据源标识：
+   ```java
+   public class DataSourceContextHolder {
+   
+       private static final ThreadLocal<String> CONTEXT = new ThreadLocal<>();
+   
+       public static void setDataSourceKey(String key) {
+           CONTEXT.set(key);
+       }
+   
+       public static String getDataSourceKey() {
+           return CONTEXT.get();
+       }
+   
+       public static void clearDataSourceKey() {
+           CONTEXT.remove();
+       }
+   }
+   ```
+- **3. 配置动态数据源**
+   ```java
+   @Configuration
+   public class DynamicDataSourceConfig {
+   
+       @Bean
+       @ConfigurationProperties(prefix = "spring.datasource.primary")
+       public DataSource primaryDataSource() {
+           return DataSourceBuilder.create().build();
+       }
+   
+       @Bean
+       @ConfigurationProperties(prefix = "spring.datasource.secondary")
+       public DataSource secondaryDataSource() {
+           return DataSourceBuilder.create().build();
+       }
+   
+       @Bean
+       public DataSource dynamicDataSource(
+               @Qualifier("primaryDataSource") DataSource primaryDataSource,
+               @Qualifier("secondaryDataSource") DataSource secondaryDataSource) {
+           Map<Object, Object> targetDataSources = new HashMap<>();
+           targetDataSources.put("primary", primaryDataSource);
+           targetDataSources.put("secondary", secondaryDataSource);
+   
+           DynamicDataSource dynamicDataSource = new DynamicDataSource();
+           dynamicDataSource.setDefaultTargetDataSource(primaryDataSource);
+           dynamicDataSource.setTargetDataSources(targetDataSources);
+           return dynamicDataSource;
+       }
+   
+       @Bean
+       public PlatformTransactionManager transactionManager(
+               @Qualifier("dynamicDataSource") DataSource dataSource) {
+           return new DataSourceTransactionManager(dataSource);
+       }
+   }
+   ```
+- **4. 定义切面切换数据源**
+   ```java
+   @Aspect
+   @Component
+   public class DataSourceAspect {
+   
+       // 根据注解切换数据源
+       @Before("@annotation(dataSourceSwitch)")
+       public void switchDataSource(JoinPoint point, DataSourceSwitch dataSourceSwitch) {
+           DataSourceContextHolder.setDataSourceKey(dataSourceSwitch.value());
+       }
+   
+       // 执行后清理数据源标识
+       @After("@annotation(dataSourceSwitch)")
+       public void restoreDataSource(JoinPoint point, DataSourceSwitch dataSourceSwitch) {
+           DataSourceContextHolder.clearDataSourceKey();
+       }
+   }
+   
+   // 自定义注解
+   @Retention(RetentionPolicy.RUNTIME)
+   @Target(ElementType.METHOD)
+   public @interface DataSourceSwitch {
+       String value() default "primary";
+   }
+   ```
+- **5. 使用动态数据源**
+   在Service层通过注解切换数据源：
+   ```java
+   @Service
+   public class UserService {
+   
+       @Autowired
+       private UserDao userDao;
+   
+       @DataSourceSwitch("primary")
+       public List<User> getPrimaryUsers() {
+           return userDao.findAll();
+       }
+   
+       @DataSourceSwitch("secondary")
+       public List<User> getSecondaryUsers() {
+           return userDao.findAll();
+       }
+   }
+   ```
+
+##### **三、注意事项**
+1. **事务管理**：动态数据源切换需确保事务管理器与当前数据源一致。
+2. **连接池配置**：为每个数据源单独配置连接池参数（如HikariCP）。
+3. **线程安全**：使用`ThreadLocal`确保多线程环境下数据源隔离。
+4. **异常处理**：在切面中需处理异常并清理数据源标识。
+
+##### **四、总结**
+- **多数据源**：通过手动配置多个`DataSource`和事务管理器实现。
+- **动态切换**：基于`AbstractRoutingDataSource`和AOP实现运行时动态路由。
+- **适用场景**：读写分离、分库分表、多租户系统等需要灵活切换数据源的场景。
+
 ---
 
-- Spring Boot 2.x 和 3.x 的主要区别？  
-- 如何实现多数据源和动态数据源？  
-- 如何集成 Spring Security？  
-- 如何实现接口幂等性？  
+#### 如何集成 Spring Security？
+##### 一、快速集成（自动配置）
+- 1. 添加依赖
+   ```xml
+   <dependency>
+       <groupId>org.springframework.boot</groupId>
+       <artifactId>spring-boot-starter-security</artifactId>
+   </dependency>
+   ```
+- 2. 默认行为
+   - 所有端点自动启用 HTTP Basic 认证
+   - 自动生成默认用户（用户名为 `user`，密码在控制台输出）
+   - 默认启用 CSRF 保护
 
+##### 二、自定义安全配置
+- 1. 创建安全配置类
+   ```java
+   @Configuration
+   @EnableWebSecurity
+   public class SecurityConfig {
+   
+       @Bean
+       public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+           http
+               .authorizeHttpRequests(auth -> auth
+                   .requestMatchers("/public/**").permitAll()
+                   .requestMatchers("/admin/**").hasRole("ADMIN")
+                   .anyRequest().authenticated()
+               )
+               .formLogin(form -> form
+                   .loginPage("/login")
+                   .defaultSuccessUrl("/home", true)
+                   .permitAll()
+               )
+               .logout(logout -> logout
+                   .logoutSuccessUrl("/login?logout")
+                   .permitAll()
+               );
+           return http.build();
+       }
+   }
+   ```
+- 2. 配置用户存储
+   ```java
+   @Bean
+   public UserDetailsService userDetailsService() {
+       UserDetails user = User.builder()
+           .username("user")
+           .password("{bcrypt}$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG")
+           .roles("USER")
+           .build();
+       
+       UserDetails admin = User.builder()
+           .username("admin")
+           .password("{bcrypt}$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG")
+           .roles("ADMIN", "USER")
+           .build();
+       
+       return new InMemoryUserDetailsManager(user, admin);
+   }
+   
+   @Bean
+   public PasswordEncoder passwordEncoder() {
+       return new BCryptPasswordEncoder();
+   }
+   ```
+
+##### 三、常用配置选项
+- 1. 禁用 CSRF（开发环境）
+   ```java
+   http.csrf(csrf -> csrf.disable());
+   ```
+- 2. 配置 CORS
+   ```java
+   @Bean
+   public CorsConfigurationSource corsConfigurationSource() {
+       CorsConfiguration config = new CorsConfiguration();
+       config.setAllowedOrigins(List.of("https://example.com"));
+       config.setAllowedMethods(List.of("GET", "POST"));
+       
+       UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+       source.registerCorsConfiguration("/**", config);
+       return source;
+   }
+   ```
+- 3. 方法级安全
+   ```java
+   @Configuration
+   @EnableMethodSecurity
+   public class MethodSecurityConfig {
+       // 启用方法注解
+   }
+   ```
+
+   在 Service 层使用：
+   ```java
+   @PreAuthorize("hasRole('ADMIN')")
+   public void deleteUser(Long id) {
+       // ...
+   }
+   ```
+
+##### 四、数据库用户认证
+- 1. 使用 JPA 用户存储
+   ```java
+   @Bean
+   public UserDetailsService userDetailsService(UserRepository userRepo) {
+       return username -> userRepo.findByUsername(username)
+           .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+   }
+   ```
+- 2. 实体类示例
+   ```java
+   @Entity
+   public class User implements UserDetails {
+       @Id
+       @GeneratedValue(strategy = IDENTITY)
+       private Long id;
+       
+       private String username;
+       private String password;
+       
+       @ManyToMany(fetch = EAGER)
+       private Set<Role> roles;
+       
+       // 必须实现的方法
+       @Override
+       public Collection<? extends GrantedAuthority> getAuthorities() {
+           return roles.stream()
+               .map(role -> new SimpleGrantedAuthority(role.getName()))
+               .toList();
+       }
+       
+       // 其他 UserDetails 方法实现...
+   }
+   ```
+
+##### 五、OAuth2 集成（示例）
+```java
+@Bean
+public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/**").authenticated()
+            .anyRequest().permitAll()
+        )
+        .oauth2ResourceServer(oauth2 -> oauth2
+            .jwt(Customizer.withDefaults())
+        );
+    return http.build();
+}
+```
+
+##### 六、测试配置
+- 1. 测试类注解
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+public class SecurityTest {
+    
+    @Autowired
+    private MockMvc mockMvc;
+}
+```
+- 2. 模拟认证用户
+```java
+@Test
+@WithMockUser(username = "user", roles = "USER")
+void testAuthenticatedEndpoint() throws Exception {
+    mockMvc.perform(get("/api/data"))
+           .andExpect(status().isOk());
+}
+```
+
+##### 七、常见问题解决
+1. **403 Forbidden 错误**  
+   - 检查 CSRF 配置  
+   - 验证用户权限是否正确  
+2. **登录重定向循环**  
+   - 确保登录页面允许匿名访问  
+   - 检查权限配置顺序  
+3. **密码加密不匹配**  
+   - 确认密码编码器与存储格式一致  
+   - 使用 `{bcrypt}` 前缀  
+
+---
 ---
 
 ## 启动流程总结归纳
@@ -260,6 +661,24 @@ Spring Boot 提供了 Maven 插件 **spring-boot-maven-plugin**，可以很方�
 1. **BOOT-INF 目录**：里面保存了我们自己 Spring Boot 项目编译后的所有文件，其中 classes 目录下面就是编译后的 .class 文件，包括项目中的配置文件等，lib 目录下就是我们引入的第三方依赖
 2. **META-INF 目录**：通过 **MANIFEST.MF** 文件提供 jar 包的元数据，声明 jar 的启动类等信息。每个 Java jar 包应该是都有这个文件的，参考 Oracle 官方对于 jar 的说明，里面有一个 **Main-Class 配置用于指定启动类**
 3. **org.springframework.boot.loader 目录**：也就是 Spring Boot 的 spring-boot-loader 工具模块，它就是 java -jar xxx.jar 启动 Spring Boot 项目的秘密所在，上面的 Main-Class 指定的就是该工具模块中的一个类
+
+### 启动整体流程
+```plaintext
+java -jar → JarLauncher.main()
+    │
+    ├─ 初始化LaunchedURLClassLoader → 加载BOOT-INF/lib和classes
+    │
+    └─ 反射调用应用主类的main()
+        │
+        ▼
+SpringApplication.run()
+    │
+    ├─ 推断应用类型 → 创建ApplicationContext
+    ├─ 加载ApplicationListeners和Initializers
+    ├─ 准备Environment → 发布环境准备事件
+    ├─ 刷新ApplicationContext（Bean加载、自动配置、Web服务器启动）
+    └─ 发布应用启动完成事件
+```
 
 ### MANIFEST.MF
 ```properties
