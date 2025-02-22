@@ -171,6 +171,61 @@ Mybatis 使用 **RowBounds** 对象进行分页，**它是针对 ResultSet 结�
 2. 动态 SQL 由原来的节点配置变成 OGNL 表达式。
 3. 在一对一或一对多的时候，引进了 `<association />` 标签，在一对多的时候，引入了 `<collection />`标签，不过都是在 `<resultMap /> `里面配置
 
+
+---
+
+## 其它补充
+### MyBatis 工作原理总结
+- 1. **核心组件**：
+   - **SqlSessionFactory**：全局单例，通过`mybatis-config.xml`和Mapper文件构建，生成`SqlSession`。
+   - **SqlSession**：代表一次数据库会话，线程不安全，需确保每次请求独立创建。
+   - **Executor**：执行器，负责SQL调度（如`SimpleExecutor`、`ReuseExecutor`、`BatchExecutor`）。
+   - **MapperProxy**：动态代理对象，将Mapper接口方法映射到XML或注解的SQL语句。
+   - **StatementHandler**：处理JDBC Statement（预编译、参数设置）。
+   - **ParameterHandler**：将Java对象转换为SQL参数。
+   - **ResultSetHandler**：将ResultSet结果集转换为Java对象。
+- 2. **核心组件与初始化过程**
+   - **配置文件加载**：MyBatis 通过 `mybatis-config.xml` 加载全局配置（如数据源、类型处理器、插件等），并通过 Mapper XML 文件或注解定义 SQL 映射。
+   - **SqlSessionFactory 构建**：使用 `SqlSessionFactoryBuilder` 解析配置文件，生成 `SqlSessionFactory`，用于创建 `SqlSession`。
+   - **SqlSession 生命周期**：每个线程通过 `SqlSessionFactory` 创建 `SqlSession` 实例，用于执行 SQL 操作。`SqlSession` 是非线程安全的，通常在一次请求或事务中使用后关闭。
+- 3. **动态代理与 SQL 执行流程**
+   - **Mapper 接口代理**：MyBatis 通过 JDK 动态代理为 Mapper 接口生成代理对象，将接口方法调用转换为对应的 SQL 语句执行。
+   - **执行器（Executor）**：`SqlSession` 内部通过 `Executor` 执行 SQL，处理缓存（一级缓存）、参数绑定、结果映射等逻辑。
+   - **结果映射**：通过 `ResultMap` 将 JDBC `ResultSet` 转换为 Java 对象，支持自动映射或自定义映射规则。
+- 4. **核心流程步骤**
+   1. **加载配置**：解析`mybatis-config.xml`和Mapper文件，构建`Configuration`对象。
+   2. **创建SqlSessionFactory**：通过`SqlSessionFactoryBuilder`生成工厂实例。
+   3. **创建SqlSession**：通过工厂实例开启会话，内部生成`Executor`。
+   4. **获取Mapper代理**：通过`SqlSession.getMapper()`生成Mapper接口的代理对象。
+   5. **执行SQL**：代理对象调用方法，根据方法名关联SQL，通过`Executor`执行。
+   6. **结果映射**：通过`ResultSetHandler`将结果转换为POJO或集合。
+
+### MyBatis 与 Spring 集成原理
+- 1. **Spring 管理 MyBatis 核心组件**
+   - **SqlSessionFactoryBean**：Spring 通过 `SqlSessionFactoryBean` 替代原生 `SqlSessionFactoryBuilder`，将 `SqlSessionFactory` 作为 Bean 注册到 IoC 容器，整合数据源和 MyBatis 配置。
+   - **数据源注入**：由 Spring 管理数据源（如 HikariCP、Druid），通过依赖注入到 `SqlSessionFactoryBean`。
+- 2. **Mapper 接口的自动扫描与代理**
+   - **MapperScannerConfigurer 或 @MapperScan**：自动扫描指定包下的 Mapper 接口，生成代理 Bean 并注册到 Spring 容器，开发者可直接通过 `@Autowired` 注入使用。
+   - **代理逻辑**：调用 Mapper 方法时，代理对象通过 `SqlSessionTemplate` 执行 SQL，确保线程安全。
+- 3. **SqlSessionTemplate 的作用**
+   - **替代原生 SqlSession**：`SqlSessionTemplate` 是线程安全的，内部通过 `SqlSessionHolder` 结合 Spring 事务管理，确保同一事务内共享同一个 `SqlSession`。
+   - **事务同步**：与 Spring 事务管理器协同，在事务提交或回滚时自动关闭 `SqlSession`。
+- 4. **事务管理整合**
+   - **声明式事务**：通过 `@Transactional` 注解，由 Spring 的 `DataSourceTransactionManager` 管理事务。
+   - **Connection 绑定**：事务开启时，Spring 将数据库连接绑定到当前线程，MyBatis 操作复用该连接，保证事务原子性。
+
+
+
+### 常见问题扩展
+- **Q：如何防止MyBatis的N+1查询问题？**  
+  - 【注】 N+1 查询问题：当查询主对象（如订单）时，触发 1 次主查询（获取 N 条数据），随后对每条主数据执行关联子查询（如查询每个订单的商品列表），导致总执行 1 + N 次 SQL，性能急剧下降。
+  **A**：使用联合查询（JOIN）或批量加载（`<collection fetchType="eager">`，默认就是急加载）【一般使用联合查询就能解决了】
+- **Q：MyBatis如何支持多数据源？**  
+  **A**：配置多个`SqlSessionFactory`，结合Spring的`@Primary`和`@Qualifier`注解区分。
+- **Q：XML和注解配置的优劣？**  
+  **A**：XML适合复杂SQL，注解适合简单场景，但可读性差。
+
+
 ---
 
 ## 使用手册
