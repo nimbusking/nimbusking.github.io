@@ -20,12 +20,12 @@ top: true
 - 《高性能MySQL》：宝典，整体介绍全面，对MySQL整体脉络看的比较清楚
 - [官网手册(5.7版本)](https://dev.mysql.com/doc/refman/5.7/en/)：这没得说，最全的。PS：英语读的累的用Google Translate页面翻译，专业名词翻译的可读性较高。
 
+<!-- more -->
+
 ### 2024年11月份更新
 - 结合《MySQL技术内幕 InnoDB存储引擎》等书/官方文档作为细节知识点补充，完善本2年前的博客。
 - 对原有知识重点部分加粗，补充若干图片辅助理解
 - 删除部分废话
-
-<!-- more -->
 
 ## 为什么InnoDB要选择用B+树
 InnoDB 存储引擎使用 **B+ 树** 作为其索引结构的主要原因在于 B+ 树在数据库系统中具有显著的优势，能够高效支持数据库的查询、插入、删除和范围查询等操作。
@@ -588,6 +588,133 @@ SQL 优化需结合业务场景，通过 `EXPLAIN` 分析瓶颈，优先解决�
   - 255以下长度只需1字节存储长度信息，256需2字节，可能影响索引前缀限制（如767字节）。
 - 3. **大字段（如BLOB）存储优化**  
   - 单独拆表存储，避免影响主表的查询性能。
+
+### **MySQL执行计划（EXPLAIN）分析最佳实践**
+
+#### **一、基础操作与核心字段解读**
+1. **获取执行计划**  
+   ```sql
+   EXPLAIN [FORMAT=JSON|TREE] SELECT ... -- 推荐JSON格式获取详细信息
+   ```
+   - **关键字段**：  
+     | 字段          | 说明                                                                 |
+     |---------------|----------------------------------------------------------------------|
+     | `id`          | 查询层级（子查询顺序）                                                |
+     | `select_type` | 查询类型（SIMPLE/PRIMARY/SUBQUERY等）                                 |
+     | `type`        | **访问类型**（性能核心指标，从优到差：`system` > `const` > `ref` > `range` > `index` > `ALL`） |
+     | `key`         | 实际使用的索引                                                       |
+     | `key_len`     | 索引使用的字节长度（判断是否完全使用联合索引）                         |
+     | `rows`        | 预估扫描行数（越小越好）                                              |
+     | `Extra`       | 附加信息（`Using index`/`Using where`/`Using temporary`等）          |
+
+#### **二、性能优化优先级判断**
+- **1. 优先关注`type`字段**
+  - **目标**：尽可能达到`const`、`ref`或`range`，避免`index`（全索引扫描）和`ALL`（全表扫描）。  
+  - **示例优化**：  
+    ```sql
+    -- 全表扫描（type=ALL）
+    EXPLAIN SELECT * FROM users WHERE phone = '13800138000';
+    -- 优化：为phone字段添加索引
+    ALTER TABLE users ADD INDEX idx_phone (phone);
+    ```
+- **2. 检查索引使用情况**
+  - **未使用索引**：`key`为`NULL`且`type=ALL` → 需添加索引。  
+  - **索引未完全使用**：联合索引的`key_len`小于定义长度 → 调整查询条件顺序或索引。  
+    ```sql
+    -- 索引(a, b, c)，查询WHERE a=1 AND c=3 → key_len仅计算a字段
+    ```
+- **3. 覆盖索引优化（Using index）**
+  - **目标**：`Extra`出现`Using index`，避免回表。  
+    ```sql
+    -- 示例：查询字段全部在索引中
+    CREATE INDEX idx_name_age ON users (name, age);
+    EXPLAIN SELECT name, age FROM users WHERE name = 'John'; -- Using index
+    ```
+
+#### **三、关键问题诊断与解决**
+- **1. 全表扫描（type=ALL）**
+  - **原因**：无索引、索引失效（如使用函数）、查询条件跳过索引最左前缀。  
+  - **解决**：  
+    - 添加匹配WHERE条件的索引。  
+    - 重写查询条件避免函数或隐式转换。  
+- **2. 临时表与排序（Using temporary; Using filesort）**
+  - **场景**：GROUP BY或ORDER BY未使用索引排序。  
+  - **优化**：  
+    - 为排序字段添加索引，确保与查询条件匹配。  
+    - 减少排序数据量（如LIMIT分页）。  
+- **3. 嵌套循环与JOIN优化**
+  - **驱动表选择**：小表作为驱动表（`EXPLAIN`中id=1的表）。  
+  - **避免笛卡尔积**：检查JOIN条件是否遗漏，导致`rows`暴增。  
+- **4. 子查询优化**
+  - **优先使用JOIN替代子查询**：  
+    ```sql
+    -- 低效
+    SELECT * FROM users WHERE id IN (SELECT user_id FROM orders);
+    -- 优化
+    SELECT users.* FROM users JOIN orders ON users.id = orders.user_id;
+    ```
+
+#### **四、高级分析技巧**
+- **1. JSON格式深度解析**
+   ```sql
+   EXPLAIN FORMAT=JSON SELECT ...
+   -- 解析`cost_info`估算执行成本，对比不同查询计划的代价
+   ```
+   - 关注`query_cost`（总成本）、`prefix_cost`（当前步骤成本）。  
+- **2. 索引选择性检查**
+   - **公式**：`索引选择性 = 不同值数量 / 总行数`（越接近1越好）。  
+   - **示例**：  
+     ```sql
+     -- 计算city字段选择性
+     SELECT COUNT(DISTINCT city)/COUNT(*) FROM users;
+     ```
+- **3. 执行计划对比**
+   - 使用`EXPLAIN`对比不同查询写法或索引方案的性能差异。  
+   - **工具辅助**：`pt-visual-explain`可视化执行计划。  
+
+#### **五、结合其他工具**
+1. **慢查询日志**  
+   - 开启慢日志定位高耗时SQL：  
+     ```ini
+     slow_query_log = ON
+     long_query_time = 2
+     ```
+2. **性能模式（Performance Schema）**  
+   - 监控锁等待、IO开销等底层行为：  
+     ```sql
+     SELECT * FROM performance_schema.events_waits_history;
+     ```
+3. **SHOW PROFILE**  
+   - 分析查询各阶段耗时（需先启用）：  
+     ```sql
+     SET profiling = 1;
+     SELECT ...;
+     SHOW PROFILE FOR QUERY 1;
+     ```
+
+#### **六、实战案例**
+**问题**：查询缓慢，执行计划显示`type=ALL`。  
+**SQL**：  
+```sql
+SELECT * FROM orders WHERE DATE(create_time) = '2023-10-01';
+```
+**分析**：  
+- `WHERE`条件使用`DATE()`函数，导致索引失效。  
+**优化**：  
+```sql
+-- 改写为范围查询
+SELECT * FROM orders 
+WHERE create_time BETWEEN '2023-10-01 00:00:00' AND '2023-10-01 23:59:59';
+-- 添加索引
+ALTER TABLE orders ADD INDEX idx_create_time (create_time);
+```
+
+#### **总结**
+- **核心流程**：`EXPLAIN` → 定位瓶颈（type/rows/Extra） → 针对性优化（索引/查询改写）。  
+- **优化原则**：减少扫描数据量、避免临时表/排序、利用覆盖索引。  
+- **持续监控**：结合慢查询日志和性能模式，定期审查执行计划。
+
+---
 
 ## MySQL底层原理（部分）
 主要涉及事务隔离级别相关
