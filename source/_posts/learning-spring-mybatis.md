@@ -202,10 +202,7 @@ Mybatis 使用 **RowBounds** 对象进行分页，**它是针对 ResultSet 结�
 
 ### MyBatis 与 Spring 集成原理
 - 1. **Spring 管理 MyBatis 核心组件**
-   - **SqlSessionFactoryBean**：Spring 通过 `SqlSessionFactoryBean` 替代原生 `SqlSessionFactoryBuilder`，将 `SqlSessionFactory` 作为 Bean 注册到 IoC 容器，整合数据源和 MyBatis 配置。
-   - **数据源注入**：由 Spring 管理数据源（如 HikariCP、Druid），通过依赖注入到 `SqlSessionFactoryBean`。
-- 2. **Mapper 接口的自动扫描与代理**
-   - **MapperScannerConfigurer 或 @MapperScan**：自动扫描指定包下的 Mapper 接口，生成代理 Bean 并注册到 Spring 容器，开发者可直接通过 `@Autowired` 注入使用。
+   - **SqlSessionFactoryBean**：Spring 通过 `SqlSessionFactoryBean` 替代原生 `SqlSessionFactoryBuilder`，将 `SqlSessionFactory` 作为 Bean 注册到 IoC 容器，整合数据源和 MyBati`cannerConfigurer 或 @MapperScan**：自动扫描指定包下的 Mapper 接口，生成代理 Bean 并注册到 Spring 容器，开发者可直接通过 `@Autowired` 注入使用。
    - **代理逻辑**：调用 Mapper 方法时，代理对象通过 `SqlSessionTemplate` 执行 SQL，确保线程安全。
 - 3. **SqlSessionTemplate 的作用**
    - **替代原生 SqlSession**：`SqlSessionTemplate` 是线程安全的，内部通过 `SqlSessionHolder` 结合 Spring 事务管理，确保同一事务内共享同一个 `SqlSession`。
