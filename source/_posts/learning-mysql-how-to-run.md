@@ -718,7 +718,7 @@ ALTER TABLE orders ADD INDEX idx_create_time (create_time);
 
 ## MySQL底层原理（部分）
 主要涉及事务隔离级别相关
-
+ 
 ### MySQL相关的MVCC
 MySQL的MVCC（Multi-Version Concurrency Control）是一种通过维护数据多版本实现高并发事务处理的机制，核心目标是减少读写操作的锁冲突，提升数据库并发性能。以下是其底层工作原理的详细总结：
 

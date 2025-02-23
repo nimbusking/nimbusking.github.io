@@ -85,9 +85,7 @@ Valine似乎已亡，评论区插件切换至GTalk，不折腾了。。。
          + Redis
     - 物联网相关
        - 技术相关
-          - Google IoT
-             - Android Things
-             - TensorFlow
+          - Home Assistant
        - 设备相关
           - Raspberry Pi
           - 小米米家系列
