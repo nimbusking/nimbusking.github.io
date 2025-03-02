@@ -49,8 +49,8 @@ top: true
    - 通过 CPU 原子指令（如 `cmpxchg`）实现无锁更新。
    - 问题：ABA 问题（用 `AtomicStampedReference` 解决）、自旋开销。
 
-
 ---
+
 ### 关于指令重排
 
 #### **一、指令重排发生的根本原因**
@@ -416,24 +416,6 @@ System.out.println(value);  // 可能看到高32位已更新，低32位仍是旧
     // 正确做法
     new ThreadPoolExecutor(..., new LinkedBlockingQueue<>(1000));
     ```
-
----
-
-### **五、并发容器**
-1. **ConcurrentHashMap 的实现原理**  
-    - JDK 8 前：分段锁（Segment + HashEntry）。
-    - JDK 8+：数组 + 链表/红黑树，CAS + `synchronized` 锁桶头节点。
-    - 
-2. **CopyOnWriteArrayList 适用场景**  
-    - 读多写少，通过写时复制（复制新数组）保证线程安全，读无锁。
-
----
-
-### **六、内存模型与可见性**
-1. **JMM（Java 内存模型）**  
-    - 主内存与工作内存：线程操作的是工作内存中的副本，需通过 `volatile` 或锁保证可见性。
-2. **happens-before 原则**  
-    - 程序顺序规则、锁规则、volatile 规则、传递性等，确保指令重排序不破坏逻辑。
 
 ---
 
@@ -1019,6 +1001,7 @@ class SharedData {
                 conditions[currentId - 1].signal();
             }
             // 确保所有线程最终都能退出，这种直接唤醒会存在异常
+            // 这里有BUG，最先使用这种方式直接轮询唤醒，这会导致虚假唤醒后容易死锁。
 //            for (Condition cond : conditions) cond.signal();
         } finally {
             lock.unlock();
@@ -1355,6 +1338,118 @@ Java 内存模型是通过在变量修改后将新值同步回主内存，在变
 volatile关键字可以保证可见性原因：
 - JVM内存屏障，storeLoad来实现；底层汇编：lock前缀; addl
 
+### 【总结】 三大特性的具体实现
+在Java中，解决并发场景下的可见性、原子性和顺序性问题主要通过以下手段：
+
+#### **一、可见性（Visibility）**
+- **1. `volatile`关键字**
+    - **机制**：  
+      - 写操作后插入**写屏障**，强制将工作内存的值刷新到主内存。  
+      - 读操作前插入**读屏障**，强制从主内存重新加载最新值。  
+    - **示例**：  
+      ```java
+      volatile boolean flag = true;
+      // 线程A修改flag后，线程B能立即看到变化
+      ```
+- **2. `synchronized`与锁机制**
+    - **机制**：  
+      - 进入同步块前清空工作内存（强制读取主内存）。  
+      - 退出同步块前将修改刷新到主内存。  
+    - **示例**：  
+      ```java
+      synchronized (lock) {
+          sharedValue++; // 修改对后续线程可见
+      }
+      ```
+- **3. `final`字段**
+    - **机制**：  
+      - 构造函数中对`final`字段的赋值不会被重排序到对象引用发布之后。  
+      - 其他线程访问已正确初始化的对象时，`final`字段值可见。  
+    - **示例**：  
+      ```java
+      public class SafeObject {
+          private final int value; // 安全发布后可见
+          public SafeObject(int v) { this.value = v; }
+      }
+      ```
+
+#### **二、原子性（Atomicity）**
+- **1. `synchronized`与显式锁**
+    - **机制**：  
+      - 通过互斥锁确保临界区代码的原子执行。  
+    - **示例**：  
+      ```java
+      ReentrantLock lock = new ReentrantLock();
+      lock.lock();
+      try {
+          sharedCounter++;
+      } finally {
+          lock.unlock();
+      }
+      ```
+- **2. 原子类（`AtomicInteger`等）**
+    - **机制**：  
+      - 基于CAS（Compare-And-Swap）操作实现无锁原子更新。  
+    - **示例**：  
+      ```java
+      AtomicInteger atomicInt = new AtomicInteger(0);
+      atomicInt.incrementAndGet(); // 原子递增
+      ```
+- **3. CAS操作**
+    - **底层实现**：  
+      - 依赖CPU指令（如x86的`CMPXCHG`）保证操作的原子性。  
+    - **示例**：  
+      ```java
+      boolean success = unsafe.compareAndSwapInt(obj, offset, expect, update);
+      ```
+
+#### **三、顺序性（Ordering）**
+- **1. `volatile`关键字**
+    - **机制**：  
+      - 禁止指令重排序（通过内存屏障）。  
+      - 保证写操作前的所有操作不会被重排序到写之后，读操作后的所有操作不会被重排序到读之前。  
+    - **示例**：  
+      ```java
+      volatile boolean initialized = false;
+      // 初始化完成后设置标志位，防止初始化步骤重排序
+      ```
+- **2. `happens-before`规则**
+    - **核心规则**：  
+      - **程序顺序规则**：单线程中的操作按代码顺序执行。  
+      - **锁规则**：解锁操作`happens-before`后续加锁操作。  
+      - **`volatile`规则**：写操作`happens-before`后续读操作。  
+    - **示例**：  
+      ```java
+      int x = 0;
+      volatile boolean v = false;
+      // 线程A：x = 1; v = true; 
+      // 线程B：if(v) assert x == 1; // 保证成立
+      ```
+-  **3. 内存屏障**
+    - **类型**：  
+      - **LoadLoad**：禁止读操作重排序。  
+      - **StoreStore**：禁止写操作重排序。  
+      - **LoadStore**：禁止读后写重排序。  
+      - **StoreLoad**：全能屏障（如`volatile`写后的屏障）。  
+    - **应用**：  
+      ```java
+      // Unsafe类中手动插入屏障
+      unsafe.storeFence(); // 插入StoreStore屏障
+      ```
+
+#### **三、选择策略**
+| **问题类型**   | **推荐方案**                          | **适用场景**                     |
+|----------------|---------------------------------------|----------------------------------|
+| **可见性**     | `volatile`、`synchronized`、`final`   | 状态标志、安全发布对象            |
+| **原子性**     | 原子类、`synchronized`、锁            | 计数器、共享资源访问              |
+| **顺序性**     | `volatile`、`happens-before`规则       | 双重检查锁、延迟初始化            |
+
+
+通过合理选择这些机制，开发者可以高效解决并发编程中的可见性、原子性和顺序性问题，构建高性能且线程安全的系统。
+
+---
+
+
 ### 缓存一致性协议-MESI
 通过缓存中数据（Cache Line）施加4个状态，来达到缓存一致性目的：M-修改；E-独占；S-共享；I-失效。
 当失效的时候，高速缓存会立即加载主内存；
@@ -1365,7 +1460,7 @@ volatile关键字可以保证可见性原因：
 1. 如果存在跨缓存行的时候，一致性协议有问题
 2. 早期处理器是没有实现缓存一致性协议（*不同处理器同时向总线发起总线事务， 通过总线仲裁实现，代价非常大，了解*）
 
-### 关于伪共享
+#### 关于伪共享
 伪共享的本质原因：因为缓存行（Cache Line），linux下默认64字节。当程序的不同变量，在同一个缓存行的时候，不同线程处理对应变量的时候，会造成相互干扰（参考MESI），导致频繁的失效要重新读取，性能严重下降。
 ![伪共享内存交互示意图](181e5700/伪共享内存交互示意图.png)
 上图对应的程序代码片段
