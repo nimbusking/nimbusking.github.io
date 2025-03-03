@@ -5,6 +5,7 @@ tags:
   - 账务
   - 清结算
   - 会员
+  - 跨境
 categories: 支付业务
 abbrlink: 3a538a14
 top: true
@@ -23,6 +24,8 @@ updated: 2025-03-02 21:16:44
 - 2025-02-28
   - 删除无用知识，调整文章排版
   - 补充公众号《隐墨星辰》相关知识引用
+- 2025-03-03
+  - 优化mermaid排版
 
 ## 支付全景图
 支付领域的架构全景图是一个复杂的体系，涵盖从用户交互到资金流转的全流程。以下是对核心模块及架构的总结：
@@ -286,17 +289,15 @@ https://nimbusk.cc/post/f6127b60.html
 
 ## **开放场景**
 ### **场景设计**  
-   “设计一个跨境电商平台的支付系统，支持多币种收款、分账给海外供应商，并满足当地合规要求。”  
+   **“设计一个跨境电商平台的支付系统，支持多币种收款、分账给海外供应商，并满足当地合规要求。”  **
    - 需涵盖：货币转换、清结算时效、分账API设计、合规报送（如税务）等。
 
 ### **故障处理**
-   “某日交易量激增10倍，部分用户余额显示错误，如何快速定位问题？”  
+**“某日交易量激增10倍，部分用户余额显示错误，如何快速定位问题？”**  
    - 考察点：监控指标（DB负载/缓存击穿）、降级方案（静态余额计算）、日志追踪。
 
-
 #### **一、紧急响应流程**
-```mermaid
-graph TD
+{% mermaid graph TD %}
     A[报警触发] --> B[确认影响范围]
     B --> C[检查核心监控指标]
     C --> D{是否DB/缓存故障?}
@@ -304,129 +305,120 @@ graph TD
     D -->|否| F[日志追踪异常请求]
     E --> G[逐步恢复服务]
     F --> G
-```
+{% endmermaid %}
 
 #### **二、核心监控指标排查**
-
-##### 1. **数据库层（MySQL）**
-- **关键指标**：
-  ```bash
-  # CPU使用率 > 90% → 锁竞争或慢查询
-  # 活跃连接数 > max_connections的80% → 连接池不足
-  # 磁盘IO等待时间 > 200ms → 存储性能瓶颈
-  # 慢查询数突增 → 检查最近SQL变更
-  ```
-- **排查工具**：
-  ```sql
-  SHOW PROCESSLIST;  -- 查看阻塞线程
-  SELECT * FROM information_schema.innodb_trx;  -- 长事务检测
-  ```
-
-##### 2. **缓存层（Redis）**
-- **关键指标**：
-  ```bash
-  # 缓存命中率 < 80% → 击穿或穿透
-  # 内存碎片率 > 1.5 → 需清理过期键
-  # 网络带宽占用 > 70% → 大Key或热点数据
-  ```
-- **排查命令**：
-  ```bash
-  redis-cli info stats | grep keyspace_misses  # 查看缓存未命中次数
-  redis-cli --bigkeys  # 扫描大Key
-  ```
-
-##### 3. **应用层**
-- **线程池状态**：活跃线程数突增可能引发OOM。
-- **GC频率**：Full GC次数增多导致响应延迟。
+- 1. **数据库层（MySQL）**
+  - **关键指标**：
+    ```bash
+    # CPU使用率 > 90% → 锁竞争或慢查询
+    # 活跃连接数 > max_connections的80% → 连接池不足
+    # 磁盘IO等待时间 > 200ms → 存储性能瓶颈
+    # 慢查询数突增 → 检查最近SQL变更
+    ```
+  - **排查工具**：
+    ```sql
+    SHOW PROCESSLIST;  -- 查看阻塞线程
+    SELECT * FROM information_schema.innodb_trx;  -- 长事务检测
+    ```
+- 2. **缓存层（Redis）**
+  - **关键指标**：
+    ```bash
+    # 缓存命中率 < 80% → 击穿或穿透
+    # 内存碎片率 > 1.5 → 需清理过期键
+    # 网络带宽占用 > 70% → 大Key或热点数据
+    ```
+  - **排查命令**：
+    ```bash
+    redis-cli info stats | grep keyspace_misses  # 查看缓存未命中次数
+    redis-cli --bigkeys  # 扫描大Key
+    ```
+- 3. **应用层**
+  - **线程池状态**：活跃线程数突增可能引发OOM。
+  - **GC频率**：Full GC次数增多导致响应延迟。
 
 #### **三、降级方案实施**
-
-##### 1. **静态余额计算降级**
-- **实现逻辑**：
-  ```java
-  // 降级开关（配置中心动态下发）
-  boolean degrade = configService.getBool("balance.degrade.enabled");
-  
-  public BigDecimal getBalance(String userId) {
-      if (degrade) {
-          // 从本地缓存读取静态余额（每小时预生成）
-          return localCache.get(userId + "_static_balance");
-      } else {
-          // 实时查询数据库
-          return realTimeBalanceService.get(userId);
-      }
-  }
-  ```
-- **数据预生成**：每小时跑批任务计算用户余额快照存入Redis。
-
-##### 2. **限流与熔断**
-- **Sentinel规则**：
-  ```java
-  // 保护数据库查询接口，QPS阈值设为正常值的50%
-  FlowRule rule = new FlowRule("queryBalance")
-    .setGrade(RuleConstant.FLOW_GRADE_QPS)
-    .setCount(500); 
-  FlowRuleManager.loadRules(Collections.singletonList(rule));
-  ```
+- 1. **静态余额计算降级**
+  - **实现逻辑**：
+    ```java
+    // 降级开关（配置中心动态下发）
+    boolean degrade = configService.getBool("balance.degrade.enabled");
+    
+    public BigDecimal getBalance(String userId) {
+        if (degrade) {
+            // 从本地缓存读取静态余额（每小时预生成）
+            return localCache.get(userId + "_static_balance");
+        } else {
+            // 实时查询数据库
+            return realTimeBalanceService.get(userId);
+        }
+    }
+    ```
+  - **数据预生成**：每小时跑批任务计算用户余额快照存入Redis。
+- 2. **限流与熔断**
+  **Sentinel规则**：
+    ```java
+    // 保护数据库查询接口，QPS阈值设为正常值的50%
+    FlowRule rule = new FlowRule("queryBalance")
+      .setGrade(RuleConstant.FLOW_GRADE_QPS)
+      .setCount(500); 
+    FlowRuleManager.loadRules(Collections.singletonList(rule));
+    ```
 
 #### **四、日志追踪与根因分析**
-
-##### 1. **分布式追踪（OpenTelemetry）**
-- **定位慢请求**：
-  ```json
-  {
-    "traceId": "d4e3b7a1",
-    "spans": [
-      {
-        "name": "DB/GetBalance",
-        "duration": "3200ms",  // 超时根源
-        "attributes": {"sql": "SELECT * FROM accounts WHERE user_id=?"}
-      }
-    ]
-  }
-  ```
-
-##### 2. **错误日志筛选**
-- **常见错误模式**：
-  ```bash
-  grep "余额计算异常" app.log | awk -F 'user=' '{print $2}' | sort | uniq -c
-  # 输出：user123 45次 → 该用户请求密集触发bug
-  ```
-
-##### 3. **数据库锁分析**
-- **死锁日志**：
-  ```sql
-  SHOW ENGINE INNODB STATUS; 
-  -- LATEST DETECTED DEADLOCK 部分显示冲突事务
-  ```
+- 1. **分布式追踪（OpenTelemetry）**
+  - **定位慢请求**：
+    ```json
+    {
+      "traceId": "d4e3b7a1",
+      "spans": [
+        {
+          "name": "DB/GetBalance",
+          "duration": "3200ms",  // 超时根源
+          "attributes": {"sql": "SELECT * FROM accounts WHERE user_id=?"}
+        }
+      ]
+    }
+    ```
+- 2. **错误日志筛选**
+   **常见错误模式**：
+    ```bash
+    grep "余额计算异常" app.log | awk -F 'user=' '{print $2}' | sort | uniq -c
+    # 输出：user123 45次 → 该用户请求密集触发bug
+    ```
+- 3. **数据库锁分析**
+   **死锁日志**：
+    ```sql
+    SHOW ENGINE INNODB STATUS; 
+    -- LATEST DETECTED DEADLOCK 部分显示冲突事务
+    ```
 
 #### **五、典型故障场景与修复**
 
-##### **场景1：缓存击穿导致DB过载**
-- **现象**：大量请求同一用户（如网红用户）余额，缓存同时失效。
-- **修复**：
-  ```python
-  # 缓存空值 + 互斥锁重建
-  def get_balance(user_id):
-      balance = redis.get(user_id)
-      if balance is None:
-          if redis.setnx("lock:" + user_id, 1):  # 获取锁
-              balance = db.query("SELECT balance FROM accounts WHERE user_id=?", user_id)
-              redis.setex(user_id, 300, balance if balance else "NULL")
-              redis.delete("lock:" + user_id)
-          else:
-              time.sleep(0.1)
-              return get_balance(user_id)  # 重试
-      return balance
-  ```
-
-##### **场景2：慢查询阻塞线程**
-- **根因**：新上线功能触发全表扫描。
-- **修复**：
-  ```sql
-  -- 优化索引
-  ALTER TABLE accounts ADD INDEX idx_user_balance (user_id, balance);
-  ```
+- **场景1：缓存击穿导致DB过载**
+  - **现象**：大量请求同一用户（如网红用户）余额，缓存同时失效。
+  - **修复**：
+    ```python
+    # 缓存空值 + 互斥锁重建
+    def get_balance(user_id):
+        balance = redis.get(user_id)
+        if balance is None:
+            if redis.setnx("lock:" + user_id, 1):  # 获取锁
+                balance = db.query("SELECT balance FROM accounts WHERE user_id=?", user_id)
+                redis.setex(user_id, 300, balance if balance else "NULL")
+                redis.delete("lock:" + user_id)
+            else:
+                time.sleep(0.1)
+                return get_balance(user_id)  # 重试
+        return balance
+    ```
+- **场景2：慢查询阻塞线程**
+  - **根因**：新上线功能触发全表扫描。
+  - **修复**：
+    ```sql
+    -- 优化索引
+    ALTER TABLE accounts ADD INDEX idx_user_balance (user_id, balance);
+    ```
 
 #### **六、后续优化措施**
 1. **自动扩容策略**：基于CPU/连接数指标自动扩展数据库只读副本。
@@ -436,9 +428,8 @@ graph TD
 ---
 
 ### **技术选型**
-   “在账务核心系统中，选择关系型数据库还是分布式NewSQL？为什么？”  
+**“在账务核心系统中，选择关系型数据库还是分布式NewSQL？为什么？”  **
    - 关键点：ACID需求、横向扩展能力、金融级一致性要求。
-
 
 在账务核心系统的数据库选型中，需根据**业务规模、一致性要求、扩展性需求**和**技术生态**综合决策。以下是关键维度的对比与选型建议：
 
@@ -464,42 +455,39 @@ graph TD
 
 
 #### **三、选型决策树**
-```mermaid
-graph TD
+{% mermaid graph TD %}
     A[账务系统规模] -->|数据量<1TB, TPS<5k| B[关系型数据库]
     A -->|数据量>1TB或TPS>10k| C{是否需要强SQL兼容?}
     C -->|是,需复杂查询| D[NewSQL+应用层适配]
     C -->|否,简单KV操作| E[NoSQL+事务补偿]
     B --> F[推荐MySQL集群+分库分表]
     D --> G[推荐TiDB/OceanBase]
-```
+{% endmermaid %}
 
 #### **四、典型场景推荐方案**
-##### **1. 中小型账务系统（银行/支付公司）**
-- **选择理由**：  
-  数据规模可控（单表<10亿条），无需跨地域多活，强事务需求优先。  
-- **技术栈**：  
-  **MySQL集群（半同步复制）** + **ShardingSphere分库分表**  
-- **优化点**：  
-  - 热点账户拆分：按账户Hash分16库，缓解锁竞争  
-  - 归档策略：历史数据定期转储至TiDB（低成本分析）
-
-##### **2. 大型互联网支付平台**
-- **选择理由**：  
-  日均交易>1亿笔，需弹性扩展与跨地域容灾。  
-- **技术栈**：  
-  **TiDB集群（5节点起步）** + **Redis分布式锁**  
-- **关键配置**：  
-  - 事务优化：关闭Pessimistic Transaction，启用Async Commit  
-  - 存储分离：TiKV部署在NVMe SSD，提升IOPS  
-
-##### **3. 金融级核心系统（券商/清算所）**
-- **选择理由**：  
-  合规要求严格，需存储过程与复杂报表。  
-- **技术栈**：  
-  **Oracle RAC** + **GoldenGate异地容灾**  
-- **妥协方案**：  
-  NewSQL仅用于非核心业务（如用户行为分析）
+- **1. 中小型账务系统（银行/支付公司）**
+  - **选择理由**：  
+    数据规模可控（单表<10亿条），无需跨地域多活，强事务需求优先。  
+  - **技术栈**：  
+    **MySQL集群（半同步复制）** + **ShardingSphere分库分表**  
+  - **优化点**：  
+    - 热点账户拆分：按账户Hash分16库，缓解锁竞争  
+    - 归档策略：历史数据定期转储至TiDB（低成本分析）
+- **2. 大型互联网支付平台**
+  - **选择理由**：  
+    日均交易>1亿笔，需弹性扩展与跨地域容灾。  
+  - **技术栈**：  
+    **TiDB集群（5节点起步）** + **Redis分布式锁**  
+  - **关键配置**：  
+    - 事务优化：关闭Pessimistic Transaction，启用Async Commit  
+    - 存储分离：TiKV部署在NVMe SSD，提升IOPS  
+- **3. 金融级核心系统（券商/清算所）**
+  - **选择理由**：  
+    合规要求严格，需存储过程与复杂报表。  
+  - **技术栈**：  
+    **Oracle RAC** + **GoldenGate异地容灾**  
+  - **妥协方案**：  
+    NewSQL仅用于非核心业务（如用户行为分析）
 
 #### **五、NewSQL落地挑战与解决方案**
 | **挑战**                | **解决方案**                                      |
@@ -606,43 +594,37 @@ $$
 ### 分布式一致性hash
 分布式一致性哈希在支付领域的落地实践场景主要包括以下几个方向，结合其特性如动态扩缩容、数据均衡分布和最小化数据迁移，可有效提升系统的稳定性和扩展性：
 
-#### 1. **支付请求的负载均衡与路由**
+- 1. **支付请求的负载均衡与路由**
    - **场景**：将用户支付请求均匀分配到多个服务节点，应对高并发。
    - **应用**：
      - 使用一致性哈希动态分配请求至服务器，新增或下线节点时仅影响相邻节点，避免全局重新哈希。
      - 结合虚拟节点解决物理服务器性能不均问题，实现更均衡的负载。
-
-#### 2. **分库分表的数据存储优化**
+- 2. **分库分表的数据存储优化**
    - **场景**：海量交易数据分片存储，避免单库性能瓶颈。
    - **应用**：
      - 按商户ID或用户ID哈希值分配数据到特定数据库分片，减少节点增减时的数据迁移量。
      - 通过虚拟节点设计预防数据倾斜，确保各分片负载均衡。
-
-#### 3. **分布式缓存管理**
+- 3. **分布式缓存管理**
    - **场景**：高频访问数据（如用户信息、交易状态）的缓存加速。
    - **应用**：
      - 一致性哈希定位缓存节点，节点变化时仅部分缓存失效，降低击穿风险。
      - 支持缓存集群弹性扩缩容，提升系统响应速度。
-
-#### 4. **支付通道的动态路由**
+- 4. **支付通道的动态路由**
    - **场景**：智能选择支付渠道（如银行、第三方支付），提升成功率与成本效益。
    - **应用**：
      - 按商户或用户哈希值固定映射到特定通道，保障事务连续性。
      - 通道故障时自动路由至备用节点，结合重试机制保障交易完成。
-
-#### 5. **分布式任务调度**
+- 5. **分布式任务调度**
    - **场景**：定时任务（如对账、清算）的分布式处理。
    - **应用**：
      - 哈希分配任务到工作节点，确保任务分布均衡。
      - 节点动态变化时自动迁移任务，提高任务执行可靠性。
-
-#### 6. **多活架构与容灾设计**
+- 6. **多活架构与容灾设计**
    - **场景**：多地数据中心协同，实现故障快速切换。
    - **应用**：
      - 按用户地域哈希路由至最近数据中心，降低延迟。
      - 数据中心故障时，请求自动转移至其他节点，保障服务高可用。
-
-#### 7. **消息队列分区管理**
+- 7. **消息队列分区管理**
    - **场景**：支付订单消息的顺序处理与并行消费平衡。
    - **应用**：
      - 一致性哈希分配消息到指定分区，确保同一订单消息有序。
@@ -660,7 +642,7 @@ $$
 
 ---
 
-### 支付状态机
+### 【通用】支付状态机
 
 #### **一、最佳实践**
 1. **明确且有限的状态定义**
@@ -760,6 +742,8 @@ $$
 - **灵活性**：支持动态扩展和配置，适应业务快速迭代。  
 
 **最终目标**：实现高可靠、易维护的支付流程管理，确保每一笔交易状态可追踪、可审计、符合业务规则。
+
+---
 
 ### 【通用】接口幂等设计
 
@@ -978,7 +962,6 @@ $$
 ### 【跨境】跨境支付下的OUR模式
 在国际电汇（如SWIFT转账）和跨境支付场景中，“**OUR模式**”（全称 **Our Charges**）是一种费用承担方式，指**汇款方（付款人）承担所有转账过程中产生的银行费用**，确保收款方收到全额款项。以下是详细解析：
 
-
 #### **一、OUR模式的核心特点**
 1. **费用承担方**：  
    - **汇款人支付所有费用**，包括：  
@@ -999,8 +982,8 @@ $$
    | **SHA**  | 汇款人付己方费用，收款人承担中间行/收款行费用 | 汇款金额 - 中间行/收款行费用（如$10,000汇出，收款$9,950） |  
 
 #### **二、OUR模式操作流程**
-```mermaid
-sequenceDiagram
+
+{% mermaid sequenceDiagram %}
     participant 汇款人
     participant 汇款行
     participant 中间行A
@@ -1014,18 +997,16 @@ sequenceDiagram
     中间行A->>中间行B: 可能扣除中间费用（由汇款行补足）
     中间行B->>收款行: 全额到账
     收款行->>收款人: 全额入账
-```
+{% endmermaid %}
 
 #### **三、关键注意事项**
 1. **费用不确定性**：  
    - 中间行费用可能因路径不同而变化，汇款行通常按**最高预估值预扣费用**，最终按实际发生额结算（多退少补）。  
    - **示例**：  
      - 汇款人预扣$150，实际中间行费用$120 → 差额$30退回汇款人账户。  
-
 2. **银行政策差异**：  
    - 部分银行可能强制使用SHA模式（如欧洲某些银行），需提前与汇款行确认。  
    - 收款行可能额外收取入账费（需在汇款时明确要求OUR模式覆盖）。  
-
 3. **成本控制建议**：  
    - **优先选择直连通道**：减少中间行数量以降低费用（如使用汇款行的合作银行网络）。  
    - **大额汇款谈判**：与银行协商固定手续费（如$10,000以上汇款费率优惠）。  
