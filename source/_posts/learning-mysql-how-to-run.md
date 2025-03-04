@@ -561,7 +561,7 @@ MySQL 索引使用中的常见问题主要包括索引未生效、选择性差�
     | `Extra`       | 附加信息（`Using index`/`Using where`/`Using temporary`等）          |
 
 #### type字段解析
-https://nimbusk.cc/post/109c2b6b.html#%E5%8D%95%E8%A1%A8%E8%AE%BF%E9%97%AE%E6%96%B9%E6%B3%95
+[type字段解析](https://nimbusk.cc/post/109c2b6b.html#%E5%8D%95%E8%A1%A8%E8%AE%BF%E9%97%AE%E6%96%B9%E6%B3%95)
 
 #### Extra字段
 MySQL执行计划中的`Extra`字段提供了查询执行过程中的额外信息，用于说明优化器如何处理查询。以下是常见`Extra`字段值及其含义：
@@ -696,7 +696,7 @@ MySQL执行计划中的`Extra`字段提供了查询执行过程中的额外信�
      SHOW PROFILE FOR QUERY 1;
      ```
 
-##### **总结**
+### **总结**
 - **核心流程**：`EXPLAIN` → 定位瓶颈（type/rows/Extra） → 针对性优化（索引/查询改写）。  
 - **优化原则**：减少扫描数据量、避免临时表/排序、利用覆盖索引。  
 - **持续监控**：结合慢查询日志和性能模式，定期审查执行计划。
