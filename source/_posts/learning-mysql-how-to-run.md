@@ -572,38 +572,13 @@ MySQL执行计划中的`Extra`字段提供了查询执行过程中的额外信�
 | **Using index**                 | 使用**覆盖索引**（查询字段全在索引中），无需回表。                                         | 尽量将SELECT字段加入索引，避免访问数据行。                                                  |
 | {% label primary@ Using temporary %}             | 需要创建**临时表**处理查询（常见于GROUP BY、DISTINCT、UNION等操作）。                   | 为GROUP BY/DISTINCT字段添加索引，或减少中间结果集大小。                                      |
 | {% label primary@ Using filesort %}              | 需对结果进行**额外排序**（无法利用索引排序）。                                             | 为ORDER BY字段添加索引，或调整索引顺序与排序方向一致。                                        |
-| **Using index condition**       | 启用**索引条件下推（ICP）**，存储引擎层提前过滤数据，减少回表次数。                                | 确认联合索引顺序是否合理，优先将高频过滤条件放在索引左侧。**通常只在联合索引场景经常遇到**                                       |
+| **Using index condition**       | 启用**索引条件下推（ICP）**，存储引擎层提前过滤数据，减少回表次数。                                | 确认联合索引顺序是否合理，优先将高频过滤条件放在索引左侧。**通常只在联合索引场景经常遇到，即便遇到这个extra信息有时候未必是真正的ICP**                                       |
 | **Using join buffer**           | 使用**连接缓冲区**（Block Nested Loop或Batched Key Access）优化多表连接。               | 检查被驱动表是否有合适索引，或调整驱动表顺序（小表作为驱动表）。                                  |
 | **Impossible WHERE**            | WHERE条件永远为假（如`1=0`），查询直接返回空集。                                          | 检查业务逻辑，避免无效条件。                                                         |
 | **Select tables optimized away**| 查询被优化为无需访问表（如使用聚合函数`MIN()`/`MAX()`且索引已覆盖）。                          | 无需优化，表明查询已被充分优化。                                                        |
 | **Using MRR**                   | 启用**多范围读取优化**，将随机I/O转为顺序I/O（常用于范围查询）。                                 | 确保优化器统计信息准确，或调整`mrr_cost_based`参数。                                     |
 | **Using index for group-by**    | 利用索引优化**GROUP BY**操作（松散索引扫描）。                                            | 确保GROUP BY字段为索引最左前缀，且无范围查询干扰。                                          |
-
-##### **关键场景示例**
-1. **覆盖索引优化**  
-   ```sql
-   -- 索引 (a, b)
-   EXPLAIN SELECT a, b FROM t WHERE a = 1;
-   -- Extra: Using index
-   ```
-2. **临时表与排序**  
-   ```sql
-   -- 无索引的GROUP BY + ORDER BY
-   EXPLAIN SELECT c FROM t GROUP BY c ORDER BY c;
-   -- Extra: Using temporary; Using filesort
-   ```
-3. **索引条件下推（ICP）**  
-   ```sql
-   -- 索引 (a, b)
-   EXPLAIN SELECT * FROM t WHERE a = 1 AND b > 10;
-   -- Extra: Using index condition
-   ```
-4. **连接缓冲区**  
-   ```sql
-   -- 被驱动表无索引
-   EXPLAIN SELECT * FROM t1 JOIN t2 ON t1.id = t2.id;
-   -- Extra: Using join buffer (Block Nested Loop)
-   ```
+| **Using intersect(a, b); Using where**    | 索引正交场景，往往是在多个单列索引场景，查询条件分别覆盖，会**走索引合并后再查询**                                            | 如果能优化索引的话，最好还是直接建立联合索引，减少低效的索引合并；如果不好优化，尝试改写SQL逻辑，或者使用固化索引的方式提升一部分查询性能                                          |
 
 ##### **性能优化重点**
 - **优先消除`Using filesort`和`Using temporary`** ：通过索引优化减少排序和临时表开销。
