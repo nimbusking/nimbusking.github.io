@@ -409,17 +409,6 @@ MySQL 索引使用中的常见问题主要包括索引未生效、选择性差�
 - **中间件支持**
    - 使用 ShardingSphere、MyCat 等工具管理分片。
 
-### 七、**其他技巧**
-- **使用 `EXPLAIN` 分析执行计划**
-   - 关注 `type`（扫描类型）、`key`（使用的索引）、`rows`（扫描行数）。
-- **批量操作**
-   - 用 `INSERT INTO ... VALUES (...), (...)` 替代多次单条插入。
-- **定期优化表**
-   - 执行 `ANALYZE TABLE` 更新统计信息，`OPTIMIZE TABLE` 整理碎片。
-
-### 总结
-SQL 优化需结合业务场景，通过 `EXPLAIN` 分析瓶颈，优先解决高消耗操作（如全表扫描、临时表、文件排序）。同时关注 MySQL 版本特性（如0 的窗口函数、索引隐藏等），持续监控慢查询日志调整策略。
-
 ---
 
 ### **MySQL索引下推（Index Condition Pushdown, ICP）核心解析**
@@ -553,25 +542,76 @@ SQL 优化需结合业务场景，通过 `EXPLAIN` 分析瓶颈，优先解决�
 ---
 
 
-### **MySQL执行计划（EXPLAIN）分析最佳实践**
+## **MySQL执行计划（EXPLAIN）分析最佳实践**
 
-#### **一、基础操作与核心字段解读**
-1. **获取执行计划**  
+### **一、基础操作与核心字段解读**
+  - **获取执行计划**  
+    ```sql
+    EXPLAIN [FORMAT=JSON|TREE] SELECT ... -- 推荐JSON格式获取详细信息
+    ```
+  - **关键字段**：  
+    | 字段          | 说明                                                                 |
+    |---------------|----------------------------------------------------------------------|
+    | `id`          | 查询层级（子查询顺序）                                                |
+    | `select_type` | 查询类型（SIMPLE/PRIMARY/SUBQUERY等）                                 |
+    | `type`        | **访问类型**（性能核心指标，从优到差：`system` > `const` > `ref` > `range` >     index` > `ALL`） |
+    | `key`         | 实际使用的索引                                                       |
+    | `key_len`     | 索引使用的字节长度（判断是否完全使用联合索引）                         |
+    | `rows`        | 预估扫描行数（越小越好）                                              |
+    | `Extra`       | 附加信息（`Using index`/`Using where`/`Using temporary`等）          |
+
+#### type字段解析
+https://nimbusk.cc/post/109c2b6b.html#%E5%8D%95%E8%A1%A8%E8%AE%BF%E9%97%AE%E6%96%B9%E6%B3%95
+
+#### Extra字段
+MySQL执行计划中的`Extra`字段提供了查询执行过程中的额外信息，用于说明优化器如何处理查询。以下是常见`Extra`字段值及其含义：
+
+| **值**                          | **含义**                                                                 | **优化建议**                                                                 |
+|---------------------------------|-------------------------------------------------------------------------|----------------------------------------------------------------------------|
+| **Using where**                 | 服务器层对存储引擎返回的数据进行**二次过滤**（WHERE条件未完全被索引覆盖）。                   | 检查WHERE条件是否可被索引完全覆盖，或添加更合适的索引。                                      |
+| **Using index**                 | 使用**覆盖索引**（查询字段全在索引中），无需回表。                                         | 尽量将SELECT字段加入索引，避免访问数据行。                                                  |
+| **Using temporary**             | 需要创建**临时表**处理查询（常见于GROUP BY、DISTINCT、UNION等操作）。                   | 为GROUP BY/DISTINCT字段添加索引，或减少中间结果集大小。                                      |
+| **Using filesort**              | 需对结果进行**额外排序**（无法利用索引排序）。                                             | 为ORDER BY字段添加索引，或调整索引顺序与排序方向一致。                                        |
+| **Using index condition**       | 启用**索引条件下推（ICP）**，存储引擎层提前过滤数据，减少回表次数。                                | 确认联合索引顺序是否合理，优先将高频过滤条件放在索引左侧。                                       |
+| **Using join buffer**           | 使用**连接缓冲区**（Block Nested Loop或Batched Key Access）优化多表连接。               | 检查被驱动表是否有合适索引，或调整驱动表顺序（小表作为驱动表）。                                  |
+| **Impossible WHERE**            | WHERE条件永远为假（如`1=0`），查询直接返回空集。                                          | 检查业务逻辑，避免无效条件。                                                         |
+| **Select tables optimized away**| 查询被优化为无需访问表（如使用聚合函数`MIN()`/`MAX()`且索引已覆盖）。                          | 无需优化，表明查询已被充分优化。                                                        |
+| **Using MRR**                   | 启用**多范围读取优化**，将随机I/O转为顺序I/O（常用于范围查询）。                                 | 确保优化器统计信息准确，或调整`mrr_cost_based`参数。                                     |
+| **Using index for group-by**    | 利用索引优化**GROUP BY**操作（松散索引扫描）。                                            | 确保GROUP BY字段为索引最左前缀，且无范围查询干扰。                                          |
+
+##### **关键场景示例**
+1. **覆盖索引优化**  
    ```sql
-   EXPLAIN [FORMAT=JSON|TREE] SELECT ... -- 推荐JSON格式获取详细信息
+   -- 索引 (a, b)
+   EXPLAIN SELECT a, b FROM t WHERE a = 1;
+   -- Extra: Using index
    ```
-   - **关键字段**：  
-     | 字段          | 说明                                                                 |
-     |---------------|----------------------------------------------------------------------|
-     | `id`          | 查询层级（子查询顺序）                                                |
-     | `select_type` | 查询类型（SIMPLE/PRIMARY/SUBQUERY等）                                 |
-     | `type`        | **访问类型**（性能核心指标，从优到差：`system` > `const` > `ref` > `range` > `index` > `ALL`） |
-     | `key`         | 实际使用的索引                                                       |
-     | `key_len`     | 索引使用的字节长度（判断是否完全使用联合索引）                         |
-     | `rows`        | 预估扫描行数（越小越好）                                              |
-     | `Extra`       | 附加信息（`Using index`/`Using where`/`Using temporary`等）          |
+2. **临时表与排序**  
+   ```sql
+   -- 无索引的GROUP BY + ORDER BY
+   EXPLAIN SELECT c FROM t GROUP BY c ORDER BY c;
+   -- Extra: Using temporary; Using filesort
+   ```
+3. **索引条件下推（ICP）**  
+   ```sql
+   -- 索引 (a, b)
+   EXPLAIN SELECT * FROM t WHERE a = 1 AND b > 10;
+   -- Extra: Using index condition
+   ```
+4. **连接缓冲区**  
+   ```sql
+   -- 被驱动表无索引
+   EXPLAIN SELECT * FROM t1 JOIN t2 ON t1.id = t2.id;
+   -- Extra: Using join buffer (Block Nested Loop)
+   ```
 
-#### **二、性能优化优先级判断**
+##### **性能优化重点**
+- **优先消除`Using filesort`和`Using temporary`**：通过索引优化减少排序和临时表开销。
+- **利用覆盖索引**：减少回表操作，提升查询速度。
+- **关注`Using index condition`**：联合索引设计需匹配查询条件顺序。
+
+
+### **二、性能优化优先级判断**
 - **1. 优先关注`type`字段**
   - **目标**：尽可能达到`const`、`ref`或`range`，避免`index`（全索引扫描）和`ALL`（全表扫描）。  
   - **示例优化**：  
@@ -595,7 +635,7 @@ SQL 优化需结合业务场景，通过 `EXPLAIN` 分析瓶颈，优先解决�
     EXPLAIN SELECT name, age FROM users WHERE name = 'John'; -- Using index
     ```
 
-#### **三、关键问题诊断与解决**
+### **三、关键问题诊断与解决**
 - **1. 全表扫描（type=ALL）**
   - **原因**：无索引、索引失效（如使用函数）、查询条件跳过索引最左前缀。  
   - **解决**：  
@@ -618,7 +658,7 @@ SQL 优化需结合业务场景，通过 `EXPLAIN` 分析瓶颈，优先解决�
     SELECT users.* FROM users JOIN orders ON users.id = orders.user_id;
     ```
 
-#### **四、高级分析技巧**
+### **四、高级分析技巧**
 - **1. JSON格式深度解析**
    ```sql
    EXPLAIN FORMAT=JSON SELECT ...
@@ -636,7 +676,7 @@ SQL 优化需结合业务场景，通过 `EXPLAIN` 分析瓶颈，优先解决�
    - 使用`EXPLAIN`对比不同查询写法或索引方案的性能差异。  
    - **工具辅助**：`pt-visual-explain`可视化执行计划。  
 
-#### **五、结合其他工具**
+### **五、结合其他工具**
 1. **慢查询日志**  
    - 开启慢日志定位高耗时SQL：  
      ```ini
@@ -656,24 +696,7 @@ SQL 优化需结合业务场景，通过 `EXPLAIN` 分析瓶颈，优先解决�
      SHOW PROFILE FOR QUERY 1;
      ```
 
-#### **六、实战案例**
-**问题**：查询缓慢，执行计划显示`type=ALL`。  
-**SQL**：  
-```sql
-SELECT * FROM orders WHERE DATE(create_time) = '2023-10-01';
-```
-**分析**：  
-- `WHERE`条件使用`DATE()`函数，导致索引失效。  
-**优化**：  
-```sql
--- 改写为范围查询
-SELECT * FROM orders 
-WHERE create_time BETWEEN '2023-10-01 00:00:00' AND '2023-10-01 23:59:59';
--- 添加索引
-ALTER TABLE orders ADD INDEX idx_create_time (create_time);
-```
-
-#### **总结**
+##### **总结**
 - **核心流程**：`EXPLAIN` → 定位瓶颈（type/rows/Extra） → 针对性优化（索引/查询改写）。  
 - **优化原则**：减少扫描数据量、避免临时表/排序、利用覆盖索引。  
 - **持续监控**：结合慢查询日志和性能模式，定期审查执行计划。
