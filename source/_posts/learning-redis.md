@@ -2187,6 +2187,156 @@ end
 
 ---
 
+#### 10. Redis下常见的限流实现算法
+
+##### **一、固定窗口计数器**
+**原理**：在固定时间窗口（如1分钟）内限制请求数量，超出阈值则拒绝。  
+**问题**：存在时间窗口临界值双倍请求漏洞。  
+**Redis 实现**：  
+```lua
+-- KEYS[1]: 限流键
+-- ARGV[1]: 窗口时间（秒）
+-- ARGV[2]: 最大请求数
+local count = redis.call('INCR', KEYS[1])
+if count == 1 then
+    redis.call('EXPIRE', KEYS[1], ARGV[1])
+end
+return count > tonumber(ARGV[2]) and 0 or 1
+```
+**优点**：简单高效，内存占用低。  
+**缺点**：无法应对突发流量，临界漏洞明显。
+
+##### **二、滑动窗口计数器**
+**原理**：统计最近时间窗口（如1分钟）内的请求数，精准度更高。  
+**Redis 实现（ZSET）**：  
+```lua
+-- KEYS[1]: 限流键
+-- ARGV[1]: 窗口时间（秒）
+-- ARGV[2]: 最大请求数
+local now = redis.call('TIME')[1]
+local window_start = now - ARGV[1]
+-- 移除旧数据
+redis.call('ZREMRANGEBYSCORE', KEYS[1], 0, window_start)
+-- 添加当前请求时间戳（成员唯一性用随机值）
+redis.call('ZADD', KEYS[1], now, now .. ':' .. math.random())
+-- 设置键过期
+redis.call('EXPIRE', KEYS[1], ARGV[1] + 1)
+-- 统计当前窗口请求数
+local count = redis.call('ZCARD', KEYS[1])
+return count > tonumber(ARGV[2]) and 0 or 1
+```
+**优点**：精准控制时间窗口。  
+**缺点**：ZSET 内存消耗大，高频请求下性能下降。
+
+##### **三、令牌桶算法**
+**原理**：以恒定速率生成令牌，请求获取令牌后通过，允许突发流量。  
+**Redis 实现**：  
+```lua
+-- KEYS[1]: 令牌桶键
+-- ARGV[1]: 令牌生成速率（个/秒）
+-- ARGV[2]: 桶容量
+local now = redis.call('TIME')[1]
+local tokens_key = KEYS[1] .. ':tokens'
+local timestamp_key = KEYS[1] .. ':ts'
+
+-- 初始化或获取当前令牌数
+local tokens = tonumber(redis.call('GET', tokens_key) or ARGV[2])
+local last_refill = tonumber(redis.call('GET', timestamp_key) or now)
+
+-- 计算新增令牌
+local delta = math.max(0, now - last_refill)
+local new_tokens = math.min(ARGV[2], tokens + delta * ARGV[1])
+
+-- 判断是否允许请求
+if new_tokens >= 1 then
+    redis.call('SET', tokens_key, new_tokens - 1, 'EX', ARGV[2] / ARGV[1] + 1)
+    redis.call('SET', timestamp_key, now, 'EX', ARGV[2] / ARGV[1] + 1)
+    return 1
+else
+    return 0
+end
+```
+**优点**：支持突发流量，控制平滑。  
+**缺点**：需维护令牌数和时间戳，实现较复杂。
+
+##### **四、漏桶算法**
+**原理**：以固定速率处理请求，超出桶容量则拒绝。  
+**Redis 实现（LIST）**：  
+```lua
+-- KEYS[1]: 漏桶键
+-- ARGV[1]: 流出速率（秒/个）
+-- ARGV[2]: 桶容量
+local now = redis.call('TIME')[1]
+local last_leak_key = KEYS[1] .. ':last_leak'
+
+-- 计算漏出量
+local last_leak = tonumber(redis.call('GET', last_leak_key) or now)
+local elapsed = now - last_leak
+local leaks = math.floor(elapsed / ARGV[1])
+
+-- 更新漏桶状态
+if leaks > 0 then
+    local current = redis.call('LLEN', KEYS[1])
+    local new_count = math.max(0, current - leaks)
+    if new_count == 0 then
+        redis.call('DEL', KEYS[1])
+    else
+        redis.call('LTRIM', KEYS[1], leaks, -1)
+    end
+    redis.call('SET', last_leak_key, now, 'EX', 3600)
+end
+
+-- 尝试添加新请求
+if redis.call('LLEN', KEYS[1]) < tonumber(ARGV[2}) then
+    redis.call('RPUSH', KEYS[1], now)
+    return 1
+else
+    return 0
+end
+```
+**优点**：严格限制请求速率。  
+**缺点**：无法应对突发流量，队列管理复杂。
+
+##### **五、分布式限流（集群模式）**
+**原理**：通过哈希标签确保所有 Key 路由到同一槽。  
+**示例代码（滑动窗口适配集群）**：  
+```lua
+-- KEYS[1]: {user123}:rate_limit （哈希标签强制同槽）
+-- ARGV[1]: 窗口时间
+-- ARGV[2]: 最大请求数
+-- ...（同滑动窗口代码）
+```
+**关键点**：所有相关 Key 需使用 `{tag}` 保证哈希一致性。
+
+##### **六、算法对比与选型**
+| **算法**         | **适用场景**               | **突发流量** | **内存开销** | **实现复杂度** |
+|------------------|--------------------------|-------------|-------------|--------------|
+| 固定窗口         | 简单低频场景（如API鉴权）  | 不支持       | 低          | 简单         |
+| 滑动窗口         | 精准控制（如秒级限流）     | 不支持       | 高          | 中等         |
+| 令牌桶           | 允许突发（如下载限速）     | 支持         | 中          | 复杂         |
+| 漏桶             | 恒定速率（如短信发送）     | 不支持       | 中          | 复杂         |
+
+##### **七、生产环境优化建议**
+1. **性能调优**：
+   - 使用 Pipeline 或 Lua 脚本合并多个命令。
+   - 滑动窗口算法中，按时间分片（如1秒/片）减少 ZSET 长度。
+2. **容错设计**：
+   - 设置 `maxmemory-policy` 避免 OOM。
+   - 客户端本地缓存 + Redis 校验，降级保底。
+3. **动态配置**：
+   ```lua
+   -- 从 Redis Hash 读取动态参数
+   local rate = redis.call('HGET', 'rate_config', 'user_api')
+   ```
+4. **监控告警**：
+   - 监控 `slowlog` 和 `memory usage`。
+   - 配置 Prometheus 统计限流拒绝率。
+
+
+通过合理选择算法及优化实现，Redis 可高效支撑百万级 QPS 的分布式限流需求。
+
+---
+
 ### **四、Redis 底层原理**
 #### 1. Redis 的 SDS（简单动态字符串）和 C 字符串有什么区别？
 Redis 的 SDS（Simple Dynamic String，简单动态字符串）与 C 字符串的主要区别如下：
