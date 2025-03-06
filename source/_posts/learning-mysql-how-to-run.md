@@ -2848,7 +2848,7 @@ MySQL的设计者们，通过一种类似于记录操作流水的方式来做的
 - 在**插入一条**记录时，至少要把这条记录的主键值记下来，这样之后回滚时只需要把这个主键值对应的记录删掉就好了;
 - 在**删除一条**记录时，至少要把这条记录中的内容都记下来，这样之后回滚时再把由这些内容组成的记录插入到表中就好了。
 - 在**修改一条**记录时，至少要把被更新的列的旧值记下来，这样之后回滚时再把这些列更新为旧值就好了。
-这些为了回滚而记录的东西称为撤销日志(undo log)，称之为undo日志。
+**这些为了回滚而记录的东西称为撤销日志(undo log)，称之为undo日志。**
 #### 事务ID
 一个事务剋以是一个只读事务，也可以是一个读写事务。
 只有在事务对表中的记录进待改动（增删改）时才会为这个事务分配一个唯一的事务id。
@@ -2903,7 +2903,7 @@ SQL标准中，根据上面4个不同的严重程度，设立了4个隔离级别
 - **REPEATABLE READ：可重复读**
 - **SERIALIZABLE：可串行化**
 ![SQL标准中规定的并发事务执行过程中可能发生的现象](109c2b6b/SQL标准中规定的并发事务执行过程中可能发生的现象.jpg)
-【备注】书中还提到了一个延申的知识点，SQL92标准中没有定义脏写的现象，在95年发表的论文《A critique of ANSI SQL isolation levels》中阐述了更为细致的事务隔离级别，如丢失更新、读偏斜、写偏斜等，有兴趣的可以直接戳连接下载该PDF文档阅读一番。 [A critique of ANSI SQL isolation levels.pdf](109c2b6b\A critique of ANSI SQL isolation levels.pdf) 
+【备注】书中还提到了一个延申的知识点，SQL92标准中没有定义脏写的现象，在95年发表的论文《A critique of ANSI SQL isolation levels》中阐述了更为细致的事务隔离级别，如丢失更新、读偏斜、写偏斜等，有兴趣的可以直接戳连接下载该PDF文档阅读一番。 ![A critique of ANSI SQL isolation levels.pdf](109c2b6b\A critique of ANSI SQL isolation levels.pdf) 
 #### MySQL中支持的4种隔离级别
 MySQL 虽然支持4种隔离级别， 但与SQL标准中规定的各级隔离级别允许发生的现象却有些出入，MySQL在REPEATABLE READ隔离级别下，**可以很大程度上禁止幻读现象的发生**(关于如何禁止会在后文详细说明)。
 **MySQL的默认隔离级别是REPEATABLE READ。**
