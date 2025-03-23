@@ -15,7 +15,7 @@ categories: 前端
 
 
 <!-- more -->
-
+## 一些概念
+- VUE是一个渐进式的JavaScript的框架
 
 ## VUE核心语法
-
