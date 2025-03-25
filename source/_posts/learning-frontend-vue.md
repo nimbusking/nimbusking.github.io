@@ -2,7 +2,7 @@
 title: 前端VUE框架学习
 abbrlink: 128e050c
 date: 2025-03-23 19:59:29
-updated: 2025-03-23 19:59:29
+updated: 2025-03-25 21:40:00
 tags:
   - 前端框架
   - vue
@@ -152,4 +152,43 @@ PS：对照下文的示例代码结合起来看
 </html>
 ```
 
-## 脚手架与组件开发
+## 脚手架
+- Vue CLI是官方打造的一个webpack脚手架工具
+
+### 1. 先安装node
+这里不过多介绍
+在vscode里面打开终端的时候，调用的是PowerShell，执行的时候可能会报一个错：
+```shell
+PS G:\Develop\vscode\learnvue\vuecli> npm --version
+npm : 无法加载文件 G:\Program Files\nodejs\npm.ps1，因为在此系统上禁止运行脚本。有关详细信息，请参阅 https:/go.microsoft.com/fwlink/?LinkID=135170 中的 about_Execution_Policies。
+所在位置 行:1 字符: 1
+```
+
+只需在PS管理员模式下，执行如下命令即可。
+```shell
+PS C:\Windows\system32> Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+
+执行策略更改
+执行策略可帮助你防止执行不信任的脚本。更改执行策略可能会产生安全风险，如 https:/go.microsoft.com/fwlink/?LinkID=135170
+中的 about_Execution_Policies 帮助主题所述。是否要更改执行策略?
+[Y] 是(Y)  [A] 全是(A)  [N] 否(N)  [L] 全否(L)  [S] 暂停(S)  [?] 帮助 (默认值为“N”): A
+PS C:\Windows\system32>
+```
+
+### 2. 安装vuecli
+通过npm执行执行
+```shell
+npm install @vue/cli -g
+```
+
+### 3. 创建初始化项目
+```shell
+vue create my-vue-project
+```
+生成后的项目，如下下图所示结构：
+![vue_create创建](128e050c/vue_create创建.jpg)
+
+细致解答
+
+
+## 组件化开发
