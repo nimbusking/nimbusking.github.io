@@ -2,7 +2,7 @@
 title: docker学习实战
 abbrlink: 4f507556
 date: 2024-12-12 16:04:00
-updated: 2024-12-12 16:04:00
+updated: 2025-04-21 22:42:36
 tags:
   - docker
   - linux
@@ -88,10 +88,191 @@ categories: 云原生
 
 ---
 
+## Docker安装(centos7)
 
-### Docker能做什么
+### 1. 卸载旧版本
+首先如果系统中已经存在旧的Docker，则先卸载
+```shell
+yum remove docker \
+    docker-client \
+    docker-client-latest \
+    docker-common \
+    docker-latest \
+    docker-latest-logrotate \
+    docker-logrotate \
+    docker-engine \
+    docker-selinux
+```
 
-### Docker安装
+### 2. 配置Docker的yum库
+```shell
+sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+```
+
+如果安装失败，使用阿里云更新yum源（通常应该不会，安装好centos第一件事，通常得换源的 :) ）
+- 换源：
+  ```shell
+  curl -o /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+  ```
+- 清除yum:
+  ```shell
+  yum clean all
+  ```
+- 更新缓存
+  ```shell
+  yum makecache
+  ```
+
+### 3. 配置Docker的yum源
+```shell
+sudo yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+ 
+sudo sed -i 's+download.docker.com+mirrors.aliyun.com/docker-ce+' /etc/yum.repos.d/docker-ce.repo
+```
+
+### 4. 更新yum，建立缓存
+```shell
+sudo yum makecache
+```
+
+### 5. 安装Docker
+```shell
+yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+
+### 6. 启动和校验
+```shell
+# 启动Docker
+systemctl start docker
+ 
+# 停止Docker
+systemctl stop docker
+ 
+# 重启
+systemctl restart docker
+ 
+# 设置开机自启
+systemctl enable docker
+ 
+# 执行docker ps命令，如果不报错，说明安装启动成功
+# 正常应该看到下面一行：
+# CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+docker ps
+```
+
+### 7. 配置镜像加速
+```shell
+
+# 创建目录
+mkdir -p /etc/docker
+ 
+# 复制内容(用的tee命令，你也可以用常用的vim，copy下面的json串写到文件里面即可)
+tee /etc/docker/daemon.json <<-'EOF'
+{
+    "registry-mirrors": [
+        "http://hub-mirror.c.163.com",
+        "https://mirrors.tuna.tsinghua.edu.cn",
+        "http://mirrors.sohu.com",
+        "https://ustc-edu-cn.mirror.aliyuncs.com",
+        "https://ccr.ccs.tencentyun.com",
+        "https://docker.m.daocloud.io",
+        "https://docker.awsl9527.cn"
+    ]
+}
+EOF
+ 
+# 重新加载配置
+systemctl daemon-reload
+ 
+# 重启Docker
+systemctl restart docker
+```
+
+## Docker基础
+docker官方网站：https://docs.docker.com/
+### 常用命令
+| 命令        | 说明           |
+| ------------- |:-------------:|
+|  docker  pull      | 拉取镜像 |
+| docker push      | 推送镜像到DockerRegistry      |
+| docker images      | 查看本地镜像      |
+| docker rmi      | 删除本地镜像      |
+| docker run      | 创建并运行容器(不能重复创建)      |
+| docker stop      | 停止指定容器      |
+| docker start      | 启动指定容器      |
+| docker restart      | 重新启动容器      |
+| docker rm      | 删除指定容器      |
+| docker ps      | 查看容器      |
+| docker logs      | 查看容器运行日志      |
+| docker exec      | 进入容器      |
+| docker save      | 保存镜像到本地压缩文件      |
+| docker load      | 加载本地压缩文件到镜像      |
+| docker inspect      | 查看容器详细信息      |
+
+总结开来，可以用下图所示：
+![Docker命令执行](4f507556/Docker命令执行.jpg)
+
+默认情况下，每次重启虚拟机我们都需要手动启动Docker和Docker中的容器。通过命令可以实现开机自启：
+```shell
+# Docker开机自启
+systemctl enable docker
+ 
+# Docker容器开机自启
+docker update --restart=always [容器名/容器id]
+```
+
+### 一则常用演示(nginx)
+```shell
+# 第1步，去DockerHub查看nginx镜像仓库及相关信息
+ 
+# 第2步，拉取Nginx镜像
+docker pull nginx
+ 
+# 第3步，查看镜像
+docker images
+# 结果如下：
+REPOSITORY   TAG       IMAGE ID       CREATED       SIZE
+nginx        latest    3f8a4339aadd   7 years ago   108MB
+ 
+# 第4步，创建并允许Nginx容器
+docker run -d --name nginx -p 80:80 nginx
+ 
+# 第5步，查看运行中容器
+docker ps
+# 也可以加格式化方式访问，格式会更加清爽
+docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}\t{{.Names}}"
+ 
+# 第6步，访问网页，地址：http://虚拟机地址
+ 
+# 第7步，停止容器
+docker stop nginx
+ 
+# 第8步，查看所有容器
+docker ps -a --format "table {{.ID}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}\t{{.Names}}"
+ 
+# 第9步，再次启动nginx容器
+docker start nginx
+ 
+# 第10步，再次查看容器
+docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}\t{{.Names}}"
+ 
+# 第11步，查看容器详细信息
+docker inspect nginx
+ 
+# 第12步，进入容器,查看容器内目录
+docker exec -it nginx bash
+# 或者，可以进入MySQL
+docker exec -it mysql mysql -uroot -p
+ 
+# 第13步，删除容器
+docker rm nginx
+# 发现无法删除，因为容器运行中，强制删除容器
+docker rm -f nginx
+```
+
+## Docker其它知识
+
+### ~~Docker安装~~
 centos7 安装
 ```shell
 # 如果安装旧版本，可以先卸载
