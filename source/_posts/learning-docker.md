@@ -2,7 +2,7 @@
 title: docker学习实战
 abbrlink: 4f507556
 date: 2024-12-12 16:04:00
-updated: 2025-04-21 22:42:36
+updated: 2025-04-28 22:06:41
 tags:
   - docker
   - linux
@@ -455,4 +455,99 @@ Docker服务端是Docker所有后台服务的统称：其中dockerd负责响应�
 
 ## 容器编排相关
 
-## 综合应用
+## 综合应用(环境搭建)
+### 搭建Postgresql
+#### 1. 拉取镜像
+```shell
+docker pull postgres
+
+## 拉取后
+[root@localhost ~]# docker images
+REPOSITORY   TAG       IMAGE ID       CREATED        SIZE
+postgres     latest    f49abb9855df   2 months ago   438MB
+nginx        latest    3f8a4339aadd   7 years ago    108MB
+```
+
+#### 2. 创建本地卷
+Docker 会自动在 /var/lib/docker/volume/ 路径下为主机上的卷创建一个目录。该卷可以在容器之间共享和重用， 且默认会一直存在。
+```shell
+docker volume list            # 列出 Docker 卷
+docker volume rm pgdata       # 删除 Docker 卷
+
+docker volume create pgdata   # 创建 Docker 卷
+docker volume inspect pgdata  # 检查 Docker 卷
+
+[root@localhost ~]# docker volume inspect pgdata
+[
+    {
+        "CreatedAt": "2025-04-28T09:58:07-04:00",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/pgdata/_data",
+        "Name": "pgdata",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+```
+
+#### 3. 构建镜像容器
+```shell
+docker run -it \
+  --name postgres \
+  --restart always \
+  -e TZ='Asia/Shanghai' \
+  -e POSTGRES_PASSWORD='abc12356' \
+  -e ALLOW_IP_RANGE=0.0.0.0/0 \
+  -v /home/postgres/data:/var/lib/postgresql \
+  -p 55435:5432 \
+  -d postgres
+
+```
+
+其中，上述命令分别的含义是：
+| 名称        | 解释           |
+|:-------------:|:-------------:|
+|  --name      |自定义容器名称 |
+| --restart always      | 设置容器在 docker 重启时自动启动容器     |
+| -e POSTGRES_PASSWORD      | Postgresql 数据库密码      |
+| -e ALLOW_IP_RANGE=0.0.0.0/0      | 表示允许所有 IP 访问     |
+| -e TZ='Asia/Shanghai'      | 设置时区     |
+| -v [path] : [path]      | 本地目录映射 (本地目录 : 容器内路径)      |
+| -p 55435:5432      | 端口映射 (主机端口 : 容器端口)      |
+| d postgres      |   镜像名称      |
+
+#### 4. 进入容器
+```shell
+docker exec -it postgres bash
+````
+
+#### 5. 切换当前用户，再登录数据库
+将当前 root 切换成 postgres
+```shell
+su postgres
+```
+
+输入用户名/密码执行完后，再根据提示输入
+```shell
+psql -U postgres -W
+```
+
+输入密码，登录成功
+![登录成功](4f507556/MyCapture_2025-04-28_22-12-55.jpg)
+
+#### 6. 创建新用户
+根据第五步，先切换到 Linux 用户 postgres，并执行如下 psql。
+PS：根据你实际的需要，按需修改即可，都是传统的语句。
+```shell
+create user nimbusk with password 'nimbusk123';            # 创建数据库新用户
+CREATE DATABASE nimbuskdb OWNER nimbusk;                # 创建用户数据库
+GRANT ALL PRIVILEGES ON DATABASE nimbuskdb TO nimbusk;  # 将 testdb 数据库的所有权限都赋予 test
+\q                                                # 使用命令 \q 退出 psql
+
+```
+
+#### 7. 客户端链接验证
+这个没啥，找个你常用的链接验证即可
+![Navicat链接验证](4f507556/MyCapture_2025-04-28_22-15-26.jpg)
+
