@@ -174,6 +174,34 @@ windows环境下面配置
     - `%JAVA_HOME%\jre\bin`
 
 
+#### window本地配置git
+基础的配置不用多说，主要记录一些异常场景
+##### 遇到Connection timed out
+当配制好SSH的访问参数之后，遇到如下错误：
+```shell
+ssh: connect to host github. com port 22: Connection timed out
+```
+
+在自己公钥的路径下（windows下，通常是：```C:\Users\你的用户名\.ssh```），新建一个 config 文件，注意没有后缀名（之前我并没有 config文件，这个也是新建的，如果你之前就有，请无视这句话）。
+
+在文件中输入如下内容：
+```
+Host github.com
+User "这里填自己注册 github 时的邮箱地址"
+Hostname ssh.github.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/id_rsa
+Port 443
+```
+
+保存之后，再次在命令行中执行
+```shell
+ssh -T git@github.com
+```
+
+显示下面successful就ok了，
+![git_successfully_authenticated](a4b1030a/git_successfully_authenticated.jpg)
+
 ### 办公相关
 
 ### Windows相关
