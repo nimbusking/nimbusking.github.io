@@ -6,7 +6,7 @@ date: 2019-05-16 02:20:17
 tags:
     - Ubuntu
     - Linux
-updated: 2024-10-28 20:30:21
+updated: 2025-12-30 02:20:17
 categories: 操作系统
 ---
 
@@ -120,6 +120,17 @@ source /etc/environment
 echo $JAVA_HOME
 ```
 
+#### 卸载jdk
+- 找到JDK包：`sudo dpkg -l | grep 'jdk\|jre'`
+- 使用以下命令卸载这些包，将包名替换为你找到的实际包名：
+    ```shell
+    sudo apt purge default-jdk default-jdk-headless default-jre default-jre-headless openjdk-21-jdk openjdk-21-jdk-headless openjdk-21-jre openjdk-21-jre-headless
+    ```
+- 卸载完成后，使用以下命令清除剩余的依赖项：
+    ```shell
+    sudo apt autoremove --purge
+    ```
+- 从/etc/environment文件中删除包含JAVA_HOME变量的行，并保存文件。
 
 ## 系列话题
 ### 在ubuntu下编译openjdk
