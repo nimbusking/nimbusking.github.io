@@ -132,6 +132,48 @@ echo $JAVA_HOME
     ```
 - 从/etc/environment文件中删除包含JAVA_HOME变量的行，并保存文件。
 
+### 碰到通过useradd之后的用户问题
+执行su命令之后，使用的是dash而不是bash，如下所示：
+```shell
+# 结尾是sh
+kemi@microservice:~$ grep nexus /etc/passwd
+nexus:x:1001:1001::/home/nexus:/bin/sh
+# 通过如下命令修改
+sudo usermod -s /bin/bash nexus
+kemi@microservice:~$ grep nexus /etc/passwd
+nexus:x:1001:1001::/home/nexus:/bin/bash
+
+```
+
+### 设置常见时区
+```shell
+# 中国标准时间
+sudo timedatectl set-timezone Asia/Shanghai
+
+# 美国东部时间
+sudo timedatectl set-timezone America/New_York
+
+# 欧洲伦敦时间
+sudo timedatectl set-timezone Europe/London
+
+# 日本东京时间
+sudo timedatectl set-timezone Asia/Tokyo
+
+# 协调世界时（UTC）
+sudo timedatectl set-timezone UTC
+
+# 打开NTP同步
+sudo timedatectl set-ntp true
+```
+
+### 为自定义添加的用户添加sudo权限
+
+```shell
+# 方法A：添加到 sudo 组（推荐）
+usermod -aG sudo nexus
+```
+
+
 ## 系列话题
 ### 在ubuntu下编译openjdk
 编译方法来自于《深入理解JAVA虚拟机 第三版》，详细请参考该书中第一章，1.6小节的相关说明
