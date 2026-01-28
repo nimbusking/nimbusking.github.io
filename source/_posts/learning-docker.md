@@ -228,13 +228,26 @@ newgrp docker
 # 创建或编辑Docker配置文件
 sudo tee /etc/docker/daemon.json <<-'EOF'
 {
-    "registry-mirrors": [
-        "https://registry.docker-cn.com",
-        "https://docker.mirrors.ustc.edu.cn",
-        "https://hub-mirror.c.163.com",
-        "https://mirror.baidubce.com",
-        "https://ccr.ccs.tencentyun.com"
-    ]
+  "registry-mirrors": [
+    "https://docker.m.daocloud.io/",
+    "https://hub-mirror.c.163.com",
+    "https://dockerproxy.com/",
+    "https://mirror.baidubce.com/",
+    "https://docker.nju.edu.cn/",
+    "https://docker.mirrors.sjtug.sjtu.edu.cn/",
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker-0.unsee.tech",
+    "https://register.liberx.info/",
+    "https://docker.registry.cyou/",
+    "https://docker-cf.registry.cyou/",
+    "https://dockercf.jsdelivr.fyi/",
+    "https://docker.jsdelivr.fyi/",
+    "https://dockertest.jsdelivr.fyi/",
+    "https://mirror.iscas.ac.cn/",
+    "https://docker.rainbond.cc/",
+    "https://mirror.aliyuncs.com",
+    "https://docker.mirrors.ustc.edu.cn/"
+  ]
 }
 EOF
 
@@ -790,3 +803,89 @@ docker exec -it redis-7001 redis-cli -p 7001 -c
 ```shell
 docker-compose down -v
 ```
+
+### 搭建zookeeper集群
+直接docker-compose.yml文件
+```yml
+services:
+  zk1:
+    image: zookeeper:3.9.3
+    hostname: zk1
+    container_name: zk1
+    ports:
+      - "2181:2181"
+      - "8081:8080"
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zk2:2888:3888;2181 server.3=zk3:2888:3888;2181
+    volumes:
+      - ./zk1/data:/data
+      - ./zk1/datalog:/datalog
+      - /etc/localtime:/etc/localtime
+    networks:
+      - zk-net
+ 
+  zk2:
+    image: zookeeper:3.9.3
+    hostname: zk2
+    container_name: zk2
+    ports:
+      - "2182:2181"
+      - "8082:8080"
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=zk1:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zk3:2888:3888;2181
+    volumes:
+      - ./zk2/data:/data
+      - ./zk2/datalog:/datalog
+      - /etc/localtime:/etc/localtime
+    networks:
+      - zk-net
+ 
+  zk3:
+    image: zookeeper:3.9.3
+    hostname: zk3
+    container_name: zk3
+    ports:
+      - "2183:2181"
+      - "8083:8080"
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zk1:2888:3888;2181 server.2=zk2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
+    volumes:
+      - ./zk3/data:/data
+      - ./zk3/datalog:/datalog
+      - /etc/localtime:/etc/localtime
+    networks:
+      - zk-net
+ 
+networks:
+  zk-net:
+    driver: bridge
+```
+
+其中：
+zookeeper 的集群部署，最主要是配置 environment 环境变量，上面配置的 2 个环境变量含义如下：
+- `ZOO_MY_ID` 表示当前 zookeeper 实例在集群中的编号，范围为1-255，所以一个 zookeeper 集群最多有 255 个节点
+- `ZOO_SERVERS` 表示当前 zookeeper 实例所在集群中的所有节点的编号、主机名（或IP地址）、端口
+
+zookeeper一共需要用到三个端口：
+- `2181`：对客户端程序（如我们开发的 SpringBoot 程序）提供服务的连接端口
+- `3888`：zookeeper 集群中的节点，选举 leader 使用的通信端口
+- `2888`：集群内各节点之间的通讯端口（Leader监听此端口）
+
+volumes挂载相关目录脚本如下：
+```shell
+mkdir -p ~/zookeeper/{zk1,zk2,zk3}
+for port in zk1 zk2 zk3; do
+  mkdir -p ~/zookeeper/${port}/data
+  mkdir -p ~/zookeeper/${port}/datalog
+done
+```
+
+#### 验证安装结果
+浏览器直接访问如下地址：
+http://your_ip:8081/commands/server_stats
+![docker_server_stat1](4f507556/docker_server_stat1.jpg)
+![docker_server_stat2](4f507556/docker_server_stat2.jpg)
+![docker_server_stat3](4f507556/docker_server_stat3.jpg)

@@ -173,6 +173,38 @@ sudo timedatectl set-ntp true
 usermod -aG sudo nexus
 ```
 
+### 固定IP
+直接修改netplan
+
+```shell
+vim /etc/netplan/50-cloud-init.yaml
+```
+
+修改成如下形式，ip按照你的实际来
+
+```yaml
+network:
+  version: 2
+  ethernets:
+    ens34:
+      dhcp4: false
+      addresses: [your_ip/24]
+      routes:
+        - to: default
+          via: 你的网关地址，一般就是你的路由器ip
+      nameservers:
+          addresses: [你的DNS地址，默认就是路由器网关ip即可]
+          search: []
+```
+
+修改之后：```netplan apply``` 生效
+在通过如下命令检查配置是否生效：
+```shell
+ip addr show
+ip route show
+ping www.baidu.com
+```
+
 ### 安装mysql
 在线安装
 #### 确认ubuntu系统版本
