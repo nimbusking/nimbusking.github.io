@@ -1,7 +1,7 @@
 ---
 title: Ubuntu相关系列
 mathjax: false
-abbrlink: 145818e1
+abbrlink: 1458180
 date: 2019-05-16 02:20:17
 tags:
     - Ubuntu
@@ -236,9 +236,9 @@ https://dev.mysql.com/doc/refman/8.4/en/linux-installation-apt-repo.html
     sudo dpkg -i mysql-apt-config_0.8.36-1_all.deb
     ```
     可以确认下面的安装内容，如果需要选择特定版本：
-    ![apt配置页面](145818e1/config_mysql_apt_config.jpg)
+    ![apt配置页面](1458180/config_mysql_apt_config.jpg)
     一般默认即可：
-    ![选择指定版本](145818e1/select_target_version_of_mysql.jpg)
+    ![选择指定版本](1458180/select_target_version_of_mysql.jpg)
 
 - 按上下键把光标移动到 OK，按回车保存退出。
 - 更新 APT 缓存
@@ -272,7 +272,7 @@ sudo apt install -y mysql-server=8.4.8-1ubuntu24.04
     dpkg -l | grep mysql
     ```
     如下图所示：
-    ![所有安装版本](145818e1/all_setup_version_of_mysql.jpg)
+    ![所有安装版本](1458180/all_setup_version_of_mysql.jpg)
 
 - 使用 sudo apt-get remove 命令，卸载掉上面查询到的所有安装的包
     ```shell
