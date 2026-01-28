@@ -39,7 +39,8 @@ Nexus不是Maven的核心概念，它仅仅是一种衍生出来的特殊的Mave
 [root@microservice ~]# mkdir /usr/local/nexus
 [root@microservice ~]# tar zxf nexus-3.29.2-02-unix.tar.gz -C /usr/local/nexus/
 # 启动nexus必须使用nexus用户，不可以使用权限过高的用户，比如root，否则会启动失败
-[root@microservice ~]# useradd nexus
+# 不要使用useradd，如果一定要使用，sudo useradd -m -d /home/username username 设置好你的家目录
+[root@microservice ~]# adduser nexus
 [root@microservice ~]# chown -R nexus:nexus /usr/local/nexus/
 [root@microservice ~]# ls /usr/local/nexus/
 nexus-3.29.2-02     # 这是应用目录

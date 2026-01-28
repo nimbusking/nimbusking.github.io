@@ -1,7 +1,7 @@
 ---
 title: Ubuntu相关系列
 mathjax: false
-abbrlink: '145818e1'
+abbrlink: 145818e1
 date: 2019-05-16 02:20:17
 tags:
     - Ubuntu
@@ -173,6 +173,169 @@ sudo timedatectl set-ntp true
 usermod -aG sudo nexus
 ```
 
+### 安装mysql
+在线安装
+#### 确认ubuntu系统版本
+```shell
+kemi@datacenter:~$ lsb_release -a
+No LSB modules are available.
+Distributor ID: Ubuntu
+Description:    Ubuntu 24.04.3 LTS
+Release:        24.04
+Codename:       noble
+```
+
+#### 更新国内镜像源
+不然 sudo apt update 可能会失败。
+
+- 备份原来的镜像文件
+    ```shell
+    sudo cp /etc/apt/sources.list.d/ubuntu.sources /etc/apt/ubuntu.sources.backup
+    ```
+- 编辑 /etc/apt/sources.list.d/ubuntu.sources 文件
+    ```shell
+    sudo vim /etc/apt/sources.list.d/ubuntu.sources
+    ```
+- 替换镜像源后的内容
+    ```shell
+    Types: deb
+    URIs: http://mirrors.aliyun.com/ubuntu/
+    Suites: noble noble-updates noble-backports
+    Components: main restricted universe multiverse
+    Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+    Types: deb
+    URIs: http://mirrors.aliyun.com/ubuntu/
+    Suites: noble-security
+    Components: main restricted universe multiverse
+    Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+    ```
+#### 更新软件包
+```shell
+# 更新本地的“软件包索引缓存”，获取镜像源地址中最新的软件版本
+sudo apt update
+
+# 更新升级 apt update 得到的新版本，更新安装这些新版本到我们的服务器上
+sudo apt upgrade -y
+
+```
+
+#### 手动添加官方 MySQL APT 源
+官网地址：
+https://dev.mysql.com/doc/refman/8.4/en/linux-installation-apt-repo.html
+
+- 下载最新的apt配置包：
+    文件版本号直接在下面的网址中查看即可：
+    https://dev.mysql.com/downloads/repo/apt/
+    ```shell
+    wget https://dev.mysql.com/get/mysql-apt-config_0.8.36-1_all.deb
+    ```
+- 安装 MySQL APT 配置包
+    ```shell
+    sudo dpkg -i mysql-apt-config_0.8.36-1_all.deb
+    ```
+    可以确认下面的安装内容，如果需要选择特定版本：
+    ![apt配置页面](145818e1/config_mysql_apt_config.jpg)
+    一般默认即可：
+    ![选择指定版本](145818e1/select_target_version_of_mysql.jpg)
+
+- 按上下键把光标移动到 OK，按回车保存退出。
+- 更新 APT 缓存
+    ```shell
+    sudo apt update
+    ```
+
+- 重新查询本地可以用的MySQL版本
+    ```shell
+    apt-cache madison mysql-server
+    kemi@datacenter:~$ apt-cache madison mysql-server
+    mysql-server | 8.4.8-1ubuntu24.04 | http://repo.mysql.com/apt/ubuntu noble/mysql-8.4-lts amd64 Packages
+    mysql-server | 8.0.44-0ubuntu0.24.04.2 | http://mirrors.aliyun.com/ubuntu noble-updates/main amd64 Packages
+    mysql-server | 8.0.44-0ubuntu0.24.04.1 | http://mirrors.aliyun.com/ubuntu noble-security/main amd64 Packages
+    mysql-server | 8.0.36-2ubuntu3 | http://mirrors.aliyun.com/ubuntu noble/main amd64 Packages
+    mysql-community | 8.4.8-1ubuntu24.04 | http://repo.mysql.com/apt/ubuntu noble/mysql-8.4-lts Sources
+    ```
+
+#### 安装 MySQL Server
+安装指定版本的mysql
+```shell
+sudo apt install -y mysql-server=8.4.8-1ubuntu24.04
+```
+
+如下图所示，设置好root密码即可安装：
+![设置root密码](145818e1/set_root_password.jpg)
+
+#### 卸载MySQL
+- 先查询mysql所有已安装的包
+    ```shell
+    dpkg -l | grep mysql
+    ```
+    如下图所示：
+    ![所有安装版本](145818e1/all_setup_version_of_mysql.jpg)
+
+- 使用 sudo apt-get remove 命令，卸载掉上面查询到的所有安装的包
+    ```shell
+    sudo apt-get remove --purge -y mysql-apt-config mysql-server mysql-client mysql-common mysql-community-server mysql-community-client mysql-community-client-core mysql-community-server-core mysql-community-client-plugins
+    ```
+
+- 删除配置文件和数据文件
+    ```shell
+    sudo rm -rf /etc/mysql /var/lib/mysql /var/log/mysql /var/log/mysql.*
+    ```
+
+- 清理无用依赖和缓存
+    ```shell
+    sudo apt-get -y autoremove
+    sudo apt-get -y autoclean
+    ```
+- 查询是否还有mysql的包
+
+#### 远程连接mysql
+修改 mysqld.cnf 配置文件：
+```shell
+sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
+```
+
+修改 bind-address 属性，属性不存在就添加在[mysqld]块中（如果只需要指定的 ip 访问，使用防火墙控制）
+```shell
+bind-address = 0.0.0.0
+# 端口，如果想修改端口的话，就修改 port 的值
+# port = 3306
+
+# 最大连接数量，默认是151，超过这个数量会报 Too many connections 错误
+# max_connections = 500    # 使用 SHOW PROCESSLIST 命令查看连接了多少个数量了
+
+# 空闲连接最长 sleep 时间为 300秒(5分钟)，通过 SHOW PROCESSLIST 查看 sleep
+# wait_timeout = 300    # 默认是28800秒(8小时)，wait_timeout 主要针对非交互客户端的连接，连接池的连接就是非交互客户端
+
+# interactive_timeout = 300     # 默认是28800秒(8小时)，interactive_timeout 针对的是交互客户端，比如命令行连接的方式
+```
+
+重启服务后，通过如下命令连接mysql
+```shell
+sudo mysql -u root -p
+# 登录指定的 ip 和 端口
+# mysql -u root -p -h 127.0.0.1 -P 3306
+
+```
+
+创建指定用户并授权
+```sql
+# 把username换成你所需的用户名即可
+CREATE USER 'username'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON *.* TO 'username'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+```
+
+#### 其它MySQL相关命令
+查看 MySQL 服务状态：`sudo systemctl status mysql`
+停止 MySQL 服务：`sudo systemctl stop mysql`
+启动 MySQL 服务：`sudo systemctl start mysql`
+重启 MySQL 服务：`sudo systemctl restart mysql`
+查看 MySQL 的开机自启状态：`systemctl is-enabled mysql`  ，**enable：启用，disable：禁用**
+启动 MySQL 开机自启动：`sudo systemctl enable mysql`
+禁用 MySQL 开机自启动：`sudo systemctl disable mysql`
 
 ## 系列话题
 ### 在ubuntu下编译openjdk
