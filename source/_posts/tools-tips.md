@@ -202,7 +202,28 @@ ssh -T git@github.com
 显示下面successful就ok了，
 ![git_successfully_authenticated](a4b1030a/git_successfully_authenticated.jpg)
 
+#### SecureCRT连接过慢
+日常使用SecureCRT的时候，每次新SSH连接远程主机的时候，都会异常的慢，有的10秒，有的20秒不等。
+解决办法：
+**取消GSSAPI鉴权**，第一个是图形界面的，另一个是直接修改配置文件
+
+- 取消GSSAPI 的鉴权方式：session options-->ssh2-->鉴权-->GSSAPI：这个我试了，似乎不生效，不知道是不是我用的这个版本的SecureCRT的bug。
+- 直接修改ini配置文件（有效的）：找到SecureCRT的配置文件目录，然后找到某个session的ini配置文件，然后修改以下值
+
+```ini
+#修改前
+S:"GSSAPI Method"=auto-detect
+#修改后
+S:"GSSAPI Method"=none
+```
+
+修改完成之后，重启一下客户端，之后就可以秒连了。
+
+---
+
 ### 办公相关
+
+---
 
 ### Windows相关
 #### WinDbg（windows 蓝屏分析工具）
