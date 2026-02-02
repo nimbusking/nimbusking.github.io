@@ -488,18 +488,18 @@ docker tag busybox:latest mybusybox:latest
 **相关指令简介：**
 
 | Dockerfile指令        | 指令说明           |
-|-------------|:-------------:|
-|  FROM      | Dockerfile除了注释第一行必须是FROM，FROM后面跟镜像名称，代码我们要基于哪个基础镜像构建我们的容器 |
-| RUN      | RUN后面跟一个具体的命令，类似于Linux命令行执行命令      |
-| ADD      | 拷贝本机文件或者远程文件到镜像内      |
-| COPY      | 拷贝本机文件的到镜像内      |
-| USER      | 指定容器启动用户      |
-| ENTRYPOINT      | 容器的启动命令      |
-| CMD      | CMD为ENTRYPOINT指令提供默认参数，也可以单独使用CMD指定容器启动参数      |
-| ENV      | 指定容器运行时的环境变量，格式为key=value      |
-| ARG      | 定义外部变量，构建镜像时可以使用build-arg <varname>=<value>的格式传递参数用于构建      |
-| EXPOSE      | 指定容器监听的端口，格式为[port]/tcp或者[port]/udp      |
-| WORKDIR      | 为Dockerfile中跟在其后的所有RUN、CMD、ENTRYPOINT、COPY和ADD命令设置工作目录      |
+|:-------------:|:-------------:|
+|  `FROM`      | Dockerfile除了注释第一行必须是FROM，FROM后面跟镜像名称，代码我们要基于哪个基础镜像构建我们的容器 |
+| `RUN`      | RUN后面跟一个具体的命令，类似于Linux命令行执行命令      |
+| `ADD`      | 拷贝本机文件或者远程文件到镜像内      |
+| `COPY`      | 拷贝本机文件的到镜像内      |
+| `USER`      | 指定容器启动用户      |
+| `ENTRYPOINT`      | 容器的启动命令      |
+| `CMD`      | CMD为ENTRYPOINT指令提供默认参数，也可以单独使用CMD指定容器启动参数      |
+| `ENV`      | 指定容器运行时的环境变量，格式为key=value      |
+| `ARG`      | 定义外部变量，构建镜像时可以使用build-arg <varname>=<value>的格式传递参数用于构建      |
+| `EXPOSE`      | 指定容器监听的端口，格式为[port]/tcp或者[port]/udp      |
+| `WORKDIR`      | 为Dockerfile中跟在其后的所有RUN、CMD、ENTRYPOINT、COPY和ADD命令设置工作目录      |
 
 示例：
 ```shell
