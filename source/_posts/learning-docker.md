@@ -169,15 +169,26 @@ mkdir -p /etc/docker
 # 复制内容(用的tee命令，你也可以用常用的vim，copy下面的json串写到文件里面即可)
 tee /etc/docker/daemon.json <<-'EOF'
 {
-    "registry-mirrors": [
-        "http://hub-mirror.c.163.com",
-        "https://mirrors.tuna.tsinghua.edu.cn",
-        "http://mirrors.sohu.com",
-        "https://ustc-edu-cn.mirror.aliyuncs.com",
-        "https://ccr.ccs.tencentyun.com",
-        "https://docker.m.daocloud.io",
-        "https://docker.awsl9527.cn"
-    ]
+  "registry-mirrors": [
+    "https://docker.m.daocloud.io/",
+    "https://hub-mirror.c.163.com",
+    "https://dockerproxy.com/",
+    "https://mirror.baidubce.com/",
+    "https://docker.nju.edu.cn/",
+    "https://docker.mirrors.sjtug.sjtu.edu.cn/",
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker-0.unsee.tech",
+    "https://register.liberx.info/",
+    "https://docker.registry.cyou/",
+    "https://docker-cf.registry.cyou/",
+    "https://dockercf.jsdelivr.fyi/",
+    "https://docker.jsdelivr.fyi/",
+    "https://dockertest.jsdelivr.fyi/",
+    "https://mirror.iscas.ac.cn/",
+    "https://docker.rainbond.cc/",
+    "https://mirror.aliyuncs.com",
+    "https://docker.mirrors.ustc.edu.cn/"
+  ]
 }
 EOF
  
@@ -889,3 +900,32 @@ http://your_ip:8081/commands/server_stats
 ![docker_server_stat1](4f507556/docker_server_stat1.jpg)
 ![docker_server_stat2](4f507556/docker_server_stat2.jpg)
 ![docker_server_stat3](4f507556/docker_server_stat3.jpg)
+
+
+
+
+## Docker镜像加速地址(持续更新)
+```json
+{
+  "registry-mirrors": [
+    "https://docker.m.daocloud.io/",
+    "https://hub-mirror.c.163.com",
+    "https://dockerproxy.com/",
+    "https://mirror.baidubce.com/",
+    "https://docker.nju.edu.cn/",
+    "https://docker.mirrors.sjtug.sjtu.edu.cn/",
+    "https://mirror.ccs.tencentyun.com",
+    "https://docker-0.unsee.tech",
+    "https://register.liberx.info/",
+    "https://docker.registry.cyou/",
+    "https://docker-cf.registry.cyou/",
+    "https://dockercf.jsdelivr.fyi/",
+    "https://docker.jsdelivr.fyi/",
+    "https://dockertest.jsdelivr.fyi/",
+    "https://mirror.iscas.ac.cn/",
+    "https://docker.rainbond.cc/",
+    "https://mirror.aliyuncs.com",
+    "https://docker.mirrors.ustc.edu.cn/"
+  ]
+}
+```
