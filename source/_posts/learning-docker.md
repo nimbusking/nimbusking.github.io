@@ -1045,6 +1045,73 @@ volumes:
   mongodb_data:
 ```
 
+### 安装influxdb
+
+#### 1. 准备目录结构
+```bash
+mkdir -p ~/influxdb2 && cd ~/influxdb2
+```
+
+#### 2. 创建 `docker-compose.yml`
+使用编辑器（如 `nano` 或 `vim`）创建文件：
+```bash
+nano docker-compose.yml
+```
+
+将以下内容粘贴进去：
+
+```yaml
+# version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:latest
+    container_name: influxdb
+    restart: always
+    ports:
+      - "8086:8086"
+    volumes:
+      # 数据持久化
+      - ./data:/var/lib/influxdb2
+      # 配置文件挂载
+      - ./config:/etc/influxdb2
+    environment:
+      # 初始化配置（可选，也可以在启动后通过 Web 页面手动配置）
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=password123  # 请修改为强密码，至少8位，弱密码启动不了
+      - DOCKER_INFLUXDB_INIT_ORG=my-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=my-bucket
+      - DOCKER_INFLUXDB_INIT_RETENTION=30d
+```
+
+### 3. 启动容器
+在 `docker-compose.yml` 所在目录下执行：
+```bash
+docker-compose up -d
+```
+
+#### 4. 访问 Web 界面
+InfluxDB 2.x 自带功能强大的管理面板。打开浏览器访问：
+`http://<你的服务器IP>:8086`
+如下图所示，就有一个这样的管理页面，有这个就不需要第三方工具了：
+![infuxdb](4f507556/infuxdb.jpg)
+
+如果你在 `docker-compose` 中配置了 `INIT_MODE`，直接用设置的用户名密码登录即可；如果没有配置，页面会引导你进行首次设置。
+
+#### 5. 检查运行状态
+```bash
+docker ps | grep influxdb
+```
+
+#### 6. 常用管理命令
+* **查看日志**：`docker logs -f influxdb`
+* **进入容器内部**：`docker exec -it influxdb influx --help`
+* **停止并移除**：`docker-compose down`（数据会保留在 `./data` 目录）
+
+
+
+---
 
 ## Docker镜像加速地址(持续更新)
 ```json
