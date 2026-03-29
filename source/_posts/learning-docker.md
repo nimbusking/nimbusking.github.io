@@ -1024,6 +1024,27 @@ docker compose restart
 
 需要我为您演示如何使用 Python 或 MQTTX 客户端连接这个带密码的服务器吗？
 
+### 安装mangoDB
+
+直接通过docker-compose来安装启动单机版的mangoDB
+```yaml
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: your_user_name
+      MONGO_INITDB_ROOT_PASSWORD: your_password
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:
+```
+
 
 ## Docker镜像加速地址(持续更新)
 ```json
