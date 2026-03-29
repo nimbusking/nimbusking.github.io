@@ -904,6 +904,125 @@ http://your_ip:8081/commands/server_stats
 ![docker_server_stat3](4f507556/docker_server_stat3.jpg)
 
 
+### 安装MQTT消息中间件
+
+#### 1. 准备工作结构
+在 Ubuntu 上执行以下命令，一次性创建目录和初始密码文件：
+
+```bash
+# 创建目录
+mkdir -p ~/mqtt/config ~/mqtt/data ~/mqtt/log
+
+# 创建一个空的密码文件并设置权限
+touch ~/mqtt/config/pwfile
+chmod 600 ~/mqtt/config/pwfile
+```
+
+
+#### 2. 编写集成配置文件
+我们需要修改 `mosquitto.conf` 以启用身份验证。
+
+```bash
+nano ~/mqtt/config/mosquitto.conf
+```
+
+**粘贴以下完整配置：**
+```text
+# 持久化设置
+persistence true
+persistence_location /mosquitto/data/
+
+# 日志设置
+log_dest file /mosquitto/log/mosquitto.log
+log_type all
+
+# 网络监听
+listener 1883
+# 如果需要开启 WebSockets，取消下面两行的注释
+# listener 9001
+# protocol websockets
+
+# 安全认证配置
+allow_anonymous false
+password_file /mosquitto/config/pwfile
+```
+
+#### 3. 编写 Docker Compose 文件
+创建 `docker-compose.yml`：
+
+```bash
+nano ~/mqtt/docker-compose.yml
+```
+
+**粘贴以下内容：**
+```yaml
+version: '3.8'
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt-broker
+    restart: always
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./config:/mosquitto/config
+      - ./data:/mosquitto/data
+      - ./log:/mosquitto/log
+    environment:
+      - TZ=Asia/Shanghai
+```
+
+#### 4. 启动并设置账号密码
+按照以下顺序操作：
+
+**第一步：启动容器**
+```bash
+cd ~/mqtt
+docker compose up -d
+```
+
+**第二步：创建用户 (例如用户名叫 `admin`)**
+执行此命令后，系统会提示你输入并确认密码：
+```bash
+docker exec -it mqtt-broker mosquitto_passwd -b /mosquitto/config/pwfile admin 你的密码
+```
+*(注意：`-b` 表示在命令行直接输入密码，如果你想交互式输入，请去掉 `-b` 和末尾的密码。)*
+
+**第三步：重启服务使密码生效**
+```bash
+docker compose restart
+```
+
+#### 5. 验证集成结果
+现在尝试连接时，必须携带用户名和密码，否则会被拒绝。
+
+* **带密码订阅：**
+    ```bash
+    docker exec -it mqtt-broker mosquitto_sub -t "test/topic" -u "admin" -P "你的密码"
+    ```
+    PS：这里运行之后会进入阻塞阶段，放在这里
+* **带密码发布：**
+    ```bash
+    docker exec -it mqtt-broker mosquitto_pub -t "test/topic" -m "Hello with Auth" -u "admin" -P "你的密码"
+    ```
+    PS：新建一个session，在这里执行之后，就会在上面那个监听session中，看到：Hello with Auth
+
+
+
+---
+
+### 常用运维操作清单
+
+| 需求 | 命令 |
+| :--- | :--- |
+| **查看容器日志** | `docker compose logs -f` |
+| **新增/修改其他用户** | `docker exec -it mqtt-broker mosquitto_passwd /mosquitto/config/pwfile 新用户名` |
+| **删除用户** | `docker exec -it mqtt-broker mosquitto_passwd -D /mosquitto/config/pwfile 用户名` |
+| **完全卸载** | `docker compose down -v` (注意：这会删除挂载的数据卷) |
+
+需要我为您演示如何使用 Python 或 MQTTX 客户端连接这个带密码的服务器吗？
 
 
 ## Docker镜像加速地址(持续更新)
