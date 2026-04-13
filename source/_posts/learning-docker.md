@@ -1123,18 +1123,15 @@ docker ps | grep influxdb
 > 
 > 所以，根本原因并非密钥错误，而是服务端缺少对应的密钥配置。
 > 
-> ### ✅ 解决方案步骤
 > 
 > 建议按顺序排查，通常检查配置即可解决。
 > 
-> #### 1. 检查 S3 网关启动命令
 > 您是否使用了 `-config` 参数来指定配置文件？配置文件是加载密钥的第一步。
 > ```bash
 > # 您需要类似这样的命令，通过 -config 参数加载配置文件
 > weed s3 -filer=localhost:8888 -config=/path/to/your/s3.json
 > ```
 > 
-> #### 2. 检查认证配置文件 (s3.json)
 > SeaweedFS 通过一个 JSON 文件来管理 S3 认证。请确认该文件格式是否正确，并包含了您想用的密钥。
 > 
 > *   **基本配置格式**：一个正确的配置文件应包含 `identities` 数组，其中定义了用户名、密钥和权限。
@@ -1164,7 +1161,6 @@ DeepSeek给了我下面答复：
 
 > 你配置 TOML 文件不行的原因找到了：SeaweedFS 有两种不同的配置系统，它们承担了不同的职责。S3 认证相关的配置（也就是能解决你 `InvalidAccessKeyId` 报错的部分）**必须使用 JSON 格式**，TOML > 文件在这里派不上用场。
 > 
-> ### 🔍 为什么 TOML 配置在这里不生效？
 > 
 > SeaweedFS 使用 TOML 格式来管理其核心组件（如 Filer, Master, Volume）的配置，例如数据库连接、安全证书等。你配置的 TOML 文件很可能就是用于这些方面的，例如 `security.toml`。
 > 
@@ -1178,11 +1174,9 @@ DeepSeek给了我下面答复：
 > | **S3 高级 IAM** | **JSON** | 配置 OIDC、STS 等高级认证 | **能** |
 > | **系统核心配置** | **TOML** | 配置各组件（Master、Filer等） | **不能** |
 > 
-> ### ✅ 正确配置步骤：创建一个 JSON 文件
 > 
 > 要解决 `InvalidAccessKeyId` 错误，你需要为 S3 网关创建一个 **JSON 格式**的配置文件。
 > 
-> #### 1. 创建 `s3.json` 文件
 > 新建一个文件（比如 `s3.json`），内容如下，把你需要的 `accessKey` 和 `secretKey` 填进去：
 > 
 > ```json
@@ -1202,7 +1196,6 @@ DeepSeek给了我下面答复：
 > }
 > ```
 > 
-> ### 💎 总结
 > 
 > 简单来说，解决这个问题的关键就是：**S3 认证必须用独立的 JSON 配置文件**，你之前配置的 TOML 文件管不到这块。按照上面的方法创建一个正确的 JSON 文件并用 `-config` 参数启动 S3 网关，问题就能解决了。
 
@@ -1258,6 +1251,7 @@ services:
 
 其中上方，```iam.json``` 鉴权配置文件如下：
 实际场景，你完全可以针对你不同的业务应用，单独分配不同权限、不同bucket的secretKey，以做到权限最小使用原则。
+*如果不配置这个鉴权配置文件的话，上面的filer的启动命令行中去掉s3.config配置文件即可*
 ```json
 {
   "identities": [
@@ -1296,6 +1290,120 @@ services:
 }
 ```
 
+#### 一段java调用代码
+先引入 AWS S3 SDK v2。建议使用 BOM（Bill of Materials）来管理版本。
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>bom</artifactId>
+            <version>2.25.10</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
+    <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>s3</artifactId>
+    </dependency>
+</dependencies>
+```
+
+java代码：
+```java
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
+
+import java.net.URI;
+import java.nio.file.Paths;
+
+public class S3Service {
+
+    private final S3Client s3Client;
+    private final String bucketName = "my-bucket";
+
+    public S3Service() {
+        // 1. 配置凭证（SeaweedFS默认可能为空，但在SDK中需填充占位符）
+        AwsBasicCredentials credentials = AwsBasicCredentials.create("anyAccessKey", "anySecretKey");
+
+        // 2. 初始化客户端
+        this.s3Client = S3Client.builder()
+                .endpointOverride(URI.create("http://127.0.0.1:18333")) // 替换为你的服务器IP和S3端口
+                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                // .credentialsProvider(AnonymousCredentialsProvider.create()) // 这里如果默认不配置上面的iam.json鉴权配置文件的话，这里直接使用匿名方式访问即可。
+                .region(Region.US_EAST_1) // S3协议要求必须有Region，SeaweedFS忽略此值
+                .serviceConfiguration(sc -> sc.pathStyleAccessEnabled(true)) // 关键：开启路径样式访问
+                .build();
+        
+        // 初始化创建 Bucket
+        ensureBucketExists();
+    }
+
+    /**
+     * 检查并创建存储桶
+     */
+    private void ensureBucketExists() {
+        try {
+            s3Client.headBucket(HeadBucketRequest.builder().bucket(bucketName).build());
+        } catch (NoSuchBucketException e) {
+            s3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
+        }
+    }
+
+    /**
+     * 上传文件
+     */
+    public void uploadFile(String objectKey, String filePath) {
+        PutObjectRequest putOb = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objectKey)
+                .build();
+
+        s3Client.putObject(putOb, RequestBody.fromFile(Paths.get(filePath)));
+        System.out.println("上传成功: " + objectKey);
+    }
+
+    /**
+     * 下载文件
+     */
+    public void downloadFile(String objectKey, String downloadPath) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objectKey)
+                .build();
+
+        s3Client.getObject(getObjectRequest, Paths.get(downloadPath));
+        System.out.println("下载完成: " + downloadPath);
+    }
+
+    /**
+     * 删除文件
+     */
+    public void deleteFile(String objectKey) {
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objectKey)
+                .build();
+
+        s3Client.deleteObject(deleteObjectRequest);
+        System.out.println("删除成功: " + objectKey);
+    }
+
+    public static void main(String[] args) {
+        S3Service s3 = new S3Service();
+        // 示例：将本地的 test.jpg 上传到 OSS 命名为 image/001.jpg
+        s3.uploadFile("image/001.jpg", "C:/temp/test.jpg");
+    }
+}
+```
 
 ---
 
