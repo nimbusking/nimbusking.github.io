@@ -11,6 +11,7 @@ top: true
 
 ### 前言
 本系列罗列日常工作学习中遇到的工具问题以及相应的解决方案，写下来供后续自己参考的同时也作分享一波！
+
 ### 编程相关
 #### Sublime Text 3
 ##### win10下解决中文输入法光标不跟随问题
@@ -219,6 +220,77 @@ S:"GSSAPI Method"=none
 ```
 
 修改完成之后，重启一下客户端，之后就可以秒连了。
+
+#### windows下面统一配置开发sdk
+这个是借助github上一个开源的多版本管理软件vfox实现的（其实就是写了一个bat而已）
+vfox网址：https://github.com/version-fox/vfox
+
+【评价】：没什么好说的，就是好用，省去了很多配置来配置去的环境变量
+【提示】：如果你用vfox在mac上安装java的话，比如jdk8，而不巧你还是新的M系列的CPU，那不好意思，你是装不到的。因为不兼容，8的jdk也没有开源，如果你非得用，只能去oracle那里下载他们的jdk8单独安装。我建议：非必要别折腾8了~
+
+下面就是统一安装的windows bat命令：
+
+```bat
+@echo off
+SETLOCAL EnableDelayedExpansion
+chcp 437 > nul
+
+echo ==========================================
+echo    vfox Auto-Setup Tool (Final Fix)
+echo ==========================================
+
+:: 1. 检测 vfox
+call vfox -v >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    echo [ERROR] vfox not found.
+    pause
+    exit /b
+)
+
+:: 2. 插件列表
+set "list=gradle:9.5.0 groovy:5.0.5 java:21.0.2+13 maven:3.9.15 nodejs:25.9.0 python:3.14.4"
+
+echo [STATUS] STEP 1: Installing all plugins...
+echo ------------------------------------------
+
+:: 第一阶段：只安装，不使用。安装命令不会导致进程刷新。
+for %%a in (%list%) do (
+    for /f "tokens=1,2 delims=:" %%i in ("%%a") do (
+        echo [INSTALLING] %%i@%%j
+        call vfox add %%i >nul 2>&1
+        call vfox install %%i@%%j
+    )
+)
+
+echo.
+echo [STATUS] STEP 2: Setting global versions...
+echo ------------------------------------------
+echo IMPORTANT: The script may exit after the first 'use' command.
+echo This is expected as vfox refreshes the shell.
+echo.
+
+:: 第二阶段：切换版本。
+:: 我们手动罗列，不放进循环，确保即便第一个成功后刷新了，前面的安装也已经完成了。
+call vfox use -g gradle@9.5.0
+call vfox use -g groovy@5.0.5
+call vfox use -g java@21.0.2+13
+call vfox use -g maven@3.9.15
+call vfox use -g nodejs@25.9.0
+call vfox use -g python@3.14.4
+
+echo.
+echo ==========================================
+echo  DONE! Please REOPEN a new terminal.
+echo ==========================================
+pause
+```
+
+##### 配置proxy
+如果你的因为众所周知的原因，访问github不顺畅，上面脚本之前加上set proxy即可：
+```bat
+set http_proxy=http://192.168.10.1:7897
+set https_proxy=http://192.168.10.1:7897
+```
 
 ---
 
