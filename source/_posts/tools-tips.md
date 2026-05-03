@@ -236,10 +236,10 @@ SETLOCAL EnableDelayedExpansion
 chcp 437 > nul
 
 echo ==========================================
-echo    vfox Auto-Setup Tool (Final Fix)
+echo    vfox Auto-Setup Tool (Process Isolation)
 echo ==========================================
 
-:: 1. 检测 vfox
+:: 1. 环境预检
 call vfox -v >nul 2>&1
 if %ERRORLEVEL% neq 0 (
     echo [ERROR] vfox not found.
@@ -247,40 +247,47 @@ if %ERRORLEVEL% neq 0 (
     exit /b
 )
 
-:: 2. 插件列表
-set "list=gradle:9.5.0 groovy:5.0.5 java:21.0.2+13 maven:3.9.15 nodejs:25.9.0 python:3.14.4"
+:: 2. 插件与版本定义，你有别的安装的版本自己修改@后面的
+set "p1=gradle@9.5.0"
+set "p2=groovy@5.0.5"
+set "p3=java@21.0.2+13"
+set "p4=maven@3.9.15"
+set "p5=nodejs@25.9.0"
+set "p6=python@3.14.4"
 
-echo [STATUS] STEP 1: Installing all plugins...
-echo ------------------------------------------
-
-:: 第一阶段：只安装，不使用。安装命令不会导致进程刷新。
-for %%a in (%list%) do (
-    for /f "tokens=1,2 delims=:" %%i in ("%%a") do (
-        echo [INSTALLING] %%i@%%j
-        call vfox add %%i >nul 2>&1
-        call vfox install %%i@%%j
-    )
+echo [STATUS] Phase 1: Installing all plugins...
+for %%v in (%p1% %p2% %p3% %p4% %p5% %p6%) do (
+    echo [WORKING] Installing %%v...
+    :: 自动添加插件并安装
+    for /f "tokens=1 delims=@" %%i in ("%%v") do call vfox add %%i >nul 2>&1
+    call vfox install %%v >nul 2>&1
 )
 
 echo.
-echo [STATUS] STEP 2: Setting global versions...
+echo [STATUS] Phase 2: Switching global versions (Isolated Mode)...
 echo ------------------------------------------
-echo IMPORTANT: The script may exit after the first 'use' command.
-echo This is expected as vfox refreshes the shell.
-echo.
 
-:: 第二阶段：切换版本。
-:: 我们手动罗列，不放进循环，确保即便第一个成功后刷新了，前面的安装也已经完成了。
-call vfox use -g gradle@9.5.0
-call vfox use -g groovy@5.0.5
-call vfox use -g java@21.0.2+13
-call vfox use -g maven@3.9.15
-call vfox use -g nodejs@25.9.0
-call vfox use -g python@3.14.4
+:: 使用 start /wait 开启新窗口执行 use 命令，执行完后通过 /c 关闭新窗口
+:: 这样主脚本进程就不会被 vfox 的进程刷新机制劫持
+for %%v in (%p1% %p2% %p3% %p4% %p5% %p6%) do (
+    echo [SWITCHING] Setting %%v as global...
+    start /wait cmd /c "vfox use -g %%v"
+)
 
 echo.
 echo ==========================================
-echo  DONE! Please REOPEN a new terminal.
+echo    Phase 3: Final Logic Verification
+echo ==========================================
+echo Note: Logic check will run in a fresh sub-shell to ensure PATH is updated.
+echo ------------------------------------------
+
+:: 为了让检查有效，我们再开一个子 Shell 执行 -v 指令
+start /wait cmd /c "echo --- Verification Results --- & gradle -v | findstr "Gradle" & java -version & mvn -v | findstr "Apache" & node -v & python --version & echo ------------------------ & pause"
+
+echo.
+echo [SUCCESS] Script finished. 
+echo All versions have been set in the registry.
+echo Please restart your IDE or Terminal to apply changes.
 echo ==========================================
 pause
 ```
