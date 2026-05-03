@@ -11,13 +11,13 @@ top: true
 
 ### 前言
 本系列罗列日常工作学习中遇到的工具问题以及相应的解决方案，写下来供后续自己参考的同时也作分享一波！
-
+<!--more-->
 ### 编程相关
 #### Sublime Text 3
 ##### win10下解决中文输入法光标不跟随问题
 国内一大老Fork并修改之后的IMESupport[主页地址](http://zcodes.net/2017/02/12/sublime_text_3_imesupport.html)，在win10下使用完美解决。看下图所示：
 ![使用效果](a4b1030a/ChineseTypeWritingInSublimeText_CursorFollowing.jpg)
-<!--more-->
+
 可以直接从GitHub上下载下来，把插件路径解压到：**%AppData%\Sublime Text 3\Packages**
 下即可，下图是我本地安装的：
 ![本地安装包](a4b1030a/SublimeTextInstalledPackages.jpg)
