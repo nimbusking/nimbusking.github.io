@@ -205,6 +205,70 @@ ip route show
 ping www.baidu.com
 ```
 
+### 拓展vm空间
+当在虚拟机中扩展空间之后，需要在虚拟机系统里面拓展可用空间才可以完成使用
+```shell
+kemi@datacenter:~$ sudo df -h
+Filesystem                         Size  Used Avail Use% Mounted on
+tmpfs                              1.6G  1.7M  1.6G   1% /run
+efivarfs                           256K   55K  197K  22% /sys/firmware/efi/efivars
+/dev/mapper/ubuntu--vg-ubuntu--lv   38G   24G   13G  66% /
+tmpfs                              7.9G     0  7.9G   0% /dev/shm
+tmpfs                              5.0M     0  5.0M   0% /run/lock
+/dev/sda2                          2.0G  199M  1.6G  11% /boot
+/dev/sda1                          1.1G  6.2M  1.1G   1% /boot/efi
+overlay                             38G   24G   13G  66% /var/lib/docker/rootfs/overlayfs/55cbaa7442e25ad111ea3179773db99d1d6ebdf469ba05a78b3970784cc0503d
+overlay                             38G   24G   13G  66% /var/lib/docker/rootfs/overlayfs/65de88b78a952a8c2260d0359b4e10567841f49ccd40090babc1a5d88250ffac
+overlay                             38G   24G   13G  66% /var/lib/docker/rootfs/overlayfs/0cdf91b414a2ace40b0033c7f17d016a56401d70a2ae7f6dea8cce780b90c47d
+overlay                             38G   24G   13G  66% /var/lib/docker/rootfs/overlayfs/b4ec42e2f7af3c4bba859633eb3c8c4b4c9013588cc8aa451b90895948d60a41
+overlay                             38G   24G   13G  66% /var/lib/docker/rootfs/overlayfs/20fdccac95ada4459d0529fa5355eb06cfeeb04295473e1de3975ed8aab04c12
+tmpfs                              1.6G   12K  1.6G   1% /run/user/1000
+overlay                             38G   24G   13G  66% /var/lib/docker/rootfs/overlayfs/6c43ed5e4d11825b580d5939a41544e40b9720911ec242785d7742a5d0183a34
+```
+
+实际上，我已经扩展空间到400G了，运行下面命令：
+```shell
+kemi@datacenter:~$ lsblk
+NAME                      MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda                         8:0    0  400G  0 disk 
+├─sda1                      8:1    0    1G  0 part /boot/efi
+├─sda2                      8:2    0    2G  0 part /boot
+└─sda3                      8:3    0 76.9G  0 part 
+  └─ubuntu--vg-ubuntu--lv 252:0    0 38.5G  0 lvm  
+```
+
+说明，确实是扩展了，但是没生效
+#### 第一步：将系统分区（sda3）拉伸，吃满整个 400G 硬盘
+```shell
+sudo growpart /dev/sda 3
+```
+
+#### 第二步：通知 LVM 物理卷（PV），底层的分区已经变大了
+```shell
+sudo pvresize /dev/sda3
+```
+
+#### 第三步：将 LVM 逻辑卷（LV），也就是您的根目录拉伸到最大
+```shell
+sudo lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv
+```
+
+#### 第四步：通知文件系统（Filesystem），底层的容器变大了，你可以写入数据了
+```shell
+sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+# 再次运行，可以了
+kemi@datacenter:~$ df -h
+Filesystem                         Size  Used Avail Use% Mounted on
+tmpfs                              1.6G  1.7M  1.6G   1% /run
+efivarfs                           256K   55K  197K  22% /sys/firmware/efi/efivars
+/dev/mapper/ubuntu--vg-ubuntu--lv  391G   24G  351G   7% /
+tmpfs                              7.9G     0  7.9G   0% /dev/shm
+tmpfs                              5.0M     0  5.0M   0% /run/lock
+/dev/sda2                          2.0G  199M  1.6G  11% /boot
+/dev/sda1                          1.1G  6.2M  1.1G   1% /boot/efi
+tmpfs                              1.6G   12K  1.6G   1% /run/user/1000
+```
+
 ### 安装mysql
 在线安装
 #### 确认ubuntu系统版本
