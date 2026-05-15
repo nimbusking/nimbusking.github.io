@@ -61,8 +61,12 @@ Ctrl+Shift+P，输入Remove，选择Remove Package，之后选择相应的插件
 打开代码片段（Snippet）: Tools -> Develop -> New Snippet
 例如，我想要再markdown中快速生成插入shell代码的片段，那么可以安装下图中的方式编写，很简单：
 这里面的语法很简单：
-**<![CDATA[写入你想要快速插入的代码片段]]>** 这个XML转义票签里面就是写入你想要快速插入的代码片段
+
+```xml
+<![CDATA[写入你想要快速插入的代码片段]]> 这个XML转义票签里面就是写入你想要快速插入的代码片段
 **tabTrigger**就是你需要再什么单词后按tab键自动插入上述你编写的代码片段
+```
+
 ![配置Sublime Snippet](a4b1030a/ConfigSublimeSnippet.jpg)
 Ctrl + S 保存，目录默认即可，文件名随意，文件后缀名必须是：**.sublime-snippet**，效果就如下图所示：
 ![演示效果](a4b1030a/shellAfterPressTabButton.gif)
