@@ -6,16 +6,18 @@ updated: 2024-10-28 20:30:21
 categories: 工具
 abbrlink: a4b1030a
 date: 2018-04-15 10:37:03
+top: true
 ---
 
 ### 前言
 本系列罗列日常工作学习中遇到的工具问题以及相应的解决方案，写下来供后续自己参考的同时也作分享一波！
+<!--more-->
 ### 编程相关
 #### Sublime Text 3
 ##### win10下解决中文输入法光标不跟随问题
 国内一大老Fork并修改之后的IMESupport[主页地址](http://zcodes.net/2017/02/12/sublime_text_3_imesupport.html)，在win10下使用完美解决。看下图所示：
 ![使用效果](a4b1030a/ChineseTypeWritingInSublimeText_CursorFollowing.jpg)
-<!--more-->
+
 可以直接从GitHub上下载下来，把插件路径解压到：**%AppData%\Sublime Text 3\Packages**
 下即可，下图是我本地安装的：
 ![本地安装包](a4b1030a/SublimeTextInstalledPackages.jpg)
@@ -218,6 +220,84 @@ S:"GSSAPI Method"=none
 ```
 
 修改完成之后，重启一下客户端，之后就可以秒连了。
+
+#### windows下面统一配置开发sdk
+这个是借助github上一个开源的多版本管理软件vfox实现的（其实就是写了一个bat而已）
+vfox网址：https://github.com/version-fox/vfox
+
+【评价】：没什么好说的，就是好用，省去了很多配置来配置去的环境变量
+【提示】：如果你用vfox在mac上安装java的话，比如jdk8，而不巧你还是新的M系列的CPU，那不好意思，你是装不到的。因为不兼容，8的jdk也没有开源，如果你非得用，只能去oracle那里下载他们的jdk8单独安装。我建议：非必要别折腾8了~
+
+下面就是统一安装的windows bat命令：
+
+```bat
+@echo off
+SETLOCAL EnableDelayedExpansion
+chcp 437 > nul
+
+echo ==========================================
+echo    vfox Auto-Setup Tool (Process Isolation)
+echo ==========================================
+
+:: 1. 环境预检
+call vfox -v >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    echo [ERROR] vfox not found.
+    pause
+    exit /b
+)
+
+:: 2. 插件与版本定义，你有别的安装的版本自己修改@后面的
+set "p1=gradle@9.5.0"
+set "p2=groovy@5.0.5"
+set "p3=java@21.0.2+13"
+set "p4=maven@3.9.15"
+set "p5=nodejs@25.9.0"
+set "p6=python@3.14.4"
+
+echo [STATUS] Phase 1: Installing all plugins...
+for %%v in (%p1% %p2% %p3% %p4% %p5% %p6%) do (
+    echo [WORKING] Installing %%v...
+    :: 自动添加插件并安装
+    for /f "tokens=1 delims=@" %%i in ("%%v") do call vfox add %%i >nul 2>&1
+    call vfox install %%v >nul 2>&1
+)
+
+echo.
+echo [STATUS] Phase 2: Switching global versions (Isolated Mode)...
+echo ------------------------------------------
+
+:: 使用 start /wait 开启新窗口执行 use 命令，执行完后通过 /c 关闭新窗口
+:: 这样主脚本进程就不会被 vfox 的进程刷新机制劫持
+for %%v in (%p1% %p2% %p3% %p4% %p5% %p6%) do (
+    echo [SWITCHING] Setting %%v as global...
+    start /wait cmd /c "vfox use -g %%v"
+)
+
+echo.
+echo ==========================================
+echo    Phase 3: Final Logic Verification
+echo ==========================================
+echo Note: Logic check will run in a fresh sub-shell to ensure PATH is updated.
+echo ------------------------------------------
+
+:: 为了让检查有效，我们再开一个子 Shell 执行 -v 指令
+start /wait cmd /c "echo --- Verification Results --- & gradle -v | findstr "Gradle" & java -version & mvn -v | findstr "Apache" & node -v & python --version & echo ------------------------ & pause"
+
+echo.
+echo [SUCCESS] Script finished. 
+echo All versions have been set in the registry.
+echo Please restart your IDE or Terminal to apply changes.
+echo ==========================================
+pause
+```
+
+##### 配置proxy
+如果你的因为众所周知的原因，访问github不顺畅，上面脚本之前加上set proxy即可：
+```bat
+set http_proxy=http://192.168.10.1:7897
+set https_proxy=http://192.168.10.1:7897
+```
 
 ---
 
