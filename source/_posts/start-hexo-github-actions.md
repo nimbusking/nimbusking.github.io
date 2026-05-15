@@ -7,7 +7,7 @@ tags:
     - Hexo
     - Nodejs
     - GitHub Actions
-updated: 2024-11-08 00:51:14
+updated: 2026-05-15 17:34:00
 categories: 站点
 ---
 
@@ -44,7 +44,7 @@ categories: 站点
 
 	其中有一个变量，DEPLOY_KEY是上面生成的私钥（id_rsa文件中），完整复制进去即可。
 
-### ~~脚本编写~~
+### 脚本编写
 这部分不用过多赘述，直接看我的脚本注释里面即可。
 有两种方式创建脚本，一种通过仓库页面选项卡的上方“Actions选项卡”进行创建；另一种是你直接创建相关的yml文件，路径放在你博客源码仓库页面的：*.github/workflows/xxx.yml* 即可。文件名自定义。
 
@@ -246,4 +246,76 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+```
+
+### 最新actions脚本(2026.5)
+本次主要更新就是github action于2026年6月份前后将全面禁止node 20版本运行，本次更新就是为了适配这个，基本上就是更新了下面俩：
+- 增加强制使用node24的参数，为后面github强制升级平滑过渡
+- 更新action版本：就是下面脚本中的@v4更新为@v6，当然不是所有的actions都有v6版本的
+
+```yaml
+name: depoloy_pages
+
+on:
+  push:
+    branches:
+      - main # default branch
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.TOKEN }}
+          # If your repository depends on submodule, please see: https://github.com/actions/checkout
+          submodules: recursive
+      - name: Use Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          # Examples: 20, 18.19, >=16.20.2, lts/Iron, lts/Hydrogen, *, latest, current, node
+          # Ref: https://github.com/actions/setup-node#supported-version-syntax
+          node-version: "24"
+      - name: Cache NPM dependencies
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: ${{ runner.OS }}-npm-cache
+          restore-keys: |
+            ${{ runner.OS }}-npm-cache
+      - name: Install Dependencies
+        run: |
+          # npm install https://github.com/foreveryang321/hexo-asset-image.git --save
+          npm install
+      - name: Replace some vars
+        run: |
+          sed -i 's/GITALK_CLIENT_ID/${{ secrets.GITALK_CLIENT_ID }}/g' ./_config.next.yml
+          sed -i 's/GITALK_CLIENT_SECRET/${{ secrets.GITALK_CLIENT_SECRET }}/g' ./_config.next.yml
+          # 处理自定义配置
+          git clone -b customer_config https://github.com/nimbusking/nimbusking.github.io.git temp
+          cp -f ./temp/post-meta.njk ./node_modules/hexo-theme-next/layout/_partials/post
+          rm -rf ./temp
+      - name: Build
+        run: npm run build
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./public
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+
 ```
