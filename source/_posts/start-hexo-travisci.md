@@ -1,5 +1,5 @@
 ---
-title: Hexo与TravisCI持续集成
+title: 【废弃】Hexo与TravisCI持续集成
 abbrlink: e62993b1
 date: 2021-02-21 22:18:07
 tags:
@@ -11,7 +11,7 @@ categories: 站点
 ---
 
 ## 更新
-由于TravisCI不论公有开始私有仓库开启收费模式了，故而我选择放弃。
+由于TravisCI不论公有开始私有仓库**开启收费**模式了，故而我选择放弃。
 本博客相关全部交付**GitHub Actions**自行托管编译了，相关教程请站内搜索GitHub Actions即可
 <!-- more -->
 
