@@ -607,3 +607,23 @@ PROCESS_NAME:  services.exe
 卸载OneDrive，官网重新下载安装包。重新安装。**安装好之后，重新指定新的路径为OD的同步路径**
 ##### 问题分析
 怀疑是重装系统之后，直接用的老的OD的同步路径，导致OD一直是同步文件的状态。最终在某次偶然的机会，崩溃蓝屏了。。。
+
+
+### AIGC相关
+
+#### comfyui相关
+##### 启动失败
+具体现象就是启动的时候报了如下一个错误：
+> PermissionError: [Errno 13] error while attempting to bind on address ('127.0.0.1', 8188): [winerror 10013] 以一种访问权限不允许的方式做了一个访问套接字的尝试。
+
+错误原因：windows本地服务winnat占用了8188端口，如果你不想通过改端口的方式解决，参考如下步骤：
+
+管理员运行cmd
+```cmd
+net stop winnat
+
+::第二步：将 8188 端口声明为你的专属保留端口**（`numberofports=1` 代表只保留这 1 个端口）
+netsh int ipv4 add excludedportrange protocol=tcp startport=8188 numberofports=1
+
+net start winnat
+```
