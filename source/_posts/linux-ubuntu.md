@@ -6,7 +6,7 @@ date: 2019-05-16 02:20:17
 tags:
     - Ubuntu
     - Linux
-updated: 2025-12-30 02:20:17
+updated: 2026-05-29 10:00:00
 categories: 操作系统
 ---
 
@@ -20,26 +20,23 @@ categories: 操作系统
 
 ```shell
 #备份source.list
-cp -f /etc/apt/sources.list /etc/apt/sources.list.bak
+cp -f /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list.d/ubuntu.sources.bak
 ```
 
 通过vi/vim修改sources.list
 将原有的都注释了，把下面的数据源新增在文件末尾即可：
 ```shell
-deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+Types: deb
+URIs: https://mirrors.aliyun.com/ubuntu-ports/
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 
-deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
-
-deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
-
-deb http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
-
-deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
-deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+Types: deb
+URIs: https://mirrors.aliyun.com/ubuntu-ports/
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 ```
 
 保存之后，记得：**sudo apt-get update**
