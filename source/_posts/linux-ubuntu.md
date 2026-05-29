@@ -25,7 +25,25 @@ cp -f /etc/apt/sources.list.d/ubuntu.sources /etc/apt/sources.list.d/ubuntu.sour
 
 通过vi/vim修改sources.list
 将原有的都注释了，把下面的数据源新增在文件末尾即可：
+PS:不同架构的数据源不同，不要填错了
+
 ```shell
+# x86
+Types: deb
+URIs: https://mirrors.aliyun.com/ubuntu/
+Suites: noble noble-updates noble-backports
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+Types: deb
+URIs: https://mirrors.aliyun.com/ubuntu/
+Suites: noble-security
+Components: main restricted universe multiverse
+Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+```
+
+```shell
+# Arm
 Types: deb
 URIs: https://mirrors.aliyun.com/ubuntu-ports/
 Suites: noble noble-updates noble-backports
@@ -37,6 +55,7 @@ URIs: https://mirrors.aliyun.com/ubuntu-ports/
 Suites: noble-security
 Components: main restricted universe multiverse
 Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
 ```
 
 保存之后，记得：**sudo apt-get update**
