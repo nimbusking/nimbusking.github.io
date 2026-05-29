@@ -1375,6 +1375,42 @@ public class S3Service {
 }
 ```
 
+### 安装gitea
+使用外挂postgres
+
+```yaml
+services:
+  server:
+    image: gitea/gitea:latest
+    container_name: gitea
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      # 【核心注意】：这里填您现有的 PostgreSQL 数据库地址
+      - GITEA__database__HOST=192.168.x.x:5432 
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=您刚才设置的密码
+    restart: always
+    volumes:
+      - ./gitea-data:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "3000:3000"
+      - "2222:2222"
+```
+
+安装完成之后，浏览器访问初始化之后，记得修改下面配置文件，重启docker服务
+修改下面配置文件的两行，保持与docker-compose.yml中的配置一致，否则clone的时候会让提供密码认证:
+路径：/home/kemi/gitea/gitea-data/gitea/conf/app.ini
+```properties
+# 修改这两行
+SSH_PORT = 2222
+SSH_LISTEN_PORT = 2222
+```
+
 ---
 
 ## Docker镜像加速地址(持续更新)
