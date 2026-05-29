@@ -58,7 +58,13 @@ Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
 
 ```
 
-保存之后，记得：**sudo apt-get update**
+保存之后，记得：
+
+```shell
+sudo apt clean
+sudo apt update
+```
+
 更新数据源即可
 
 ### 首次登录设置root密码
