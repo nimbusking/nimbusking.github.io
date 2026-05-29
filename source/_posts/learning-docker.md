@@ -676,6 +676,7 @@ protected-mode no
 # cluster-announce-ip 127.0.0.1 让docker自己寻找，注释了
 cluster-announce-port ${PORT}
 cluster-announce-bus-port 1${PORT}
+bind 0.0.0.0
 EOF
 ```
 
@@ -689,89 +690,58 @@ done
 #### 编写docker-compose.yml文件
 直接贴，注意你配置文件和改yml文件所在目录即可，否则会出现问题
 ```yaml
-# 新版本docker compose 不用写 version: "3.8"
+# 提取公共配置模块，大幅减少重复代码
+x-redis-common: &redis-common
+  image: redis:7.0.2
+  restart: always
+  # 关键优化：使用 host 网络模式，解决 Redis 集群对外网发布 IP 时引起的连接错乱
+  network_mode: "host"
+  # 统一启动命令，使用容器内部固定路径的配置文件
+  command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+
 services:
   redis-7001:
-    image: redis:7.0.2 #这里的版本按照上面pull的版本，否则会重新拉取
+    <<: *redis-common
     container_name: redis-7001
-    ports:
-      - "7001:7001"
-      - "17001:17001"
     volumes:
+      # 严格对应你物理机上的独立配置文件
       - ./redis-7001.conf:/usr/local/etc/redis/redis.conf
       - ./7001/data:/data
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    networks:
-      - redis-cluster-net
 
   redis-7002:
-    image: redis:7.0.2
+    <<: *redis-common
     container_name: redis-7002
-    ports:
-      - "7002:7002"
-      - "17002:17002"
     volumes:
       - ./redis-7002.conf:/usr/local/etc/redis/redis.conf
       - ./7002/data:/data
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    networks:
-      - redis-cluster-net
 
   redis-7003:
-    image: redis:7.0.2
+    <<: *redis-common
     container_name: redis-7003
-    ports:
-      - "7003:7003"
-      - "17003:17003"
     volumes:
       - ./redis-7003.conf:/usr/local/etc/redis/redis.conf
       - ./7003/data:/data
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    networks:
-      - redis-cluster-net
 
   redis-7004:
-    image: redis:7.0.2
+    <<: *redis-common
     container_name: redis-7004
-    ports:
-      - "7004:7004"
-      - "17004:17004"
     volumes:
       - ./redis-7004.conf:/usr/local/etc/redis/redis.conf
       - ./7004/data:/data
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    networks:
-      - redis-cluster-net
 
   redis-7005:
-    image: redis:7.0.2
+    <<: *redis-common
     container_name: redis-7005
-    ports:
-      - "7005:7005"
-      - "17005:17005"
     volumes:
       - ./redis-7005.conf:/usr/local/etc/redis/redis.conf
       - ./7005/data:/data
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    networks:
-      - redis-cluster-net
 
   redis-7006:
-    image: redis:7.0.2
+    <<: *redis-common
     container_name: redis-7006
-    ports:
-      - "7006:7006"
-      - "17006:17006"
     volumes:
       - ./redis-7006.conf:/usr/local/etc/redis/redis.conf
       - ./7006/data:/data
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
-    networks:
-      - redis-cluster-net
-
-networks:
-  redis-cluster-net:
-    driver: bridge
 ```
 
 #### 启动
