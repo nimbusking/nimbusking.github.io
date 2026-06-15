@@ -216,7 +216,7 @@ https://support.broadcom.com/group/ecx/productdownloads?subfamily=VMware%20Works
 ![下载验证提醒](65cd2699/download_verify_warning.png)
 用下面的油猴脚本，截止笔者测试日期（2026-06-15）目前能解决：
 
-PS：油猴的具体用法参考我的另外一篇文章：
+PS：油猴的具体用法参考我的另外一篇文章：https://nimbusk.cc/b67c451a.html
 
 ```javascript
 // ==UserScript==
